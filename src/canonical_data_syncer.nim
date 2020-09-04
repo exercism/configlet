@@ -6,24 +6,24 @@ import os
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
-proc probSpecsDir: string = 
-  joinPath(getCurrentDir(), ".problem-specifications")
+let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
 proc cloneProbSpecsRepo =
-  discard execCmd(fmt"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir()}")
+  # TODO: handle errors
+  discard execCmd(fmt"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}")
 
 proc removeProbSpecsRepo =
-  removeDir(probSpecsDir())
+  removeDir(probSpecsDir)
 
 proc main =
   echo fmt"Exercism Canonical Data Syncer v{NimblePkgVersion}"
 
-  # try:
-    # removeProbSpecsRepo()
-    # cloneProbSpecsRepo()
+  try:
+    removeProbSpecsRepo()
+    cloneProbSpecsRepo()
 
-  # finally:
-  #   removeProbSpecsRepo()
+  finally:
+    removeProbSpecsRepo()
 
   # let table1 = parsetoml.parseFile("tests.toml")
 
