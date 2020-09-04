@@ -1,1 +1,5 @@
 canonical_data_syncer
+
+# TODO: remove before release, testing purposes only
+exercises/
+.problem-specifications/

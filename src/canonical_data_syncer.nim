@@ -18,12 +18,12 @@ proc removeProbSpecsRepo =
 proc main =
   echo fmt"Exercism Canonical Data Syncer v{NimblePkgVersion}"
 
-  try:
-    removeProbSpecsRepo()
-    cloneProbSpecsRepo()
+  # try:
+    # removeProbSpecsRepo()
+    # cloneProbSpecsRepo()
 
-  finally:
-    removeProbSpecsRepo()
+  # finally:
+  #   removeProbSpecsRepo()
 
   # let table1 = parsetoml.parseFile("tests.toml")
 
