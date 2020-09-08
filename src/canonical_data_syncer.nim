@@ -8,10 +8,16 @@ const NimblePkgVersion {.strdefine}: string = "unknown"
 
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
+proc execCmdException(cmd: string, exceptn: typedesc, message: string) =
+  if execCmd(cmd) != 0:
+    raise newException(exceptn, message)
+
 proc cloneProbSpecsRepo =
   let cmd = fmt"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
-  if execCmd(cmd) != 0:
-    raise newException(IOError, "Could not clone problem-specifications repo")
+  execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
+
+  # TODO: remove once the uuids branch is merged in prob-specs
+  execCmdException("git checkout --track origin/uuids", IOError, "Could not checkout the uuids branch")
 
 proc removeProbSpecsRepo =
   removeDir(probSpecsDir)
