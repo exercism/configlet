@@ -1,6 +1,13 @@
 import strformat
 import os
 import commands
+import sequtils
+
+type
+  ProbSpecsExercise* = object
+    slug*: string
+    dir*: string
+    canonicalDataJsonFile*: string
 
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
@@ -13,3 +20,13 @@ proc cloneProbSpecsRepo*: void =
 
 proc removeProbSpecsRepo*: void =
   removeDir(probSpecsDir)
+
+proc probSpecExerciseFromDir(dir: string): ProbSpecsExercise =
+  ProbSpecsExercise(
+    slug: extractFilename(dir),
+    dir: dir,
+    canonicalDataJsonFile: joinPath(dir, "canonical-data.json"),
+  )
+
+proc findProbSpecExercises*: seq[ProbSpecsExercise] =
+  toSeq(walkDirs(joinPath(probSpecsDir, "exercises/*"))).map(probSpecExerciseFromDir)

@@ -8,12 +8,12 @@ proc main: void =
   echo &"Exercism Canonical Data Syncer v{NimblePkgVersion}"
 
   try:
-    removeProbSpecsRepo()
-    cloneProbSpecsRepo()
+    # removeProbSpecsRepo()
+    # cloneProbSpecsRepo()
     syncExercisesData()
   except:
     echo fmt"Error: {getCurrentExceptionMsg()}"
   # finally:
-    removeProbSpecsRepo() 
+    # removeProbSpecsRepo() 
 
 main()
