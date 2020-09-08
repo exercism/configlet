@@ -1,5 +1,4 @@
-import sequtils
-import os
+import sequtils, os
 
 type
   TrackExercise* = object

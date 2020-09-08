@@ -1,13 +1,12 @@
-import strformat
-import os
-import commands
-import sequtils
+import strformat, os, json, tables, options, commands, sequtils
 
 type
   ProbSpecsExercise* = object
     slug*: string
     dir*: string
     canonicalDataJsonFile*: string
+
+type ProbSpecsExercisesCanonicalData = Table[string, Option[JsonNode]]
 
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
@@ -28,5 +27,20 @@ proc probSpecExerciseFromDir(dir: string): ProbSpecsExercise =
     canonicalDataJsonFile: joinPath(dir, "canonical-data.json"),
   )
 
-proc findProbSpecExercises*: seq[ProbSpecsExercise] =
+proc findProbSpecExercises: seq[ProbSpecsExercise] =
   toSeq(walkDirs(joinPath(probSpecsDir, "exercises/*"))).map(probSpecExerciseFromDir)
+
+proc parseCanonicalData(exercise: ProbSpecsExercise): Option[JsonNode] =
+  # TODO: fix JSON parse Error: Parsed integer outside of valid range
+  if exercise.slug == "grains":
+    return none(JsonNode)
+
+  if fileExists(exercise.canonicalDataJsonFile):
+    some(json.parseFile(exercise.canonicalDataJsonFile))
+  else:
+    none(JsonNode)
+
+proc probSpecsExercisesCanonicalData*: ProbSpecsExercisesCanonicalData =
+  toSeq(findProbSpecExercises())
+    .mapIt((it.slug, parseCanonicalData(it)))
+    .toTable

@@ -1,6 +1,4 @@
-import strformat
-import probspecsrepo
-import syncer
+import strformat, probspecsrepo, syncer
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
