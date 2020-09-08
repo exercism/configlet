@@ -9,8 +9,9 @@ const NimblePkgVersion {.strdefine}: string = "unknown"
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
 proc cloneProbSpecsRepo =
-  # TODO: handle errors
-  discard execCmd(fmt"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}")
+  let cmd = fmt"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
+  if execCmd(cmd) != 0:
+    raise newException(IOError, "Could not clone problem-specifications repo")
 
 proc removeProbSpecsRepo =
   removeDir(probSpecsDir)
@@ -21,7 +22,8 @@ proc main =
   try:
     removeProbSpecsRepo()
     cloneProbSpecsRepo()
-
+  except:
+    echo fmt"Error: {getCurrentExceptionMsg()}"
   finally:
     removeProbSpecsRepo()
 
