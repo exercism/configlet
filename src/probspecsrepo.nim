@@ -11,10 +11,12 @@ type ProbSpecsExercisesCanonicalData = Table[string, Option[JsonNode]]
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
 proc cloneProbSpecsRepo*: void =
-  let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
+  # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
+  # let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
+  # execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
+  
+  let cmd = &"git clone https://github.com/exercism/problem-specifications.git {probSpecsDir}"
   execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
-
-  # TODO: remove once the uuids branch is merged in prob-specs
   execCmdException("git checkout --track origin/uuids", IOError, "Could not checkout the uuids branch")
 
 proc removeProbSpecsRepo*: void =
