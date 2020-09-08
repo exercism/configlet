@@ -8,6 +8,11 @@ type
 
 type ProbSpecsExercisesCanonicalData = Table[string, Option[JsonNode]]
 
+type
+  ProbSpecsRepo* = object
+    dir*: string
+    exercises: seq[ProbSpecsExercise]
+
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
 proc cloneProbSpecsRepo*: void =
