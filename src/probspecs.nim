@@ -1,9 +1,14 @@
-import strformat, os, json, commands, sequtils
+import strformat, os, json, commands
 
 type
+  ProbSpecsRepoExercise = object
+    dir: string
+    slug: string
+    canonicalDataFile: string
+
   ProbSpecsRepo = object
     dir: string
-    exerciseDirs: seq[string]
+    exercises: seq[ProbSpecsRepoExercise]
 
   ProbSpecsTestCase* = object
     uuid*: string
@@ -17,10 +22,20 @@ type
   ProbSpecs* = object
     exercises*: seq[ProbSpecsExercise]
 
+proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
+  ProbSpecsRepoExercise(
+    dir: dir,
+    slug: extractFilename(dir),
+    canonicalDataFile: joinPath(dir, "canonical-data.json"))
+
+proc newProbSpecsRepoExercises(dir: string): seq[ProbSpecsRepoExercise] =
+  for exerciseDir in walkDirs(joinPath(dir, "exercises/*")):
+    result.add(newProbSpecsRepoExercise(exerciseDir))
+
 proc newProbSpecsRepo: ProbSpecsRepo =
-  let repoDir = joinPath(getCurrentDir(), ".problem-specifications")
-  let exerciseDirs = toSeq(walkDirs(joinPath(repoDir, "exercises/*")))
-  ProbSpecsRepo(dir: repoDir, exerciseDirs: exerciseDirs)
+  let dir = joinPath(getCurrentDir(), ".problem-specifications")
+  let exercises = newProbSpecsRepoExercises(dir)
+  ProbSpecsRepo(dir: dir, exercises: exercises)
 
 proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
@@ -41,29 +56,32 @@ proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
     json: node
   )
 
-proc parseTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
+proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
     result.add(newProbSpecsTestCase(node))
   elif node.hasKey("cases"):
     for childNode in node["cases"].getElems():
-      result.add(parseTestCases(childNode))
+      result.add(newProbSpecsTestCases(childNode))
 
-proc parseTestCases(exerciseDir: string): seq[ProbSpecsTestCase] =
+proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
   # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
-  if extractFilename(exerciseDir) == "grains":
+  if repoExercise.slug == "grains":
     return
   
-  let filePath = joinPath(exerciseDir, "canonical-data.json")
-  if not fileExists(filePath):
+  if not fileExists(repoExercise.canonicalDataFile):
     return
   
-  parseTestCases(json.parseFile(filePath))
+  newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
-proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
-  ProbSpecsExercise(slug: extractFilename(exerciseDir), testCases: parseTestCases(exerciseDir))
+proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+  ProbSpecsExercise(slug: repoExercise.slug, testCases: parseProbSpecsTestCases(repoExercise))
+
+proc newPropSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
+  for repoExercise in repo.exercises:
+    result.add(newPropSpecsExercise(repoExercise))
 
 proc newProbSpecs(repo: ProbSpecsRepo): ProbSpecs =
-  ProbSpecs(exercises: repo.exerciseDirs.map(newPropSpecsExercise))
+  ProbSpecs(exercises: newPropSpecsExercises(repo))
 
 proc newProbSpecs*: ProbSpecs =
   let probSpecsRepo = newProbSpecsRepo()

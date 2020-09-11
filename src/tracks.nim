@@ -7,7 +7,7 @@ type
   ConfigJson = object
     exercises: seq[ConfigJsonExercise]
 
-  TrackGitRepo* = object
+  TrackRepo* = object
     dir: string
 
   TrackExerciseTest* = object
@@ -46,10 +46,10 @@ proc tryParseTests(exerciseDir: string): Option[TrackExerciseTests] =
   else:
     none(TrackExerciseTests)
 
-proc newTrackGitRepo: TrackGitRepo =
-  TrackGitRepo(dir: getCurrentDir())
+proc newTrackRepo: TrackRepo =
+  TrackRepo(dir: getCurrentDir())
 
-proc parseExercises(gitRepo: TrackGitRepo): seq[TrackExercise] =
+proc parseExercises(gitRepo: TrackRepo): seq[TrackExercise] =
   let configJsonFile = joinPath(gitRepo.dir, "config.json")  
   let configJson = parseConfigJson(configJsonFile)
 
@@ -58,9 +58,9 @@ proc parseExercises(gitRepo: TrackGitRepo): seq[TrackExercise] =
     let tests = tryParseTests(exerciseDir)
     result.add(TrackExercise(slug: exercise.slug, tests: tests))
 
-proc newTrack(gitRepo: TrackGitRepo): Track =
+proc newTrack(gitRepo: TrackRepo): Track =
   Track(exercises: parseExercises(gitRepo))
 
 proc newTrack*: Track =
-  let trackGitRepo = newTrackGitRepo()
+  let trackGitRepo = newTrackRepo()
   trackGitRepo.newTrack()
