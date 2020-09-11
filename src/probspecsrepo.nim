@@ -1,17 +1,17 @@
 import strformat, os, json, tables, options, commands, sequtils
 
 type
-  ProbSpecsExercise* = object
-    slug*: string
-    dir*: string
-    canonicalDataJsonFile*: string
-
-type ProbSpecsExercisesCanonicalData = Table[string, Option[JsonNode]]
+  ProbSpecsExerciseCanonicalData* = object
+    json*: JsonNode
 
 type
-  ProbSpecsRepo* = object
-    dir*: string
-    exercises: seq[ProbSpecsExercise]
+  ProbSpecsExercise* = object
+    slug*: string
+    canonicalData*: Option[ProbSpecsExerciseCanonicalData]
+
+type
+  ProbSpecsExercises* = object
+    exercises*: seq[ProbSpecsExercise]
 
 let probSpecsDir = joinPath(getCurrentDir(), ".problem-specifications")
 
@@ -27,27 +27,25 @@ proc cloneProbSpecsRepo*: void =
 proc removeProbSpecsRepo*: void =
   removeDir(probSpecsDir)
 
+proc probSpecsExerciseCanonicalDataFromDir(dir: string): Option[ProbSpecsExerciseCanonicalData] =
+  let filePath = joinPath(dir, "canonical-data")
+
+  # TODO: fix JSON parse Error: Parsed integer outside of valid range
+  # if exercise.slug == "grains":
+  #   return none(ProbSpecsExerciseCanonicalData)
+    
+  if fileExists(filePath):
+    some(ProbSpecsExerciseCanonicalData(json: json.parseFile(filePath)))
+  else:
+    none(ProbSpecsExerciseCanonicalData)
+
 proc probSpecExerciseFromDir(dir: string): ProbSpecsExercise =
   ProbSpecsExercise(
     slug: extractFilename(dir),
-    dir: dir,
-    canonicalDataJsonFile: joinPath(dir, "canonical-data.json"),
+    canonicalData: probSpecsExerciseCanonicalDataFromDir(dir)
   )
 
-proc findProbSpecExercises: seq[ProbSpecsExercise] =
-  toSeq(walkDirs(joinPath(probSpecsDir, "exercises/*"))).map(probSpecExerciseFromDir)
-
-proc parseCanonicalData(exercise: ProbSpecsExercise): Option[JsonNode] =
-  # TODO: fix JSON parse Error: Parsed integer outside of valid range
-  if exercise.slug == "grains":
-    return none(JsonNode)
-
-  if fileExists(exercise.canonicalDataJsonFile):
-    some(json.parseFile(exercise.canonicalDataJsonFile))
-  else:
-    none(JsonNode)
-
-proc probSpecsExercisesCanonicalData*: ProbSpecsExercisesCanonicalData =
-  toSeq(findProbSpecExercises())
-    .mapIt((it.slug, parseCanonicalData(it)))
-    .toTable
+proc findProbSpecExercises: ProbSpecsExercises =
+  let exercisesDir = joinPath(probSpecsDir, "exercises/*")
+  let exercises = toSeq(walkDirs(exercisesDir)).map(probSpecExerciseFromDir)
+  ProbSpecsExercises(exercises: exercises)

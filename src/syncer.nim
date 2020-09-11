@@ -42,28 +42,29 @@ proc syncExerciseData(exercise: TrackExercise, canonicalData: Option[JsonNode]):
     echo &"Syncing {exercise.slug} (skipped: no [canonical-tests] section in tests.toml file)"
     return  
     
-  let canonicalTests = toSeq(tests["canonical-tests"].getTable().pairs)
-    .mapIt((it[0], it[1].getBool()))
-    .toTable
+  # let canonicalTests = toSeq(tests["canonical-tests"].getTable().pairs)
+  #   .mapIt((it[0], it[1].getBool()))
+  #   .toTable
 
-  for canonicalCase in canonicalData.get["cases"].getElems():
-    # if canonicalCase.hasKey("uuid"):
-    #   if canonicalCase["uuid"] == "2009a269-4cc9-4e30-8156-f5331b6269f5":
-    #     canonicalCase.delete()
+  # for canonicalCase in canonicalData.get["cases"].getElems():
+  #   # if canonicalCase.hasKey("uuid"):
+  #   #   if canonicalCase["uuid"] == "2009a269-4cc9-4e30-8156-f5331b6269f5":
+  #   #     canonicalCase.delete()
       
-    if canonicalCase.hasKey("cases"):
-      for subCase in canonicalCase["cases"].getElems():
-        echo subCase
-        echo ""
+  #   if canonicalCase.hasKey("cases"):
+  #     for subCase in canonicalCase["cases"].getElems():
+  #       echo subCase
+  #       echo ""
     
 
   # echo canonicalData.get.pretty
 
-proc syncExercisesData*: void =
-  let exerciseCanonicalData = probSpecsExercisesCanonicalData()
+proc syncTests*: void =
+  echo "Sync"
+  # let exerciseCanonicalData = probSpecsExercisesCanonicalData()
 
-  for trackExercise in findTrackExercises():
-    if trackExercise.slug != "acronym":
-      continue
-    # TODO: refactor all this
-    syncExerciseData(trackExercise, exerciseCanonicalData[trackExercise.slug])
+  # for trackExercise in findTrackExercises():
+  #   if trackExercise.slug != "acronym":
+  #     continue
+  #   # TODO: refactor all this
+  #   syncExerciseData(trackExercise, exerciseCanonicalData[trackExercise.slug])

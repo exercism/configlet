@@ -8,7 +8,7 @@ proc main: void =
   try:
     # removeProbSpecsRepo()
     # cloneProbSpecsRepo()
-    syncExercisesData()
+    syncTests()
   except:
     echo fmt"Error: {getCurrentExceptionMsg()}"
   # finally:
