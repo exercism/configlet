@@ -1,84 +1,76 @@
-import strformat, os, json, options, commands, sequtils
+import strformat, os, json, commands, sequtils
 
 type
-  ProbSpecsGitRepo = object
+  ProbSpecsRepo = object
     dir: string
+    exerciseDirs: seq[string]
 
   ProbSpecsTestCase* = object
     uuid*: string
     description*: string
     json*: JsonNode
 
-  ProbSpecsCanonicalData* = object
-    testCases*: seq[ProbSpecsTestCase]
-
   ProbSpecsExercise* = object
     slug*: string
-    canonicalData*: Option[ProbSpecsCanonicalData]
+    testCases*: seq[ProbSpecsTestCase]
 
-  ProbSpecsRepo* = object
+  ProbSpecs* = object
     exercises*: seq[ProbSpecsExercise]
 
-proc newProbSpecsGitRepo: ProbSpecsGitRepo =
-  ProbSpecsGitRepo(dir: joinPath(getCurrentDir(), ".problem-specifications"))
+proc newProbSpecsRepo: ProbSpecsRepo =
+  let repoDir = joinPath(getCurrentDir(), ".problem-specifications")
+  let exerciseDirs = toSeq(walkDirs(joinPath(repoDir, "exercises/*")))
+  ProbSpecsRepo(dir: repoDir, exerciseDirs: exerciseDirs)
 
-proc clone(gitRepo: ProbSpecsGitRepo): void =
+proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
-  # let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {gitRepo.dir}"
+  # let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
   # execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
   
-  let cmd = &"git clone https://github.com/exercism/problem-specifications.git {gitRepo.dir}"
+  let cmd = &"git clone https://github.com/exercism/problem-specifications.git {repo.dir}"
   execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
   execCmdException("git checkout --track origin/uuids", IOError, "Could not checkout the uuids branch")
 
-proc remove(gitRepo: ProbSpecsGitRepo): void =
-  removeDir(gitRepo.dir)
+proc remove(repo: ProbSpecsRepo): void =
+  removeDir(repo.dir)
 
-proc newTestCase(json: JsonNode): ProbSpecsTestCase =
+proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   ProbSpecsTestCase(
-    uuid: json["uuid"].getStr(),
-    description: json["description"].getStr(),
-    json: json
+    uuid: node["uuid"].getStr(),
+    description: node["description"].getStr(),
+    json: node
   )
 
-proc testCaseJsonNodes(json: JsonNode): seq[JsonNode] =
-  if json.hasKey("cases"):
-    json["cases"].getElems().map(testCaseJsonNodes).concat
-  elif json.hasKey("uuid"):
-    @[json]
-  else:
-    @[]
+proc parseTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
+  if node.hasKey("uuid"):
+    result.add(newProbSpecsTestCase(node))
+  elif node.hasKey("cases"):
+    for childNode in node["cases"].getElems():
+      result.add(parseTestCases(childNode))
 
-proc newTestCasesFromJson(json: JsonNode): seq[ProbSpecsTestCase] =
-  testCaseJsonNodes(json).map(newTestCase)
-
-proc tryNewCanonicalData(exerciseDir: string): Option[ProbSpecsCanonicalData] =
-  let filePath = joinPath(exerciseDir, "canonical-data.json")
-
+proc parseTestCases(exerciseDir: string): seq[ProbSpecsTestCase] =
   # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
   if extractFilename(exerciseDir) == "grains":
-    none(ProbSpecsCanonicalData)
-  elif fileExists(filePath):
-    some(ProbSpecsCanonicalData(testCases: newTestCasesFromJson(json.parseFile(filePath))))
-  else:
-    none(ProbSpecsCanonicalData)
+    return
+  
+  let filePath = joinPath(exerciseDir, "canonical-data.json")
+  if not fileExists(filePath):
+    return
+  
+  parseTestCases(json.parseFile(filePath))
 
-proc newExercise(exerciseDir: string): ProbSpecsExercise =
-  let slug = extractFilename(exerciseDir)
-  let canonicalData = tryNewCanonicalData(exerciseDir)
-  ProbSpecsExercise(slug: slug, canonicalData: canonicalData)
+proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
+  ProbSpecsExercise(slug: extractFilename(exerciseDir), testCases: parseTestCases(exerciseDir))
 
-proc newProbSpecsRepo(gitRepo: ProbSpecsGitRepo): ProbSpecsRepo =
-  let exercisesDir = joinPath(gitRepo.dir, "exercises/*")
-  let exercises = toSeq(walkDirs(exercisesDir)).map(newExercise)
-  ProbSpecsRepo(exercises: exercises)
+proc newProbSpecs(repo: ProbSpecsRepo): ProbSpecs =
+  ProbSpecs(exercises: repo.exerciseDirs.map(newPropSpecsExercise))
 
-proc newProbSpecsRepo*: ProbSpecsRepo =
-  let probSpecsGitRepo = newProbSpecsGitRepo()
+proc newProbSpecs*: ProbSpecs =
+  let probSpecsRepo = newProbSpecsRepo()
 
   # try:
     # probSpecsGitRepo.remove()
     # probSpecsGitRepo.clone()
-  probSpecsGitRepo.newProbSpecsRepo()
+  probSpecsRepo.newProbSpecs()
   # finally:
   #   probSpecsGitRepo.remove()

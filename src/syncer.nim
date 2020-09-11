@@ -3,11 +3,11 @@ import strformat, sequtils, json, tables, options, tracks, probspecs
 proc syncTests* =
   echo "Sync"
 
-  let probSpecsRepo = newProbSpecsRepo()
-  let trackRepo = newTrackRepo()
+  let probSpecs = newProbSpecs()
+  let track = newTrack()
 
-  echo probSpecsRepo.exercises.filterIt(it.slug == "acronym")
-  echo trackRepo.exercises.filterIt(it.slug == "acronym")
+  echo probSpecs.exercises.filterIt(it.slug == "acronym")
+  echo track.exercises.filterIt(it.slug == "acronym")
 
   # echo trackRepo.exercises.mapIt(it.slug)
 

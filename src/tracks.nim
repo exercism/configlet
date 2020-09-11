@@ -21,7 +21,7 @@ type
     slug*: string
     tests: Option[TrackExerciseTests]
 
-  TrackRepo* = object
+  Track* = object
     exercises*: seq[TrackExercise]
 
 proc parseConfigJson(filePath: string): ConfigJson =
@@ -58,9 +58,9 @@ proc parseExercises(gitRepo: TrackGitRepo): seq[TrackExercise] =
     let tests = tryParseTests(exerciseDir)
     result.add(TrackExercise(slug: exercise.slug, tests: tests))
 
-proc newTrackRepo(gitRepo: TrackGitRepo): TrackRepo =
-  TrackRepo(exercises: parseExercises(gitRepo))
+proc newTrack(gitRepo: TrackGitRepo): Track =
+  Track(exercises: parseExercises(gitRepo))
 
-proc newTrackRepo*: TrackRepo =
+proc newTrack*: Track =
   let trackGitRepo = newTrackGitRepo()
-  trackGitRepo.newTrackRepo()
+  trackGitRepo.newTrack()
