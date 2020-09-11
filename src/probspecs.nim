@@ -49,7 +49,7 @@ proc testCaseJsonNodes(json: JsonNode): seq[JsonNode] =
   else:
     @[]
 
-proc testCasesFromJson(json: JsonNode): seq[ProbSpecsTestCase] =
+proc newTestCasesFromJson(json: JsonNode): seq[ProbSpecsTestCase] =
   testCaseJsonNodes(json).map(newTestCase)
 
 proc tryNewCanonicalData(exerciseDir: string): Option[ProbSpecsCanonicalData] =
@@ -59,7 +59,7 @@ proc tryNewCanonicalData(exerciseDir: string): Option[ProbSpecsCanonicalData] =
   if extractFilename(exerciseDir) == "grains":
     none(ProbSpecsCanonicalData)
   elif fileExists(filePath):
-    some(ProbSpecsCanonicalData(testCases: testCasesFromJson(json.parseFile(filePath))))
+    some(ProbSpecsCanonicalData(testCases: newTestCasesFromJson(json.parseFile(filePath))))
   else:
     none(ProbSpecsCanonicalData)
 
