@@ -1,4 +1,4 @@
-import strformat, sequtils, parsetoml, json, os, tables, options, tracks, probspecsrepo
+import strformat, sequtils, parsetoml, json, os, tables, options, tracks, probspecs
 
 type
   CanonicalDataCase = object
@@ -41,26 +41,13 @@ proc syncExerciseData(exercise: TrackExercise, canonicalData: Option[JsonNode]):
   if not tests.hasKey("canonical-tests"):
     echo &"Syncing {exercise.slug} (skipped: no [canonical-tests] section in tests.toml file)"
     return  
-    
-  # let canonicalTests = toSeq(tests["canonical-tests"].getTable().pairs)
-  #   .mapIt((it[0], it[1].getBool()))
-  #   .toTable
-
-  # for canonicalCase in canonicalData.get["cases"].getElems():
-  #   # if canonicalCase.hasKey("uuid"):
-  #   #   if canonicalCase["uuid"] == "2009a269-4cc9-4e30-8156-f5331b6269f5":
-  #   #     canonicalCase.delete()
-      
-  #   if canonicalCase.hasKey("cases"):
-  #     for subCase in canonicalCase["cases"].getElems():
-  #       echo subCase
-  #       echo ""
-    
-
-  # echo canonicalData.get.pretty
 
 proc syncTests*: void =
   echo "Sync"
+
+  let probSpecsRepo = newProbSpecsRepo()
+  echo probSpecsRepo.exercises.filterIt(it.slug == "acronym")
+
   # let exerciseCanonicalData = probSpecsExercisesCanonicalData()
 
   # for trackExercise in findTrackExercises():
