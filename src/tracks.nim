@@ -7,8 +7,15 @@ type
   ConfigJson = object
     exercises: seq[ConfigJsonExercise]
 
+  TrackRepoExercise = object
+    dir: string
+    slug: string
+    testsFile: string
+
   TrackRepo* = object
     dir: string
+    configFile: string
+    exercises: seq[TrackRepoExercise]
 
   TrackExerciseTest* = object
     uuid: string
@@ -24,9 +31,22 @@ type
   Track* = object
     exercises*: seq[TrackExercise]
 
-proc parseConfigJson(filePath: string): ConfigJson =
-  let json = json.parseFile(filePath)
-  to(json, ConfigJson)
+proc newTrackRepoExercise(dir: string): TrackRepoExercise =
+  TrackRepoExercise(
+    dir: dir,
+    slug: extractFilename(dir),
+    testsFile: joinPath(dir, joinPath(".meta", "tests.toml"))
+  )
+
+proc newTrackRepoExercises(dir: string): seq[TrackRepoExercise] =
+  for exerciseDir in walkDirs(joinPath(dir, "exercises/*")):
+    result.add(newTrackRepoExercise(exerciseDir))
+
+proc newTrackRepo: TrackRepo =
+  let dir = getCurrentDir()
+  let configFile = joinPath(dir, "config.json")
+  let exercises = newTrackRepoExercises(dir)
+  TrackRepo(dir: dir, configFile: configFile, exercises: exercises)
 
 proc newTest(node: (string, TomlValueRef)): TrackExerciseTest =
   TrackExerciseTest(uuid: node[0], enabled: node[1].boolVal)
@@ -46,17 +66,18 @@ proc tryParseTests(exerciseDir: string): Option[TrackExerciseTests] =
   else:
     none(TrackExerciseTests)
 
-proc newTrackRepo: TrackRepo =
-  TrackRepo(dir: getCurrentDir())
+proc parseConfigJson(filePath: string): ConfigJson =
+  let json = json.parseFile(filePath)
+  to(json, ConfigJson)
 
-proc parseExercises(gitRepo: TrackRepo): seq[TrackExercise] =
-  let configJsonFile = joinPath(gitRepo.dir, "config.json")  
-  let configJson = parseConfigJson(configJsonFile)
+proc parseExercises(repo: TrackRepo): seq[TrackExercise] =
+  let configJson = parseConfigJson(repo.configFile)
 
   for exercise in configJson.exercises:
-    let exerciseDir = joinPath(gitRepo.dir, joinPath("exercises", exercise.slug))
+    let exerciseDir = joinPath(repo.dir, joinPath("exercises", exercise.slug))
     let tests = tryParseTests(exerciseDir)
     result.add(TrackExercise(slug: exercise.slug, tests: tests))
+
 
 proc newTrack(gitRepo: TrackRepo): Track =
   Track(exercises: parseExercises(gitRepo))
