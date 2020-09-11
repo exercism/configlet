@@ -14,15 +14,12 @@ type
     uuid: string
     enabled: bool
 
-  TrackExerciseKind = enum
-    noTests, withTests
-
   TrackExercise* = object
     slug*: string    
-    case kind: TrackExerciseKind
-    of withTests:
-      tests: seq[TrackExerciseTest]
-    of noTests:
+    case hasTests*: bool
+    of true:
+      tests*: seq[TrackExerciseTest]
+    of false:
       discard
 
 proc newTrackRepo: TrackRepo =
@@ -45,9 +42,9 @@ proc newTrackExercise(repo: TrackRepo, configExercise: ConfigJsonExercise): Trac
   let testsFile = joinPath(repo.dir, "exercises", configExercise.slug, ".meta", "tests.toml")
 
   if fileExists(testsFile):
-    TrackExercise(slug: configExercise.slug, kind: withTests, tests: parseTrackExerciseTests(testsFile))
+    TrackExercise(slug: configExercise.slug, hasTests: true, tests: parseTrackExerciseTests(testsFile))
   else:
-    TrackExercise(slug: configExercise.slug, kind: noTests)
+    TrackExercise(slug: configExercise.slug, hasTests: false)
 
 proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
   let configJson = parseConfigJson(joinPath(repo.dir, "config.json"))

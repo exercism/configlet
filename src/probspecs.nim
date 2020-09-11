@@ -9,15 +9,12 @@ type
     description*: string
     json*: JsonNode
 
-  ProbSpecsExerciseKind = enum
-    noCanonicalData, withCanonicalData
-
   ProbSpecsExercise* = object
     slug*: string
-    case kind: ProbSpecsExerciseKind
-    of withCanonicalData:
+    case hasCanonicalData*: bool
+    of true:
       testCases*: seq[ProbSpecsTestCase]
-    of noCanonicalData:
+    of false:
       discard
 
 proc newProbSpecsRepo: ProbSpecsRepo =
@@ -59,11 +56,11 @@ proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
 
   # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
   if slug == "grains":
-    ProbSpecsExercise(slug: slug, kind: noCanonicalData)
+    ProbSpecsExercise(slug: slug, hasCanonicalData: false)
   elif fileExists(canonicalDataFile):
-    ProbSpecsExercise(slug: slug, kind: withCanonicalData, testCases: parseProbSpecsTestCasesFromFile(canonicalDataFile))
+    ProbSpecsExercise(slug: slug, hasCanonicalData: true, testCases: parseProbSpecsTestCasesFromFile(canonicalDataFile))
   else:
-    ProbSpecsExercise(slug: slug, kind: noCanonicalData)
+    ProbSpecsExercise(slug: slug, hasCanonicalData: false)
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
   for exerciseDir in walkDirs(joinPath(repo.dir, "exercises/*")):
