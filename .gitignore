@@ -3,3 +3,4 @@ canonicaldatasyncer
 # TODO: remove before release, testing purposes only
 exercises/
 .problem-specifications/
+config.json

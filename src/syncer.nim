@@ -9,3 +9,5 @@ proc syncTests* =
   echo probSpecsRepo.exercises.filterIt(it.slug == "acronym")
   echo trackRepo.exercises.filterIt(it.slug == "acronym")
 
+  # echo trackRepo.exercises.mapIt(it.slug)
+

@@ -1,6 +1,12 @@
-import sequtils, os, options, parsetoml
+import sequtils, os, options, parsetoml, json
 
 type
+  ConfigJsonExercise = object
+    slug: string
+
+  ConfigJson = object
+    exercises: seq[ConfigJsonExercise]
+
   TrackGitRepo* = object
     dir: string
 
@@ -18,6 +24,10 @@ type
   TrackRepo* = object
     exercises*: seq[TrackExercise]
 
+proc parseConfigJson(filePath: string): ConfigJson =
+  let json = json.parseFile(filePath)
+  to(json, ConfigJson)
+
 proc newTest(node: (string, TomlValueRef)): TrackExerciseTest =
   TrackExerciseTest(uuid: node[0], enabled: node[1].boolVal)
 
@@ -27,7 +37,7 @@ proc newTestsFromToml(toml: TomlValueRef): seq[TrackExerciseTest] =
   else:
     @[]
 
-proc tryNewTests(exerciseDir: string): Option[TrackExerciseTests] =
+proc tryParseTests(exerciseDir: string): Option[TrackExerciseTests] =
   let filePath = joinPath(exerciseDir, joinPath(".meta", "tests.toml"))
   
   if fileExists(filePath):
@@ -39,15 +49,17 @@ proc tryNewTests(exerciseDir: string): Option[TrackExerciseTests] =
 proc newTrackGitRepo: TrackGitRepo =
   TrackGitRepo(dir: getCurrentDir())
 
-proc newExercise(exerciseDir: string): TrackExercise =
-  let slug = extractFilename(exerciseDir)
-  let tests = tryNewTests(exerciseDir)
-  TrackExercise(slug: slug, tests: tests)
+proc parseExercises(gitRepo: TrackGitRepo): seq[TrackExercise] =
+  let configJsonFile = joinPath(gitRepo.dir, "config.json")  
+  let configJson = parseConfigJson(configJsonFile)
+
+  for exercise in configJson.exercises:
+    let exerciseDir = joinPath(gitRepo.dir, joinPath("exercises", exercise.slug))
+    let tests = tryParseTests(exerciseDir)
+    result.add(TrackExercise(slug: exercise.slug, tests: tests))
 
 proc newTrackRepo(gitRepo: TrackGitRepo): TrackRepo =
-  let exercisesDir = joinPath(gitRepo.dir, "exercises/*")
-  let exercises = toSeq(walkDirs(exercisesDir)).map(newExercise)
-  TrackRepo(exercises: exercises)
+  TrackRepo(exercises: parseExercises(gitRepo))
 
 proc newTrackRepo*: TrackRepo =
   let trackGitRepo = newTrackGitRepo()
