@@ -1,45 +1,28 @@
-import strformat, os, json, commands
+import commands, json, strformat, os
 
 type
-  ProbSpecsRepoExercise = object
-    dir: string
-    slug: string
-    canonicalDataFile: string
-
   ProbSpecsRepo = object
     dir: string
-    exercises: seq[ProbSpecsRepoExercise]
 
   ProbSpecsTestCase* = object
     uuid*: string
     description*: string
     json*: JsonNode
 
+  ProbSpecsExerciseKind = enum
+    noCanonicalData, withCanonicalData
+
   ProbSpecsExercise* = object
     slug*: string
-    case hasCanonicalData: bool
-    of true: 
+    case kind: ProbSpecsExerciseKind
+    of withCanonicalData:
       testCases*: seq[ProbSpecsTestCase]
-    else:
+    of noCanonicalData:
       discard
-
-  ProbSpecs* = object
-    exercises*: seq[ProbSpecsExercise]
-
-proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
-  ProbSpecsRepoExercise(
-    dir: dir,
-    slug: extractFilename(dir),
-    canonicalDataFile: joinPath(dir, "canonical-data.json"))
-
-proc newProbSpecsRepoExercises(dir: string): seq[ProbSpecsRepoExercise] =
-  for exerciseDir in walkDirs(joinPath(dir, "exercises/*")):
-    result.add(newProbSpecsRepoExercise(exerciseDir))
 
 proc newProbSpecsRepo: ProbSpecsRepo =
   let dir = joinPath(getCurrentDir(), ".problem-specifications")
-  let exercises = newProbSpecsRepoExercises(dir)
-  ProbSpecsRepo(dir: dir, exercises: exercises)
+  ProbSpecsRepo(dir: dir)
 
 proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
@@ -67,31 +50,31 @@ proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(newProbSpecsTestCases(childNode))
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
-  newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
+proc parseProbSpecsTestCasesFromFile(canonicalDataFile: string): seq[ProbSpecsTestCase] =  
+  newProbSpecsTestCases(json.parseFile(canonicalDataFile))
 
-proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
+  let canonicalDataFile = joinPath(exerciseDir, "canonical-data.json")
+  let slug = extractFilename(exerciseDir)
+
   # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
-  if repoExercise.slug == "grains":
-    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: false)
-  elif fileExists(repoExercise.canonicalDataFile):
-    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: true, testCases: parseProbSpecsTestCases(repoExercise))
+  if slug == "grains":
+    ProbSpecsExercise(slug: slug, kind: noCanonicalData)
+  elif fileExists(canonicalDataFile):
+    ProbSpecsExercise(slug: slug, kind: withCanonicalData, testCases: parseProbSpecsTestCasesFromFile(canonicalDataFile))
   else:
-    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: false)
+    ProbSpecsExercise(slug: slug, kind: noCanonicalData)
 
-proc newPropSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
-  for repoExercise in repo.exercises:
-    result.add(newPropSpecsExercise(repoExercise))
+proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
+  for exerciseDir in walkDirs(joinPath(repo.dir, "exercises/*")):
+    result.add(newPropSpecsExercise(exerciseDir))
 
-proc newProbSpecs(repo: ProbSpecsRepo): ProbSpecs =
-  ProbSpecs(exercises: newPropSpecsExercises(repo))
-
-proc newProbSpecs*: ProbSpecs =
+proc findProbSpecsExercises*: seq[ProbSpecsExercise] =
   let probSpecsRepo = newProbSpecsRepo()
 
   # try:
-    # probSpecsGitRepo.remove()
-    # probSpecsGitRepo.clone()
-  probSpecsRepo.newProbSpecs()
+    # probSpecsRepo.remove()
+    # probSpecsRepo.clone()
+  probSpecsRepo.findProbSpecsExercises()
   # finally:
-  #   probSpecsGitRepo.remove()
+  #   probSpecsRepo.remove()

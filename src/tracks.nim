@@ -1,4 +1,4 @@
-import sequtils, os, parsetoml, json, sets
+import os, json, parsetoml
 
 type
   ConfigJsonExercise = object
@@ -7,86 +7,54 @@ type
   ConfigJson = object
     exercises: seq[ConfigJsonExercise]
 
-  TrackRepoExercise = object
+  TrackRepo = object
     dir: string
-    slug: string
-    testsFile: string
-
-  TrackRepo* = object
-    dir: string
-    configFile: string
-    exercises: seq[TrackRepoExercise]
 
   TrackExerciseTest* = object
     uuid: string
     enabled: bool
 
+  TrackExerciseKind = enum
+    noTests, withTests
+
   TrackExercise* = object
-    slug*: string
-    case hasTests: bool
-    of true: 
+    slug*: string    
+    case kind: TrackExerciseKind
+    of withTests:
       tests: seq[TrackExerciseTest]
-    else:
-      discard    
-
-  Track* = object
-    exercises*: seq[TrackExercise]
-
-proc newTrackRepoExercise(dir: string): TrackRepoExercise =
-  TrackRepoExercise(
-    dir: dir,
-    slug: extractFilename(dir),
-    testsFile: joinPath(dir, joinPath(".meta", "tests.toml"))
-  )
-
-proc newTrackRepoExercises(dir: string): seq[TrackRepoExercise] =
-  for exerciseDir in walkDirs(joinPath(dir, "exercises/*")):
-    result.add(newTrackRepoExercise(exerciseDir))
+    of noTests:
+      discard
 
 proc newTrackRepo: TrackRepo =
   let dir = getCurrentDir()
-  let configFile = joinPath(dir, "config.json")
-  let exercises = newTrackRepoExercises(dir)
-  TrackRepo(dir: dir, configFile: configFile, exercises: exercises)
+  TrackRepo(dir: dir)
 
-proc parseTrackExerciseTests(trackRepoExercise: TrackRepoExercise): seq[TrackExerciseTest] =
-  let toml = parsetoml.parseFile(trackRepoExercise.testsFile)
+proc parseConfigJson(filePath: string): ConfigJson =
+  let json = json.parseFile(filePath)
+  to(json, ConfigJson)
+
+proc parseTrackExerciseTests(testsFile: string): seq[TrackExerciseTest] =
+  let toml = parsetoml.parseFile(testsFile)
   if not toml.hasKey("canonical-tests"):
     return
 
   for uuid, enabled in toml["canonical-tests"].getTable():
     result.add(TrackExerciseTest(uuid: uuid, enabled: enabled.getBool()))
 
-proc newTrackExercise(trackRepoExercise: TrackRepoExercise): TrackExercise =
-  if fileExists(trackRepoExercise.testsFile):
-    TrackExercise(slug: trackRepoExercise.slug, hasTests: true, tests: parseTrackExerciseTests(trackRepoExercise))
+proc newTrackExercise(repo: TrackRepo, configExercise: ConfigJsonExercise): TrackExercise =
+  let testsFile = joinPath(repo.dir, "exercises", configExercise.slug, ".meta", "tests.toml")
+
+  if fileExists(testsFile):
+    TrackExercise(slug: configExercise.slug, kind: withTests, tests: parseTrackExerciseTests(testsFile))
   else:
-    TrackExercise(slug: trackRepoExercise.slug, hasTests: false)
+    TrackExercise(slug: configExercise.slug, kind: noTests)
 
-proc parseConfigJson(filePath: string): ConfigJson =
-  let json = json.parseFile(filePath)
-  to(json, ConfigJson)
+proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
+  let configJson = parseConfigJson(joinPath(repo.dir, "config.json"))
 
-proc parseExercises(repo: TrackRepo): seq[TrackExercise] =
-  let config = parseConfigJson(repo.configFile)
-  
-  # TODO: refactor this to helper type
-  let configExercisesBySlug = config.exercises.mapIt((it.slug, it)).toTable
-  let trackRepoExercisesBySlug = repo.exercises.mapIt((it.slug, it)).toTable
+  for configExercise in configJson.exercises:
+    result.add(newTrackExercise(repo, configExercise))
 
-  let configExerciseUuids = toSeq(configExercisesBySlug.keys).toHashSet
-  let trackRepoExerciseUuids = toSeq(trackRepoExercisesBySlug.keys).toHashSet
-
-  # TODO: Output missing entries
-  let validExerciseUuids = configExerciseUuids - trackRepoExerciseUuids
-
-  # TODO: refactor this
-  for exerciseUUids in validExerciseUuids:
-    result.add(newTrackExercise(trackRepoExercisesBySlug[exerciseUUids]))
-
-proc newTrack(repo: TrackRepo): Track =
-  Track(exercises: parseExercises(repo))
-
-proc newTrack*: Track =
+proc findTrackExercises*: seq[TrackExercise] =
   let trackRepo = newTrackRepo()
-  trackRepo.newTrack()
+  trackRepo.findTrackExercises()
