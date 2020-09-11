@@ -6,8 +6,8 @@ proc syncTests* =
   let probSpecs = newProbSpecs()
   let track = newTrack()
 
-  echo probSpecs.exercises.filterIt(it.slug == "acronym")
-  echo track.exercises.filterIt(it.slug == "acronym")
+  # echo probSpecs.exercises.filterIt(it.slug == "acronym")
+  # echo track.exercises.filterIt(it.slug == "acronym")
 
   # echo trackRepo.exercises.mapIt(it.slug)
 

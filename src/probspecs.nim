@@ -17,7 +17,11 @@ type
 
   ProbSpecsExercise* = object
     slug*: string
-    testCases*: seq[ProbSpecsTestCase]
+    case hasCanonicalData: bool
+    of true: 
+      testCases*: seq[ProbSpecsTestCase]
+    else:
+      discard
 
   ProbSpecs* = object
     exercises*: seq[ProbSpecsExercise]
@@ -63,18 +67,17 @@ proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(newProbSpecsTestCases(childNode))
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
-  # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
-  if repoExercise.slug == "grains":
-    return
-  
-  if not fileExists(repoExercise.canonicalDataFile):
-    return
-  
+proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
   newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
 proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
-  ProbSpecsExercise(slug: repoExercise.slug, testCases: parseProbSpecsTestCases(repoExercise))
+  # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
+  if repoExercise.slug == "grains":
+    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: false)
+  elif fileExists(repoExercise.canonicalDataFile):
+    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: true, testCases: parseProbSpecsTestCases(repoExercise))
+  else:
+    ProbSpecsExercise(slug: repoExercise.slug, hasCanonicalData: false)
 
 proc newPropSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercises:
