@@ -40,13 +40,16 @@ proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)
   to(json, ConfigJson)
 
+proc parseTrackExerciseTests(testsTable: TomlTableRef): seq[TrackExerciseTest] =
+  for uuid, enabled in testsTable:
+    result.add((uuid: uuid, enabled: enabled.getBool()))
+
 proc parseTrackExerciseTests(testsFile: string): seq[TrackExerciseTest] =
   let toml = parsetoml.parseFile(testsFile)
   if not toml.hasKey("canonical-tests"):
     return
 
-  for uuid, enabled in toml["canonical-tests"].getTable():
-    result.add((uuid: uuid, enabled: enabled.getBool()))
+  parseTrackExerciseTests(toml["canonical-tests"].getTable())
 
 proc newTrackExercise(repo: TrackRepo, configExercise: ConfigJsonExercise): TrackExercise =
   let testsFile = joinPath(repo.dir, "exercises", configExercise.slug, ".meta", "tests.toml")
