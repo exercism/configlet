@@ -1,4 +1,4 @@
-import json, strformat, os, osproc
+import json, sequtils, strformat, os, osproc
 
 type
   ProbSpecsRepo = object
@@ -11,11 +11,7 @@ type
 
   ProbSpecsExercise* = object
     slug*: string
-    case hasCanonicalData*: bool
-    of true:
-      testCases*: seq[ProbSpecsTestCase]
-    of false:
-      discard
+    testCases*: seq[ProbSpecsTestCase]
 
 proc execCmdException*(cmd: string, exceptn: typedesc, message: string): void =
   if execCmd(cmd) != 0:
@@ -51,23 +47,30 @@ proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(newProbSpecsTestCases(childNode))
 
-proc parseProbSpecsTestCasesFromFile(canonicalDataFile: string): seq[ProbSpecsTestCase] =  
-  newProbSpecsTestCases(json.parseFile(canonicalDataFile))
+proc slugFromDir(exerciseDir: string): string =
+  extractFilename(exerciseDir)
+
+proc canonicalDataFile(exerciseDir: string): string =
+  joinPath(exerciseDir, "canonical-data.json")
+
+proc parseProbSpecsTestCasesFromFile(exerciseDir: string): seq[ProbSpecsTestCase] =  
+  if slugFromDir(exerciseDir) == "grains":
+    @[]
+  else:  
+    newProbSpecsTestCases(json.parseFile(canonicalDataFile(exerciseDir)))
+
+proc hasCanonicalDataFile(exerciseDir: string): bool =
+  fileExists(canonicalDataFile(exerciseDir))
+
+proc exerciseDirs(repo: ProbSpecsRepo): seq[string] =
+  for exerciseDir in walkDirs(joinPath(repo.dir, "exercises/*")):
+    result.add(exerciseDir)
 
 proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
-  let canonicalDataFile = joinPath(exerciseDir, "canonical-data.json")
-  let slug = extractFilename(exerciseDir)
-
-  # TODO: fix Grains JSON parse Error: Parsed integer outside of valid range
-  if slug == "grains":
-    ProbSpecsExercise(slug: slug, hasCanonicalData: false)
-  elif fileExists(canonicalDataFile):
-    ProbSpecsExercise(slug: slug, hasCanonicalData: true, testCases: parseProbSpecsTestCasesFromFile(canonicalDataFile))
-  else:
-    ProbSpecsExercise(slug: slug, hasCanonicalData: false)
+  ProbSpecsExercise(slug: slugFromDir(exerciseDir), testCases: parseProbSpecsTestCasesFromFile(exerciseDir))
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
-  for exerciseDir in walkDirs(joinPath(repo.dir, "exercises/*")):
+  for exerciseDir in exerciseDirs(repo).filter(hasCanonicalDataFile):
     result.add(newPropSpecsExercise(exerciseDir))
 
 proc findProbSpecsExercises*: seq[ProbSpecsExercise] =

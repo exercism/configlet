@@ -10,17 +10,11 @@ type
   TrackRepo = object
     dir: string
 
-  TrackExerciseTest* = object
-    uuid*: string
-    enabled*: bool
+  TrackExerciseTest* = tuple[uuid: string, enabled: bool]
 
   TrackExercise* = object
-    slug*: string    
-    case hasTests*: bool
-    of true:
-      tests*: seq[TrackExerciseTest]
-    of false:
-      discard
+    slug*: string  
+    tests*: seq[TrackExerciseTest]
 
 proc newTrackRepo: TrackRepo =
   let dir = getCurrentDir()
