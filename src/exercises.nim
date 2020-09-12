@@ -23,18 +23,18 @@ proc testCaseStatus(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): 
     unknown
 
 proc newTestCase(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): TestCase =
-  TestCase(
-    uuid: testCase.uuid,
-    description: testCase.description,
-    json: testCase.json,
-    status: testCaseStatus(trackExercise, testCase)
-  )
+  result.uuid = testCase.uuid
+  result.description = testCase.description
+  result.json = testCase.json
+  result.status = testCaseStatus(trackExercise, testCase)
 
 proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): seq[TestCase] =
-  probSpecsExercise.testCases.mapIt(newTestCase(trackExercise, it))
+  for testCase in probSpecsExercise.testCases:
+    result.add(newTestCase(trackExercise, testCase))
 
 proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
-  Exercise(slug: trackExercise.slug, testCases: newTestCases(trackExercise, probSpecsExercise))
+  result.slug = trackExercise.slug
+  result.testCases = newTestCases(trackExercise, probSpecsExercise)
 
 proc findExercises*: seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises().mapIt((it.slug, it)).toTable

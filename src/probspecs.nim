@@ -22,7 +22,7 @@ proc probSpecsDir: string =
   joinPath(getCurrentDir(), ".problem-specifications")
 
 proc newProbSpecsRepo: ProbSpecsRepo =
-  ProbSpecsRepo(dir: probSpecsDir())
+  result.dir = probSpecsDir()
 
 proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
@@ -37,7 +37,7 @@ proc remove(repo: ProbSpecsRepo): void =
   removeDir(repo.dir)
 
 proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
-  ProbSpecsRepoExercise(dir: dir)
+  result.dir = dir
 
 proc exercisesDir(repo: ProbSpecsRepo): string =
   joinPath(repo.dir, "exercises")
@@ -60,7 +60,7 @@ proc slug(repoExercise: ProbSpecsRepoExercise): string =
   extractFilename(repoExercise.dir)
 
 proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  ProbSpecsTestCase(json: node)
+  result.json = node
 
 proc uuid*(testCase: ProbSpecsTestCase): string =
   testCase.json["uuid"].getStr()
@@ -82,7 +82,8 @@ proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecs
   newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
 proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
-  ProbSpecsExercise(slug: repoExercise.slug, testCases: parseProbSpecsTestCases(repoExercise))
+  result.slug = repoExercise.slug
+  result.testCases = parseProbSpecsTestCases(repoExercise)
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():

@@ -22,8 +22,7 @@ type
     tests*: TrackExerciseTests
 
 proc newTrackRepo: TrackRepo =
-  let dir = getCurrentDir()
-  TrackRepo(dir: dir)
+  result.dir = getCurrentDir()
 
 proc configJsonFile(repo: TrackRepo): string =
   joinPath(repo.dir, "config.json")
@@ -45,7 +44,7 @@ proc parseConfigJson(filePath: string): ConfigJson =
   to(json, ConfigJson)
 
 proc newTrackRepoExercise(repo: TrackRepo, exercise: ConfigJsonExercise): TrackRepoExercise =
-  TrackRepoExercise(dir: repo.exerciseDir(exercise))
+  result.dir = repo.exerciseDir(exercise)
 
 proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   let config = parseConfigJson(repo.configJsonFile)
@@ -65,7 +64,8 @@ proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests 
       result.excluded.incl(uuid)
 
 proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
-  TrackExercise(slug: repoExercise.slug, tests: newTrackExerciseTests(repoExercise))
+  result.slug = repoExercise.slug
+  result.tests = newTrackExerciseTests(repoExercise)
 
 proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
   for repoExercise in repo.exercises:
