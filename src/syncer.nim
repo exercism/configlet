@@ -1,9 +1,17 @@
-import strformat, analyzer
+import strformat, analyzer, probspecs, tracks
 
 proc syncTests*: void =
-  let exercises = findExercises()
-  for exercise in exercises:
-    echo &"{exercise.slug}: with prob specs"
+  echo "Prob spec exercises:"
+  let probSpecsExercises = findProbSpecsExercises()
+  echo probSpecsExercises
+
+  echo "Track exercises:"
+  let trackExercises = findTrackExercises()
+  echo trackExercises
+
+  # let exercises = findExercises()
+  # for exercise in exercises:
+  #   echo &"{exercise.slug}: with prob specs"
 
   # for trackExercise in trackExercises:
   #   let probSpecsExercise = probSpecsExercisesBySlug[trackExercise.slug]

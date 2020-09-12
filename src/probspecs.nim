@@ -1,12 +1,13 @@
 import json, sequtils, strformat, os, osproc
 
 type
+  ProbSpecsRepoExercise = object
+    dir: string
+
   ProbSpecsRepo = object
     dir: string
 
   ProbSpecsTestCase* = object
-    uuid*: string
-    description*: string
     json*: JsonNode
 
   ProbSpecsExercise* = object
@@ -17,9 +18,11 @@ proc execCmdException*(cmd: string, exceptn: typedesc, message: string): void =
   if execCmd(cmd) != 0:
     raise newException(exceptn, message)
 
+proc probSpecsDir: string =
+  joinPath(getCurrentDir(), ".problem-specifications")
+
 proc newProbSpecsRepo: ProbSpecsRepo =
-  let dir = joinPath(getCurrentDir(), ".problem-specifications")
-  ProbSpecsRepo(dir: dir)
+  ProbSpecsRepo(dir: probSpecsDir())
 
 proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
@@ -33,12 +36,37 @@ proc clone(repo: ProbSpecsRepo): void =
 proc remove(repo: ProbSpecsRepo): void =
   removeDir(repo.dir)
 
+proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
+  ProbSpecsRepoExercise(dir: dir)
+
+proc slug(repoExercise: ProbSpecsRepoExercise): string =
+  extractFilename(repoExercise.dir)
+
+proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
+  joinPath(repoExercise.dir, "canonical-data.json")
+
+proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
+  fileExists(repoExercise.canonicalDataFile())
+
+proc exercisesDir(repo: ProbSpecsRepo): string =
+  joinPath(repo.dir, "exercises")
+
+proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
+  for exerciseDir in walkDirs(joinPath(repo.exercisesDir, "*")):
+    result.add(newProbSpecsRepoExercise(exerciseDir))
+
+proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
+  for repoExercise in repo.exercises().filter(hasCanonicalDataFile):
+    result.add(repoExercise)
+
 proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  ProbSpecsTestCase(
-    uuid: node["uuid"].getStr(),
-    description: node["description"].getStr(),
-    json: node
-  )
+  ProbSpecsTestCase(json: node)
+
+proc uuid*(testCase: ProbSpecsTestCase): string =
+  testCase.json["uuid"].getStr()
+
+proc description*(testCase: ProbSpecsTestCase): string =
+  testCase.json["description"].getStr()
 
 proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
@@ -47,31 +75,18 @@ proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(newProbSpecsTestCases(childNode))
 
-proc slugFromDir(exerciseDir: string): string =
-  extractFilename(exerciseDir)
+proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
+  if repoExercise.slug == "grains":
+    return
 
-proc canonicalDataFile(exerciseDir: string): string =
-  joinPath(exerciseDir, "canonical-data.json")
+  newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
-proc parseProbSpecsTestCasesFromFile(exerciseDir: string): seq[ProbSpecsTestCase] =  
-  if slugFromDir(exerciseDir) == "grains":
-    @[]
-  else:  
-    newProbSpecsTestCases(json.parseFile(canonicalDataFile(exerciseDir)))
-
-proc hasCanonicalDataFile(exerciseDir: string): bool =
-  fileExists(canonicalDataFile(exerciseDir))
-
-proc exerciseDirs(repo: ProbSpecsRepo): seq[string] =
-  for exerciseDir in walkDirs(joinPath(repo.dir, "exercises/*")):
-    result.add(exerciseDir)
-
-proc newPropSpecsExercise(exerciseDir: string): ProbSpecsExercise =
-  ProbSpecsExercise(slug: slugFromDir(exerciseDir), testCases: parseProbSpecsTestCasesFromFile(exerciseDir))
+proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+  ProbSpecsExercise(slug: repoExercise.slug, testCases: parseProbSpecsTestCases(repoExercise))
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
-  for exerciseDir in exerciseDirs(repo).filter(hasCanonicalDataFile):
-    result.add(newPropSpecsExercise(exerciseDir))
+  for repoExercise in repo.exercisesWithCanonicalData():
+    result.add(newPropSpecsExercise(repoExercise))
 
 proc findProbSpecsExercises*: seq[ProbSpecsExercise] =
   let probSpecsRepo = newProbSpecsRepo()
