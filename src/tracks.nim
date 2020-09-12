@@ -23,8 +23,18 @@ proc newTrackRepo: TrackRepo =
   let dir = getCurrentDir()
   TrackRepo(dir: dir)
 
+proc newTrackRepoExercise(dir: string): TrackRepoExercise =
+  TrackRepoExercise(dir: dir)
+
 proc configJsonFile(repo: TrackRepo): string =
   joinPath(repo.dir, "config.json")
+
+proc exercisesDir(repo: TrackRepo): string =
+  joinPath(repo.dir, "exercises")
+
+proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
+  for exerciseDir in walkDirs(joinPath(repo.exercisesDir, "*")):
+    result.add(newTrackRepoExercise(exerciseDir))
 
 proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)

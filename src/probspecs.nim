@@ -39,15 +39,6 @@ proc remove(repo: ProbSpecsRepo): void =
 proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
   ProbSpecsRepoExercise(dir: dir)
 
-proc slug(repoExercise: ProbSpecsRepoExercise): string =
-  extractFilename(repoExercise.dir)
-
-proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
-  joinPath(repoExercise.dir, "canonical-data.json")
-
-proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
-  fileExists(repoExercise.canonicalDataFile())
-
 proc exercisesDir(repo: ProbSpecsRepo): string =
   joinPath(repo.dir, "exercises")
 
@@ -55,9 +46,18 @@ proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
   for exerciseDir in walkDirs(joinPath(repo.exercisesDir, "*")):
     result.add(newProbSpecsRepoExercise(exerciseDir))
 
+proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
+  joinPath(repoExercise.dir, "canonical-data.json")
+
+proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
+  fileExists(repoExercise.canonicalDataFile())
+
 proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
   for repoExercise in repo.exercises().filter(hasCanonicalDataFile):
     result.add(repoExercise)
+
+proc slug(repoExercise: ProbSpecsRepoExercise): string =
+  extractFilename(repoExercise.dir)
 
 proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   ProbSpecsTestCase(json: node)
