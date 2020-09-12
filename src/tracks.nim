@@ -11,8 +11,8 @@ type
     dir: string
 
   TrackExerciseTest* = object
-    uuid: string
-    enabled: bool
+    uuid*: string
+    enabled*: bool
 
   TrackExercise* = object
     slug*: string    

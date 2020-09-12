@@ -1,4 +1,4 @@
-import commands, json, strformat, os
+import json, strformat, os, osproc
 
 type
   ProbSpecsRepo = object
@@ -16,6 +16,10 @@ type
       testCases*: seq[ProbSpecsTestCase]
     of false:
       discard
+
+proc execCmdException*(cmd: string, exceptn: typedesc, message: string): void =
+  if execCmd(cmd) != 0:
+    raise newException(exceptn, message)
 
 proc newProbSpecsRepo: ProbSpecsRepo =
   let dir = joinPath(getCurrentDir(), ".problem-specifications")
