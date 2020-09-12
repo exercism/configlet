@@ -14,9 +14,9 @@ type
     slug*: string
     testCases*: seq[ProbSpecsTestCase]
 
-proc execCmdException*(cmd: string, exceptn: typedesc, message: string): void =
+proc execCmdException*(cmd: string, message: string): void =
   if execCmd(cmd) != 0:
-    raise newException(exceptn, message)
+    quit(message)
 
 proc probSpecsDir: string =
   joinPath(getCurrentDir(), ".problem-specifications")
@@ -27,11 +27,11 @@ proc newProbSpecsRepo: ProbSpecsRepo =
 proc clone(repo: ProbSpecsRepo): void =
   # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
   # let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
-  # execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
+  # execCmdException(cmd, "Could not clone problem-specifications repo")
   
   let cmd = &"git clone https://github.com/exercism/problem-specifications.git {repo.dir}"
-  execCmdException(cmd, IOError, "Could not clone problem-specifications repo")
-  execCmdException("git checkout --track origin/uuids", IOError, "Could not checkout the uuids branch")
+  execCmdException(cmd, "Could not clone problem-specifications repo")
+  execCmdException("git checkout --track origin/uuids", "Could not checkout the uuids branch")
 
 proc remove(repo: ProbSpecsRepo): void =
   removeDir(repo.dir)
