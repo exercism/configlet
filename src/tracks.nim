@@ -1,4 +1,4 @@
-import os, json, parsetoml
+import os, json, parsetoml, sets
 
 type
   ConfigJsonExercise = object
@@ -13,11 +13,13 @@ type
   TrackRepo = object
     dir: string
 
-  TrackExerciseTest* = tuple[uuid: string, enabled: bool]
+  TrackExerciseTests* = object
+    included*: HashSet[string]
+    excluded*: HashSet[string]
 
   TrackExercise* = object
-    slug*: string  
-    tests*: seq[TrackExerciseTest]
+    slug*: string
+    tests*: TrackExerciseTests
 
 proc newTrackRepo: TrackRepo =
   let dir = getCurrentDir()
@@ -51,16 +53,30 @@ proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   for exercise in config.exercises:
     result.add(newTrackRepoExercise(repo, exercise))
 
-proc parseTrackExerciseTests(repoExercise: TrackRepoExercise): seq[TrackExerciseTest] =
+proc parseTestsFile(repoExercise: TrackRepoExercise): TomlTableRef =
   if not fileExists(repoExercise.testsFile):
     return
 
   let toml = parsetoml.parseFile(repoExercise.testsFile)
-  for uuid, enabled in toml["canonical-tests"].getTable():
-      result.add((uuid: uuid, enabled: enabled.getBool()))
+  toml["canonical-tests"].getTable()
+
+proc includedTests(tests: TomlTableRef): HashSet[string] =
+  for uuid, enabled in tests:
+      if enabled.getBool():
+        result.incl(uuid)
+
+proc excludedTests(tests: TomlTableRef): HashSet[string] =
+  for uuid, enabled in tests:
+      if not enabled.getBool():
+        result.incl(uuid)
 
 proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
-  TrackExercise(slug: repoExercise.slug, tests: parseTrackExerciseTests(repoExercise))
+  let tests = parseTestsFile(repoExercise)
+
+  TrackExercise(
+    slug: repoExercise.slug,
+    includedTests: tests.includedTests(),
+    excludedTests: tests.excludedTests())
 
 proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
   for repoExercise in repo.exercises:
