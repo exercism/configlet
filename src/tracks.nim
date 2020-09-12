@@ -53,30 +53,19 @@ proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   for exercise in config.exercises:
     result.add(newTrackRepoExercise(repo, exercise))
 
-proc parseTestsFile(repoExercise: TrackRepoExercise): TomlTableRef =
+proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests =
   if not fileExists(repoExercise.testsFile):
     return
 
-  let toml = parsetoml.parseFile(repoExercise.testsFile)
-  toml["canonical-tests"].getTable()
-
-proc includedTests(tests: TomlTableRef): HashSet[string] =
-  for uuid, enabled in tests:
-      if enabled.getBool():
-        result.incl(uuid)
-
-proc excludedTests(tests: TomlTableRef): HashSet[string] =
-  for uuid, enabled in tests:
-      if not enabled.getBool():
-        result.incl(uuid)
+  let tests = parsetoml.parseFile(repoExercise.testsFile)
+  for uuid, enabled in tests["canonical-tests"].getTable():
+    if enabled.getBool():
+      result.included.incl(uuid)
+    else:
+      result.excluded.incl(uuid)
 
 proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
-  let tests = parseTestsFile(repoExercise)
-
-  TrackExercise(
-    slug: repoExercise.slug,
-    includedTests: tests.includedTests(),
-    excludedTests: tests.excludedTests())
+  TrackExercise(slug: repoExercise.slug, tests: newTrackExerciseTests(repoExercise))
 
 proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
   for repoExercise in repo.exercises:

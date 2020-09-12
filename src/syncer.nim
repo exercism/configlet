@@ -7,5 +7,5 @@ proc syncTests*: void =
 
   for testCase in exercises[0].testCases:
     echo &"# {testCase.description}"
-    echo &"{uuid} = {testCase.status}"
+    echo &"{testCase.uuid} = {testCase.status}"
     echo ""

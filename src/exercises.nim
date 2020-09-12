@@ -1,4 +1,4 @@
-import sequtils, tables, tracks, probspecs, json
+import sequtils, tables, tracks, probspecs, sets, json
 
 type
   TestCaseStatus* = enum
@@ -14,17 +14,27 @@ type
     slug*: string
     testCases*: seq[TestCase]
 
-proc newTests(trackExercise: TrackExercise): OrderedTable[string, bool] =
-  trackExercise.tests.mapIt((it.uuid, it.enabled)).toOrderedTable
+proc testCaseStatus(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): TestCaseStatus =
+  if trackExercise.tests.included.contains(testCase.uuid):
+    enabled
+  elif trackExercise.tests.excluded.contains(testCase.uuid):
+    disabled
+  else:
+    unknown
 
-proc newTestCase(testCase: ProbSpecsTestCase): TestCase =
-  TestCase(uuid: testCase.uuid, description: testCase.description, json: testCase.json)
+proc newTestCase(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): TestCase =
+  TestCase(
+    uuid: testCase.uuid,
+    description: testCase.description,
+    json: testCase.json,
+    status: testCaseStatus(trackExercise, testCase)
+  )
 
-proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Table[string, TestCase] =
-  probSpecsExercise.testCases.map(newTestCase).mapIt((it.uuid, it)).toTable
+proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): seq[TestCase] =
+  probSpecsExercise.testCases.mapIt(newTestCase(trackExercise, it))
 
 proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
-  Exercise(slug: trackExercise.slug, tests: newTests(trackExercise), testCases: newTestCases(probSpecsExercise))
+  Exercise(slug: trackExercise.slug, testCases: newTestCases(trackExercise, probSpecsExercise))
 
 proc findExercises*: seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises().mapIt((it.slug, it)).toTable
