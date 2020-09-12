@@ -23,47 +23,48 @@ proc newTrackRepo: TrackRepo =
   let dir = getCurrentDir()
   TrackRepo(dir: dir)
 
-proc newTrackRepoExercise(dir: string): TrackRepoExercise =
-  TrackRepoExercise(dir: dir)
-
 proc configJsonFile(repo: TrackRepo): string =
   joinPath(repo.dir, "config.json")
 
 proc exercisesDir(repo: TrackRepo): string =
   joinPath(repo.dir, "exercises")
 
-proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
-  for exerciseDir in walkDirs(joinPath(repo.exercisesDir, "*")):
-    result.add(newTrackRepoExercise(exerciseDir))
+proc exerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
+  joinPath(repo.exercisesDir, exercise.slug)
+
+proc slug(repoExercise: TrackRepoExercise): string =
+  extractFilename(repoExercise.dir)
+
+proc testsFile(repoExercise: TrackRepoExercise): string =
+  joinPath(repoExercise.dir, ".meta", "tests.toml")
 
 proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)
   to(json, ConfigJson)
 
-proc parseTrackExerciseTests(testsTable: TomlTableRef): seq[TrackExerciseTest] =
-  for uuid, enabled in testsTable:
-    result.add((uuid: uuid, enabled: enabled.getBool()))
+proc newTrackRepoExercise(repo: TrackRepo, exercise: ConfigJsonExercise): TrackRepoExercise =
+  TrackRepoExercise(dir: repo.exerciseDir(exercise))
 
-proc parseTrackExerciseTests(testsFile: string): seq[TrackExerciseTest] =
-  let toml = parsetoml.parseFile(testsFile)
-  if not toml.hasKey("canonical-tests"):
+proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
+  let config = parseConfigJson(repo.configJsonFile)
+
+  for exercise in config.exercises:
+    result.add(newTrackRepoExercise(repo, exercise))
+
+proc parseTrackExerciseTests(repoExercise: TrackRepoExercise): seq[TrackExerciseTest] =
+  if not fileExists(repoExercise.testsFile):
     return
 
-  parseTrackExerciseTests(toml["canonical-tests"].getTable())
+  let toml = parsetoml.parseFile(repoExercise.testsFile)
+  for uuid, enabled in toml["canonical-tests"].getTable():
+      result.add((uuid: uuid, enabled: enabled.getBool()))
 
-proc newTrackExercise(repo: TrackRepo, configExercise: ConfigJsonExercise): TrackExercise =
-  let testsFile = joinPath(repo.dir, "exercises", configExercise.slug, ".meta", "tests.toml")
-
-  if fileExists(testsFile):
-    TrackExercise(slug: configExercise.slug, tests: parseTrackExerciseTests(testsFile))
-  else:
-    TrackExercise(slug: configExercise.slug, tests: @[])
+proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
+  TrackExercise(slug: repoExercise.slug, tests: parseTrackExerciseTests(repoExercise))
 
 proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
-  let configJson = parseConfigJson(repo.configJsonFile)
-
-  for configExercise in configJson.exercises:
-    result.add(newTrackExercise(repo, configExercise))
+  for repoExercise in repo.exercises:
+    result.add(newTrackExercise(repoExercise))
 
 proc findTrackExercises*: seq[TrackExercise] =
   let trackRepo = newTrackRepo()
