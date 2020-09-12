@@ -1,36 +1,36 @@
 import sequtils, tables, tracks, probspecs, sets, json
 
 type
-  TestCaseStatus* = enum
-    enabled, disabled, unknown
-
   TestCase* = object
     uuid*: string
     description*: string
     json*: JsonNode
-    status*: TestCaseStatus
+
+  TestCases* = object
+    included*: seq[TestCase]
+    excluded*: seq[TestCase]
+    missing*: seq[TestCase]
 
   Exercise* = object
     slug*: string
-    testCases*: seq[TestCase]
+    testCases*: TestCases
 
-proc testCaseStatus(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): TestCaseStatus =
-  if trackExercise.tests.included.contains(testCase.uuid):
-    enabled
-  elif trackExercise.tests.excluded.contains(testCase.uuid):
-    disabled
-  else:
-    unknown
+proc len*(testCases: TestCases): int =
+  testCases.included.len + testCases.excluded.len + testCases.missing.len
 
-proc newTestCase(trackExercise: TrackExercise, testCase: ProbSpecsTestCase): TestCase =
+proc newTestCase(testCase: ProbSpecsTestCase): TestCase =
   result.uuid = testCase.uuid
   result.description = testCase.description
   result.json = testCase.json
-  result.status = testCaseStatus(trackExercise, testCase)
 
-proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): seq[TestCase] =
+proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): TestCases =
   for testCase in probSpecsExercise.testCases:
-    result.add(newTestCase(trackExercise, testCase))
+    if trackExercise.tests.included.contains(testCase.uuid):
+      result.included.add(newTestCase(testCase))
+    elif trackExercise.tests.excluded.contains(testCase.uuid):
+      result.excluded.add(newTestCase(testCase))
+    else:
+      result.missing.add(newTestCase(testCase))
 
 proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
