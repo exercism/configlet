@@ -1,5 +1,5 @@
-import sequtils, strformat
-import ../exercises
+import options, sequtils, strformat
+import ../arguments, ../exercises
 
 proc missingTestCases(exercise: Exercise): bool =
   exercise.testCases.missing.len > 0
@@ -15,9 +15,15 @@ proc printOverallStatus(exercises: seq[Exercise]): void =
   else:
     echo "All exercises are up-to-date!"
 
-proc check*: void =
+proc findExercises(args: Arguments): seq[Exercise] =
+  if args.exercise.isNone:
+    result = findExercises()
+  else:
+    result = findExercises().filterIt(it.slug == args.exercise.get)
+
+proc check*(args: Arguments): void =
   echo "Checking exercises..."
 
-  let exercises = findExercises()
+  let exercises = findExercises(args)
   printExerciseStatuses(exercises)
   printOverallStatus(exercises)

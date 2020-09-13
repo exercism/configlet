@@ -1,14 +1,14 @@
 import strformat
-import options, commands/[check,update]
+import arguments, commands/[check,update]
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
 echo &"Exercism Canonical Data Syncer v{NimblePkgVersion}"
 
-let opts = parseOptions()
+let args = parseArguments()
 
-case opts.command
+case args.command
 of Command.check:
-  check()
+  check(args)
 of Command.update:
-  update()
+  update(args)

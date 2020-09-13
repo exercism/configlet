@@ -1,7 +1,7 @@
 import strformat
-import ../exercises
+import ../arguments, ../exercises
 
-proc update*: void =
+proc update*(args: Arguments): void =
   echo "Update"
   # for exercise in findExercises():
   #   echo &"[{exercise.slug}]"
