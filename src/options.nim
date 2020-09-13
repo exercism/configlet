@@ -2,7 +2,7 @@ import os, sequtils, strformat, strutils
 
 type
   Command* = enum
-    check, update, format
+    check, update
 
   Options* = object
     command*: Command

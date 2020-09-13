@@ -1,5 +1,5 @@
 import strformat
-import options, commands/[check,format,update]
+import options, commands/[check,update]
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
@@ -12,5 +12,3 @@ of Command.check:
   check()
 of Command.update:
   update()
-of Command.format:
-  format()

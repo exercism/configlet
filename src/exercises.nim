@@ -1,4 +1,4 @@
-import sequtils, tables, sets, json
+import algorithm, sequtils, tables, sets, json
 import tracks, probspecs
 
 type
@@ -40,6 +40,6 @@ proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExerc
 proc findExercises*: seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises().mapIt((it.slug, it)).toTable
   
-  for trackExercise in findTrackExercises():
+  for trackExercise in findTrackExercises().sortedByIt(it.slug):
     if probSpecsExercises.hasKey(trackExercise.slug):
       result.add(newExercise(trackExercise, probSpecsExercises[trackExercise.slug]))

@@ -1,12 +1,23 @@
-import strformat
+import sequtils, strformat
 import ../exercises
 
+proc missingTestCases(exercise: Exercise): bool =
+  exercise.testCases.missing.len > 0
+
+proc printExerciseStatuses(exercises: seq[Exercise]): void =
+  for exercise in exercises:
+    if exercise.missingTestCases:
+      echo &"[warn] {exercise.slug}"
+
+proc printOverallStatus(exercises: seq[Exercise]): void =
+  if exercises.anyIt(it.missingTestCases):
+    echo "[warn] some exercises are missing test cases"
+  else:
+    echo "All exercises are up-to-date!"
+
 proc check*: void =
-  echo "Check"
-  for exercise in findExercises():
-    echo &"[{exercise.slug}]"
-    echo &"  total:    {exercise.testCases.len}"
-    echo &"  included: {exercise.testCases.included.len}"
-    echo &"  excluded: {exercise.testCases.excluded.len}"
-    echo &"  missing:  {exercise.testCases.missing.len}"
-    echo ""
+  echo "Checking exercises..."
+
+  let exercises = findExercises()
+  printExerciseStatuses(exercises)
+  printOverallStatus(exercises)
