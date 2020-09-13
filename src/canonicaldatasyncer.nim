@@ -1,4 +1,4 @@
-import options, strformat
+import options, strformat, commands/[check,format,update]
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
@@ -8,8 +8,8 @@ let opts = parseOptions()
 
 case opts.command
 of Command.check:
-  echo "Check check"
+  check()
 of Command.update:
-  echo "Update"
+  update()
 of Command.format:
-  echo "Format"
+  format()

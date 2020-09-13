@@ -1,6 +1,7 @@
-import exercises, strformat
+import ../exercises, strformat
 
-proc syncTests*: void =
+proc check*: void =
+  echo "Check"
   for exercise in findExercises():
     echo &"[{exercise.slug}]"
     echo &"  total:    {exercise.testCases.len}"
