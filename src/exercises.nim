@@ -1,4 +1,5 @@
-import sequtils, tables, tracks, probspecs, sets, json
+import sequtils, tables, sets, json
+import tracks, probspecs
 
 type
   TestCase* = object

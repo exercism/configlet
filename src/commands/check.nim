@@ -1,4 +1,5 @@
-import ../exercises, strformat
+import strformat
+import ../exercises
 
 proc check*: void =
   echo "Check"

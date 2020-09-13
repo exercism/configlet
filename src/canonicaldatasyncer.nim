@@ -1,4 +1,5 @@
-import options, strformat, commands/[check,format,update]
+import strformat
+import options, commands/[check,format,update]
 
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
