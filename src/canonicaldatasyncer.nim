@@ -2,8 +2,15 @@ import arguments, commands/[check,update]
 
 let args = parseArguments()
 
-case args.command
-of Command.check:
+case args.action
+of Action.check:
   check(args)
-of Command.update:
+of Action.update:
   update(args)
+of Action.help:
+  showHelp()
+of Action.version:
+  showVersion()
+of Action.unknown:
+  showHelp()
+  quit(QuitFailure)
