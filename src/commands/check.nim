@@ -1,14 +1,11 @@
 import options, sequtils, strformat
 import ../arguments, ../exercises
 
-proc missingTestCases(exercise: Exercise): bool =
-  exercise.testCases.missing.len > 0
-
 proc check(exercises: seq[Exercise]): void =
   var missingTestCases = false
 
   for exercise in exercises:
-    if exercise.missingTestCases:
+    if exercise.testCases.missing.len > 0:
       echo &"[warn] {exercise.slug}"
       missingTestCases = true
 
