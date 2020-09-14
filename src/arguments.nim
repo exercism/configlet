@@ -4,8 +4,12 @@ type
   Command* = enum
     check, update
 
+  Verbosity* = enum
+    quiet, normal, detailed
+
   Arguments* = object
     command*: Command
+    verbosity*: Verbosity
     exercise*: Option[string]
 
 let commands = toSeq(Command.items).join("|")
@@ -35,5 +39,6 @@ proc parseArguments*: Arguments =
   if noParameters():
       quit(describeUsage)
 
+  # TODO: parse verbosity
   result.command = parseCommand()
   result.exercise = parseExercise()
