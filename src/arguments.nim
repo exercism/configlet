@@ -41,7 +41,7 @@ proc showVersion*() =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
 proc parseArguments*: Arguments =
-  result.action = Action.unknown
+  result.action = Action.check
   result.logLevel = LogLevel.normal
 
   try:
