@@ -2,7 +2,7 @@ import strformat
 import ../arguments, ../exercises
 
 proc update*(args: Arguments): void =
-  echo "Update"
+  echo "Updating exercises..."
   # for exercise in findExercises():
   #   echo &"[{exercise.slug}]"
   #   echo &"  total:    {exercise.testCases.len}"
