@@ -26,14 +26,14 @@ const VersionArgument : Argument = (short: "v", long: "version")
 
 proc showHelp*() =
   let commandOptions = toSeq(Command).join("|")
-  let verbosityOptions = toSeq(LogLevel).mapIt(&"[{($it)[0]}]{($it)[1..^1]}").join("|")
+  let verbosityOptions = toSeq(LogLevel).join("|")
   let applicationName = extractFileName(getAppFilename())
 
   echo &"Usage: {applicationName} [options] [{commandOptions}]"
   echo ""
   echo "Options:"
   echo &"  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>       Check/update only this exercise"
-  echo &"  -{LogLevelArgument.short}, --{LogLevelArgument.long} <verbosity>  Set the log level: {verbosityOptions}"
+  echo &"  -{LogLevelArgument.short}, --{LogLevelArgument.long} <verbosity>  Set the log level: <{verbosityOptions}>"
   echo &"  -{HelpArgument.short}, --{HelpArgument.long}                  Show CLI usage" 
   echo &"  -{VersionArgument.short}, --{VersionArgument.long}               Display version information"
 
