@@ -1,4 +1,5 @@
-import os, json, parsetoml, sets
+import options, os, json, parsetoml, sets
+import arguments
 
 type
   ConfigJsonExercise = object
@@ -67,10 +68,11 @@ proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
   result.slug = repoExercise.slug
   result.tests = newTrackExerciseTests(repoExercise)
 
-proc findTrackExercises(repo: TrackRepo): seq[TrackExercise] =
+proc findTrackExercises(repo: TrackRepo, args: Arguments): seq[TrackExercise] =
   for repoExercise in repo.exercises:
-    result.add(newTrackExercise(repoExercise))
+    if args.exercise.isNone or args.exercise.get() == repoExercise.slug:
+      result.add(newTrackExercise(repoExercise))
 
-proc findTrackExercises*: seq[TrackExercise] =
+proc findTrackExercises*(args: Arguments): seq[TrackExercise] =
   let trackRepo = newTrackRepo()
-  trackRepo.findTrackExercises()
+  trackRepo.findTrackExercises(args)

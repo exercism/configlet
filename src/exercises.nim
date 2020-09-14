@@ -1,5 +1,5 @@
 import algorithm, sequtils, tables, sets, json
-import tracks, probspecs
+import arguments, tracks, probspecs
 
 type
   TestCase* = object
@@ -37,9 +37,9 @@ proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExerc
   result.slug = trackExercise.slug
   result.testCases = newTestCases(trackExercise, probSpecsExercise)
 
-proc findExercises*: seq[Exercise] =
-  let probSpecsExercises = findProbSpecsExercises().mapIt((it.slug, it)).toTable
+proc findExercises*(args: Arguments): seq[Exercise] =
+  let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
   
-  for trackExercise in findTrackExercises().sortedByIt(it.slug):
+  for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
     if probSpecsExercises.hasKey(trackExercise.slug):
       result.add(newExercise(trackExercise, probSpecsExercises[trackExercise.slug]))

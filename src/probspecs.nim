@@ -1,4 +1,5 @@
-import json, sequtils, strformat, os, osproc
+import json, sequtils, strformat, options, os, osproc
+import arguments
 
 type
   ProbSpecsRepoExercise = object
@@ -85,16 +86,18 @@ proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercis
   result.slug = repoExercise.slug
   result.testCases = parseProbSpecsTestCases(repoExercise)
 
-proc findProbSpecsExercises(repo: ProbSpecsRepo): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises(repo: ProbSpecsRepo, args: Arguments): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
-    result.add(newPropSpecsExercise(repoExercise))
+    if args.exercise.isNone or args.exercise.get() == repoExercise.slug:
+      result.add(newPropSpecsExercise(repoExercise))
 
-proc findProbSpecsExercises*: seq[ProbSpecsExercise] =
+proc findProbSpecsExercises*(args: Arguments): seq[ProbSpecsExercise] =
   let probSpecsRepo = newProbSpecsRepo()
 
+  # TODO: enable checking prob-specs repo
   # try:
     # probSpecsRepo.remove()
     # probSpecsRepo.clone()
-  probSpecsRepo.findProbSpecsExercises()
+  probSpecsRepo.findProbSpecsExercises(args)
   # finally:
   #   probSpecsRepo.remove()

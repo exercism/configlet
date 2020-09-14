@@ -1,12 +1,6 @@
 import options, sequtils, strformat
 import ../arguments, ../exercises
 
-proc findExercises(args: Arguments): seq[Exercise] =
-  if args.exercise.isNone:
-    result = findExercises()
-  else:
-    result = findExercises().filterIt(it.slug == args.exercise.get)
-
 proc missingTestCases(exercise: Exercise): bool =
   exercise.testCases.missing.len > 0
 
