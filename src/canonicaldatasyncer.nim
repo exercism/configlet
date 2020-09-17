@@ -1,4 +1,6 @@
-import arguments, check, sync
+import arguments, check, errorhandling, sync
+
+setupInterruptHandler()
 
 let args = parseArguments()
 
