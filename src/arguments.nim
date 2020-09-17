@@ -1,8 +1,8 @@
-import options, os, parseopt, sequtils, strformat, strutils
+import options, os, parseopt, strformat
 
 type
   Action* {.pure.} = enum
-    unknown, check, update, help, version
+    update, check, help, version
 
   Arguments* = object
     action*: Action
@@ -21,13 +21,13 @@ const VersionArgument : Argument = (short: "v", long: "version")
 proc showHelp*() =
   let applicationName = extractFileName(getAppFilename())
 
-  echo &"Usage: {applicationName} [options]"
-  echo ""
-  echo "Options:"
-  echo &"  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>  Only sync this exercise"
-  echo &"  -{CheckArgument.short}, --{CheckArgument.long}            Check if there are exercises with missing test cases"
-  echo &"  -{HelpArgument.short}, --{HelpArgument.long}             Show CLI usage" 
-  echo &"  -{VersionArgument.short}, --{VersionArgument.long}          Display version information"
+  echo &"""Usage: {applicationName} [options]
+  
+Options:
+  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>  Only sync this exercise
+  -{CheckArgument.short}, --{CheckArgument.long}            Check if there are exercises with missing test cases
+  -{HelpArgument.short}, --{HelpArgument.long}             Show CLI usage
+  -{VersionArgument.short}, --{VersionArgument.long}          Display version information"""
 
 proc showVersion*() = 
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
@@ -35,24 +35,18 @@ proc showVersion*() =
 proc parseArguments*: Arguments =
   result.action = Action.update
 
-  try:
-    var optParser = initOptParser()
-    for kind, key, val in optParser.getopt():
-      case kind
-      of cmdArgument:
-        result.action = parseEnum[Action](key)
-        break
-      of cmdLongOption, cmdShortOption:
-        case key
-        of ExerciseArgument.short, ExerciseArgument.long:
-          result.exercise = some(key)
-        of CheckArgument.short, CheckArgument.long:
-          result.action = check
-        of HelpArgument.short, HelpArgument.long:
-          result.action = help
-        of VersionArgument.short, VersionArgument.long:
-          result.action = version
-      of cmdEnd: 
-        result.action = unknown
-  except ValueError:
-    result.action = unknown
+  var optParser = initOptParser()
+  for kind, key, val in optParser.getopt():
+    case kind
+    of cmdLongOption, cmdShortOption:
+      case key
+      of ExerciseArgument.short, ExerciseArgument.long:
+        result.exercise = some(key)
+      of CheckArgument.short, CheckArgument.long:
+        result.action = check
+      of HelpArgument.short, HelpArgument.long:
+        result.action = help
+      of VersionArgument.short, VersionArgument.long:
+        result.action = version
+    else: 
+      discard

@@ -11,6 +11,3 @@ of Action.help:
   showHelp()
 of Action.version:
   showVersion()
-of Action.unknown:
-  showHelp()
-  quit(QuitFailure)
