@@ -16,9 +16,6 @@ type
     slug*: string
     testCases*: TestCases
 
-proc len*(testCases: TestCases): int =
-  testCases.included.len + testCases.excluded.len + testCases.missing.len
-
 proc newTestCase(testCase: ProbSpecsTestCase): TestCase =
   result.uuid = testCase.uuid
   result.description = testCase.description

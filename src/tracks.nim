@@ -26,19 +26,19 @@ proc newTrackRepo: TrackRepo =
   result.dir = getCurrentDir()
 
 proc configJsonFile(repo: TrackRepo): string =
-  joinPath(repo.dir, "config.json")
+  repo.dir / "config.json"
 
 proc exercisesDir(repo: TrackRepo): string =
-  joinPath(repo.dir, "exercises")
+  repo.dir / "exercises"
 
 proc exerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
-  joinPath(repo.exercisesDir, exercise.slug)
+  repo.exercisesDir / exercise.slug
 
 proc slug(repoExercise: TrackRepoExercise): string =
   extractFilename(repoExercise.dir)
 
 proc testsFile(repoExercise: TrackRepoExercise): string =
-  joinPath(repoExercise.dir, ".meta", "tests.toml")
+  repoExercise.dir / ".meta" / "tests.toml"
 
 proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)

@@ -20,7 +20,7 @@ proc execCmdException*(cmd: string, message: string): void =
     quit(message)
 
 proc probSpecsDir: string =
-  joinPath(getCurrentDir(), ".problem-specifications")
+  getCurrentDir() / ".problem-specifications"
 
 proc newProbSpecsRepo: ProbSpecsRepo =
   result.dir = probSpecsDir()
@@ -41,14 +41,14 @@ proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
   result.dir = dir
 
 proc exercisesDir(repo: ProbSpecsRepo): string =
-  joinPath(repo.dir, "exercises")
+  repo.dir / "exercises"
 
 proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
-  for exerciseDir in walkDirs(joinPath(repo.exercisesDir, "*")):
+  for exerciseDir in walkDirs(repo.exercisesDir / "*"):
     result.add(newProbSpecsRepoExercise(exerciseDir))
 
 proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
-  joinPath(repoExercise.dir, "canonical-data.json")
+  repoExercise.dir / "canonical-data.json"
 
 proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
   fileExists(repoExercise.canonicalDataFile())
