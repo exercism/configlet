@@ -1,12 +1,12 @@
-import arguments, commands/[check,update]
+import arguments, check, sync
 
 let args = parseArguments()
 
 case args.action
+of Action.sync:
+  sync(args)
 of Action.check:
   check(args)
-of Action.update:
-  update(args)
 of Action.help:
   showHelp()
 of Action.version:

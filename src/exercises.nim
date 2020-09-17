@@ -37,9 +37,14 @@ proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExerc
   result.slug = trackExercise.slug
   result.testCases = newTestCases(trackExercise, probSpecsExercise)
 
-proc findExercises*(args: Arguments): seq[Exercise] =
+proc findExercises(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
   
   for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
     if probSpecsExercises.hasKey(trackExercise.slug):
       result.add(newExercise(trackExercise, probSpecsExercises[trackExercise.slug]))
+
+proc findOutOfSyncExercises*(args: Arguments): seq[Exercise] =
+  for exercise in findExercises(args):
+    if exercise.testCases.missing.len > 0:
+      result.add(exercise)

@@ -2,7 +2,7 @@ import options, os, parseopt, strformat
 
 type
   Action* {.pure.} = enum
-    update, check, help, version
+    sync, check, help, version
 
   Arguments* = object
     action*: Action
@@ -33,7 +33,7 @@ proc showVersion*() =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
 proc parseArguments*: Arguments =
-  result.action = Action.update
+  result.action = Action.sync
 
   var optParser = initOptParser()
   for kind, key, val in optParser.getopt():
