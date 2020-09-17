@@ -30,9 +30,21 @@ proc initTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExe
     else:
       result.missing.add(initTestCase(testCase))
 
+proc initTestCases(testCases: TestCases, newIncludes: seq[TestCase], newExcludes: seq[TestCase]): TestCases =
+  result.included.add(testCases.included & newIncludes)
+  result.excluded.add(testCases.excluded & newIncludes)
+
+  for missingTestCase in testCases.missing:
+    if missingTestCase notin newIncludes and missingTestCase notin newExcludes:
+      result.missing.add(missingTestCase)
+
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
   result.testCases = initTestCases(trackExercise, probSpecsExercise)
+
+proc initExercise*(exercise: Exercise, newIncludes: seq[TestCase], newExcludes: seq[TestCase]): Exercise =
+  result.slug = exercise.slug
+  result.testCases = initTestCases(exercise.testCases, newIncludes, newExcludes)
 
 proc findExercises(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable

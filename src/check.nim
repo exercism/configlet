@@ -7,7 +7,7 @@ proc check*(args: Arguments): void =
   let outOfSyncExercises = findOutOfSyncExercises(args)
 
   for outOfSyncExercise in outOfSyncExercises:
-    echo &"[warn] {outOfSyncExercise.slug} is out of sync ({outofSyncExercise.testCases.missing.len} test cases missing)"
+    echo &"[warn] {outOfSyncExercise.slug} is missing {outofSyncExercise.testCases.missing.len} test cases"
 
   if outOfSyncExercises.len > 0:
     quit("[warn] some exercises are missing test cases", QuitFailure)

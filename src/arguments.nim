@@ -18,7 +18,7 @@ const CheckArgument   : Argument = (short: "c", long: "check")
 const HelpArgument    : Argument = (short: "h", long: "help")
 const VersionArgument : Argument = (short: "v", long: "version")
 
-proc showHelp*() =
+proc showHelp*: void =
   let applicationName = extractFileName(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
@@ -29,7 +29,7 @@ Options:
   -{HelpArgument.short}, --{HelpArgument.long}             Show CLI usage
   -{VersionArgument.short}, --{VersionArgument.long}          Display version information"""
 
-proc showVersion*() = 
+proc showVersion*: void = 
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
 proc parseArguments*: Arguments =
