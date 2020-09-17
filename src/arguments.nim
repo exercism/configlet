@@ -1,18 +1,12 @@
 import options, os, parseopt, sequtils, strformat, strutils
 
 type
-  Command {.pure.} = enum
-    check, update
-
   Action* {.pure.} = enum
     unknown, check, update, help, version
 
-  LogLevel* = enum
-    quiet, normal, detailed
-
   Arguments* = object
     action*: Action
-    logLevel*: LogLevel
+    check*: bool
     exercise*: Option[string]
 
   Argument = tuple[short: string, long: string]
@@ -20,29 +14,26 @@ type
 const NimblePkgVersion {.strdefine}: string = "unknown"
 
 const ExerciseArgument: Argument = (short: "e", long: "exercise")
-const LogLevelArgument: Argument = (short: "l", long: "loglevel")
+const CheckArgument   : Argument = (short: "c", long: "check")
 const HelpArgument    : Argument = (short: "h", long: "help")
 const VersionArgument : Argument = (short: "v", long: "version")
 
 proc showHelp*() =
-  let commandOptions = toSeq(Command).join("|")
-  let verbosityOptions = toSeq(LogLevel).join("|")
   let applicationName = extractFileName(getAppFilename())
 
-  echo &"Usage: {applicationName} [options] [{commandOptions}]"
+  echo &"Usage: {applicationName} [options]"
   echo ""
   echo "Options:"
-  echo &"  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>       Check/update only this exercise"
-  echo &"  -{LogLevelArgument.short}, --{LogLevelArgument.long} <verbosity>  Set the log level: <{verbosityOptions}>"
-  echo &"  -{HelpArgument.short}, --{HelpArgument.long}                  Show CLI usage" 
-  echo &"  -{VersionArgument.short}, --{VersionArgument.long}               Display version information"
+  echo &"  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>  Only sync this exercise"
+  echo &"  -{CheckArgument.short}, --{CheckArgument.long}            Check if there are exercises with missing test cases"
+  echo &"  -{HelpArgument.short}, --{HelpArgument.long}             Show CLI usage" 
+  echo &"  -{VersionArgument.short}, --{VersionArgument.long}          Display version information"
 
 proc showVersion*() = 
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
 proc parseArguments*: Arguments =
   result.action = Action.check
-  result.logLevel = LogLevel.normal
 
   try:
     var optParser = initOptParser()
@@ -55,8 +46,8 @@ proc parseArguments*: Arguments =
         case key
         of ExerciseArgument.short, ExerciseArgument.long:
           result.exercise = some(key)
-        of LogLevelArgument.short, LogLevelArgument.long:
-          result.logLevel = parseEnum[LogLevel](key)
+        of CheckArgument.short, CheckArgument.long:
+          result.action = check
         of HelpArgument.short, HelpArgument.long:
           result.action = help
         of VersionArgument.short, VersionArgument.long:
