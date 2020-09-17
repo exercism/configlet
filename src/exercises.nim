@@ -16,30 +16,30 @@ type
     slug*: string
     testCases*: TestCases
 
-proc newTestCase(testCase: ProbSpecsTestCase): TestCase =
+proc initTestCase(testCase: ProbSpecsTestCase): TestCase =
   result.uuid = testCase.uuid
   result.description = testCase.description
   result.json = testCase.json
 
-proc newTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): TestCases =
+proc initTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): TestCases =
   for testCase in probSpecsExercise.testCases:
     if trackExercise.tests.included.contains(testCase.uuid):
-      result.included.add(newTestCase(testCase))
+      result.included.add(initTestCase(testCase))
     elif trackExercise.tests.excluded.contains(testCase.uuid):
-      result.excluded.add(newTestCase(testCase))
+      result.excluded.add(initTestCase(testCase))
     else:
-      result.missing.add(newTestCase(testCase))
+      result.missing.add(initTestCase(testCase))
 
-proc newExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
+proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
-  result.testCases = newTestCases(trackExercise, probSpecsExercise)
+  result.testCases = initTestCases(trackExercise, probSpecsExercise)
 
 proc findExercises(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
   
   for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
     if probSpecsExercises.hasKey(trackExercise.slug):
-      result.add(newExercise(trackExercise, probSpecsExercises[trackExercise.slug]))
+      result.add(initExercise(trackExercise, probSpecsExercises[trackExercise.slug]))
 
 proc findOutOfSyncExercises*(args: Arguments): seq[Exercise] =
   for exercise in findExercises(args):

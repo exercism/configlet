@@ -22,7 +22,7 @@ proc execCmdException*(cmd: string, message: string): void =
 proc probSpecsDir: string =
   getCurrentDir() / ".problem-specifications"
 
-proc newProbSpecsRepo: ProbSpecsRepo =
+proc initProbSpecsRepo: ProbSpecsRepo =
   result.dir = probSpecsDir()
 
 proc clone(repo: ProbSpecsRepo): void =
@@ -37,7 +37,7 @@ proc clone(repo: ProbSpecsRepo): void =
 proc remove(repo: ProbSpecsRepo): void =
   removeDir(repo.dir)
 
-proc newProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
+proc initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
   result.dir = dir
 
 proc exercisesDir(repo: ProbSpecsRepo): string =
@@ -45,7 +45,7 @@ proc exercisesDir(repo: ProbSpecsRepo): string =
 
 proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
   for exerciseDir in walkDirs(repo.exercisesDir / "*"):
-    result.add(newProbSpecsRepoExercise(exerciseDir))
+    result.add(initProbSpecsRepoExercise(exerciseDir))
 
 proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
   repoExercise.dir / "canonical-data.json"
@@ -60,7 +60,7 @@ proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise]
 proc slug(repoExercise: ProbSpecsRepoExercise): string =
   extractFilename(repoExercise.dir)
 
-proc newProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
+proc initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   result.json = node
 
 proc uuid*(testCase: ProbSpecsTestCase): string =
@@ -69,30 +69,30 @@ proc uuid*(testCase: ProbSpecsTestCase): string =
 proc description*(testCase: ProbSpecsTestCase): string =
   testCase.json["description"].getStr()
 
-proc newProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
+proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
-    result.add(newProbSpecsTestCase(node))
+    result.add(initProbSpecsTestCase(node))
   elif node.hasKey("cases"):
     for childNode in node["cases"].getElems():
-      result.add(newProbSpecsTestCases(childNode))
+      result.add(initProbSpecsTestCases(childNode))
 
 proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
   if repoExercise.slug == "grains":
     return
 
-  newProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
+  initProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
-proc newPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+proc initPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
   result.slug = repoExercise.slug
   result.testCases = parseProbSpecsTestCases(repoExercise)
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo, args: Arguments): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
     if args.exercise.isNone or args.exercise.get() == repoExercise.slug:
-      result.add(newPropSpecsExercise(repoExercise))
+      result.add(initPropSpecsExercise(repoExercise))
 
 proc findProbSpecsExercises*(args: Arguments): seq[ProbSpecsExercise] =
-  let probSpecsRepo = newProbSpecsRepo()
+  let probSpecsRepo = initProbSpecsRepo()
 
   # TODO: enable checking prob-specs repo
   # try:
