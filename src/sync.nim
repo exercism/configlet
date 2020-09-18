@@ -2,7 +2,7 @@ import json, sets, sequtils, strformat, strutils
 import arguments, exercises
 
 type
-  SyncDecision = enum
+  SyncDecision {.pure.} = enum
     yes, no, skip
 
 proc syncDecision: SyncDecision =
@@ -10,14 +10,14 @@ proc syncDecision: SyncDecision =
 
   case stdin.readLine().toLowerAscii
     of "y", "yes":
-      yes
+      SyncDecision.yes
     of "n", "no":
-      no
+      SyncDecision.no
     of "s", "skip":
-      skip
+      SyncDecision.skip
     else:
       echo "Unknown response. Skipping test case..."
-      skip
+      SyncDecision.skip
 
 proc sync(exercise: Exercise): Exercise =
   result = exercise
@@ -37,13 +37,13 @@ proc sync(exercise: Exercise): Exercise =
 """
 
     case syncDecision()
-    of yes:
+    of SyncDecision.yes:
       included.incl(testCase.uuid)
       missing.excl(testCase.uuid)
-    of no:
+    of SyncDecision.no:
       excluded.incl(testCase.uuid)
       missing.excl(testCase.uuid)
-    of skip:
+    of SyncDecision.skip:
       discard
 
   result.tests = initExerciseTests(included, excluded, missing)
