@@ -32,7 +32,7 @@ Options:
 proc showVersion*: void = 
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
-proc parseArguments*: Arguments =
+proc parseArguments: Arguments =
   result.action = Action.sync
 
   var optParser = initOptParser()
@@ -50,3 +50,5 @@ proc parseArguments*: Arguments =
         result.action = version
     else: 
       discard
+
+let args* = parseArguments()

@@ -2,8 +2,6 @@ import arguments, check, errorhandling, sync
 
 setupInterruptHandler()
 
-let args = parseArguments()
-
 case args.action
 of Action.sync:
   sync(args)
