@@ -1,5 +1,5 @@
 proc onCtrlC() {.noconv.} =
   quit()
 
-proc setupInterruptHandler*: void =
+proc handleExitSignal*: void =
   setControlCHook(onCtrlC)

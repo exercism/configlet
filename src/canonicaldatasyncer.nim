@@ -1,6 +1,6 @@
 import arguments, check, errorhandling, sync
 
-setupInterruptHandler()
+handleExitSignal()
 
 case args.action
 of Action.sync:
