@@ -1,4 +1,4 @@
-import algorithm, sequtils, tables, sets, json
+import algorithm, json, os, sets, sequtils, tables, parsetoml
 import arguments, tracks, probspecs
 
 type
@@ -14,6 +14,7 @@ type
 
   Exercise* = object
     slug*: string
+    testsFile*: string
     testCases*: TestCases
 
 proc initTestCase(testCase: ProbSpecsTestCase): TestCase =
@@ -40,10 +41,12 @@ proc initTestCases(testCases: TestCases, newIncludes: seq[TestCase], newExcludes
 
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
+  result.testsFile = trackExercise.testsFile
   result.testCases = initTestCases(trackExercise, probSpecsExercise)
 
 proc initExercise*(exercise: Exercise, newIncludes: seq[TestCase], newExcludes: seq[TestCase]): Exercise =
   result.slug = exercise.slug
+  result.testsFile = exercise.testsFile
   result.testCases = initTestCases(exercise.testCases, newIncludes, newExcludes)
 
 proc findExercises(args: Arguments): seq[Exercise] =
@@ -57,3 +60,17 @@ proc findOutOfSyncExercises*(args: Arguments): seq[Exercise] =
   for exercise in findExercises(args):
     if exercise.testCases.missing.len > 0:
       result.add(exercise)
+
+proc toToml*(exerciseTestCases: TestCases): string =
+  result.add("[canonical-tests]")
+  result.add("")
+
+  # for exerciseTestCase in exerciseTestCases:
+  #   result.add(&"# {exerciseTestCase.description}")
+    # TODO: write out status
+
+proc writeTestsToFile*(exercise: Exercise): void =
+  createDir(parentDir(exercise.testsFile))
+
+  let file = open(exercise.testsFile, fmWrite)
+  write(file, exercise.testCases.toToml)

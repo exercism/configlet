@@ -20,6 +20,7 @@ type
 
   TrackExercise* = object
     slug*: string
+    testsFile*: string
     tests*: TrackExerciseTests
 
 proc newTrackRepo: TrackRepo =
@@ -58,6 +59,9 @@ proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests 
     return
 
   let tests = parsetoml.parseFile(repoExercise.testsFile)
+  if not tests.hasKey("canonical-tests"):
+    return
+
   for uuid, enabled in tests["canonical-tests"].getTable():
     if enabled.getBool():
       result.included.incl(uuid)
@@ -66,6 +70,7 @@ proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests 
 
 proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
   result.slug = repoExercise.slug
+  result.testsFile = repoExercise.testsFile
   result.tests = newTrackExerciseTests(repoExercise)
 
 proc findTrackExercises(repo: TrackRepo, args: Arguments): seq[TrackExercise] =

@@ -25,7 +25,6 @@ proc sync(exercise: Exercise): void =
 
   for missingTestCase in exercise.testCases.missing:
     echo &"""The following test case is missing:
-
 {missingTestCase.json.pretty}:
 """
 
@@ -37,9 +36,8 @@ proc sync(exercise: Exercise): void =
     of skip:
       discard
 
-  echo initExercise(exercise, newIncludes, newExcludes)
-
-  # TODO: write updated file
+  let updatedExercise = initExercise(exercise, newIncludes, newExcludes)
+  writeTestsToFile(updatedExercise)
 
 proc sync*(args: Arguments): void =
   echo "Syncing exercises..."
@@ -50,6 +48,7 @@ proc sync*(args: Arguments): void =
     echo &"[warn] {outOfSyncExercise.slug} is missing {outofSyncExercise.testCases.missing.len} test cases"
     sync(outOfSyncExercise)
 
+  # TODO: re-check status
   if outOfSyncExercises.len > 0:
     quit("[warn] some exercises are missing test cases", QuitFailure)
   else:
