@@ -1,53 +1,49 @@
-import algorithm, json, os, sets, sequtils, tables, parsetoml
+import algorithm, json, os, sets, sequtils, strformat, tables
 import arguments, tracks, probspecs
 
 type
-  TestCase* = object
+  ExerciseTestCase* = object
     uuid*: string
     description*: string
     json*: JsonNode
 
-  TestCases* = object
-    included*: seq[TestCase]
-    excluded*: seq[TestCase]
-    missing*: seq[TestCase]
+  ExerciseTests* = object
+    included*: HashSet[string]
+    excluded*: HashSet[string]
+    missing*: HashSet[string]
 
   Exercise* = object
     slug*: string
-    testsFile*: string
-    testCases*: TestCases
+    tests*: ExerciseTests
+    testCases*: seq[ExerciseTestCase]
 
-proc initTestCase(testCase: ProbSpecsTestCase): TestCase =
+proc initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
+  result.included = included
+  result.excluded = excluded
+  result.missing = missing
+
+proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
+  for testCase in probSpecsExercise.testCases:
+    if trackExercise.tests.included.contains(testCase.uuid):
+      result.included.incl(testCase.uuid)
+    elif trackExercise.tests.excluded.contains(testCase.uuid):
+      result.excluded.incl(testCase.uuid)
+    else:
+      result.missing.incl(testCase.uuid)
+
+proc initExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   result.uuid = testCase.uuid
   result.description = testCase.description
   result.json = testCase.json
 
-proc initTestCases(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): TestCases =
-  for testCase in probSpecsExercise.testCases:
-    if trackExercise.tests.included.contains(testCase.uuid):
-      result.included.add(initTestCase(testCase))
-    elif trackExercise.tests.excluded.contains(testCase.uuid):
-      result.excluded.add(initTestCase(testCase))
-    else:
-      result.missing.add(initTestCase(testCase))
-
-proc initTestCases(testCases: TestCases, newIncludes: seq[TestCase], newExcludes: seq[TestCase]): TestCases =
-  result.included.add(testCases.included & newIncludes)
-  result.excluded.add(testCases.excluded & newIncludes)
-
-  for missingTestCase in testCases.missing:
-    if missingTestCase notin newIncludes and missingTestCase notin newExcludes:
-      result.missing.add(missingTestCase)
+proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+  for testCase in testCases:
+    result.add(initExerciseTestCase(testCase))
 
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
-  result.testsFile = trackExercise.testsFile
-  result.testCases = initTestCases(trackExercise, probSpecsExercise)
-
-proc initExercise*(exercise: Exercise, newIncludes: seq[TestCase], newExcludes: seq[TestCase]): Exercise =
-  result.slug = exercise.slug
-  result.testsFile = exercise.testsFile
-  result.testCases = initTestCases(exercise.testCases, newIncludes, newExcludes)
+  result.tests = initExerciseTests(trackExercise, probSpecsExercise)
+  result.testCases = initExerciseTestCases(probSpecsExercise.testCases)
 
 proc findExercises(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
@@ -58,19 +54,25 @@ proc findExercises(args: Arguments): seq[Exercise] =
 
 proc findOutOfSyncExercises*(args: Arguments): seq[Exercise] =
   for exercise in findExercises(args):
-    if exercise.testCases.missing.len > 0:
+    if exercise.tests.missing.len > 0:
       result.add(exercise)
 
-proc toToml*(exerciseTestCases: TestCases): string =
-  result.add("[canonical-tests]")
-  result.add("")
+proc testsFile(exercise: Exercise): string =
+  getCurrentDir() / "exercises" / exercise.slug / ".meta" / "tests.toml"
 
-  # for exerciseTestCase in exerciseTestCases:
-  #   result.add(&"# {exerciseTestCase.description}")
-    # TODO: write out status
+proc toToml(exercise: Exercise): string =
+  result.add("[canonical-tests]\n")
 
-proc writeTestsToFile*(exercise: Exercise): void =
+  for testCase in exercise.testCases:
+    if testCase.uuid in exercise.tests.missing:
+      continue
+    
+    let included = testCase.uuid in exercise.tests.included
+    result.add(&"\n# {testCase.description}")
+    result.add(&"\n\"{testCase.uuid}\" = {included}\n")
+
+proc writeFile*(exercise: Exercise): void =
   createDir(parentDir(exercise.testsFile))
 
   let file = open(exercise.testsFile, fmWrite)
-  write(file, exercise.testCases.toToml)
+  write(file, exercise.toToml())

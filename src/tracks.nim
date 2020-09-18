@@ -20,8 +20,8 @@ type
 
   TrackExercise* = object
     slug*: string
-    testsFile*: string
     tests*: TrackExerciseTests
+    repoExercise: TrackRepoExercise
 
 proc newTrackRepo: TrackRepo =
   result.dir = getCurrentDir()
@@ -40,6 +40,9 @@ proc slug(repoExercise: TrackRepoExercise): string =
 
 proc testsFile(repoExercise: TrackRepoExercise): string =
   repoExercise.dir / ".meta" / "tests.toml"
+
+proc testsFile*(exercise: TrackExercise): string =
+  exercise.repoExercise.testsFile
 
 proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)
@@ -70,7 +73,6 @@ proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests 
 
 proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
   result.slug = repoExercise.slug
-  result.testsFile = repoExercise.testsFile
   result.tests = newTrackExerciseTests(repoExercise)
 
 proc findTrackExercises(repo: TrackRepo, args: Arguments): seq[TrackExercise] =

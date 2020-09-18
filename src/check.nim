@@ -1,4 +1,4 @@
-import strformat
+import sets, strformat
 import arguments, exercises
 
 proc check*(args: Arguments): void =
@@ -7,7 +7,7 @@ proc check*(args: Arguments): void =
   let outOfSyncExercises = findOutOfSyncExercises(args)
 
   for outOfSyncExercise in outOfSyncExercises:
-    echo &"[warn] {outOfSyncExercise.slug} is missing {outofSyncExercise.testCases.missing.len} test cases"
+    echo &"[warn] {outOfSyncExercise.slug} is missing {outofSyncExercise.tests.missing.len} test cases"
 
   if outOfSyncExercises.len > 0:
     quit("[warn] some exercises are missing test cases", QuitFailure)
