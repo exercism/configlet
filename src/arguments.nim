@@ -41,7 +41,7 @@ proc parseArguments*: Arguments =
     of cmdLongOption, cmdShortOption:
       case key
       of ExerciseArgument.short, ExerciseArgument.long:
-        result.exercise = some(key)
+        result.exercise = some(val)
       of CheckArgument.short, CheckArgument.long:
         result.action = check
       of HelpArgument.short, HelpArgument.long:
