@@ -8,10 +8,10 @@ type
   ConfigJson = object
     exercises: seq[ConfigJsonExercise]
 
-  TrackRepoExercise = object
+  TrackRepo = object
     dir: string
 
-  TrackRepo = object
+  TrackRepoExercise = object
     dir: string
 
   TrackExerciseTests* = object
