@@ -22,7 +22,7 @@ const NimblePkgVersion {.strdefine}: string = "unknown"
 
 const ExerciseArgument  : Argument = (short: "e", long: "exercise")
 const CheckArgument     : Argument = (short: "c", long: "check")
-const ModeArgument      : Argument = (short: "m", long: "mode")
+const DefaultArgument   : Argument = (short: "d", long: "default")
 const VerbosityArgument : Argument = (short: "o", long: "verbosity")
 const HelpArgument      : Argument = (short: "h", long: "help")
 const VersionArgument   : Argument = (short: "v", long: "version")
@@ -35,7 +35,7 @@ proc showHelp*: void =
 Options:
   -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>        Only sync this exercise
   -{CheckArgument.short}, --{CheckArgument.long}                  Check if there missing tests. Doesn't update the tests
-  -{ModeArgument.short}, --{ModeArgument.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  -{DefaultArgument.short}, --{DefaultArgument.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{HelpArgument.short}, --{HelpArgument.long}                   Show CLI usage
   -{VersionArgument.short}, --{VersionArgument.long}                Display version information"""
@@ -71,7 +71,7 @@ proc parseArguments*: Arguments =
         result.exercise = some(val)
       of CheckArgument.short, CheckArgument.long:
         result.action = check
-      of ModeArgument.short, ModeArgument.long:
+      of DefaultArgument.short, DefaultArgument.long:
         result.mode = parseMode(val)
       of VerbosityArgument.short, VerbosityArgument.long:
         result.verbosity = parseVerbosity(val)
