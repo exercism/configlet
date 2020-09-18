@@ -12,6 +12,9 @@ type
     excluded*: HashSet[string]
     missing*: HashSet[string]
 
+  ExerciseStatus* {.pure.} = enum
+    outOfSync, inSync, noCanonicalData
+
   Exercise* = object
     slug*: string
     tests*: ExerciseTests
@@ -45,17 +48,22 @@ proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExer
   result.tests = initExerciseTests(trackExercise, probSpecsExercise)
   result.testCases = initExerciseTestCases(probSpecsExercise.testCases)
 
-proc findExercises(args: Arguments): seq[Exercise] =
+proc findExercises*(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
   
   for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
-    if probSpecsExercises.hasKey(trackExercise.slug):
-      result.add(initExercise(trackExercise, probSpecsExercises[trackExercise.slug]))
+    result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
 
-proc findOutOfSyncExercises*(args: Arguments): seq[Exercise] =
-  for exercise in findExercises(args):
-    if exercise.tests.missing.len > 0:
-      result.add(exercise)
+proc status*(exercise: Exercise): ExerciseStatus = 
+  if exercise.testCases.len == 0:
+    ExerciseStatus.noCanonicalData
+  elif exercise.tests.missing.len > 0:
+    ExerciseStatus.outOfSync
+  else:
+    ExerciseStatus.inSync
+
+proc hasCanonicalData*(exercise: Exercise): bool =
+  exercise.testCases.len > 0
 
 proc testsFile(exercise: Exercise): string =
   getCurrentDir() / "exercises" / exercise.slug / ".meta" / "tests.toml"

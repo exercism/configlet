@@ -1,15 +1,23 @@
-import sets, strformat
-import arguments, exercises
+import sets, sequtils, strformat
+import arguments, exercises, logger
 
 proc check*(args: Arguments): void =
-  echo "Checking exercises..."
+  logNormal("Checking exercises...")
 
-  let outOfSyncExercises = findOutOfSyncExercises(args)
+  let exercises = findExercises(args)
 
-  for outOfSyncExercise in outOfSyncExercises:
-    echo &"[warn] {outOfSyncExercise.slug} is missing {outofSyncExercise.tests.missing.len} test cases"
+  for exercise in exercises:
+    case exercise.status
+    of ExerciseStatus.outOfSync:
+      logNormal(&"[warn] {exercise.slug} is missing {exercise.tests.missing.len} test cases")
+    of ExerciseStatus.inSync:
+      logDetailed(&"[skip] {exercise.slug} is up-to-date")
+    of ExerciseStatus.noCanonicalData:
+      logDetailed(&"[skip] {exercise.slug} does not have canonical data")
 
-  if outOfSyncExercises.len > 0:
-    quit("[warn] some exercises are missing test cases", QuitFailure)
+  if exercises.anyIt(it.status == ExerciseStatus.outOfSync):
+    logNormal("[warn] some exercises are missing test cases")
+    quit(QuitFailure)
   else:
-    quit("All exercises are up-to-date!", QuitSuccess)
+    logNormal("All exercises are up-to-date!")
+    quit(QuitSuccess)

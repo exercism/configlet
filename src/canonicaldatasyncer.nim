@@ -1,6 +1,10 @@
-import arguments, check, errorhandling, sync
+import arguments, check, errorhandling, logger, sync
 
 handleExitSignal()
+
+let args = parseArguments()
+
+setupLogging(args)
 
 case args.action
 of Action.sync:

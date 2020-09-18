@@ -1,5 +1,5 @@
 import json, sets, sequtils, strformat, strutils
-import arguments, exercises
+import arguments, exercises, logger
 
 type
   SyncDecision {.pure.} = enum
@@ -52,15 +52,23 @@ proc sync(exercise: Exercise): Exercise =
 
 proc sync(exercises: seq[Exercise]): seq[Exercise] =  
   for exercise in exercises:
-    result.add(sync(exercise))
+    case exercise.status
+    of ExerciseStatus.outOfSync:
+      result.add(sync(exercise))
+    of ExerciseStatus.inSync:
+      logDetailed(&"[skip] {exercise.slug} is up-to-date")
+    of ExerciseStatus.noCanonicalData:
+      logDetailed(&"[skip] {exercise.slug} does not have canonical data")
 
 proc sync*(args: Arguments): void =
-  echo "Syncing exercises..."
+  logNormal("Syncing exercises...")
 
-  let outOfSyncExercises = findOutOfSyncExercises(args)
-  let syncedExercises = sync(outOfSyncExercises)
+  let exercises = findExercises(args)
+  let syncedExercises = sync(exercises)
 
-  if syncedExercises.anyIt(it.tests.missing.len > 0):
-    quit("[warn] some exercises are still missing test cases", QuitFailure)
+  if syncedExercises.anyIt(it.status == ExerciseStatus.outOfSync):
+    logNormal("[warn] some exercises are still missing test cases")
+    quit(QuitFailure)
   else:
-    quit("All exercises are synced!", QuitSuccess)
+    logNormal("All exercises are synced!")
+    quit(QuitSuccess)
