@@ -8,7 +8,7 @@
       "name": "GDB",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/canonical_data_syncer",
+      "program": "${workspaceFolder}/canonicaldatasyncer",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
