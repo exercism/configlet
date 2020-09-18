@@ -35,17 +35,32 @@ proc showHelp*: void =
 Options:
   -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>        Only sync this exercise
   -{CheckArgument.short}, --{CheckArgument.long}                  Check if there missing tests. Doesn't update the tests
-  -{ModeArgument.short}, --{ModeArgument.long} <mode>            What to do with missing test cases. Allowed values: choose, include, exclude
-  -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: quiet, normal, detailed
+  -{ModeArgument.short}, --{ModeArgument.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{HelpArgument.short}, --{HelpArgument.long}                   Show CLI usage
   -{VersionArgument.short}, --{VersionArgument.long}                Display version information"""
 
 proc showVersion*: void = 
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
+proc parseMode(mode: string): Mode =
+  case mode.toLowerAscii
+  of "c", "choose": Mode.choose
+  of "i", "include": Mode.includeMissing
+  of "e", "exclude": Mode.excludeMissing
+  else: Mode.choose
+
+proc parseVerbosity(verbosity: string): Verbosity =
+  case verbosity.toLowerAscii
+  of "q", "quiet": Verbosity.quiet
+  of "n", "normal": Verbosity.normal
+  of "d", "detailed": Verbosity.detailed
+  else: Verbosity.normal
+
 proc parseArguments*: Arguments =
   result.action = Action.sync
   result.verbosity = Verbosity.normal
+  result.mode = Mode.choose
 
   var optParser = initOptParser()
   for kind, key, val in optParser.getopt():
@@ -57,9 +72,9 @@ proc parseArguments*: Arguments =
       of CheckArgument.short, CheckArgument.long:
         result.action = check
       of ModeArgument.short, ModeArgument.long:
-        result.mode = parseEnum[Mode](val, Mode.choose)
+        result.mode = parseMode(val)
       of VerbosityArgument.short, VerbosityArgument.long:
-        result.verbosity = parseEnum[Verbosity](val, Verbosity.normal)
+        result.verbosity = parseVerbosity(val)
       of HelpArgument.short, HelpArgument.long:
         result.action = help
       of VersionArgument.short, VersionArgument.long:
