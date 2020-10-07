@@ -1,4 +1,4 @@
-import std/[algorithm, json, os, sets, sequtils, strformat, tables]
+import std/[algorithm, json, options, os, sets, sequtils, strformat, tables]
 import arguments, tracks, probspecs
 
 type
@@ -6,6 +6,7 @@ type
     uuid*: string
     description*: string
     json*: JsonNode
+    reimplements*: Option[JsonNode]
 
   ExerciseTests* = object
     included*: HashSet[string]
@@ -34,14 +35,20 @@ proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpec
     else:
       result.missing.incl(testCase.uuid)
 
-proc initExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
+proc initExerciseTestCase(testCase: ProbSpecsTestCase, reimplements: Option[JsonNode]): ExerciseTestCase =
   result.uuid = testCase.uuid
   result.description = testCase.description
   result.json = testCase.json
+  result.reimplements = reimplements
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =  
+  let uuidToJson = testCases.mapIt((it.uuid, it.json)).toTable()
+  
   for testCase in testCases:
-    result.add(initExerciseTestCase(testCase))
+    if testCase.reimplementation:
+      result.add(initExerciseTestCase(testCase, some(uuidToJson[testCase.reimplements])))
+    else:
+      result.add(initExerciseTestCase(testCase, none(JsonNode)))
 
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
