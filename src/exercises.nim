@@ -1,5 +1,5 @@
-import std/[algorithm, json, options, os, sets, sequtils, strformat, tables]
-import arguments, tracks, probspecs
+import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
+import arguments, probspecs, tracks
 
 type
   ExerciseTestCase* = ref object
