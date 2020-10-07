@@ -56,22 +56,22 @@ proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   case mode
-  of includeMissing:
+  of Mode.includeMissing:
     SyncDecision.includeTest
-  of excludeMissing:
+  of Mode.excludeMissing:
     SyncDecision.excludeTest
-  of choose:
+  of Mode.choose:
     chooseSyncDecision(testCase)
 
 proc sync(exercise: Exercise, mode: Mode): Exercise =
   result = exercise
 
   case mode
-  of includeMissing:
+  of Mode.includeMissing:
     logNormal(&"[info] {exercise.slug}: included {exercise.tests.missing.len} missing test cases")
-  of excludeMissing:
+  of Mode.excludeMissing:
     logNormal(&"[info] {exercise.slug}: excluded {exercise.tests.missing.len} missing test cases")
-  of choose:
+  of Mode.choose:
     logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
 
   var included = result.tests.included

@@ -70,14 +70,14 @@ proc parseArguments*: Arguments =
       of ExerciseArgument.short, ExerciseArgument.long:
         result.exercise = some(val)
       of CheckArgument.short, CheckArgument.long:
-        result.action = check
+        result.action = Action.check
       of DefaultArgument.short, DefaultArgument.long:
         result.mode = parseMode(val)
       of VerbosityArgument.short, VerbosityArgument.long:
         result.verbosity = parseVerbosity(val)
       of HelpArgument.short, HelpArgument.long:
-        result.action = help
+        result.action = Action.help
       of VersionArgument.short, VersionArgument.long:
-        result.action = version
+        result.action = Action.version
     else:
       discard
