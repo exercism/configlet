@@ -1,17 +1,21 @@
-import arguments, check, errorhandling, logger, sync
+import arguments, check, logger, sync, posix
 
-handleExitSignal()
+proc main() =
+  onSignal(SIGTERM):
+    quit(0)
 
-let args = parseArguments()
+  let args = parseArguments()
 
-setupLogging(args)
+  setupLogging(args)
 
-case args.action
-of Action.sync:
-  sync(args)
-of Action.check:
-  check(args)
-of Action.help:
-  showHelp()
-of Action.version:
-  showVersion()
+  case args.action
+  of Action.sync:
+    sync(args)
+  of Action.check:
+    check(args)
+  of Action.help:
+    showHelp()
+  of Action.version:
+    showVersion()
+  
+main()
