@@ -28,7 +28,7 @@ const HelpArgument      : Argument = (short: "h", long: "help")
 const VersionArgument   : Argument = (short: "v", long: "version")
 
 proc showHelp* =
-  let applicationName = extractFileName(getAppFilename())
+  let applicationName = extractFilename(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
 
