@@ -69,6 +69,9 @@ proc uuid*(testCase: ProbSpecsTestCase): string =
 proc description*(testCase: ProbSpecsTestCase): string =
   testCase.json["description"].getStr()
 
+proc reimplements*(testCase: ProbSpecsTestCase): string =
+  testCase.json["reimplements"].getStr()
+
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
     result.add(initProbSpecsTestCase(node))
