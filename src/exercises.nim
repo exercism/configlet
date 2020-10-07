@@ -1,4 +1,4 @@
-import algorithm, json, os, sets, sequtils, strformat, tables
+import std/[algorithm, json, os, sets, sequtils, strformat, tables]
 import arguments, tracks, probspecs
 
 type

@@ -1,4 +1,4 @@
-import json, sets, sequtils, strformat, strutils
+import std/[json, sets, sequtils, strformat, strutils]
 import arguments, exercises, logger
 
 type

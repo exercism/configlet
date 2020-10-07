@@ -1,4 +1,5 @@
-import arguments, check, logger, sync, posix
+import std/posix
+import arguments, check, logger, sync
 
 proc main() =
   onSignal(SIGTERM):

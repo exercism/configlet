@@ -1,4 +1,4 @@
-import sets, sequtils, strformat
+import std/[sets, sequtils, strformat]
 import arguments, exercises, logger
 
 proc check*(args: Arguments): void =

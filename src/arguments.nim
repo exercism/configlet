@@ -1,4 +1,4 @@
-import options, os, parseopt, strformat, strutils
+import std/[options, os, parseopt, strformat, strutils]
 
 type
   Action* {.pure.} = enum

@@ -1,4 +1,4 @@
-import logging
+import std/logging
 import arguments
 
 proc levelThreshold(verbosity: Verbosity): Level =

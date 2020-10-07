@@ -1,4 +1,4 @@
-import json, sequtils, strformat, options, os, osproc
+import std/[json, sequtils, strformat, options, os, osproc]
 import arguments
 
 type
