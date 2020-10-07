@@ -8,14 +8,14 @@ proc check*(args: Arguments) =
 
   for exercise in exercises:
     case exercise.status
-    of ExerciseStatus.outOfSync:
+    of ExerciseStatus.OutOfSync:
       logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
-    of ExerciseStatus.inSync:
+    of ExerciseStatus.InSync:
       logDetailed(&"[skip] {exercise.slug}: up-to-date")
-    of ExerciseStatus.noCanonicalData:
+    of ExerciseStatus.NoCanonicalData:
       logDetailed(&"[skip] {exercise.slug}: does not have canonical data")
 
-  if exercises.anyIt(it.status == ExerciseStatus.outOfSync):
+  if exercises.anyIt(it.status == ExerciseStatus.OutOfSync):
     logNormal("[warn] some exercises are missing test cases")
     quit(QuitFailure)
   else:

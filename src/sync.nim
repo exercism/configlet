@@ -3,7 +3,7 @@ import arguments, exercises, logger
 
 type
   SyncDecision {.pure.} = enum
-    includeTest, excludeTest, skipTest, replaceTest
+    IncludeTest, ExcludeTest, SkipTest, ReplaceTest
 
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   doAssert(testCase.reimplements.isNone)
@@ -16,14 +16,14 @@ Do you want to include the test case ([y]es/[n]o/[s]kip)?:
 
   case stdin.readLine().toLowerAscii
   of "y", "yes":
-    SyncDecision.includeTest
+    SyncDecision.IncludeTest
   of "n", "no":
-    SyncDecision.excludeTest
+    SyncDecision.ExcludeTest
   of "s", "skip":
-    SyncDecision.skipTest
+    SyncDecision.SkipTest
   else:
     echo "Unknown response. Skipping test case..."
-    SyncDecision.skipTest
+    SyncDecision.SkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   doAssert(testCase.reimplements.isSome)
@@ -39,14 +39,14 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
 
   case stdin.readLine().toLowerAscii
   of "y", "yes":
-    SyncDecision.replaceTest
+    SyncDecision.ReplaceTest
   of "n", "no":
-    SyncDecision.excludeTest
+    SyncDecision.ExcludeTest
   of "s", "skip":
-    SyncDecision.skipTest
+    SyncDecision.SkipTest
   else:
     echo "Unknown response. Skipping test case..."
-    SyncDecision.skipTest
+    SyncDecision.SkipTest
 
 proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   if testCase.reimplements.isNone:
@@ -56,22 +56,22 @@ proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   case mode
-  of Mode.includeMissing:
-    SyncDecision.includeTest
-  of Mode.excludeMissing:
-    SyncDecision.excludeTest
-  of Mode.choose:
+  of Mode.IncludeMissing:
+    SyncDecision.IncludeTest
+  of Mode.ExcludeMissing:
+    SyncDecision.ExcludeTest
+  of Mode.Choose:
     chooseSyncDecision(testCase)
 
 proc sync(exercise: Exercise, mode: Mode): Exercise =
   result = exercise
 
   case mode
-  of Mode.includeMissing:
+  of Mode.IncludeMissing:
     logNormal(&"[info] {exercise.slug}: included {exercise.tests.missing.len} missing test cases")
-  of Mode.excludeMissing:
+  of Mode.ExcludeMissing:
     logNormal(&"[info] {exercise.slug}: excluded {exercise.tests.missing.len} missing test cases")
-  of Mode.choose:
+  of Mode.Choose:
     logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
 
   var included = result.tests.included
@@ -83,18 +83,18 @@ proc sync(exercise: Exercise, mode: Mode): Exercise =
       continue
 
     case syncDecision(testCase, mode)
-    of SyncDecision.includeTest:
+    of SyncDecision.IncludeTest:
       included.incl(testCase.uuid)
       missing.excl(testCase.uuid)
-    of SyncDecision.replaceTest:
+    of SyncDecision.ReplaceTest:
       included.incl(testCase.uuid)
       missing.excl(testCase.uuid)
       included.excl(testCase.reimplements.get.uuid)
       excluded.incl(testCase.reimplements.get.uuid)
-    of SyncDecision.excludeTest:
+    of SyncDecision.ExcludeTest:
       excluded.incl(testCase.uuid)
       missing.excl(testCase.uuid)
-    of SyncDecision.skipTest:
+    of SyncDecision.SkipTest:
       discard
 
   result.tests = initExerciseTests(included, excluded, missing)
@@ -104,11 +104,11 @@ proc sync(exercise: Exercise, mode: Mode): Exercise =
 proc sync(exercises: seq[Exercise], mode: Mode): seq[Exercise] =
   for exercise in exercises:
     case exercise.status
-    of ExerciseStatus.outOfSync:
+    of ExerciseStatus.OutOfSync:
       result.add(sync(exercise, mode))
-    of ExerciseStatus.inSync:
+    of ExerciseStatus.InSync:
       logDetailed(&"[skip] {exercise.slug} is up-to-date")
-    of ExerciseStatus.noCanonicalData:
+    of ExerciseStatus.NoCanonicalData:
       logDetailed(&"[skip] {exercise.slug} does not have canonical data")
 
 proc sync*(args: Arguments) =
@@ -117,7 +117,7 @@ proc sync*(args: Arguments) =
   let exercises = findExercises(args)
   let syncedExercises = sync(exercises, args.mode)
 
-  if syncedExercises.anyIt(it.status == ExerciseStatus.outOfSync):
+  if syncedExercises.anyIt(it.status == ExerciseStatus.OutOfSync):
     logNormal("[warn] some exercises are still missing test cases")
     quit(QuitFailure)
   else:

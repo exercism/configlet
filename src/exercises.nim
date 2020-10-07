@@ -14,7 +14,7 @@ type
     missing*: HashSet[string]
 
   ExerciseStatus* {.pure.} = enum
-    outOfSync, inSync, noCanonicalData
+    OutOfSync, InSync, NoCanonicalData
 
   Exercise* = object
     slug*: string
@@ -65,11 +65,11 @@ proc findExercises*(args: Arguments): seq[Exercise] =
 
 proc status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
-    ExerciseStatus.noCanonicalData
+    ExerciseStatus.NoCanonicalData
   elif exercise.tests.missing.len > 0:
-    ExerciseStatus.outOfSync
+    ExerciseStatus.OutOfSync
   else:
-    ExerciseStatus.inSync
+    ExerciseStatus.InSync
 
 proc hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0

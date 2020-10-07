@@ -3,9 +3,9 @@ import arguments
 
 proc levelThreshold(verbosity: Verbosity): Level =
   case verbosity
-  of Verbosity.quiet: lvlNone
-  of Verbosity.normal: lvlNotice
-  of Verbosity.detailed: lvlInfo
+  of Verbosity.Quiet: lvlNone
+  of Verbosity.Normal: lvlNotice
+  of Verbosity.Detailed: lvlInfo
 
 proc setupLogging*(args: Arguments) =
   let consoleLogger = newConsoleLogger(levelThreshold = levelThreshold(args.verbosity), fmtStr = "")
