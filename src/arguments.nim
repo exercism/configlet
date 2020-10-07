@@ -35,7 +35,7 @@ proc showHelp* =
 Options:
   -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>        Only sync this exercise
   -{CheckArgument.short}, --{CheckArgument.long}                  Check if there missing tests. Doesn't update the tests
-  -{DefaultArgument.short}, --{DefaultArgument.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  -{DefaultArgument.short}, --{DefaultArgument.long} <mode>         What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{HelpArgument.short}, --{HelpArgument.long}                   Show CLI usage
   -{VersionArgument.short}, --{VersionArgument.long}                Display version information"""
