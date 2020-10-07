@@ -2,11 +2,11 @@ import std/[algorithm, json, options, os, sets, sequtils, strformat, tables]
 import arguments, tracks, probspecs
 
 type
-  ExerciseTestCase* = object
+  ExerciseTestCase* = ref object
     uuid*: string
     description*: string
     json*: JsonNode
-    reimplements*: Option[JsonNode]
+    reimplements*: Option[ExerciseTestCase]
 
   ExerciseTests* = object
     included*: HashSet[string]
@@ -35,25 +35,27 @@ proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpec
     else:
       result.missing.incl(testCase.uuid)
 
-proc initExerciseTestCase(testCase: ProbSpecsTestCase, reimplements: Option[JsonNode]): ExerciseTestCase =
+proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
+  result = new(ExerciseTestCase)
   result.uuid = testCase.uuid
   result.description = testCase.description
   result.json = testCase.json
-  result.reimplements = reimplements
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =  
-  let uuidToJson = testCases.mapIt((it.uuid, it.json)).toTable()
-  
+proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =  
   for testCase in testCases:
-    if testCase.reimplementation:
-      result.add(initExerciseTestCase(testCase, some(uuidToJson[testCase.reimplements])))
-    else:
-      result.add(initExerciseTestCase(testCase, none(JsonNode)))
+    result.add(newExerciseTestCase(testCase))
+
+  let reimplementations = testCases.filterIt(it.reimplementation).mapIt((it.uuid, it.reimplements)).toTable()
+  let testCasesByUuids = result.newTableFrom(proc (testCase: ExerciseTestCase): string = testCase.uuid)
+
+  for testCase in result:
+    if testCase.uuid in reimplementations:
+      testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   result.slug = trackExercise.slug
   result.tests = initExerciseTests(trackExercise, probSpecsExercise)
-  result.testCases = initExerciseTestCases(probSpecsExercise.testCases)
+  result.testCases = newExerciseTestCases(probSpecsExercise.testCases)
 
 proc findExercises*(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable

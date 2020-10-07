@@ -1,26 +1,58 @@
-import std/[json, sets, sequtils, strformat, strutils]
+import std/[json, options, sets, sequtils, strformat, strutils]
 import arguments, exercises, logger
 
 type
   SyncDecision {.pure.} = enum
-    includeTest, excludeTest, skipTest
+    includeTest, excludeTest, skipTest, replaceTest
 
-proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  echo &"""The following test case is missing:
+proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
+  doAssert(testCase.reimplements.isNone)
+
+  echo &"""The following test case is missing:"
 {testCase.json.pretty}:
+
 Do you want to include the test case ([y]es/[n]o/[s]kip)?:
 """
 
   case stdin.readLine().toLowerAscii
-    of "y", "yes":
-      SyncDecision.includeTest
-    of "n", "no":
-      SyncDecision.excludeTest
-    of "s", "skip":
-      SyncDecision.skipTest
-    else:
-      echo "Unknown response. Skipping test case..."
-      SyncDecision.skipTest
+  of "y", "yes":
+    SyncDecision.includeTest
+  of "n", "no":
+    SyncDecision.excludeTest
+  of "s", "skip":
+    SyncDecision.skipTest
+  else:
+    echo "Unknown response. Skipping test case..."
+    SyncDecision.skipTest
+
+proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
+  doAssert(testCase.reimplements.isSome)
+
+  echo &"""The following test case is missing:"
+{testCase.json.pretty}:
+
+It reimplements this test case:
+{testCase.reimplements.get.json.pretty}:
+
+Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
+"""
+
+  case stdin.readLine().toLowerAscii
+  of "y", "yes":
+    SyncDecision.replaceTest
+  of "n", "no":
+    SyncDecision.excludeTest
+  of "s", "skip":
+    SyncDecision.skipTest
+  else:
+    echo "Unknown response. Skipping test case..."
+    SyncDecision.skipTest
+
+proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
+  if testCase.reimplements.isNone:
+    chooseRegularSyncDecision(testCase)
+  else:
+    chooseReimplementsSyncDecision(testCase)
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   case mode
@@ -54,6 +86,11 @@ proc sync(exercise: Exercise, mode: Mode): Exercise =
     of SyncDecision.includeTest:
       included.incl(testCase.uuid)
       missing.excl(testCase.uuid)
+    of SyncDecision.replaceTest:
+      included.incl(testCase.uuid)
+      missing.excl(testCase.uuid)
+      included.excl(testCase.reimplements.get.uuid)
+      excluded.incl(testCase.reimplements.get.uuid)
     of SyncDecision.excludeTest:
       excluded.incl(testCase.uuid)
       missing.excl(testCase.uuid)
