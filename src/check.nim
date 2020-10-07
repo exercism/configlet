@@ -1,7 +1,7 @@
 import std/[sequtils, sets, strformat]
 import arguments, exercises, logger
 
-proc check*(args: Arguments): void =
+proc check*(args: Arguments) =
   logNormal("Checking exercises...")
 
   let exercises = findExercises(args)

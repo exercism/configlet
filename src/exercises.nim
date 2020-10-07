@@ -88,7 +88,7 @@ proc toToml(exercise: Exercise): string =
     result.add(&"\n# {testCase.description}")
     result.add(&"\n\"{testCase.uuid}\" = {included}\n")
 
-proc writeFile*(exercise: Exercise): void =
+proc writeFile*(exercise: Exercise) =
   createDir(parentDir(exercise.testsFile))
 
   let file = open(exercise.testsFile, fmWrite)

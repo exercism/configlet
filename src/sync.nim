@@ -111,7 +111,7 @@ proc sync(exercises: seq[Exercise], mode: Mode): seq[Exercise] =
     of ExerciseStatus.noCanonicalData:
       logDetailed(&"[skip] {exercise.slug} does not have canonical data")
 
-proc sync*(args: Arguments): void =
+proc sync*(args: Arguments) =
   logNormal("Syncing exercises...")
 
   let exercises = findExercises(args)
