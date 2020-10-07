@@ -26,13 +26,8 @@ proc initProbSpecsRepo: ProbSpecsRepo =
   result.dir = probSpecsDir()
 
 proc clone(repo: ProbSpecsRepo): void =
-  # TODO: uncomment these lines and remove the other lines once the 'uuids' branch is merged in prob-specs
-  # let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
-  # execCmdException(cmd, "Could not clone problem-specifications repo")
-  
-  let cmd = &"git clone https://github.com/exercism/problem-specifications.git {repo.dir}"
+  let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
   execCmdException(cmd, "Could not clone problem-specifications repo")
-  execCmdException("git checkout --track origin/uuids", "Could not checkout the uuids branch")
 
 proc remove(repo: ProbSpecsRepo): void =
   removeDir(repo.dir)
@@ -100,10 +95,9 @@ proc findProbSpecsExercises(repo: ProbSpecsRepo, args: Arguments): seq[ProbSpecs
 proc findProbSpecsExercises*(args: Arguments): seq[ProbSpecsExercise] =
   let probSpecsRepo = initProbSpecsRepo()
 
-  # TODO: enable checking prob-specs repo
-  # try:
-    # probSpecsRepo.remove()
-    # probSpecsRepo.clone()
-  probSpecsRepo.findProbSpecsExercises(args)
-  # finally:
-  #   probSpecsRepo.remove()
+  try:
+    probSpecsRepo.remove()
+    probSpecsRepo.clone()
+    probSpecsRepo.findProbSpecsExercises(args)
+  finally:
+    probSpecsRepo.remove()
