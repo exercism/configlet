@@ -18,5 +18,5 @@ proc main() =
     showHelp()
   of Action.version:
     showVersion()
-  
+
 main()

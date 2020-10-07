@@ -77,7 +77,7 @@ proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(initProbSpecsTestCases(childNode))
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
+proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
   if repoExercise.slug == "grains":
     return
 

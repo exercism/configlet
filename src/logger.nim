@@ -11,8 +11,8 @@ proc setupLogging*(args: Arguments): void =
   let consoleLogger = newConsoleLogger(levelThreshold=levelThreshold(args.verbosity), fmtStr="")
   addHandler(consoleLogger)
 
-proc logNormal*(args: varargs[string]): void = 
+proc logNormal*(args: varargs[string]): void =
   notice(args)
 
-proc logDetailed*(args: varargs[string]): void = 
+proc logDetailed*(args: varargs[string]): void =
   info(args)

@@ -31,7 +31,7 @@ proc showHelp*: void =
   let applicationName = extractFileName(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
-  
+
 Options:
   -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>        Only sync this exercise
   -{CheckArgument.short}, --{CheckArgument.long}                  Check if there missing tests. Doesn't update the tests
@@ -40,7 +40,7 @@ Options:
   -{HelpArgument.short}, --{HelpArgument.long}                   Show CLI usage
   -{VersionArgument.short}, --{VersionArgument.long}                Display version information"""
 
-proc showVersion*: void = 
+proc showVersion*: void =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
 
 proc parseMode(mode: string): Mode =
@@ -79,5 +79,5 @@ proc parseArguments*: Arguments =
         result.action = help
       of VersionArgument.short, VersionArgument.long:
         result.action = version
-    else: 
+    else:
       discard
