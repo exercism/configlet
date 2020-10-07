@@ -1,7 +1,7 @@
 import std/posix
 import arguments, check, logger, sync
 
-proc main() =
+proc main =
   onSignal(SIGTERM):
     quit(0)
 
