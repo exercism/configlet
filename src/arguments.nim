@@ -18,7 +18,7 @@ type
 
   Argument = tuple[short: string, long: string]
 
-const NimblePkgVersion {.strdefine}: string = "unknown"
+const NimblePkgVersion {.strdefine.}: string = "unknown"
 
 const ExerciseArgument  : Argument = (short: "e", long: "exercise")
 const CheckArgument     : Argument = (short: "c", long: "check")
