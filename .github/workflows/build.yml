@@ -58,6 +58,7 @@ jobs:
           triple: ${{ matrix.target.triple }}
 
       - name: Export current version
+        shell: bash
         run: ./.github/bin/export-version
 
       - name: Publish release
