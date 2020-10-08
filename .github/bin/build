@@ -5,12 +5,14 @@ nimble install -d -Y
 case "$os" in
   windows)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+    7z a canonicaldatasyncer-windows-64bit.zip canonicaldatasyncer.exe
     ;;
   linux)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+    tar -cvzf canonicaldatasyncer.tgz canonicaldatasyncer-linux-64bit.tgz
     ;;
   macosx)
     nimble build -d:release
+    tar -cvzf canonicaldatasyncer.tgz canonicaldatasyncer-mac-64bit.tgz
     ;;
 esac
-
