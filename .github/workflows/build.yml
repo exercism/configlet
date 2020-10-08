@@ -51,11 +51,13 @@ jobs:
           nim-version: "1.2.6"
 
       - name: Install dependencies
+        shell: bash
         run: ./.github/bin/deps
         env:
           os: ${{ matrix.target.os }}
 
       - name: Build binary
+        shell: bash
         run: ./.github/bin/build
         env:
           os: ${{ matrix.target.os }}
