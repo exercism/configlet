@@ -36,11 +36,11 @@ proc exercisesDir(repo: TrackRepo): string =
 proc exerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
   repo.exercisesDir / exercise.slug
 
-proc slug(repoExercise: TrackRepoExercise): string =
-  extractFilename(repoExercise.dir)
+proc slug(exercise: TrackRepoExercise): string =
+  extractFilename(exercise.dir)
 
-proc testsFile(repoExercise: TrackRepoExercise): string =
-  repoExercise.dir / ".meta" / "tests.toml"
+proc testsFile(exercise: TrackRepoExercise): string =
+  exercise.dir / ".meta" / "tests.toml"
 
 proc testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
@@ -49,7 +49,8 @@ proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)
   to(json, ConfigJson)
 
-proc newTrackRepoExercise(repo: TrackRepo, exercise: ConfigJsonExercise): TrackRepoExercise =
+proc newTrackRepoExercise(repo: TrackRepo,
+    exercise: ConfigJsonExercise): TrackRepoExercise =
   result.dir = repo.exerciseDir(exercise)
 
 proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
@@ -58,11 +59,11 @@ proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   for exercise in config.exercises:
     result.add(newTrackRepoExercise(repo, exercise))
 
-proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests =
-  if not fileExists(repoExercise.testsFile):
+proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
+  if not fileExists(exercise.testsFile):
     return
 
-  let tests = parsetoml.parseFile(repoExercise.testsFile)
+  let tests = parsetoml.parseFile(exercise.testsFile)
   if not tests.hasKey("canonical-tests"):
     return
 
@@ -72,9 +73,9 @@ proc newTrackExerciseTests(repoExercise: TrackRepoExercise): TrackExerciseTests 
     else:
       result.excluded.incl(uuid)
 
-proc newTrackExercise(repoExercise: TrackRepoExercise): TrackExercise =
-  result.slug = repoExercise.slug
-  result.tests = newTrackExerciseTests(repoExercise)
+proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
+  result.slug = exercise.slug
+  result.tests = newTrackExerciseTests(exercise)
 
 proc findTrackExercises(repo: TrackRepo, args: Arguments): seq[TrackExercise] =
   for repoExercise in repo.exercises:
