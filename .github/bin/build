@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+nimble install -d -Y
+nimble build -d:release --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
