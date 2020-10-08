@@ -57,13 +57,18 @@ jobs:
           os: ${{ matrix.target.os }}
           triple: ${{ matrix.target.triple }}
 
-    - name: Export current version
-      shell: bash
-      run: ./.github/bin/export-version
+  publish:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Export current version
+        shell: bash
+        run: ./.github/bin/export-version
 
-    - name: Test
-      shell: bash
-      run: ls -al
+      - name: Test
+        shell: bash
+        run: ls -al
 
     # - name: Publish release
     #   uses: svenstaro/upload-release-action@v2
