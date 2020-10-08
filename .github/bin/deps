@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+printenv
+
 case "$(os)" in
   windows)
     echo "On windows"
