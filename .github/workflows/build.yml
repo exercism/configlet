@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+    paths: ["**.nim"]
+  pull_request:
+    branches: [master]
+    paths: ["**.nim"]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Nim
+        uses: jiro4989/setup-nim-action@v1
+        with:
+          nim-version: "1.2.6"
+
+      - name: Install Nim build tools
+        run: ./.github/bin/install-build-tools
+
+      - name: Build binary
+        run: ./.github/bin/build
