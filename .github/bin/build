@@ -1,4 +1,16 @@
 #!/usr/bin/env sh
 
 nimble install -d -Y
-nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+
+case "$os" in
+  windows)
+    nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+    ;;
+  linux)
+    nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+    ;;
+  macosx)
+    nimble build -d:release
+    ;;
+esac
+
