@@ -55,4 +55,4 @@ jobs:
 
       - name: Build binary
         # run: ./.github/bin/build
-        run: nimble build
+        run: nimble build -y
