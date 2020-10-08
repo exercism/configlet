@@ -1,0 +1,10 @@
+# IDE files
+.vscode/
+
+# Application binary
+canonicaldatasyncer
+
+# TODO: remove before release, testing purposes only
+exercises/
+.problem-specifications/
+config.json
