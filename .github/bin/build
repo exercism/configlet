@@ -2,6 +2,8 @@
 
 nimble install -d -Y
 
+echo "os is: $os"
+
 case "$os" in
   windows)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'

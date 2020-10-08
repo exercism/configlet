@@ -57,19 +57,19 @@ jobs:
           os: ${{ matrix.target.os }}
           triple: ${{ matrix.target.triple }}
 
-      - name: Export current version
-        shell: bash
-        run: ./.github/bin/export-version
+    - name: Export current version
+      shell: bash
+      run: ./.github/bin/export-version
 
-      - name: Test
-        shell: bash
-        run: ls -al
+    - name: Test
+      shell: bash
+      run: ls -al
 
-      - name: Publish release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: canonicaldatasyncer-*
-          file_glob: true
-          tag: ${{ env.VERSION }}
-          overwrite: false
+    # - name: Publish release
+    #   uses: svenstaro/upload-release-action@v2
+    #   with:
+    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+    #     file: canonicaldatasyncer-*
+    #     file_glob: true
+    #     tag: ${{ env.VERSION }}
+    #     overwrite: false
