@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 nimble install -d -Y
-nimble build -d:release --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
+nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
