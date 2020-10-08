@@ -7,7 +7,7 @@ case "$os" in
   linux)
     echo "On linux"
     ;;
-  macos)
+  macosx)
     echo "On macos"
     brew install llvm
     ;;
