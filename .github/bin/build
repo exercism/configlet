@@ -4,9 +4,9 @@ nimble install -d -Y
 
 printenv
 
-echo "os is: $os"
+echo "os is: $OS"
 
-case "$os" in
+case "$OS" in
   windows)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
     7z a canonicaldatasyncer-windows-64bit.zip canonicaldatasyncer.exe

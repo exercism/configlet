@@ -54,8 +54,8 @@ jobs:
         shell: bash
         run: ./.github/bin/build
         env:
-          os: ${{ matrix.target.os }}
-          triple: ${{ matrix.target.triple }}
+          OS: ${{ matrix.target.os }}
+          TRIPLE: ${{ matrix.target.triple }}
 
   publish:
     name: Publish
