@@ -50,8 +50,8 @@ jobs:
         with:
           nim-version: "1.2.6"
 
-      - name: Install Nim build tools
-        run: ./.github/bin/install-build-tools
+      - name: Install dependencies
+        run: ./.github/bin/deps
         env:
           os: ${{ matrix.target.os }}
 
