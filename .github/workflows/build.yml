@@ -22,10 +22,10 @@ jobs:
           #   triple: aarch64-linux-musl
           # - os: linux
           #   triple: armv7l-linux-musleabihf
-          # - os: macosx
-          #   triple: x86_64-apple-darwin14
-          # - os: windows
-          #   triple: x86_64-w64-mingw32
+          - os: macosx
+            triple: x86_64-apple-darwin14
+          - os: windows
+            triple: x86_64-w64-mingw32
           # - os: windows
           #   triple: i686-w64-mingw32
         include:
@@ -50,8 +50,10 @@ jobs:
         with:
           nim-version: "1.2.6"
 
-      # - name: Install Nim build tools
-      #   run: ./.github/bin/install-build-tools
+      - name: Install Nim build tools
+        run: ./.github/bin/install-build-tools
+        env:
+          os: ${{ matrix.target.os }}
 
       - name: Build binary
         run: ./.github/bin/build
