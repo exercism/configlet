@@ -9,5 +9,6 @@ case "$os" in
     ;;
   macos)
     echo "On macos"
+    brew install llvm
     ;;
 esac
