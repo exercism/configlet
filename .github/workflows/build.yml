@@ -53,5 +53,6 @@ jobs:
       # - name: Install Nim build tools
       #   run: ./.github/bin/install-build-tools
 
-      # - name: Build binary
-      #   run: ./.github/bin/build
+      - name: Build binary
+        # run: ./.github/bin/build
+        run: nimble build
