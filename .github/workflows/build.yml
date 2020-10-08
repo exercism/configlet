@@ -61,6 +61,10 @@ jobs:
         shell: bash
         run: ./.github/bin/export-version
 
+      - name: Test
+        shell: bash
+        run: ls -al
+
       - name: Publish release
         uses: svenstaro/upload-release-action@v2
         with:
