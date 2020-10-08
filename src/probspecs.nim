@@ -1,4 +1,4 @@
-import std/[json, sequtils, strformat, options, os, osproc]
+import std/[json, options, os, osproc, sequtils, strformat]
 import arguments
 
 type
@@ -15,7 +15,7 @@ type
     slug*: string
     testCases*: seq[ProbSpecsTestCase]
 
-proc execCmdException*(cmd: string, message: string): void =
+proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
     quit(message)
 
@@ -25,11 +25,11 @@ proc probSpecsDir: string =
 proc initProbSpecsRepo: ProbSpecsRepo =
   result.dir = probSpecsDir()
 
-proc clone(repo: ProbSpecsRepo): void =
+proc clone(repo: ProbSpecsRepo) =
   let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
-proc remove(repo: ProbSpecsRepo): void =
+proc remove(repo: ProbSpecsRepo) =
   removeDir(repo.dir)
 
 proc initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
@@ -77,7 +77,7 @@ proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(initProbSpecsTestCases(childNode))
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =  
+proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
   if repoExercise.slug == "grains":
     return
 

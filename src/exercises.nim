@@ -1,5 +1,5 @@
-import std/[algorithm, json, options, os, sets, sequtils, strformat, tables]
-import arguments, tracks, probspecs
+import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
+import arguments, probspecs, tracks
 
 type
   ExerciseTestCase* = ref object
@@ -14,7 +14,7 @@ type
     missing*: HashSet[string]
 
   ExerciseStatus* {.pure.} = enum
-    outOfSync, inSync, noCanonicalData
+    OutOfSync, InSync, NoCanonicalData
 
   Exercise* = object
     slug*: string
@@ -41,7 +41,7 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   result.description = testCase.description
   result.json = testCase.json
 
-proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =  
+proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   for testCase in testCases:
     result.add(newExerciseTestCase(testCase))
 
@@ -59,17 +59,17 @@ proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExer
 
 proc findExercises*(args: Arguments): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
-  
+
   for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
     result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
 
-proc status*(exercise: Exercise): ExerciseStatus = 
+proc status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
-    ExerciseStatus.noCanonicalData
+    ExerciseStatus.NoCanonicalData
   elif exercise.tests.missing.len > 0:
-    ExerciseStatus.outOfSync
+    ExerciseStatus.OutOfSync
   else:
-    ExerciseStatus.inSync
+    ExerciseStatus.InSync
 
 proc hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0
@@ -83,12 +83,12 @@ proc toToml(exercise: Exercise): string =
   for testCase in exercise.testCases:
     if testCase.uuid in exercise.tests.missing:
       continue
-    
+
     let included = testCase.uuid in exercise.tests.included
     result.add(&"\n# {testCase.description}")
     result.add(&"\n\"{testCase.uuid}\" = {included}\n")
 
-proc writeFile*(exercise: Exercise): void =
+proc writeFile*(exercise: Exercise) =
   createDir(parentDir(exercise.testsFile))
 
   let file = open(exercise.testsFile, fmWrite)

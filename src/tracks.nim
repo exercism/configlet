@@ -1,4 +1,4 @@
-import std/[options, os, json, sets]
+import std/[json, options, os, sets]
 import pkg/parsetoml
 import arguments
 
