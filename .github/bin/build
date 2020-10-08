@@ -9,10 +9,10 @@ case "$os" in
     ;;
   linux)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
-    tar -cvzf canonicaldatasyncer.tgz canonicaldatasyncer-linux-64bit.tgz
+    tar -cvzf canonicaldatasyncer canonicaldatasyncer-linux-64bit.tgz
     ;;
   macosx)
     nimble build -d:release
-    tar -cvzf canonicaldatasyncer.tgz canonicaldatasyncer-mac-64bit.tgz
+    tar -cvzf canonicaldatasyncer canonicaldatasyncer-mac-64bit.tgz
     ;;
 esac
