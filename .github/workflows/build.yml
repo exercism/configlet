@@ -10,8 +10,37 @@ on:
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - os: linux
+            triple: x86_64-linux-musl
+          - os: linux
+            triple: i686-linux-musl
+          - os: linux
+            triple: aarch64-linux-musl
+          - os: linux
+            triple: armv7l-linux-musleabihf
+          - os: macosx
+            triple: x86_64-apple-darwin14
+          - os: windows
+            triple: x86_64-w64-mingw32
+          - os: windows
+            triple: i686-w64-mingw32
+        include:
+          - target:
+              os: linux
+            builder: ubuntu-18.04
+          - target:
+              os: macosx
+            builder: macos-10.15
+          - target:
+              os: windows
+            builder: windows-2019
+
+    name: "Build ${{ matrix.target.triple }}"
+    runs-on: ${{ matrix.builder }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -21,8 +50,8 @@ jobs:
         with:
           nim-version: "1.2.6"
 
-      - name: Install Nim build tools
-        run: ./.github/bin/install-build-tools
+      # - name: Install Nim build tools
+      #   run: ./.github/bin/install-build-tools
 
-      - name: Build binary
-        run: ./.github/bin/build
+      # - name: Build binary
+      #   run: ./.github/bin/build
