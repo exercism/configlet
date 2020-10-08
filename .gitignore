@@ -4,7 +4,5 @@
 # Application binary
 canonicaldatasyncer
 
-# TODO: remove before release, testing purposes only
-exercises/
+# Temporary prob-specs repo
 .problem-specifications/
-config.json
