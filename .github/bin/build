@@ -1,4 +1,29 @@
 #!/usr/bin/env sh
 
+printenv
+
 nimble install -d -Y
-nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
+
+
+# cpusuffix=
+# case "$cpu" in
+#   i?86)
+#     cpusuffix=_x32
+#     ;;
+#   x86_64)
+#     cpusuffix=_x64
+#     ;;
+#   aarch64)
+#     cpusuffix=_arm64
+#     ;;
+#   *)
+#     cpusuffix=_$cpu
+#     ;;
+# esac
+
+# suffix=-${os}$cpusuffix
+
+
+# nimble build -y
+
+# nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
