@@ -3,10 +3,10 @@ name: Build
 on:
   push:
     branches: [master]
-    paths: ["**.nim"]
+    # paths: ["**.nim"]
   pull_request:
     branches: [master]
-    paths: ["**.nim"]
+    # paths: ["**.nim"]
 
 jobs:
   build:
