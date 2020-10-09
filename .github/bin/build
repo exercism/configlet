@@ -10,6 +10,6 @@ case "$OS" in
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
     ;;
   mac)
-    nimble build -d:release
+    nimble build -d:release --passC:'-flto'
     ;;
 esac
