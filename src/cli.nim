@@ -2,7 +2,7 @@ import std/[options, os, parseopt, strformat, strutils]
 
 type
   Action* = enum
-    actSync, actCheck, actHelp, actVersion
+    actSync, actCheck
 
   Mode* = enum
     modeChoose, modeIncludeMissing, modeExcludeMissing
@@ -27,7 +27,7 @@ const VerbosityArgument : Argument = (short: "o", long: "verbosity")
 const HelpArgument      : Argument = (short: "h", long: "help")
 const VersionArgument   : Argument = (short: "v", long: "version")
 
-proc showHelp* =
+proc showHelp =
   let applicationName = extractFilename(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
@@ -42,7 +42,7 @@ Options:
 
   quit(0)
 
-proc showVersion* =
+proc showVersion =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
   quit(0)
 
@@ -84,10 +84,8 @@ proc parseArguments*: Arguments =
       of VerbosityArgument.short, VerbosityArgument.long:
         result.verbosity = parseVerbosity(val)
       of HelpArgument.short, HelpArgument.long:
-        result.action = actHelp
-        return
+        showHelp()
       of VersionArgument.short, VersionArgument.long:
-        result.action = actVersion
-        return
+        showVersion()
     else:
       discard
