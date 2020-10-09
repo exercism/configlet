@@ -62,25 +62,25 @@ jobs:
           name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
           path: ${{ github.workspace }}/artifacts/*
 
+  publish:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Export current version
-        shell: bash
         run: ./.github/bin/export-version
 
-      # - name: Publish release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: artifacts/*
-      #     file_glob: true
-      #     tag: ${{ env.VERSION }}
-      #     overwrite: true
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v2
 
-  # publish:
-  #   name: Publish
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   steps:
-
-  #     - name: Test
-  #       shell: bash
-  #       run: ls -al
+      - name: Publish release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: artifacts/*
+          file_glob: true
+          tag: ${{ env.VERSION }}
+          overwrite: true
