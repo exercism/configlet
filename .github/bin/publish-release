@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
 
-gh release create $TAG
-gh release upload $TAG $ARTIFACT_FILE
+VERSION="v${REF/refs\/tags\//}"
+
+gh release create $VERSION
+gh release upload $VERSION $ARTIFACT_FILE
