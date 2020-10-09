@@ -37,8 +37,8 @@ Options:
   -{CheckArgument.short}, --{CheckArgument.long}                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
   -{DefaultArgument.short}, --{DefaultArgument.long} <mode>         What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -{HelpArgument.short}, --{HelpArgument.long}                   Show CLI usage
-  -{VersionArgument.short}, --{VersionArgument.long}                Display version information"""
+  -{HelpArgument.short}, --{HelpArgument.long}                   Show this help message
+  -{VersionArgument.short}, --{VersionArgument.long}                Show this tool's version information"""
 
 proc showVersion* =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
