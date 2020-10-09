@@ -56,36 +56,48 @@ jobs:
           OS: ${{ matrix.target.os }}
           ARCH: ${{ matrix.target.arch }}
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
-          path: ${{ github.workspace }}/artifacts/*
-
-  publish:
-    name: Publish
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install Nim
-        uses: jiro4989/setup-nim-action@v1
-        with:
-          nim-version: "1.2.6"
-
       - name: Export current version
         run: ./.github/bin/export-version
 
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
-
       - name: Publish release
-        uses: svenstaro/upload-release-action@v2
+        uses: svenstaro/upload-release-action@v2.2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: artifacts/*
           file_glob: true
           tag: ${{ env.VERSION }}
           overwrite: true
+
+      # - name: Upload artifact
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
+      #     path: ${{ github.workspace }}/artifacts/*
+
+  # publish:
+  #   name: Publish
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Install Nim
+  #       uses: jiro4989/setup-nim-action@v1
+  #       with:
+  #         nim-version: "1.2.6"
+
+  #     - name: Export current version
+  #       run: ./.github/bin/export-version
+
+  #     - name: Download all workflow run artifacts
+  #       uses: actions/download-artifact@v2
+
+  #     - name: Publish release
+  #       uses: svenstaro/upload-release-action@v2
+  #       with:
+  #         repo_token: ${{ secrets.GITHUB_TOKEN }}
+  #         file: artifacts/*
+  #         file_glob: true
+  #         tag: ${{ env.VERSION }}
+  #         overwrite: true
