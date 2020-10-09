@@ -16,16 +16,30 @@ type
     mode*: Mode
     verbosity*: Verbosity
 
-  Argument = tuple[short: string, long: string]
+  Opt = enum
+    optExercise, optCheck, optMode, optVerbosity, optHelp, optVersion
 
-const NimblePkgVersion {.strdefine.}: string = "unknown"
+  OptKey = tuple
+    short: string
+    long: string
 
-const ExerciseArgument  : Argument = (short: "e", long: "exercise")
-const CheckArgument     : Argument = (short: "c", long: "check")
-const ModeArgument      : Argument = (short: "m", long: "mode")
-const VerbosityArgument : Argument = (short: "o", long: "verbosity")
-const HelpArgument      : Argument = (short: "h", long: "help")
-const VersionArgument   : Argument = (short: "v", long: "version")
+const
+  NimblePkgVersion {.strdefine.}: string = "unknown"
+
+  optKeys: array[Opt, OptKey] = [
+    ("e", "exercise"),
+    ("c", "check"),
+    ("m", "mode"),
+    ("o", "verbosity"),
+    ("h", "help"),
+    ("v", "version"),
+  ]
+
+func short(opt: Opt): string =
+  result = optKeys[opt].short
+
+func long(opt: Opt): string =
+  result = optKeys[opt].long
 
 proc showHelp =
   let applicationName = extractFilename(getAppFilename())
@@ -33,12 +47,12 @@ proc showHelp =
   echo &"""Usage: {applicationName} [options]
 
 Options:
-  -{ExerciseArgument.short}, --{ExerciseArgument.long} <slug>        Only sync this exercise
-  -{CheckArgument.short}, --{CheckArgument.long}                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
-  -{ModeArgument.short}, --{ModeArgument.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
-  -{VerbosityArgument.short}, --{VerbosityArgument.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -{HelpArgument.short}, --{HelpArgument.long}                   Show this help message and exit
-  -{VersionArgument.short}, --{VersionArgument.long}                Show this tool's version information and exit"""
+  -{optExercise.short}, --{optExercise.long} <slug>        Only sync this exercise
+  -{optCheck.short}, --{optCheck.long}                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
+  -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
+  -{optVersion.short}, --{optVersion.long}                Show this tool's version information and exit"""
 
   quit(0)
 
@@ -100,26 +114,26 @@ proc processCmdLine*: Conf =
     case kind
     of cmdLongOption, cmdShortOption:
       case key
-      of ExerciseArgument.short, ExerciseArgument.long:
+      of optExercise.short, optExercise.long:
         showErrorForMissingVal(kind, key, val)
         result.exercise = some(val)
-      of CheckArgument.short, CheckArgument.long:
+      of optCheck.short, optCheck.long:
         result.action = actCheck
-      of ModeArgument.short, ModeArgument.long:
+      of optMode.short, optMode.long:
         showErrorForMissingVal(kind, key, val)
         result.mode = parseMode(kind, key, val)
-      of VerbosityArgument.short, VerbosityArgument.long:
+      of optVerbosity.short, optVerbosity.long:
         showErrorForMissingVal(kind, key, val)
         result.verbosity = parseVerbosity(kind, key, val)
-      of HelpArgument.short, HelpArgument.long:
+      of optHelp.short, optHelp.long:
         showHelp()
-      of VersionArgument.short, VersionArgument.long:
+      of optVersion.short, optVersion.long:
         showVersion()
       else:
         showError(&"invalid option: '{kind.prefix}{key}'")
     of cmdArgument:
       case key.toLowerAscii
-      of HelpArgument.long:
+      of optHelp.long:
         showHelp()
       else:
         showError(&"invalid argument: '{key}'")
