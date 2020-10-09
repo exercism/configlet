@@ -7,7 +7,7 @@ This small application is used to help Exercism tracks keep their exercise-speci
 The application is a single binary and can be used as follows:
 
 ```
-Usage: canonicaldatasyncer [options]
+Usage: canonical_data_syncer [options]
 
 Options:
   -e, --exercise <slug>        Only sync this exercise
@@ -22,7 +22,7 @@ Running the application will prompt the user to choose whether to include or exc
 
 ## Use in your track
 
-To use the application in your track, you can copy the [`scripts/fetch-canonicaldatasyncer`](./scripts/fetch-canonicaldatasyncer) and/or [`scripts/fetch-canonicaldatasyncer.ps1`](./scripts/fetch-canonicaldatasyncer.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `canonicaldatasyncer` tool to your track's `bin` directory.
+To use the application in your track, you can copy the [`scripts/fetch-canonical_data_syncer`](./scripts/fetch-canonical_data_syncer) and/or [`scripts/fetch-canonical_data_syncer.ps1`](./scripts/fetch-canonical_data_syncer.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `canonical_data_syncer` tool to your track's `bin` directory.
 
 ## Contributing
 
