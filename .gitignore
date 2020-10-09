@@ -2,7 +2,7 @@
 .vscode/
 
 # Application binary
-canonicaldatasyncer
+canonical_data_syncer
 
 # Temporary prob-specs repo
 .problem-specifications/

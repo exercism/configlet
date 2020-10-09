@@ -14,7 +14,7 @@ Function Arch {
 
 $arch = Arch
 $headers = Headers
-$fileName = "canonicaldatasyncer-windows-$arch.zip"
+$fileName = "canonical_data_syncer-windows-$arch.zip"
 $outputDirectory = "bin"
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 $zipUrl = DownloadUrl -FileName $fileName -Headers $headers

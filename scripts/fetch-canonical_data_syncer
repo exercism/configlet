@@ -32,7 +32,7 @@ else
     HEADER="authorization: Bearer ${GITHUB_TOKEN}"
 fi
 
-FILENAME="canonicaldatasyncer-${OS}-${ARCH}.${EXT}"
+FILENAME="canonical_data_syncer-${OS}-${ARCH}.${EXT}"
 
 get_url () {
     curl --header "$HEADER" -s "$LATEST" |
@@ -44,9 +44,9 @@ URL=$(get_url)
 
 case "$EXT" in
     (*zip)
-        curl --header "$HEADER" -s --location "$URL" -o bin/latest-canonicaldatasyncer.zip
-        unzip bin/latest-canonicaldatasyncer.zip -d bin/
-        rm bin/latest-canonicaldatasyncer.zip
+        curl --header "$HEADER" -s --location "$URL" -o bin/latest-canonical_data_syncer.zip
+        unzip bin/latest-canonical_data_syncer.zip -d bin/
+        rm bin/latest-canonical_data_syncer.zip
         ;;
     (*) curl --header "$HEADER" -s --location "$URL" | tar xz -C bin/ ;;
 esac
