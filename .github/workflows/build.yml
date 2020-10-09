@@ -60,7 +60,7 @@ jobs:
         run: ./.github/bin/export-version
 
       - name: Publish release
-        uses: svenstaro/upload-release-action@v2.2
+        uses: svenstaro/upload-release-action@v2.2.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: artifacts/*
