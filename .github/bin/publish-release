@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-VERSION="v${REF/refs\/tags\//}"
+VERSION=$(echo $REF | cut -d "/" -f3)
 
 gh release create $VERSION
 gh release upload $VERSION $ARTIFACT_FILE
