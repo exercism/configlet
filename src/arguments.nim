@@ -1,14 +1,14 @@
 import std/[options, os, parseopt, strformat, strutils]
 
 type
-  Action* {.pure.} = enum
-    Sync, Check, Help, Version
+  Action* = enum
+    actSync, actCheck, actHelp, actVersion
 
-  Mode* {.pure.} = enum
-    Choose, IncludeMissing, ExcludeMissing
+  Mode* = enum
+    modeChoose, modeIncludeMissing, modeExcludeMissing
 
-  Verbosity* {.pure.} = enum
-    Quiet, Normal, Detailed
+  Verbosity* = enum
+    verQuiet, verNormal, verDetailed
 
   Arguments* = object
     action*: Action
@@ -45,22 +45,22 @@ proc showVersion* =
 
 proc parseMode(mode: string): Mode =
   case mode.toLowerAscii
-  of "c", "choose": Mode.Choose
-  of "i", "include": Mode.IncludeMissing
-  of "e", "exclude": Mode.ExcludeMissing
-  else: Mode.Choose
+  of "c", "choose": modeChoose
+  of "i", "include": modeIncludeMissing
+  of "e", "exclude": modeExcludeMissing
+  else: modeChoose
 
 proc parseVerbosity(verbosity: string): Verbosity =
   case verbosity.toLowerAscii
-  of "q", "quiet": Verbosity.Quiet
-  of "n", "normal": Verbosity.Normal
-  of "d", "detailed": Verbosity.Detailed
-  else: Verbosity.Normal
+  of "q", "quiet": verQuiet
+  of "n", "normal": verNormal
+  of "d", "detailed": verDetailed
+  else: verNormal
 
 proc parseArguments*: Arguments =
-  result.action = Action.Sync
-  result.verbosity = Verbosity.Normal
-  result.mode = Mode.Choose
+  result.action = actSync
+  result.verbosity = verNormal
+  result.mode = modeChoose
 
   var optParser = initOptParser()
   for kind, key, val in optParser.getopt():
@@ -70,14 +70,14 @@ proc parseArguments*: Arguments =
       of ExerciseArgument.short, ExerciseArgument.long:
         result.exercise = some(val)
       of CheckArgument.short, CheckArgument.long:
-        result.action = Action.Check
+        result.action = actCheck
       of DefaultArgument.short, DefaultArgument.long:
         result.mode = parseMode(val)
       of VerbosityArgument.short, VerbosityArgument.long:
         result.verbosity = parseVerbosity(val)
       of HelpArgument.short, HelpArgument.long:
-        result.action = Action.Help
+        result.action = actHelp
       of VersionArgument.short, VersionArgument.long:
-        result.action = Action.Version
+        result.action = actVersion
     else:
       discard

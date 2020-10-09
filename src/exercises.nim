@@ -13,8 +13,8 @@ type
     excluded*: HashSet[string]
     missing*: HashSet[string]
 
-  ExerciseStatus* {.pure.} = enum
-    OutOfSync, InSync, NoCanonicalData
+  ExerciseStatus* = enum
+    exOutOfSync, exInSync, exNoCanonicalData
 
   Exercise* = object
     slug*: string
@@ -65,11 +65,11 @@ proc findExercises*(args: Arguments): seq[Exercise] =
 
 proc status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
-    ExerciseStatus.NoCanonicalData
+    exNoCanonicalData
   elif exercise.tests.missing.len > 0:
-    ExerciseStatus.OutOfSync
+    exOutOfSync
   else:
-    ExerciseStatus.InSync
+    exInSync
 
 proc hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0

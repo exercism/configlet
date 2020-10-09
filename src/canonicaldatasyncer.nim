@@ -10,13 +10,13 @@ proc main =
   setupLogging(args)
 
   case args.action
-  of Action.Sync:
+  of actSync:
     sync(args)
-  of Action.Check:
+  of actCheck:
     check(args)
-  of Action.Help:
+  of actHelp:
     showHelp()
-  of Action.Version:
+  of actVersion:
     showVersion()
 
 main()
