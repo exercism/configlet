@@ -15,19 +15,8 @@ jobs:
       matrix:
         target:
           - os: linux
-            triple: x86_64-linux-musl
-          # - os: linux
-          #   triple: i686-linux-musl
-          # - os: linux
-          #   triple: aarch64-linux-musl
-          # - os: linux
-          #   triple: armv7l-linux-musleabihf
-          - os: macosx
-            triple: x86_64-apple-darwin14
+          # - os: macosx
           - os: windows
-            triple: x86_64-w64-mingw32
-          # - os: windows
-          #   triple: i686-w64-mingw32
         include:
           - target:
               os: linux
@@ -55,26 +44,26 @@ jobs:
         run: ./.github/bin/build
         env:
           OS: ${{ matrix.target.os }}
-          TRIPLE: ${{ matrix.target.triple }}
 
-  publish:
-    name: Publish
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
       - name: Export current version
         shell: bash
         run: ./.github/bin/export-version
 
-      - name: Test
-        shell: bash
-        run: ls -al
+      - name: Publish release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: artifacts/*
+          file_glob: true
+          tag: ${{ env.VERSION }}
+          overwrite: true
 
-    # - name: Publish release
-    #   uses: svenstaro/upload-release-action@v2
-    #   with:
-    #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-    #     file: canonicaldatasyncer-*
-    #     file_glob: true
-    #     tag: ${{ env.VERSION }}
-    #     overwrite: false
+  # publish:
+  #   name: Publish
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+
+  #     - name: Test
+  #       shell: bash
+  #       run: ls -al
