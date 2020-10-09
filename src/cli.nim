@@ -58,19 +58,27 @@ proc prefix(kind: CmdLineKind): string =
   of cmdLongOption: "--"
   of cmdArgument, cmdEnd: ""
 
-proc parseMode(mode: string): Mode =
-  case mode.toLowerAscii
-  of "c", "choose": modeChoose
-  of "i", "include": modeIncludeMissing
-  of "e", "exclude": modeExcludeMissing
-  else: modeChoose
+proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
+  case val.toLowerAscii
+  of "c", "choose":
+    result = modeChoose
+  of "i", "include":
+    result = modeIncludeMissing
+  of "e", "exclude":
+    result = modeExcludeMissing
+  else:
+    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
-proc parseVerbosity(verbosity: string): Verbosity =
-  case verbosity.toLowerAscii
-  of "q", "quiet": verQuiet
-  of "n", "normal": verNormal
-  of "d", "detailed": verDetailed
-  else: verNormal
+proc parseVerbosity(kind: CmdLineKind, key: string, val: string): Verbosity =
+  case val.toLowerAscii
+  of "q", "quiet":
+    result = verQuiet
+  of "n", "normal":
+    result = verNormal
+  of "d", "detailed":
+    result = verDetailed
+  else:
+    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
 proc initArguments: Arguments =
   result = Arguments(
@@ -92,9 +100,9 @@ proc parseArguments*: Arguments =
       of CheckArgument.short, CheckArgument.long:
         result.action = actCheck
       of ModeArgument.short, ModeArgument.long:
-        result.mode = parseMode(val)
+        result.mode = parseMode(kind, key, val)
       of VerbosityArgument.short, VerbosityArgument.long:
-        result.verbosity = parseVerbosity(val)
+        result.verbosity = parseVerbosity(kind, key, val)
       of HelpArgument.short, HelpArgument.long:
         showHelp()
       of VersionArgument.short, VersionArgument.long:
