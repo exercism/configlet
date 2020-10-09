@@ -4,6 +4,6 @@
 VERSION="v$(nimble dump | grep "version:" | cut -d':' -f 2 | tr -d ' "')"
 # echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
 
-echo VERSION
+echo "version: $VERSION"
 
 # gh release create "v"
