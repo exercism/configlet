@@ -18,8 +18,8 @@ jobs:
             arch: 64-bit
           # - os: macosx
           #   arch: 64-bit
-          # - os: windows
-          #   arch: 64-bit
+          - os: windows
+            arch: 64-bit
         include:
           - target:
               os: linux
@@ -27,9 +27,9 @@ jobs:
           # - target:
           #     os: macosx
           #   builder: macos-10.15
-          # - target:
-          #     os: windows
-          #   builder: windows-2019
+          - target:
+              os: windows
+            builder: windows-2019
 
     name: "${{ matrix.target.os }}-${{ matrix.target.arch }}"
     runs-on: ${{ matrix.builder }}
@@ -60,14 +60,3 @@ jobs:
         run: ./.github/bin/publish-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Setup Git credentials
-      #   run: ./.github/bin/set-credentials
-
-      # - name: Publish release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: ${{ env.ARTIFACT_FILE }}
-      #     tag: ${{ env.VERSION }}
-      #     overwrite: true
