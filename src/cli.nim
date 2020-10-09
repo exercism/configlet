@@ -102,6 +102,10 @@ proc parseArguments*: Arguments =
       else:
         showError(&"invalid option: '{kind.prefix}{key}'")
     of cmdArgument:
+      case key.toLowerAscii
+      of HelpArgument.long:
+        showHelp()
+      else:
         showError(&"invalid argument: '{key}'")
     of cmdEnd:
       discard
