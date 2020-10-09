@@ -1,4 +1,4 @@
-import std/[options, os, parseopt, strformat, strutils]
+import std/[options, os, parseopt, strformat, strutils, terminal]
 
 type
   Action* = enum
@@ -46,6 +46,18 @@ proc showVersion =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
   quit(0)
 
+proc showError(s: string) =
+  stdout.styledWrite(fgRed, "Error: ")
+  stdout.write(s)
+  stdout.write("\n\n")
+  showHelp()
+
+proc prefix(kind: CmdLineKind): string =
+  case kind
+  of cmdShortOption: "-"
+  of cmdLongOption: "--"
+  of cmdArgument, cmdEnd: ""
+
 proc parseMode(mode: string): Mode =
   case mode.toLowerAscii
   of "c", "choose": modeChoose
@@ -87,5 +99,9 @@ proc parseArguments*: Arguments =
         showHelp()
       of VersionArgument.short, VersionArgument.long:
         showVersion()
-    else:
+      else:
+        showError(&"invalid option: '{kind.prefix}{key}'")
+    of cmdArgument:
+        showError(&"invalid argument: '{key}'")
+    of cmdEnd:
       discard
