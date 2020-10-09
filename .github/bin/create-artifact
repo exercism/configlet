@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+ARTIFACTS_DIR="artifacts"
+mkdir -p $ARTIFACTS_DIR
+
+BINARY_NAME="canonicaldatasyncer"
+
+case "$OS" in
+  windows)
+    ARTIFACT_FILE="$ARTIFACTS_DIR/$BINARY_NAME-$OS-$ARCH.zip"
+    7z a $ARTIFACT_FILE $BINARY_NAME.exe
+    ;;
+  linux)
+    ARTIFACT_FILE="$ARTIFACTS_DIR/$BINARY_NAME-$OS-$ARCH.tgz"
+    tar -cvzf $ARTIFACT_FILE $BINARY_NAME
+    ;;
+  macosx)
+    ARTIFACT_FILE="$ARTIFACTS_DIR/$BINARY_NAME-$OS-$ARCH.tgz"
+    tar -cvzf $ARTIFACT_FILE $BINARY_NAME
+    ;;
+esac
+
+# echo "ARTIFACT_FILE=${ARTIFACT_FILE}" >> "${GITHUB_ENV}"
