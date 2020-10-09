@@ -57,10 +57,16 @@ proc parseVerbosity(verbosity: string): Verbosity =
   of "d", "detailed": verDetailed
   else: verNormal
 
+proc initArguments: Arguments =
+  result = Arguments(
+    action: actSync,
+    exercise: none(string),
+    mode: modeChoose,
+    verbosity: verNormal,
+  )
+
 proc parseArguments*: Arguments =
-  result.action = actSync
-  result.verbosity = verNormal
-  result.mode = modeChoose
+  result = initArguments()
 
   var optParser = initOptParser()
   for kind, key, val in optParser.getopt():
