@@ -1,5 +1,5 @@
 import std/[json, options, sequtils, sets, strformat, strutils]
-import arguments, exercises, logger
+import cli, exercises, logger
 
 type
   SyncDecision = enum
