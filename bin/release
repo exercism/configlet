@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+BUMP="minor"
+MESSAGE="$(git log --oneline --format=%B -n 1 HEAD | head -n 1)"
+
+while [[ $# -gt 0 ]]
+do
+  case "$1" in
+    -b|--bump)
+      BUMP="$2"
+      shift
+      shift
+    ;;
+    -m|--message)
+      MESSAGE="$2"
+      shift
+      shift
+    ;;
+    *)
+      shift
+    ;;
+  esac
+done
+
+nimble install -Y bump
+bump --v --$BUMP $MESSAGE
