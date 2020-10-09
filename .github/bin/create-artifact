@@ -20,4 +20,4 @@ case "$OS" in
     ;;
 esac
 
-# echo "ARTIFACT_FILE=${ARTIFACT_FILE}" >> "${GITHUB_ENV}"
+echo "ARTIFACT_FILE=${ARTIFACT_FILE}" >> "${GITHUB_ENV}"
