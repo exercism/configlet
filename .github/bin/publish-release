@@ -2,8 +2,6 @@
 
 # Extract the version from the tooling_webserver.nimble file
 VERSION="v$(nimble dump | grep "version:" | cut -d':' -f 2 | tr -d ' "')"
-# echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
 
-echo "version: $VERSION"
-
-# gh release create "v"
+gh release create $VERSION
+gh release upload $VERSION $ARTIFACT_FILE
