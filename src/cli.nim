@@ -68,8 +68,7 @@ proc initArguments: Arguments =
 proc parseArguments*: Arguments =
   result = initArguments()
 
-  var optParser = initOptParser()
-  for kind, key, val in optParser.getopt():
+  for kind, key, val in getopt():
     case kind
     of cmdLongOption, cmdShortOption:
       case key
