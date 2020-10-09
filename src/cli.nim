@@ -35,6 +35,8 @@ const
     ("v", "version"),
   ]
 
+  optsNoVal = {optCheck, optHelp, optVersion}
+
 func short(opt: Opt): string =
   result = optKeys[opt].short
 
@@ -110,7 +112,13 @@ proc initConf: Conf =
 proc processCmdLine*: Conf =
   result = initConf()
 
-  for kind, key, val in getopt():
+  var shortNoVal: set[char]
+  var longNoVal = newSeqOfCap[string](optsNoVal.len)
+  for opt in optsNoVal:
+    shortNoVal.incl(opt.short[0])
+    longNoVal.add(opt.long)
+
+  for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
     of cmdLongOption, cmdShortOption:
       case key
