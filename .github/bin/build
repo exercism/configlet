@@ -1,19 +1,15 @@
 #!/usr/bin/env sh
 
 nimble install -d -Y
-mkdir -p artifacts
 
 case "$OS" in
   windows)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
-    7z a artifacts/canonicaldatasyncer-windows-64bit.zip canonicaldatasyncer.exe
     ;;
   linux)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
-    tar -cvzf artifacts/canonicaldatasyncer-linux-64bit.tgz canonicaldatasyncer
     ;;
   macosx)
     nimble build -d:release
-    tar -cvzf artifacts/canonicaldatasyncer-mac-64bit.tgz canonicaldatasyncer
     ;;
 esac

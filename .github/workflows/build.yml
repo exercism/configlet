@@ -15,8 +15,11 @@ jobs:
       matrix:
         target:
           - os: linux
+            arch: 64-bit
           # - os: macosx
+          #   arch: 64-bit
           - os: windows
+            arch: 64-bit
         include:
           - target:
               os: linux
@@ -28,7 +31,7 @@ jobs:
               os: windows
             builder: windows-2019
 
-    name: "Build ${{ matrix.target.triple }}"
+    name: "Build ${{ matrix.target.os }}-${{ matrix.target.arch }}"
     runs-on: ${{ matrix.builder }}
     steps:
       - name: Checkout code
@@ -44,19 +47,33 @@ jobs:
         run: ./.github/bin/build
         env:
           OS: ${{ matrix.target.os }}
+          ARCH: ${{ matrix.target.arch }}
+
+      - name: Create artifact
+        shell: bash
+        run: ./.github/bin/create-artifact
+        env:
+          OS: ${{ matrix.target.os }}
+          ARCH: ${{ matrix.target.arch }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.target.os }}-${{ matrix.target.arch }}
+          path: ${{ github.workspace }}/artifacts/*
 
       - name: Export current version
         shell: bash
         run: ./.github/bin/export-version
 
-      - name: Publish release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: artifacts/*
-          file_glob: true
-          tag: ${{ env.VERSION }}
-          overwrite: true
+      # - name: Publish release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: artifacts/*
+      #     file_glob: true
+      #     tag: ${{ env.VERSION }}
+      #     overwrite: true
 
   # publish:
   #   name: Publish
