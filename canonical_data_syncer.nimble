@@ -1,5 +1,5 @@
 # Package
-version       = "0.5.0"
+version       = "0.6.0"
 author        = "Erik Schierboom"
 description   = "Sync canonical data from the Problem Specifications repo to the track repo"
 license       = "AGPL3"
