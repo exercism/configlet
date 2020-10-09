@@ -12,11 +12,11 @@ jobs:
       matrix:
         target:
           - os: linux
-            arch: 64-bit
+            arch: 64bit
           - os: macosx
-            arch: 64-bit
+            arch: 64bit
           - os: windows
-            arch: 64-bit
+            arch: 64bit
         include:
           - target:
               os: linux
