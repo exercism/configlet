@@ -58,6 +58,8 @@ jobs:
 
       - name: Publish release
         run: ./.github/bin/publish-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # - name: Setup Git credentials
       #   run: ./.github/bin/set-credentials
