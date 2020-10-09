@@ -58,6 +58,11 @@ proc prefix(kind: CmdLineKind): string =
   of cmdLongOption: "--"
   of cmdArgument, cmdEnd: ""
 
+proc showErrorForMissingVal(kind: CmdLineKind, key: string, val: string) =
+  if val.len == 0:
+    let msg = &"'{kind.prefix}{key}' was given without a value"
+    showError(msg)
+
 proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
   case val.toLowerAscii
   of "c", "choose":
@@ -96,12 +101,15 @@ proc parseArguments*: Arguments =
     of cmdLongOption, cmdShortOption:
       case key
       of ExerciseArgument.short, ExerciseArgument.long:
+        showErrorForMissingVal(kind, key, val)
         result.exercise = some(val)
       of CheckArgument.short, CheckArgument.long:
         result.action = actCheck
       of ModeArgument.short, ModeArgument.long:
+        showErrorForMissingVal(kind, key, val)
         result.mode = parseMode(kind, key, val)
       of VerbosityArgument.short, VerbosityArgument.long:
+        showErrorForMissingVal(kind, key, val)
         result.verbosity = parseVerbosity(kind, key, val)
       of HelpArgument.short, HelpArgument.long:
         showHelp()
