@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+gh release create $TAG
+gh release upload $TAG $ARTIFACT_FILE
