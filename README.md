@@ -11,11 +11,11 @@ Usage: canonical_data_syncer [options]
 
 Options:
   -e, --exercise <slug>        Only sync this exercise
-  -c, --check                  Check if there missing tests. Doesn't update the tests. Terminates with a non-zero exit code if any one or more test cases are missing.
-  -d, --default <mode>         What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  -c, --check                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
+  -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -o, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -h, --help                   Show CLI usage
-  -v, --version                Display version information
+  -h, --help                   Show this help message and exit
+  -v, --version                Show this tool's version information and exit
 ```
 
 Running the application will prompt the user to choose whether to include or exclude missing tests. It will update the `tests.toml` file accordingly. If you only want a quick check, you can use the `--check` option.
