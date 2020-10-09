@@ -57,10 +57,10 @@ proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExer
   result.tests = initExerciseTests(trackExercise, probSpecsExercise)
   result.testCases = newExerciseTestCases(probSpecsExercise.testCases)
 
-proc findExercises*(args: Arguments): seq[Exercise] =
-  let probSpecsExercises = findProbSpecsExercises(args).mapIt((it.slug, it)).toTable
+proc findExercises*(conf: Conf): seq[Exercise] =
+  let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
 
-  for trackExercise in findTrackExercises(args).sortedByIt(it.slug):
+  for trackExercise in findTrackExercises(conf).sortedByIt(it.slug):
     result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
 
 proc status*(exercise: Exercise): ExerciseStatus =
