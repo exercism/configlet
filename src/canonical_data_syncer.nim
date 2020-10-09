@@ -14,9 +14,5 @@ proc main =
     sync(args)
   of actCheck:
     check(args)
-  of actHelp:
-    showHelp()
-  of actVersion:
-    showVersion()
 
 main()
