@@ -57,6 +57,7 @@ jobs:
           ARCH: ${{ matrix.target.arch }}
 
       - name: Publish release
+        shell: bash
         run: ./.github/bin/publish-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
