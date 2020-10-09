@@ -42,19 +42,19 @@ jobs:
         with:
           nim-version: "1.2.6"
 
-      # - name: Build binary
-      #   shell: bash
-      #   run: ./.github/bin/build
-      #   env:
-      #     OS: ${{ matrix.target.os }}
-      #     ARCH: ${{ matrix.target.arch }}
+      - name: Build binary
+        shell: bash
+        run: ./.github/bin/build
+        env:
+          OS: ${{ matrix.target.os }}
+          ARCH: ${{ matrix.target.arch }}
 
-      # - name: Create artifact
-      #   shell: bash
-      #   run: ./.github/bin/create-artifact
-      #   env:
-      #     OS: ${{ matrix.target.os }}
-      #     ARCH: ${{ matrix.target.arch }}
+      - name: Create artifact
+        shell: bash
+        run: ./.github/bin/create-artifact
+        env:
+          OS: ${{ matrix.target.os }}
+          ARCH: ${{ matrix.target.arch }}
 
       - name: Publish release
         run: ./.github/bin/publish-release
