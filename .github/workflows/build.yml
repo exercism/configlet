@@ -37,35 +37,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Nim
-        uses: jiro4989/setup-nim-action@v1
-        with:
-          nim-version: "1.2.6"
+      # - name: Install Nim
+      #   uses: jiro4989/setup-nim-action@v1
+      #   with:
+      #     nim-version: "1.2.6"
 
-      - name: Build binary
-        shell: bash
-        run: ./.github/bin/build
-        env:
-          OS: ${{ matrix.target.os }}
-          ARCH: ${{ matrix.target.arch }}
+      # - name: Build binary
+      #   shell: bash
+      #   run: ./.github/bin/build
+      #   env:
+      #     OS: ${{ matrix.target.os }}
+      #     ARCH: ${{ matrix.target.arch }}
 
-      - name: Create artifact
-        shell: bash
-        run: ./.github/bin/create-artifact
-        env:
-          OS: ${{ matrix.target.os }}
-          ARCH: ${{ matrix.target.arch }}
-
-      - name: Export current version
-        run: ./.github/bin/export-version
-
-      - name: Setup Git credentials
-        run: ./.github/bin/set-credentials
+      # - name: Create artifact
+      #   shell: bash
+      #   run: ./.github/bin/create-artifact
+      #   env:
+      #     OS: ${{ matrix.target.os }}
+      #     ARCH: ${{ matrix.target.arch }}
 
       - name: Publish release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.ARTIFACT_FILE }}
-          tag: ${{ env.VERSION }}
-          overwrite: true
+        run: ./.github/bin/publish-release
+
+      # - name: Setup Git credentials
+      #   run: ./.github/bin/set-credentials
+
+      # - name: Publish release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: ${{ env.ARTIFACT_FILE }}
+      #     tag: ${{ env.VERSION }}
+      #     overwrite: true
