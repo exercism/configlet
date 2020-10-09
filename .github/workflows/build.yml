@@ -59,6 +59,9 @@ jobs:
       - name: Export current version
         run: ./.github/bin/export-version
 
+      - name: Setup Git credentials
+        run: ./.github/bin/set-credentials
+
       - name: Publish release
         uses: svenstaro/upload-release-action@v2
         with:
