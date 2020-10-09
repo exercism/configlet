@@ -14,7 +14,7 @@ case "$OS" in
     ARTIFACT_FILE="$ARTIFACTS_DIR/$BINARY_NAME-$OS-$ARCH.tgz"
     tar -cvzf $ARTIFACT_FILE $BINARY_NAME
     ;;
-  macosx)
+  mac)
     ARTIFACT_FILE="$ARTIFACTS_DIR/$BINARY_NAME-$OS-$ARCH.tgz"
     tar -cvzf $ARTIFACT_FILE $BINARY_NAME
     ;;

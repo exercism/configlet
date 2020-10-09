@@ -9,7 +9,7 @@ case "$OS" in
   linux)
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
     ;;
-  macosx)
+  mac)
     nimble build -d:release
     ;;
 esac
