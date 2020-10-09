@@ -1,5 +1,5 @@
 import std/[sequtils, sets, strformat]
-import arguments, exercises, logger
+import cli, exercises, logger
 
 proc check*(args: Arguments) =
   logNormal("Checking exercises...")

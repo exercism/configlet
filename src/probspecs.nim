@@ -1,5 +1,5 @@
 import std/[json, options, os, osproc, sequtils, strformat]
-import arguments
+import cli
 
 type
   ProbSpecsRepoExercise = object
