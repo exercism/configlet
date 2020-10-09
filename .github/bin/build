@@ -7,7 +7,7 @@ case "$OS" in
     nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
     ;;
   linux)
-    nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static'
+    nimble build -d:release --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
     ;;
   mac)
     nimble build -d:release
