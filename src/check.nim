@@ -1,10 +1,10 @@
 import std/[sequtils, sets, strformat]
 import cli, exercises, logger
 
-proc check*(args: Arguments) =
+proc check*(conf: Conf) =
   logNormal("Checking exercises...")
 
-  let exercises = findExercises(args)
+  let exercises = findExercises(conf)
 
   for exercise in exercises:
     case exercise.status

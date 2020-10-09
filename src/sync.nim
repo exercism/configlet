@@ -111,11 +111,11 @@ proc sync(exercises: seq[Exercise], mode: Mode): seq[Exercise] =
     of exNoCanonicalData:
       logDetailed(&"[skip] {exercise.slug} does not have canonical data")
 
-proc sync*(args: Arguments) =
+proc sync*(conf: Conf) =
   logNormal("Syncing exercises...")
 
-  let exercises = findExercises(args)
-  let syncedExercises = sync(exercises, args.mode)
+  let exercises = findExercises(conf)
+  let syncedExercises = sync(exercises, conf.mode)
 
   if syncedExercises.anyIt(it.status == exOutOfSync):
     logNormal("[warn] some exercises are still missing test cases")

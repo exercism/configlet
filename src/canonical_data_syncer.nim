@@ -5,14 +5,14 @@ proc main =
   onSignal(SIGTERM):
     quit(0)
 
-  let args = parseArguments()
+  let conf = processCmdLine()
 
-  setupLogging(args)
+  setupLogging(conf)
 
-  case args.action
+  case conf.action
   of actSync:
-    sync(args)
+    sync(conf)
   of actCheck:
-    check(args)
+    check(conf)
 
 main()

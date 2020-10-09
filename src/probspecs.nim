@@ -87,17 +87,17 @@ proc initPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExerci
   result.slug = repoExercise.slug
   result.testCases = parseProbSpecsTestCases(repoExercise)
 
-proc findProbSpecsExercises(repo: ProbSpecsRepo, args: Arguments): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
-    if args.exercise.isNone or args.exercise.get() == repoExercise.slug:
+    if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
       result.add(initPropSpecsExercise(repoExercise))
 
-proc findProbSpecsExercises*(args: Arguments): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   let probSpecsRepo = initProbSpecsRepo()
 
   try:
     probSpecsRepo.remove()
     probSpecsRepo.clone()
-    probSpecsRepo.findProbSpecsExercises(args)
+    probSpecsRepo.findProbSpecsExercises(conf)
   finally:
     probSpecsRepo.remove()

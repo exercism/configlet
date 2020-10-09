@@ -10,7 +10,7 @@ type
   Verbosity* = enum
     verQuiet, verNormal, verDetailed
 
-  Arguments* = object
+  Conf* = object
     action*: Action
     exercise*: Option[string]
     mode*: Mode
@@ -85,16 +85,16 @@ proc parseVerbosity(kind: CmdLineKind, key: string, val: string): Verbosity =
   else:
     showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
-proc initArguments: Arguments =
-  result = Arguments(
+proc initConf: Conf =
+  result = Conf(
     action: actSync,
     exercise: none(string),
     mode: modeChoose,
     verbosity: verNormal,
   )
 
-proc parseArguments*: Arguments =
-  result = initArguments()
+proc processCmdLine*: Conf =
+  result = initConf()
 
   for kind, key, val in getopt():
     case kind
