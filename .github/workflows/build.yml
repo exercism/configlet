@@ -2,11 +2,8 @@ name: Build
 
 on:
   push:
-    branches: [master]
-    # paths: ["**.nim"]
-  pull_request:
-    branches: [master]
-    # paths: ["**.nim"]
+    tags:
+      - "*"
 
 jobs:
   build:
@@ -16,17 +13,17 @@ jobs:
         target:
           - os: linux
             arch: 64-bit
-          # - os: macosx
-          #   arch: 64-bit
+          - os: macosx
+            arch: 64-bit
           - os: windows
             arch: 64-bit
         include:
           - target:
               os: linux
             builder: ubuntu-18.04
-          # - target:
-          #     os: macosx
-          #   builder: macos-10.15
+          - target:
+              os: macosx
+            builder: macos-10.15
           - target:
               os: windows
             builder: windows-2019
@@ -61,3 +58,4 @@ jobs:
         run: ./.github/bin/publish-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref }}

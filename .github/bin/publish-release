@@ -1,7 +1,4 @@
 #!/usr/bin/env sh
 
-# Extract the version from the tooling_webserver.nimble file
-VERSION="v$(nimble dump | grep "version:" | cut -d':' -f 2 | tr -d ' "')"
-
-gh release create $VERSION
-gh release upload $VERSION $ARTIFACT_FILE
+gh release create $TAG
+gh release upload $TAG $ARTIFACT_FILE
