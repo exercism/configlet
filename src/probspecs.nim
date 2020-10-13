@@ -1,4 +1,4 @@
-import std/[json, options, os, osproc, sequtils, strformat]
+import std/[json, options, os, osproc, sequtils, strformat, strutils]
 import cli
 
 type
@@ -28,6 +28,16 @@ proc initProbSpecsRepo: ProbSpecsRepo =
 proc clone(repo: ProbSpecsRepo) =
   let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
   execCmdException(cmd, "Could not clone problem-specifications repo")
+
+proc grainsWorkaround(repo: ProbSpecsRepo) =
+  ## Overwrites the canonical data file for `grains` so that it no longer
+  ## contains integers that are too large to store in a 64-bit signed integer.
+  ## Otherwise, we get an error when parsing it as JSON.
+  let grainsPath = repo.dir / "exercises" / "grains" / "canonical-data.json"
+  let s = readFile(grainsPath).multiReplace(
+    ("92233720368547758", "92233720368547758.0"),
+    ("184467440737095516", "184467440737095516.0"))
+  writeFile(grainsPath, s)
 
 proc remove(repo: ProbSpecsRepo) =
   removeDir(repo.dir)
@@ -78,9 +88,6 @@ proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
       result.add(initProbSpecsTestCases(childNode))
 
 proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
-  if repoExercise.slug == "grains":
-    return
-
   initProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
 proc initPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
@@ -98,6 +105,7 @@ proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   try:
     probSpecsRepo.remove()
     probSpecsRepo.clone()
+    probSpecsRepo.grainsWorkaround()
     probSpecsRepo.findProbSpecsExercises(conf)
   finally:
     probSpecsRepo.remove()
