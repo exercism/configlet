@@ -1,6 +1,6 @@
 import std/[json, options, os, sets]
 import pkg/parsetoml
-import arguments
+import cli
 
 type
   ConfigJsonExercise = object
@@ -77,11 +77,11 @@ proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   result.slug = exercise.slug
   result.tests = newTrackExerciseTests(exercise)
 
-proc findTrackExercises(repo: TrackRepo, args: Arguments): seq[TrackExercise] =
+proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
   for repoExercise in repo.exercises:
-    if args.exercise.isNone or args.exercise.get() == repoExercise.slug:
+    if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
       result.add(newTrackExercise(repoExercise))
 
-proc findTrackExercises*(args: Arguments): seq[TrackExercise] =
+proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackRepo = newTrackRepo()
-  trackRepo.findTrackExercises(args)
+  trackRepo.findTrackExercises(conf)
