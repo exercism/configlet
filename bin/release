@@ -23,4 +23,4 @@ do
 done
 
 nimble install -Y bump
-bump --v --$BUMP $MESSAGE
+bump --v --$BUMP "$MESSAGE"
