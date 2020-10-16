@@ -10,10 +10,9 @@ proc check*(conf: Conf) =
     case exercise.status
     of exOutOfSync:
       logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
-      let missingCases = exercise.testCases
-        .filterIt(it.uuid in exercise.tests.missing)
-      for testCase in missingCases:
-        logNormal(&"       - {testCase.description} ({testCase.uuid})")
+      for testCase in exercise.testCases:
+        if testCase.uuid in exercise.tests.missing:
+          logNormal(&"       - {testCase.description} ({testCase.uuid})")
     of exInSync:
       logDetailed(&"[skip] {exercise.slug}: up-to-date")
     of exNoCanonicalData:
