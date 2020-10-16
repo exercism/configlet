@@ -1,5 +1,5 @@
 import std/[json, options, os, osproc, sequtils, strformat, strutils]
-import cli
+import cli, logger
 
 type
   ProbSpecsRepoExercise = object
@@ -26,7 +26,8 @@ proc initProbSpecsRepo: ProbSpecsRepo =
   result.dir = probSpecsDir()
 
 proc clone(repo: ProbSpecsRepo) =
-  let cmd = &"git clone --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
+  let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
+  logDetailed(&"Taking a shallow clone of problem-specifications repo into {repo.dir}")
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
 proc grainsWorkaround(repo: ProbSpecsRepo) =
