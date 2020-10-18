@@ -27,7 +27,7 @@ proc initProbSpecsRepo: ProbSpecsRepo =
 
 proc clone(repo: ProbSpecsRepo) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
-  logDetailed(&"Cloning the problem-specifications repo into {repo.dir}...")
+  logNormal(&"Cloning the problem-specifications repo into {repo.dir}...")
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
 proc grainsWorkaround(repo: ProbSpecsRepo) =
