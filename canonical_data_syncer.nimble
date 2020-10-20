@@ -9,5 +9,5 @@ bin           = @["canonical_data_syncer"]
 backend       = "c"
 
 # Dependencies
-requires "nim >= 1.2.6"
+requires "nim >= 1.4.0"
 requires "parsetoml"
