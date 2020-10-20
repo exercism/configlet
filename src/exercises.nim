@@ -45,7 +45,7 @@ proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCa
   for testCase in testCases:
     result.add(newExerciseTestCase(testCase))
 
-  let reimplementations = testCases.filterIt(it.reimplementation).mapIt((it.uuid, it.reimplements)).toTable()
+  let reimplementations = testCases.filterIt(it.isReimplementation).mapIt((it.uuid, it.reimplements)).toTable()
   let testCasesByUuids = result.newTableFrom(proc (testCase: ExerciseTestCase): string = testCase.uuid)
 
   for testCase in result:
@@ -84,9 +84,9 @@ proc toToml(exercise: Exercise): string =
     if testCase.uuid in exercise.tests.missing:
       continue
 
-    let included = testCase.uuid in exercise.tests.included
+    let isIncluded = testCase.uuid in exercise.tests.included
     result.add(&"\n# {testCase.description}")
-    result.add(&"\n\"{testCase.uuid}\" = {included}\n")
+    result.add(&"\n\"{testCase.uuid}\" = {isIncluded}\n")
 
 proc writeFile*(exercise: Exercise) =
   createDir(parentDir(exercise.testsFile))
