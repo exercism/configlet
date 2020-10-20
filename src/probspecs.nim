@@ -91,14 +91,14 @@ proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
 proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
   initProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
 
-proc initPropSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
   result.slug = repoExercise.slug
   result.testCases = parseProbSpecsTestCases(repoExercise)
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
     if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
-      result.add(initPropSpecsExercise(repoExercise))
+      result.add(initProbSpecsExercise(repoExercise))
 
 proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   let probSpecsRepo = initProbSpecsRepo()
