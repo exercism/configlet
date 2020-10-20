@@ -1,4 +1,5 @@
-import std/[options, os, parseopt, strformat, strutils, terminal]
+import std/[options, os, strformat, strutils, terminal]
+import pkg/[cligen/parseopt3]
 
 type
   Action* = enum
@@ -72,7 +73,7 @@ proc prefix(kind: CmdLineKind): string =
   case kind
   of cmdShortOption: "-"
   of cmdLongOption: "--"
-  of cmdArgument, cmdEnd: ""
+  of cmdArgument, cmdEnd, cmdError: ""
 
 proc showErrorForMissingVal(kind: CmdLineKind, key: string, val: string) =
   if val.len == 0:
@@ -145,5 +146,6 @@ proc processCmdLine*: Conf =
         showHelp()
       else:
         showError(&"invalid argument: '{key}'")
-    of cmdEnd:
+    # cmdError can only occur if we pass `requireSep = true` to `getopt`.
+    of cmdEnd, cmdError:
       discard
