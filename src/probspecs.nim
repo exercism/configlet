@@ -1,4 +1,4 @@
-import std/[json, options, os, osproc, sequtils, strformat, strutils]
+import std/[json, options, os, osproc, sequtils, strformat, strscans, strutils]
 import cli, logger
 
 type
@@ -102,12 +102,86 @@ proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExerc
     if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
       result.add(initProbSpecsExercise(repoExercise))
 
-proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
-  let probSpecsRepo = initProbSpecsRepo()
-
+template withDir(dir: string; body: untyped): untyped =
+  ## Changes the current directory to `dir` temporarily.
+  let startDir = getCurrentDir()
   try:
-    probSpecsRepo.remove()
-    probSpecsRepo.clone()
-    probSpecsRepo.findProbSpecsExercises(conf)
+    setCurrentDir(dir)
+    body
   finally:
-    probSpecsRepo.remove()
+    setCurrentDir(startDir)
+
+proc getNameOfRemote(probSpecsDir, location: string): string =
+  ## Returns the name of the remote in `probSpecsDir` that points to `location`.
+  ##
+  ## Raises an error if there is no remote that points to `location`.
+  # There's probably a better way to do this than parsing `git remote -v`.
+  let (remotes, errRemotes) = execCmdEx("git remote -v")
+  if errRemotes != 0:
+    showError("could not run `git remote -v` in the given " &
+              &"problem-specifications directory: '{probSpecsDir}'")
+  var remoteName, remoteUrl: string
+  for line in remotes.splitLines():
+    discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
+    if remoteUrl.contains(location):
+      return remoteName
+  showError(&"there is no remote that points to '{location}' in the " &
+            &"given problem-specifications directory: '{probSpecsDir}'")
+
+proc validate(probSpecsRepo: ProbSpecsRepo) =
+  ## Raises an error if the given `probSpecsRepo` is not a valid
+  ## `problem-specifications` repo that is up-to-date with upstream.
+  const mainBranchName = "master"
+
+  let probSpecsDir = probSpecsRepo.dir
+  logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
+
+  # Exit if the given directory does not exist.
+  if not dirExists(probSpecsDir):
+    showError("the given problem-specifications directory does not exist: " &
+              &"'{probSpecsDir}'")
+
+  withDir probSpecsDir:
+    # Exit if the given directory is not a git repo.
+    if execCmd("git rev-parse") != 0:
+      showError("the given problem-specifications directory is not a git " &
+                &"repository: '{probSpecsDir}'")
+
+    # Exit if the working directory is not clean.
+    if execCmd("git diff-index --quiet HEAD") != 0: # Ignores untracked files.
+      showError("the given problem-specifications working directory is not " &
+                &"clean: '{probSpecsDir}'")
+
+    # Find the name of the remote that points to upstream. Don't assume the
+    # remote is called 'upstream'.
+    # Exit if the repo has no remote that points to upstream.
+    const upstreamLocation = "github.com/exercism/problem-specifications"
+    let remoteName = getNameOfRemote(probSpecsDir, upstreamLocation)
+
+    # For now, just exit with an error if the HEAD is not up-to-date with
+    # upstream, even if it's possible to do a fast-forward merge.
+    if execCmd(&"git fetch --quiet {remoteName} {mainBranchName}") != 0:
+      showError(&"failed to fetch `{mainBranchName}` in " &
+                &"problem-specifications directory: '{probSpecsDir}'")
+
+    # Allow HEAD to be on a non-`master` branch, as long as it's up-to-date
+    # with `upstream/master`.
+    let (revHead, _) = execCmdEx("git rev-parse HEAD")
+    let (revUpstream, _) = execCmdEx(&"git rev-parse {remoteName}/{mainBranchName}")
+    if revHead != revUpstream:
+      showError("the given problem-specifications directory is not " &
+                &"up-to-date: '{probSpecsDir}'")
+
+proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
+  if conf.probSpecsDir.isSome():
+    let probSpecsRepo = ProbSpecsRepo(dir: conf.probSpecsDir.get())
+    probSpecsRepo.validate()
+    result = probSpecsRepo.findProbSpecsExercises(conf)
+  else:
+    let probSpecsRepo = initProbSpecsRepo()
+    try:
+      probSpecsRepo.remove()
+      probSpecsRepo.clone()
+      result = probSpecsRepo.findProbSpecsExercises(conf)
+    finally:
+      probSpecsRepo.remove()
