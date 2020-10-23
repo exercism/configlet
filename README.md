@@ -13,10 +13,10 @@ Options:
   -e, --exercise <slug>        Only sync this exercise
   -c, --check                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
-  -o, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -p, --probSpecsDir <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   -h, --help                   Show this help message and exit
-  -v, --version                Show this tool's version information and exit
+  --version                    Show this tool's version information and exit
 ```
 
 Running the application will prompt the user to choose whether to include or exclude missing tests. It will update the `tests.toml` file accordingly. If you only want a quick check, you can use the `--check` option.
