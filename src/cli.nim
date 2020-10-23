@@ -17,9 +17,10 @@ type
     mode*: Mode
     verbosity*: Verbosity
     probSpecsDir*: Option[string]
+    offline*: bool
 
   Opt = enum
-    optExercise, optCheck, optMode, optVerbosity, optProbSpecsDir,
+    optExercise, optCheck, optMode, optVerbosity, optProbSpecsDir, optOffline,
     optHelp, optVersion
 
   OptKey = tuple
@@ -35,11 +36,12 @@ const
     ("m", "mode"),
     ("v", "verbosity"),
     ("p", "probSpecsDir"),
+    ("o", "offline"),
     ("h", "help"),
     ("_", "version"), # No short option for `--version`
   ]
 
-  optsNoVal = {optCheck, optHelp, optVersion}
+  optsNoVal = {optCheck, optOffline, optHelp, optVersion}
 
 func short(opt: Opt): string =
   result = optKeys[opt].short
@@ -58,6 +60,7 @@ Options:
   -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
+  -{optOffline.short}, --{optOffline.long}                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
   -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
   --{optVersion.long}                    Show this tool's version information and exit"""
 
@@ -141,6 +144,8 @@ proc processCmdLine*: Conf =
       of optProbSpecsDir.short, optProbSpecsDir.long:
         showErrorForMissingVal(kind, key, val)
         result.probSpecsDir = some(val)
+      of optOffline.short, optOffline.long:
+        result.offline = true
       of optHelp.short, optHelp.long:
         showHelp()
       of optVersion.short, optVersion.long:
@@ -156,3 +161,6 @@ proc processCmdLine*: Conf =
     # cmdError can only occur if we pass `requireSep = true` to `getopt`.
     of cmdEnd, cmdError:
       discard
+
+  if result.offline and result.probSpecsDir.isNone():
+    showError("'-o, --offline' was given without passing '-p, --probSpecsDir'")

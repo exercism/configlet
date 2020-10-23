@@ -175,7 +175,8 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
 proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   if conf.probSpecsDir.isSome():
     let probSpecsRepo = ProbSpecsRepo(dir: conf.probSpecsDir.get())
-    probSpecsRepo.validate()
+    if not conf.offline:
+      probSpecsRepo.validate()
     result = probSpecsRepo.findProbSpecsExercises(conf)
   else:
     let probSpecsRepo = initProbSpecsRepo()
