@@ -83,5 +83,9 @@ proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
       result.add(newTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
-  let trackRepo = newTrackRepo()
+  let trackRepo =
+    if conf.trackDir.len > 0:
+      TrackRepo(dir: conf.trackDir)
+    else:
+      newTrackRepo()
   trackRepo.findTrackExercises(conf)
