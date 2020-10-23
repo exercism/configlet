@@ -54,7 +54,7 @@ proc showHelp =
 
 Options:
   -{optExercise.short}, --{optExercise.long} <slug>        Only sync this exercise
-  -{optCheck.short}, --{optCheck.long}                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
+  -{optCheck.short}, --{optCheck.long}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
   -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
