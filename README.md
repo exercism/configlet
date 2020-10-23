@@ -15,6 +15,7 @@ Options:
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -p, --probSpecsDir <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
+  -o, --offline                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
   -h, --help                   Show this help message and exit
   --version                    Show this tool's version information and exit
 ```
