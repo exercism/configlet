@@ -111,7 +111,7 @@ template withDir(dir: string; body: untyped): untyped =
   finally:
     setCurrentDir(startDir)
 
-proc getNameOfRemote(probSpecsDir, location: string): string =
+proc getNameOfRemote(probSpecsDir, host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`.
   ##
   ## Raises an error if there is no remote that points to `location`.
@@ -123,7 +123,7 @@ proc getNameOfRemote(probSpecsDir, location: string): string =
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
-    if remoteUrl.contains(location):
+    if remoteUrl.contains(host) and remoteUrl.contains(location):
       return remoteName
   showError(&"there is no remote that points to '{location}' in the " &
             &"given problem-specifications directory: '{probSpecsDir}'")
@@ -155,8 +155,9 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
     # Find the name of the remote that points to upstream. Don't assume the
     # remote is called 'upstream'.
     # Exit if the repo has no remote that points to upstream.
-    const upstreamLocation = "github.com/exercism/problem-specifications"
-    let remoteName = getNameOfRemote(probSpecsDir, upstreamLocation)
+    const upstreamHost = "github.com"
+    const upstreamLocation = "exercism/problem-specifications"
+    let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
     # For now, just exit with an error if the HEAD is not up-to-date with
     # upstream, even if it's possible to do a fast-forward merge.
