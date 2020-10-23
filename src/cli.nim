@@ -16,9 +16,11 @@ type
     exercise*: Option[string]
     mode*: Mode
     verbosity*: Verbosity
+    probSpecsDir*: Option[string]
 
   Opt = enum
-    optExercise, optCheck, optMode, optVerbosity, optHelp, optVersion
+    optExercise, optCheck, optMode, optVerbosity, optProbSpecsDir,
+    optHelp, optVersion
 
   OptKey = tuple
     short: string
@@ -32,6 +34,7 @@ const
     ("c", "check"),
     ("m", "mode"),
     ("o", "verbosity"),
+    ("p", "probSpecsDir"),
     ("h", "help"),
     ("v", "version"),
   ]
@@ -54,6 +57,7 @@ Options:
   -{optCheck.short}, --{optCheck.long}                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
   -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
   -{optVersion.short}, --{optVersion.long}                Show this tool's version information and exit"""
 
@@ -63,7 +67,7 @@ proc showVersion =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
   quit(0)
 
-proc showError(s: string) =
+proc showError*(s: string) =
   stdout.styledWrite(fgRed, "Error: ")
   stdout.write(s)
   stdout.write("\n\n")
@@ -134,6 +138,9 @@ proc processCmdLine*: Conf =
       of optVerbosity.short, optVerbosity.long:
         showErrorForMissingVal(kind, key, val)
         result.verbosity = parseVerbosity(kind, key, val)
+      of optProbSpecsDir.short, optProbSpecsDir.long:
+        showErrorForMissingVal(kind, key, val)
+        result.probSpecsDir = some(val)
       of optHelp.short, optHelp.long:
         showHelp()
       of optVersion.short, optVersion.long:
