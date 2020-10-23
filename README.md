@@ -11,7 +11,7 @@ Usage: canonical_data_syncer [options]
 
 Options:
   -e, --exercise <slug>        Only sync this exercise
-  -c, --check                  Check if there are missing tests. Doesn't update the tests. Terminates with a non-zero exit code if one or more tests are missing
+  -c, --check                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -p, --probSpecsDir <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
