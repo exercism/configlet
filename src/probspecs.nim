@@ -30,16 +30,6 @@ proc clone(repo: ProbSpecsRepo) =
   logNormal(&"Cloning the problem-specifications repo into {repo.dir}...")
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
-proc grainsWorkaround(repo: ProbSpecsRepo) =
-  ## Overwrites the canonical data file for `grains` so that it no longer
-  ## contains integers that are too large to store in a 64-bit signed integer.
-  ## Otherwise, we get an error when parsing it as JSON.
-  let grainsPath = repo.dir / "exercises" / "grains" / "canonical-data.json"
-  let s = readFile(grainsPath).multiReplace(
-    ("92233720368547758", "92233720368547758.0"),
-    ("184467440737095516", "184467440737095516.0"))
-  writeFile(grainsPath, s)
-
 proc remove(repo: ProbSpecsRepo) =
   removeDir(repo.dir)
 
@@ -88,8 +78,20 @@ proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
     for childNode in node["cases"].getElems():
       result.add(initProbSpecsTestCases(childNode))
 
+proc grainsWorkaround(grainsPath: string): JsonNode =
+  ## Parses the canonical data file for `grains`, replacing the too-large
+  ## integers with floats. This avoids an error that otherwise occurs when
+  ## parsing integers are too large to store as a 64-bit signed integer.
+  let sanitised = readFile(grainsPath).multiReplace(
+    ("92233720368547758", "92233720368547758.0"),
+    ("184467440737095516", "184467440737095516.0"))
+  result = parseJson(sanitised)
+
 proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
-  initProbSpecsTestCases(json.parseFile(repoExercise.canonicalDataFile))
+  if repoExercise.slug == "grains":
+    repoExercise.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
+  else:
+    repoExercise.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
 proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
   result.slug = repoExercise.slug
@@ -106,7 +108,6 @@ proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   try:
     probSpecsRepo.remove()
     probSpecsRepo.clone()
-    probSpecsRepo.grainsWorkaround()
     probSpecsRepo.findProbSpecsExercises(conf)
   finally:
     probSpecsRepo.remove()
