@@ -33,10 +33,10 @@ const
     ("e", "exercise"),
     ("c", "check"),
     ("m", "mode"),
-    ("o", "verbosity"),
+    ("v", "verbosity"),
     ("p", "probSpecsDir"),
     ("h", "help"),
-    ("v", "version"),
+    ("_", "version"), # No short option for `--version`
   ]
 
   optsNoVal = {optCheck, optHelp, optVersion}
@@ -59,7 +59,7 @@ Options:
   -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
   -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
-  -{optVersion.short}, --{optVersion.long}                Show this tool's version information and exit"""
+  --{optVersion.long}                    Show this tool's version information and exit"""
 
   quit(0)
 
