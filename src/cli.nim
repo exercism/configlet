@@ -117,6 +117,20 @@ proc initConf: Conf =
     verbosity: verNormal,
   )
 
+func normalizeOption(s: string): string =
+  ## Returns the string `s`, but converted to lowercase and without '_' or '-'.
+  result = newString(s.len)
+  var i = 0
+  for c in s:
+    if c in {'A'..'Z'}:
+      result[i] = toLowerAscii(c)
+      inc i
+    elif c notin {'_', '-'}:
+      result[i] = c
+      inc i
+  if i != s.len:
+    setLen(result, i)
+
 proc processCmdLine*: Conf =
   result = initConf()
 
@@ -129,7 +143,7 @@ proc processCmdLine*: Conf =
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
     of cmdLongOption, cmdShortOption:
-      case key
+      case key.normalizeOption()
       of optExercise.short, optExercise.long:
         showErrorForMissingVal(kind, key, val)
         result.exercise = some(val)
@@ -141,7 +155,7 @@ proc processCmdLine*: Conf =
       of optVerbosity.short, optVerbosity.long:
         showErrorForMissingVal(kind, key, val)
         result.verbosity = parseVerbosity(kind, key, val)
-      of optProbSpecsDir.short, optProbSpecsDir.long:
+      of optProbSpecsDir.short, optProbSpecsDir.long.toLowerAscii():
         showErrorForMissingVal(kind, key, val)
         result.probSpecsDir = some(val)
       of optOffline.short, optOffline.long:
