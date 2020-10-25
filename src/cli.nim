@@ -83,11 +83,6 @@ proc prefix(kind: CmdLineKind): string =
   of cmdLongOption: "--"
   of cmdArgument, cmdEnd, cmdError: ""
 
-proc showErrorForMissingVal(kind: CmdLineKind, key: string, val: string) =
-  if val.len == 0:
-    let msg = &"'{kind.prefix}{key}' was given without a value"
-    showError(msg)
-
 proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
   case val.toLowerAscii
   of "c", "choose":
@@ -132,6 +127,26 @@ func normalizeOption(s: string): string =
   if i != s.len:
     setLen(result, i)
 
+proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
+  ## Parses `key` as an `Opt`, using a style-insensitive comparison.
+  ##
+  ## Raises an error:
+  ## - if `key` cannot be parsed as an `Opt`.
+  ## - if the parsed `Opt` requires a value, but `val` is of zero-length.
+  var keyNormalized = normalizeOption(key)
+  # Parse a valid single-letter abbreviation.
+  if keyNormalized.len == 1:
+    for opt in Opt:
+      if keyNormalized[0] == short[opt]:
+        keyNormalized = $opt
+        break
+  try:
+    result = parseEnum[Opt](keyNormalized) # `parseEnum` does not normalize for `-`.
+    if val.len == 0 and result notin optsNoVal:
+      showError(&"'{prefix(kind)}{key}' was given without a value")
+  except ValueError:
+    showError(&"invalid option: '{prefix(kind)}{key}'")
+
 proc processCmdLine*: Conf =
   result = initConf()
 
@@ -144,29 +159,23 @@ proc processCmdLine*: Conf =
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
     of cmdLongOption, cmdShortOption:
-      case key.normalizeOption()
-      of $short[optExercise], $optExercise:
-        showErrorForMissingVal(kind, key, val)
+      case parseOption(kind, key, val)
+      of optExercise:
         result.exercise = some(val)
-      of $short[optCheck], $optCheck:
+      of optCheck:
         result.action = actCheck
-      of $short[optMode], $optMode:
-        showErrorForMissingVal(kind, key, val)
+      of optMode:
         result.mode = parseMode(kind, key, val)
-      of $short[optVerbosity], $optVerbosity:
-        showErrorForMissingVal(kind, key, val)
+      of optVerbosity:
         result.verbosity = parseVerbosity(kind, key, val)
-      of $short[optProbSpecsDir], toLowerAscii($optProbSpecsDir):
-        showErrorForMissingVal(kind, key, val)
+      of optProbSpecsDir:
         result.probSpecsDir = some(val)
-      of $short[optOffline], $optOffline:
+      of optOffline:
         result.offline = true
-      of $short[optHelp], $optHelp:
+      of optHelp:
         showHelp()
-      of $short[optVersion], $optVersion:
+      of optVersion:
         showVersion()
-      else:
-        showError(&"invalid option: '{kind.prefix}{key}'")
     of cmdArgument:
       case key.toLowerAscii
       of $optHelp:
