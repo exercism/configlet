@@ -20,40 +20,35 @@ type
     offline*: bool
 
   Opt = enum
-    optExercise, optCheck, optMode, optVerbosity, optProbSpecsDir, optOffline,
-    optHelp, optVersion
+    optExercise = "exercise"
+    optCheck = "check"
+    optMode = "mode"
+    optVerbosity = "verbosity"
+    optProbSpecsDir = "probSpecsDir"
+    optOffline = "offline"
+    optHelp = "help"
+    optVersion = "version"
 
-  OptKey = tuple
-    short: string
-    long: string
+func genShortKeys: array[Opt, char] =
+  ## Returns a lookup that gives the valid short option key for an `Opt`.
+  for opt in Opt:
+    if opt == optVersion:
+      result[opt] = '_' # No short option for `--version`
+    else:
+      result[opt] = ($opt)[0]
 
 const
   NimblePkgVersion {.strdefine.}: string = "unknown"
 
-  optKeys: array[Opt, OptKey] = [
-    ("e", "exercise"),
-    ("c", "check"),
-    ("m", "mode"),
-    ("v", "verbosity"),
-    ("p", "probSpecsDir"),
-    ("o", "offline"),
-    ("h", "help"),
-    ("_", "version"), # No short option for `--version`
-  ]
+  short = genShortKeys()
 
   optsNoVal = {optCheck, optOffline, optHelp, optVersion}
 
-func short(opt: Opt): string =
-  result = optKeys[opt].short
-
-func long(opt: Opt): string =
-  result = optKeys[opt].long
-
 func list(opt: Opt): string =
-  if opt.short == "_":
-    &"    --{opt.long}"
+  if short[opt] == '_':
+    &"    --{$opt}"
   else:
-    &"-{opt.short}, --{opt.long}"
+    &"-{short[opt]}, --{$opt}"
 
 proc showHelp =
   let applicationName = extractFilename(getAppFilename())
@@ -143,38 +138,38 @@ proc processCmdLine*: Conf =
   var shortNoVal: set[char]
   var longNoVal = newSeqOfCap[string](optsNoVal.len)
   for opt in optsNoVal:
-    shortNoVal.incl(opt.short[0])
-    longNoVal.add(opt.long)
+    shortNoVal.incl(short[opt])
+    longNoVal.add($opt)
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
     of cmdLongOption, cmdShortOption:
       case key.normalizeOption()
-      of optExercise.short, optExercise.long:
+      of $short[optExercise], $optExercise:
         showErrorForMissingVal(kind, key, val)
         result.exercise = some(val)
-      of optCheck.short, optCheck.long:
+      of $short[optCheck], $optCheck:
         result.action = actCheck
-      of optMode.short, optMode.long:
+      of $short[optMode], $optMode:
         showErrorForMissingVal(kind, key, val)
         result.mode = parseMode(kind, key, val)
-      of optVerbosity.short, optVerbosity.long:
+      of $short[optVerbosity], $optVerbosity:
         showErrorForMissingVal(kind, key, val)
         result.verbosity = parseVerbosity(kind, key, val)
-      of optProbSpecsDir.short, optProbSpecsDir.long.toLowerAscii():
+      of $short[optProbSpecsDir], toLowerAscii($optProbSpecsDir):
         showErrorForMissingVal(kind, key, val)
         result.probSpecsDir = some(val)
-      of optOffline.short, optOffline.long:
+      of $short[optOffline], $optOffline:
         result.offline = true
-      of optHelp.short, optHelp.long:
+      of $short[optHelp], $optHelp:
         showHelp()
-      of optVersion.short, optVersion.long:
+      of $short[optVersion], $optVersion:
         showVersion()
       else:
         showError(&"invalid option: '{kind.prefix}{key}'")
     of cmdArgument:
       case key.toLowerAscii
-      of optHelp.long:
+      of $optHelp:
         showHelp()
       else:
         showError(&"invalid argument: '{key}'")
