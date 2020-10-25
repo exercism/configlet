@@ -6,7 +6,7 @@ type
     actSync, actCheck
 
   Mode* = enum
-    modeChoose, modeIncludeMissing, modeExcludeMissing
+    modeChoose, modeInclude, modeExclude
 
   Verbosity* = enum
     verQuiet, verNormal, verDetailed
@@ -88,9 +88,9 @@ proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
   of "c", "choose":
     result = modeChoose
   of "i", "include":
-    result = modeIncludeMissing
+    result = modeInclude
   of "e", "exclude":
-    result = modeExcludeMissing
+    result = modeExclude
   else:
     showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
