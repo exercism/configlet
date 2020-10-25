@@ -6,10 +6,14 @@ type
     actSync, actCheck
 
   Mode* = enum
-    modeChoose, modeInclude, modeExclude
+    modeChoose = "choose"
+    modeInclude = "include"
+    modeExclude = "exclude"
 
   Verbosity* = enum
-    verQuiet, verNormal, verDetailed
+    verQuiet = "quiet"
+    verNormal = "normal"
+    verDetailed = "detailed"
 
   Conf* = object
     action*: Action
@@ -50,6 +54,19 @@ func list(opt: Opt): string =
   else:
     &"-{short[opt]}, --{$opt}"
 
+func first(s: string): string =
+  # Returns the first character of `s` as a string.
+  result = newString(1)
+  result[0] = s[0]
+
+func allowedValues(T: typedesc[enum]): string =
+  ## Returns a string that describes the allowed values for an enum `T`.
+  result = "Allowed values: "
+  for val in T:
+    result &= &"{($val)[0]}"
+    result &= &"[{($val)[1 .. ^1]}], "
+  setLen(result, result.len - 2)
+
 proc showHelp =
   let applicationName = extractFilename(getAppFilename())
 
@@ -58,8 +75,8 @@ proc showHelp =
 Options:
   {list(optExercise)} <slug>        Only sync this exercise
   {list(optCheck)}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
-  {list(optMode)} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
-  {list(optVerbosity)} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  {list(optMode)} <mode>            What to do with missing test cases. {allowedValues(Mode)}
+  {list(optVerbosity)} <verbosity>  The verbosity of output. {allowedValues(Verbosity)}
   {list(optProbSpecsDir)} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   {list(optOffline)}                Do not check that the directory specified by `{list(optProbSpecsDir)}` is up-to-date
   {list(optHelp)}                   Show this help message and exit
@@ -85,22 +102,22 @@ proc prefix(kind: CmdLineKind): string =
 
 proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
   case val.toLowerAscii
-  of "c", "choose":
+  of first($modeChoose), $modeChoose:
     result = modeChoose
-  of "i", "include":
+  of first($modeInclude), $modeInclude:
     result = modeInclude
-  of "e", "exclude":
+  of first($modeExclude), $modeExclude:
     result = modeExclude
   else:
     showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
 proc parseVerbosity(kind: CmdLineKind, key: string, val: string): Verbosity =
   case val.toLowerAscii
-  of "q", "quiet":
+  of first($verQuiet), $verQuiet:
     result = verQuiet
-  of "n", "normal":
+  of first($verNormal), $verNormal:
     result = verNormal
-  of "d", "detailed":
+  of first($verDetailed), $verDetailed:
     result = verDetailed
   else:
     showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
