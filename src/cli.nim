@@ -49,20 +49,26 @@ func short(opt: Opt): string =
 func long(opt: Opt): string =
   result = optKeys[opt].long
 
+func list(opt: Opt): string =
+  if opt.short == "_":
+    &"    --{opt.long}"
+  else:
+    &"-{opt.short}, --{opt.long}"
+
 proc showHelp =
   let applicationName = extractFilename(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
 
 Options:
-  -{optExercise.short}, --{optExercise.long} <slug>        Only sync this exercise
-  -{optCheck.short}, --{optCheck.long}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
-  -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
-  -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
-  -{optOffline.short}, --{optOffline.long}                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
-  -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
-      --{optVersion.long}                Show this tool's version information and exit"""
+  {list(optExercise)} <slug>        Only sync this exercise
+  {list(optCheck)}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
+  {list(optMode)} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
+  {list(optVerbosity)} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  {list(optProbSpecsDir)} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
+  {list(optOffline)}                Do not check that the directory specified by `{list(optProbSpecsDir)}` is up-to-date
+  {list(optHelp)}                   Show this help message and exit
+  {list(optVersion)}                Show this tool's version information and exit"""
 
   quit(0)
 
@@ -177,4 +183,4 @@ proc processCmdLine*: Conf =
       discard
 
   if result.offline and result.probSpecsDir.isNone():
-    showError("'-o, --offline' was given without passing '-p, --probSpecsDir'")
+    showError(&"'{list(optOffline)}' was given without passing '{list(optProbSpecsDir)}'")
