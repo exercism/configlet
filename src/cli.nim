@@ -54,11 +54,6 @@ func list(opt: Opt): string =
   else:
     &"-{short[opt]}, --{$opt}"
 
-func first(s: string): string =
-  # Returns the first character of `s` as a string.
-  result = newString(1)
-  result[0] = s[0]
-
 func allowedValues(T: typedesc[enum]): string =
   ## Returns a string that describes the allowed values for an enum `T`.
   result = "Allowed values: "
@@ -99,28 +94,6 @@ proc prefix(kind: CmdLineKind): string =
   of cmdShortOption: "-"
   of cmdLongOption: "--"
   of cmdArgument, cmdEnd, cmdError: ""
-
-proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
-  case val.toLowerAscii
-  of first($modeChoose), $modeChoose:
-    result = modeChoose
-  of first($modeInclude), $modeInclude:
-    result = modeInclude
-  of first($modeExclude), $modeExclude:
-    result = modeExclude
-  else:
-    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
-
-proc parseVerbosity(kind: CmdLineKind, key: string, val: string): Verbosity =
-  case val.toLowerAscii
-  of first($verQuiet), $verQuiet:
-    result = verQuiet
-  of first($verNormal), $verNormal:
-    result = verNormal
-  of first($verDetailed), $verDetailed:
-    result = verDetailed
-  else:
-    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
 proc initConf: Conf =
   result = Conf(
@@ -164,6 +137,23 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
   except ValueError:
     showError(&"invalid option: '{prefix(kind)}{key}'")
 
+proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
+  ## Parses `val` as a value of the enum `T`, using a case-insensitive
+  ## comparsion.
+  ##
+  ## Exits with an error if `key` cannot be parsed as a value of `T`.
+  var valNormalized = toLowerAscii(val)
+  # Convert a valid single-letter abbreviation to the string value of the enum.
+  if valNormalized.len == 1:
+    for e in T:
+      if valNormalized[0] == ($e)[0]:
+        valNormalized = $e
+        break
+  try:
+    result = parseEnum[T](valNormalized)
+  except ValueError:
+    showError(&"invalid value for '{prefix(kind)}{key}': '{val}'")
+
 proc processCmdLine*: Conf =
   result = initConf()
 
@@ -182,9 +172,9 @@ proc processCmdLine*: Conf =
       of optCheck:
         result.action = actCheck
       of optMode:
-        result.mode = parseMode(kind, key, val)
+        result.mode = parseVal[Mode](kind, key, val)
       of optVerbosity:
-        result.verbosity = parseVerbosity(kind, key, val)
+        result.verbosity = parseVal[Verbosity](kind, key, val)
       of optProbSpecsDir:
         result.probSpecsDir = some(val)
       of optOffline:
