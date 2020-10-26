@@ -101,6 +101,8 @@ proc initConf: Conf =
     exercise: none(string),
     mode: modeChoose,
     verbosity: verNormal,
+    probSpecsDir: none(string),
+    offline: false,
   )
 
 func normalizeOption(s: string): string =
