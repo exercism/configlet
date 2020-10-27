@@ -62,7 +62,7 @@ Options:
   -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   -{optOffline.short}, --{optOffline.long}                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
   -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
-  --{optVersion.long}                    Show this tool's version information and exit"""
+      --{optVersion.long}                Show this tool's version information and exit"""
 
   quit(0)
 
