@@ -1,4 +1,4 @@
-import std/[json, options, os, sets]
+import std/[json, os, sets]
 import pkg/parsetoml
 import cli
 
@@ -79,7 +79,7 @@ proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
 
 proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
   for repoExercise in repo.exercises:
-    if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
+    if conf.exercise.len == 0 or conf.exercise == repoExercise.slug:
       result.add(newTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
