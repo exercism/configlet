@@ -58,11 +58,22 @@ func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
 const
   (shortNoVal, longNoVal) = generateNoVals()
 
+func camelToKebab(s: string): string =
+  ## Converts the string `s` to lowercase, adding a `-` before each previously
+  ## uppercase letter.
+  result = newStringOfCap(s.len + 2)
+  for c in s:
+    if c in {'A'..'Z'}:
+      result &= '-'
+      result &= toLowerAscii(c)
+    else:
+      result &= c
+
 func list(opt: Opt): string =
   if short[opt] == '_':
-    &"    --{$opt}"
+    &"    --{camelToKebab($opt)}"
   else:
-    &"-{short[opt]}, --{$opt}"
+    &"-{short[opt]}, --{camelToKebab($opt)}"
 
 func allowedValues(T: typedesc[enum]): string =
   ## Returns a string that describes the allowed values for an enum `T`.
@@ -82,7 +93,7 @@ Options:
   {list(optCheck)}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
   {list(optMode)} <mode>            What to do with missing test cases. {allowedValues(Mode)}
   {list(optVerbosity)} <verbosity>  The verbosity of output. {allowedValues(Verbosity)}
-  {list(optProbSpecsDir)} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
+  {list(optProbSpecsDir)} <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
   {list(optOffline)}                Do not check that the directory specified by `{list(optProbSpecsDir)}` is up-to-date
   {list(optHelp)}                   Show this help message and exit
   {list(optVersion)}                Show this tool's version information and exit"""
