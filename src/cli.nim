@@ -6,10 +6,14 @@ type
     actSync, actCheck
 
   Mode* = enum
-    modeChoose, modeIncludeMissing, modeExcludeMissing
+    modeChoose = "choose"
+    modeInclude = "include"
+    modeExclude = "exclude"
 
   Verbosity* = enum
-    verQuiet, verNormal, verDetailed
+    verQuiet = "quiet"
+    verNormal = "normal"
+    verDetailed = "detailed"
 
   Conf* = object
     action*: Action
@@ -20,34 +24,43 @@ type
     offline*: bool
 
   Opt = enum
-    optExercise, optCheck, optMode, optVerbosity, optProbSpecsDir, optOffline,
-    optHelp, optVersion
+    optExercise = "exercise"
+    optCheck = "check"
+    optMode = "mode"
+    optVerbosity = "verbosity"
+    optProbSpecsDir = "probSpecsDir"
+    optOffline = "offline"
+    optHelp = "help"
+    optVersion = "version"
 
-  OptKey = tuple
-    short: string
-    long: string
+func genShortKeys: array[Opt, char] =
+  ## Returns a lookup that gives the valid short option key for an `Opt`.
+  for opt in Opt:
+    if opt == optVersion:
+      result[opt] = '_' # No short option for `--version`
+    else:
+      result[opt] = ($opt)[0]
 
 const
   NimblePkgVersion {.strdefine.}: string = "unknown"
 
-  optKeys: array[Opt, OptKey] = [
-    ("e", "exercise"),
-    ("c", "check"),
-    ("m", "mode"),
-    ("v", "verbosity"),
-    ("p", "probSpecsDir"),
-    ("o", "offline"),
-    ("h", "help"),
-    ("_", "version"), # No short option for `--version`
-  ]
+  short = genShortKeys()
 
   optsNoVal = {optCheck, optOffline, optHelp, optVersion}
 
-func short(opt: Opt): string =
-  result = optKeys[opt].short
+func list(opt: Opt): string =
+  if short[opt] == '_':
+    &"    --{$opt}"
+  else:
+    &"-{short[opt]}, --{$opt}"
 
-func long(opt: Opt): string =
-  result = optKeys[opt].long
+func allowedValues(T: typedesc[enum]): string =
+  ## Returns a string that describes the allowed values for an enum `T`.
+  result = "Allowed values: "
+  for val in T:
+    result &= &"{($val)[0]}"
+    result &= &"[{($val)[1 .. ^1]}], "
+  setLen(result, result.len - 2)
 
 proc showHelp =
   let applicationName = extractFilename(getAppFilename())
@@ -55,14 +68,14 @@ proc showHelp =
   echo &"""Usage: {applicationName} [options]
 
 Options:
-  -{optExercise.short}, --{optExercise.long} <slug>        Only sync this exercise
-  -{optCheck.short}, --{optCheck.long}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
-  -{optMode.short}, --{optMode.long} <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
-  -{optVerbosity.short}, --{optVerbosity.long} <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -{optProbSpecsDir.short}, --{optProbSpecsDir.long} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
-  -{optOffline.short}, --{optOffline.long}                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
-  -{optHelp.short}, --{optHelp.long}                   Show this help message and exit
-      --{optVersion.long}                Show this tool's version information and exit"""
+  {list(optExercise)} <slug>        Only sync this exercise
+  {list(optCheck)}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
+  {list(optMode)} <mode>            What to do with missing test cases. {allowedValues(Mode)}
+  {list(optVerbosity)} <verbosity>  The verbosity of output. {allowedValues(Verbosity)}
+  {list(optProbSpecsDir)} <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
+  {list(optOffline)}                Do not check that the directory specified by `{list(optProbSpecsDir)}` is up-to-date
+  {list(optHelp)}                   Show this help message and exit
+  {list(optVersion)}                Show this tool's version information and exit"""
 
   quit(0)
 
@@ -81,33 +94,6 @@ proc prefix(kind: CmdLineKind): string =
   of cmdShortOption: "-"
   of cmdLongOption: "--"
   of cmdArgument, cmdEnd, cmdError: ""
-
-proc showErrorForMissingVal(kind: CmdLineKind, key: string, val: string) =
-  if val.len == 0:
-    let msg = &"'{kind.prefix}{key}' was given without a value"
-    showError(msg)
-
-proc parseMode(kind: CmdLineKind, key: string, val: string): Mode =
-  case val.toLowerAscii
-  of "c", "choose":
-    result = modeChoose
-  of "i", "include":
-    result = modeIncludeMissing
-  of "e", "exclude":
-    result = modeExcludeMissing
-  else:
-    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
-
-proc parseVerbosity(kind: CmdLineKind, key: string, val: string): Verbosity =
-  case val.toLowerAscii
-  of "q", "quiet":
-    result = verQuiet
-  of "n", "normal":
-    result = verNormal
-  of "d", "detailed":
-    result = verDetailed
-  else:
-    showError(&"invalid value for '{kind.prefix}{key}': '{val}'")
 
 proc initConf: Conf =
   result = Conf(
@@ -131,44 +117,75 @@ func normalizeOption(s: string): string =
   if i != s.len:
     setLen(result, i)
 
+proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
+  ## Parses `key` as an `Opt`, using a style-insensitive comparison.
+  ##
+  ## Raises an error:
+  ## - if `key` cannot be parsed as an `Opt`.
+  ## - if the parsed `Opt` requires a value, but `val` is of zero-length.
+  var keyNormalized = normalizeOption(key)
+  # Parse a valid single-letter abbreviation.
+  if keyNormalized.len == 1:
+    for opt in Opt:
+      if keyNormalized[0] == short[opt]:
+        keyNormalized = $opt
+        break
+  try:
+    result = parseEnum[Opt](keyNormalized) # `parseEnum` does not normalize for `-`.
+    if val.len == 0 and result notin optsNoVal:
+      showError(&"'{prefix(kind)}{key}' was given without a value")
+  except ValueError:
+    showError(&"invalid option: '{prefix(kind)}{key}'")
+
+proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
+  ## Parses `val` as a value of the enum `T`, using a case-insensitive
+  ## comparsion.
+  ##
+  ## Exits with an error if `key` cannot be parsed as a value of `T`.
+  var valNormalized = toLowerAscii(val)
+  # Convert a valid single-letter abbreviation to the string value of the enum.
+  if valNormalized.len == 1:
+    for e in T:
+      if valNormalized[0] == ($e)[0]:
+        valNormalized = $e
+        break
+  try:
+    result = parseEnum[T](valNormalized)
+  except ValueError:
+    showError(&"invalid value for '{prefix(kind)}{key}': '{val}'")
+
 proc processCmdLine*: Conf =
   result = initConf()
 
   var shortNoVal: set[char]
   var longNoVal = newSeqOfCap[string](optsNoVal.len)
   for opt in optsNoVal:
-    shortNoVal.incl(opt.short[0])
-    longNoVal.add(opt.long)
+    shortNoVal.incl(short[opt])
+    longNoVal.add($opt)
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
     of cmdLongOption, cmdShortOption:
-      case key.normalizeOption()
-      of optExercise.short, optExercise.long:
-        showErrorForMissingVal(kind, key, val)
+      case parseOption(kind, key, val)
+      of optExercise:
         result.exercise = some(val)
-      of optCheck.short, optCheck.long:
+      of optCheck:
         result.action = actCheck
-      of optMode.short, optMode.long:
-        showErrorForMissingVal(kind, key, val)
-        result.mode = parseMode(kind, key, val)
-      of optVerbosity.short, optVerbosity.long:
-        showErrorForMissingVal(kind, key, val)
-        result.verbosity = parseVerbosity(kind, key, val)
-      of optProbSpecsDir.short, optProbSpecsDir.long.toLowerAscii():
-        showErrorForMissingVal(kind, key, val)
+      of optMode:
+        result.mode = parseVal[Mode](kind, key, val)
+      of optVerbosity:
+        result.verbosity = parseVal[Verbosity](kind, key, val)
+      of optProbSpecsDir:
         result.probSpecsDir = some(val)
-      of optOffline.short, optOffline.long:
+      of optOffline:
         result.offline = true
-      of optHelp.short, optHelp.long:
+      of optHelp:
         showHelp()
-      of optVersion.short, optVersion.long:
+      of optVersion:
         showVersion()
-      else:
-        showError(&"invalid option: '{kind.prefix}{key}'")
     of cmdArgument:
       case key.toLowerAscii
-      of optHelp.long:
+      of $optHelp:
         showHelp()
       else:
         showError(&"invalid argument: '{key}'")
@@ -177,4 +194,4 @@ proc processCmdLine*: Conf =
       discard
 
   if result.offline and result.probSpecsDir.isNone():
-    showError("'-o, --offline' was given without passing '-p, --probSpecsDir'")
+    showError(&"'{list(optOffline)}' was given without passing '{list(optProbSpecsDir)}'")
