@@ -48,6 +48,19 @@ const
 
   optsNoVal = {optCheck, optOffline, optHelp, optVersion}
 
+func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
+  ## Returns the short and long keys for the options in `optsNoVal`.
+  result.shortNoVal = {}
+  result.longNoVal = newSeq[string](optsNoVal.len)
+  var i = 0
+  for opt in optsNoVal:
+    result.shortNoVal.incl(short[opt])
+    result.longNoVal[i] = $opt
+    inc i
+
+const
+  (shortNoVal, longNoVal) = generateNoVals()
+
 func list(opt: Opt): string =
   if short[opt] == '_':
     &"    --{$opt}"
@@ -156,12 +169,6 @@ proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
 
 proc processCmdLine*: Conf =
   result = initConf()
-
-  var shortNoVal: set[char]
-  var longNoVal = newSeqOfCap[string](optsNoVal.len)
-  for opt in optsNoVal:
-    shortNoVal.incl(short[opt])
-    longNoVal.add($opt)
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
