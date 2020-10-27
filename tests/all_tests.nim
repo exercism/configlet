@@ -1,3 +1,3 @@
-import ../tests/[
+import "."/[
   test_probspecs,
 ]
