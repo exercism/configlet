@@ -17,7 +17,7 @@ Options:
   -p, --probSpecsDir <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
   -h, --help                   Show this help message and exit
-  --version                    Show this tool's version information and exit
+      --version                Show this tool's version information and exit
 ```
 
 Running the application will prompt the user to choose whether to include or exclude missing tests. It will update the `tests.toml` file accordingly. If you only want a quick check, you can use the `--check` option.
