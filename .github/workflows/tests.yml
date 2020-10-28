@@ -36,8 +36,19 @@ jobs:
         with:
           nim-version: "1.4.0"
 
+      - name: Install musl on Linux
+        if: matrix.target.os == 'linux'
+        run: ./.github/bin/linux-install-build-tools
+
       - name: Install our Nimble dependencies
         run: nimble -y install --depsOnly
+
+      - name: Build binary
+        shell: bash
+        run: ./.github/bin/build
+        env:
+          OS: ${{ matrix.target.os }}
+          ARCH: ${{ matrix.target.arch }}
 
       - name: Run `tests/all_tests.nim`
         run: nim c --styleCheck:error -r ./tests/all_tests.nim
