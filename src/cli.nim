@@ -2,9 +2,6 @@ import std/[options, os, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3]
 
 type
-  Action* = enum
-    actSync, actCheck
-
   Mode* = enum
     modeChoose = "choose"
     modeInclude = "include"
@@ -16,8 +13,8 @@ type
     verDetailed = "detailed"
 
   Conf* = object
-    action*: Action
     exercise*: Option[string]
+    check*: bool
     mode*: Mode
     verbosity*: Verbosity
     probSpecsDir*: Option[string]
@@ -110,8 +107,8 @@ proc prefix(kind: CmdLineKind): string =
 
 proc initConf: Conf =
   result = Conf(
-    action: actSync,
     exercise: none(string),
+    check: false,
     mode: modeChoose,
     verbosity: verNormal,
     probSpecsDir: none(string),
@@ -179,7 +176,7 @@ proc processCmdLine*: Conf =
       of optExercise:
         result.exercise = some(val)
       of optCheck:
-        result.action = actCheck
+        result.check = true
       of optMode:
         result.mode = parseVal[Mode](kind, key, val)
       of optVerbosity:
