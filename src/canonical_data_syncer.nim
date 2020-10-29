@@ -9,10 +9,9 @@ proc main =
 
   setupLogging(conf)
 
-  case conf.action
-  of actSync:
-    sync(conf)
-  of actCheck:
+  if conf.check:
     check(conf)
+  else:
+    sync(conf)
 
 main()
