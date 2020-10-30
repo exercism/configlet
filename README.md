@@ -14,8 +14,8 @@ Options:
   -c, --check                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
-  -p, --probSpecsDir <dir>     Use this `problem-specifications` directory, rather than cloning temporarily
-  -o, --offline                Do not check that the directory specified by `-p, --probSpecsDir` is up-to-date
+  -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
+  -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
   -h, --help                   Show this help message and exit
       --version                Show this tool's version information and exit
 ```

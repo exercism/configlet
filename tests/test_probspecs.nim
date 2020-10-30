@@ -5,7 +5,7 @@ import cli, probspecs
 type
   ProblemSpecsDir = enum
     psFresh = "fresh clone"
-    psExisting = "existing dir (simulate the `--probSpecsDir` option)"
+    psExisting = "existing dir (simulate the `--prob-specs-dir` option)"
 
 proc main =
   let existingDir = getTempDir() / "test_probspecs_problem-specifications"
