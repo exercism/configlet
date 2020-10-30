@@ -1,4 +1,4 @@
-import std/[json, options, os, osproc, sequtils, strformat, strscans, strutils]
+import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
 import cli, logger
 
 type
@@ -99,7 +99,7 @@ proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExerci
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
-    if conf.exercise.isNone or conf.exercise.get() == repoExercise.slug:
+    if conf.exercise.len == 0 or conf.exercise == repoExercise.slug:
       result.add(initProbSpecsExercise(repoExercise))
 
 template withDir(dir: string; body: untyped): untyped =
@@ -175,8 +175,8 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
                 &"up-to-date: '{probSpecsDir}'")
 
 proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
-  if conf.probSpecsDir.isSome():
-    let probSpecsRepo = ProbSpecsRepo(dir: conf.probSpecsDir.get())
+  if conf.probSpecsDir.len > 0:
+    let probSpecsRepo = ProbSpecsRepo(dir: conf.probSpecsDir)
     if not conf.offline:
       probSpecsRepo.validate()
     result = probSpecsRepo.findProbSpecsExercises(conf)
