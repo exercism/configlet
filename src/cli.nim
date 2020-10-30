@@ -1,4 +1,4 @@
-import std/[options, os, strformat, strutils, terminal]
+import std/[os, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3]
 
 type
@@ -13,11 +13,11 @@ type
     verDetailed = "detailed"
 
   Conf* = object
-    exercise*: Option[string]
+    exercise*: string
     check*: bool
     mode*: Mode
     verbosity*: Verbosity
-    probSpecsDir*: Option[string]
+    probSpecsDir*: string
     offline*: bool
 
   Opt = enum
@@ -107,11 +107,11 @@ proc prefix(kind: CmdLineKind): string =
 
 proc initConf: Conf =
   result = Conf(
-    exercise: none(string),
+    exercise: "",
     check: false,
     mode: modeChoose,
     verbosity: verNormal,
-    probSpecsDir: none(string),
+    probSpecsDir: "",
     offline: false,
   )
 
@@ -174,7 +174,7 @@ proc processCmdLine*: Conf =
     of cmdLongOption, cmdShortOption:
       case parseOption(kind, key, val)
       of optExercise:
-        result.exercise = some(val)
+        result.exercise = val
       of optCheck:
         result.check = true
       of optMode:
@@ -182,7 +182,7 @@ proc processCmdLine*: Conf =
       of optVerbosity:
         result.verbosity = parseVal[Verbosity](kind, key, val)
       of optProbSpecsDir:
-        result.probSpecsDir = some(val)
+        result.probSpecsDir = val
       of optOffline:
         result.offline = true
       of optHelp:
@@ -199,5 +199,5 @@ proc processCmdLine*: Conf =
     of cmdEnd, cmdError:
       discard
 
-  if result.offline and result.probSpecsDir.isNone():
+  if result.offline and result.probSpecsDir.len == 0:
     showError(&"'{list(optOffline)}' was given without passing '{list(optProbSpecsDir)}'")

@@ -1,5 +1,5 @@
 # This module contains tests for `src/probspecs.nim`
-import std/[json, options, os, osproc, strformat, unittest]
+import std/[json, os, osproc, strformat, unittest]
 import cli, probspecs
 
 type
@@ -23,8 +23,8 @@ proc main =
 
       let probSpecsDir =
         case ps
-        of psFresh: none(string)
-        of psExisting: some(existingDir)
+        of psFresh: ""
+        of psExisting: existingDir
 
       let conf = Conf(probSpecsDir: probSpecsDir)
       let probSpecsExercises = findProbSpecsExercises(conf)
