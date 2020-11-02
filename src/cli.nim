@@ -83,7 +83,7 @@ func allowedValues(T: typedesc[enum]): string =
     result &= &"[{($val)[1 .. ^1]}], "
   setLen(result, result.len - 2)
 
-proc showHelp =
+proc showHelp(exitCode: range[0..255] = 0) =
   let applicationName = extractFilename(getAppFilename())
 
   echo &"""Usage: {applicationName} [options]
@@ -98,7 +98,7 @@ Options:
   {list(optHelp)}                   Show this help message and exit
   {list(optVersion)}                Show this tool's version information and exit"""
 
-  quit(0)
+  quit(exitCode)
 
 proc showVersion =
   echo &"Canonical Data Syncer v{NimblePkgVersion}"
@@ -108,7 +108,7 @@ proc showError*(s: string) =
   stdout.styledWrite(fgRed, "Error: ")
   stdout.write(s)
   stdout.write("\n\n")
-  showHelp()
+  showHelp(exitCode = 1)
 
 proc prefix(kind: CmdLineKind): string =
   case kind

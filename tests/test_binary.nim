@@ -13,45 +13,51 @@ proc main =
 
   suite "help as an argument":
     test "help":
-      let (outp, _) = execCmdEx(&"{binaryPath} help")
+      let (outp, exitCode) = execCmdEx(&"{binaryPath} help")
       check:
         outp.startsWith(helpStart)
+        exitCode == 0
 
   suite "help as an option":
     for goodHelp in ["-h", "--help"]:
       test goodHelp:
-        let (outp, _) = execCmdEx(&"{binaryPath} {goodHelp}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
           outp.startsWith(helpStart)
+          exitCode == 0
 
   suite "help via normalization":
     for goodHelp in ["-H", "--HELP", "--hElP", "--HeLp", "--H--e-L__p"]:
       test goodHelp:
-        let (outp, _) = execCmdEx(&"{binaryPath} {goodHelp}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
           outp.startsWith(helpStart)
+          exitCode == 0
 
   suite "help is always printed if present":
     for goodHelp in ["--help --check", "-ch", "-hc", "-ho", "-oh"]:
       test goodHelp:
-        let (outp, _) = execCmdEx(&"{binaryPath} {goodHelp}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
           outp.startsWith(helpStart)
+          exitCode == 0
 
   suite "invalid argument":
     for badArg in ["h", "halp", "-", "_", "__", "foo", "FOO", "f-o-o", "f_o_o",
                    "f--o"]:
       test badArg:
-        let (outp, _) = execCmdEx(&"{binaryPath} {badArg}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {badArg}")
         check:
           outp.contains(&"invalid argument: '{badArg}'")
+          exitCode == 1
 
   suite "invalid option":
     for badOption in ["--halp", "--checkk"]:
       test badOption:
-        let (outp, _) = execCmdEx(&"{binaryPath} {badOption}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {badOption}")
         check:
           outp.contains(&"invalid option: '{badOption}'")
+          exitCode == 1
 
   suite "invalid value":
     for (option, badValue) in [("--mode", "foo"), ("--mode", "f"),
@@ -60,23 +66,26 @@ proc main =
                                ("-m", "-mc"), ("-m", "--mode")]:
       for sep in [" ", "=", ":"]:
         test &"{option}{sep}{badValue}":
-          let (outp, _) = execCmdEx(&"{binaryPath} {option}{sep}{badValue}")
+          let (outp, exitCode) = execCmdEx(&"{binaryPath} {option}{sep}{badValue}")
           check:
             outp.contains(&"invalid value for '{option}': '{badValue}'")
+            exitCode == 1
 
   suite "version":
     test "--version":
-      let (outp, _) = execCmdEx(&"{binaryPath} --version")
+      let (outp, exitCode) = execCmdEx(&"{binaryPath} --version")
       var major, minor, patch: int
       check:
         outp.scanf("Canonical Data Syncer v$i.$i.$i$s$.", major, minor, patch)
+        exitCode == 0
 
   suite "offline":
     for offline in ["--offline", "-o"]:
       test &"requires --prob-specs-dir: {offline}":
-        let (outp, _) = execCmdEx(&"{binaryPath} {offline}")
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {offline}")
         check:
           outp.contains("'-o, --offline' was given without passing '-p, --prob-specs-dir'")
+          exitCode == 1
 
 main()
 {.used.}
