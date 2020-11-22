@@ -3,7 +3,7 @@
 ARTIFACTS_DIR="artifacts"
 mkdir -p $ARTIFACTS_DIR
 
-BINARY_NAME="canonical_data_syncer"
+BINARY_NAME="configlet_v3"
 
 case "$OS" in
   windows)

@@ -115,7 +115,7 @@ proc sync*(conf: Conf) =
   logNormal("Syncing exercises...")
 
   let exercises = findExercises(conf)
-  let syncedExercises = sync(exercises, conf.mode)
+  let syncedExercises = sync(exercises, conf.action.mode)
 
   if syncedExercises.anyIt(it.status == exOutOfSync):
     logNormal("[warn] some exercises are still missing test cases")

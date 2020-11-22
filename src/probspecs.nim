@@ -99,7 +99,7 @@ proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExerci
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():
-    if conf.exercise.len == 0 or conf.exercise == repoExercise.slug:
+    if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(initProbSpecsExercise(repoExercise))
 
 template withDir(dir: string; body: untyped): untyped =
@@ -175,9 +175,9 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
                 &"up-to-date: '{probSpecsDir}'")
 
 proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
-  if conf.probSpecsDir.len > 0:
-    let probSpecsRepo = ProbSpecsRepo(dir: conf.probSpecsDir)
-    if not conf.offline:
+  if conf.action.probSpecsDir.len > 0:
+    let probSpecsRepo = ProbSpecsRepo(dir: conf.action.probSpecsDir)
+    if not conf.action.offline:
       probSpecsRepo.validate()
     result = probSpecsRepo.findProbSpecsExercises(conf)
   else:

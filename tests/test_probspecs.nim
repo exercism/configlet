@@ -26,7 +26,8 @@ proc main =
         of psFresh: ""
         of psExisting: existingDir
 
-      let conf = Conf(probSpecsDir: probSpecsDir)
+      let action = initAction(actSync, probSpecsDir)
+      let conf = initConf(action)
       let probSpecsExercises = findProbSpecsExercises(conf)
 
       test "can return the exercises":
