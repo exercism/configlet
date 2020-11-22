@@ -1,5 +1,5 @@
 Function DownloadUrl ([string] $FileName, $Headers) {
-    $latestUrl = "https://api.github.com/repos/exercism/canonical-data-syncer/releases/latest"
+    $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
     $json = Invoke-RestMethod -Headers $Headers -Uri $latestUrl
     $json.assets | Where-Object { $_.browser_download_url -match $FileName } | Select-Object -ExpandProperty browser_download_url
 }
@@ -14,7 +14,7 @@ Function Arch {
 
 $arch = Arch
 $headers = Headers
-$fileName = "canonical_data_syncer-windows-$arch.zip"
+$fileName = "configlet_v3-windows-$arch.zip"
 $outputDirectory = "bin"
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 $zipUrl = DownloadUrl -FileName $fileName -Headers $headers

@@ -2,33 +2,44 @@ import std/[os, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3]
 
 type
-  Mode* = enum
-    modeChoose = "choose"
-    modeInclude = "include"
-    modeExclude = "exclude"
-
   Verbosity* = enum
     verQuiet = "quiet"
     verNormal = "normal"
     verDetailed = "detailed"
 
+  Mode* = enum
+    modeChoose = "choose"
+    modeInclude = "include"
+    modeExclude = "exclude"
+
+  ActionKind* = enum
+    actNil = "nil"
+    actSync = "sync"
+
+  Action* = object
+    case kind*: ActionKind
+    of actNil:
+      discard
+    of actSync:
+      exercise*: string
+      check*: bool
+      mode*: Mode
+      probSpecsDir*: string
+      offline*: bool
+
   Conf* = object
-    exercise*: string
-    check*: bool
-    mode*: Mode
+    action*: Action
     verbosity*: Verbosity
-    probSpecsDir*: string
-    offline*: bool
 
   Opt = enum
-    optExercise = "exercise"
-    optCheck = "check"
-    optMode = "mode"
-    optVerbosity = "verbosity"
-    optProbSpecsDir = "probSpecsDir"
-    optOffline = "offline"
     optHelp = "help"
     optVersion = "version"
+    optVerbosity = "verbosity"
+    optSyncExercise = "exercise"
+    optSyncCheck = "check"
+    optSyncMode = "mode"
+    optSyncProbSpecsDir = "probSpecsDir"
+    optSyncOffline = "offline"
 
 func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
@@ -40,10 +51,8 @@ func genShortKeys: array[Opt, char] =
 
 const
   NimblePkgVersion {.strdefine.}: string = "unknown"
-
   short = genShortKeys()
-
-  optsNoVal = {optCheck, optOffline, optHelp, optVersion}
+  optsNoVal = {optHelp, optVersion, optSyncCheck, optSyncOffline}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -94,10 +103,10 @@ func genHelpText: string =
     for opt in Opt:
       let paramName =
         case opt
-        of optExercise: "slug"
-        of optMode: "mode"
         of optVerbosity: "verbosity"
-        of optProbSpecsDir: "dir"
+        of optSyncExercise: "slug"
+        of optSyncMode: "mode"
+        of optSyncProbSpecsDir: "dir"
         else: ""
 
       let paramText = if paramName.len > 0: &" <{paramName}>" else: ""
@@ -108,34 +117,55 @@ func genHelpText: string =
   const (syntax, maxLen) = genSyntaxStrings()
 
   const descriptions: array[Opt, string] = [
-    optExercise: "Only sync this exercise",
-    optCheck: "Terminates with a non-zero exit code if one or more tests " &
-              "are missing. Doesn't update the tests",
-    optMode: &"What to do with missing test cases. {allowedValues(Mode)}",
-    optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
-    optProbSpecsDir: "Use this `problem-specifications` directory, " &
-                     "rather than cloning temporarily",
-    optOffline: "Do not check that the directory specified by " &
-                &"`{list(optProbSpecsDir)}` is up-to-date",
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
+    optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
+    optSyncExercise: "Only sync this exercise",
+    optSyncCheck: "Terminates with a non-zero exit code if one or more tests " &
+                  "are missing. Doesn't update the tests",
+    optSyncMode: &"What to do with missing test cases. {allowedValues(Mode)}",
+    optSyncProbSpecsDir: "Use this `problem-specifications` directory, " &
+                         "rather than cloning temporarily",
+    optSyncOffline: "Do not check that the directory specified by " &
+                    &"`{list(optSyncProbSpecsDir)}` is up-to-date",
   ]
 
-  result = "Options:\n"
+  result = "Commands:\n  "
+
+  for action in ActionKind:
+    if action != actNil:
+      result &= $action & ", "
+  setLen(result, result.len - 2)
+  result &= "\n"
+
+  var optSeen: set[Opt] = {}
+  for actionKind in ActionKind:
+    if actionKind != actNil:
+      result &= &"\nOptions for {actionKind}:\n"
+      let action = Action(kind: actionKind)
+      for key, val in fieldPairs(action):
+        if key != "kind":
+          let opt = parseEnum[Opt](key)
+          result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+          optSeen.incl opt
+
+  result &= &"\nGlobal options:\n"
   for opt in Opt:
-    result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+    if opt notin optSeen:
+      result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
   const helpText = genHelpText()
-  let applicationName = extractFilename(getAppFilename())
-  let usage = &"Usage: {applicationName} [options]\n\n"
+  let appName = extractFilename(getAppFilename())
+  let usage = "Usage:\n" &
+              &"  {appName} [global-options] <command> [command-options]\n\n"
   stdout.write usage
   echo helpText
   quit(exitCode)
 
 proc showVersion =
-  echo &"Canonical Data Syncer v{NimblePkgVersion}"
+  echo &"v{NimblePkgVersion}"
   quit(0)
 
 proc showError*(s: string) =
@@ -163,15 +193,29 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-proc initConf: Conf =
+func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
+  case actionKind
+  of actNil:
+    Action(kind: actionKind)
+  of actSync:
+    Action(kind: actionKind, probSpecsDir: probSpecsDir)
+
+func initConf*(action = initAction(actNil), verbosity = verNormal): Conf =
   result = Conf(
-    exercise: "",
-    check: false,
-    mode: modeChoose,
-    verbosity: verNormal,
-    probSpecsDir: "",
-    offline: false,
+    action: action,
+    verbosity: verbosity,
   )
+
+proc parseActionKind(key: string): ActionKind =
+  ## Parses `key` as an `ActionKind`, using a case-insensitive comparison.
+  ##
+  ## Raises an error if `key` cannot be parsed as a `ActionKind`.
+  var keyNormalized = toLowerAscii(key)
+  if keyNormalized == "help": showHelp()
+  try:
+    result = parseEnum[ActionKind](keyNormalized)
+  except ValueError:
+    showError(&"invalid command: '{key}'")
 
 func normalizeOption(s: string): string =
   ## Returns the string `s`, but converted to lowercase and without '_' or '-'.
@@ -224,38 +268,85 @@ proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
   except ValueError:
     showError(&"invalid value for {formatOpt(kind, key, val)}")
 
+proc handleArgument(conf: var Conf; kind: CmdLineKind; key: string) =
+  if conf.action.kind == actNil:
+    let actionKind = parseActionKind(key)
+    let action = initAction(actionKind)
+    conf = initConf(action, conf.verbosity)
+  else:
+    showError(&"invalid argument for command '{conf.action.kind}': '{key}'")
+
+template setGlobalOpt(key, val: untyped) =
+  conf.key = val
+  isGlobalOpt = true
+
+template setActionOpt(key, val: untyped) =
+  conf.action.key = val
+  isActionOpt = true
+
+proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
+  let opt = parseOption(kind, key, val)
+
+  var
+    isGlobalOpt = false
+    isActionOpt = false
+
+  # Process global options
+  case opt
+  of optHelp:
+    showHelp()
+  of optVersion:
+    showVersion()
+  of optVerbosity:
+    setGlobalOpt(verbosity, parseVal[Verbosity](kind, key, val))
+  else:
+    discard
+
+  # Process action-specific options
+  if not isGlobalOpt:
+    case conf.action.kind
+    of actNil:
+      discard
+    of actSync:
+      case opt
+      of optSyncExercise:
+        setActionOpt(exercise, val)
+      of optSyncCheck:
+        setActionOpt(check, true)
+      of optSyncMode:
+        setActionOpt(mode, parseVal[Mode](kind, key, val))
+      of optSyncProbSpecsDir:
+        setActionOpt(probSpecsDir, val)
+      of optSyncOffline:
+        setActionOpt(offline, true)
+      else:
+        discard
+
+  if not isGlobalOpt and not isActionOpt:
+    case conf.action.kind
+    of actNil:
+      showError(&"invalid global option: {formatOpt(kind, key)}")
+    else:
+      showError(&"invalid option for '{conf.action.kind}': " &
+                &"{formatOpt(kind, key)}")
+
 proc processCmdLine*: Conf =
   result = initConf()
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
-    of cmdLongOption, cmdShortOption:
-      case parseOption(kind, key, val)
-      of optExercise:
-        result.exercise = val
-      of optCheck:
-        result.check = true
-      of optMode:
-        result.mode = parseVal[Mode](kind, key, val)
-      of optVerbosity:
-        result.verbosity = parseVal[Verbosity](kind, key, val)
-      of optProbSpecsDir:
-        result.probSpecsDir = val
-      of optOffline:
-        result.offline = true
-      of optHelp:
-        showHelp()
-      of optVersion:
-        showVersion()
     of cmdArgument:
-      case key.toLowerAscii
-      of $optHelp:
-        showHelp()
-      else:
-        showError(&"invalid argument: '{key}'")
+      handleArgument(result, kind, key)
+    of cmdLongOption, cmdShortOption:
+      handleOption(result, kind, key, val)
     # cmdError can only occur if we pass `requireSep = true` to `getopt`.
     of cmdEnd, cmdError:
       discard
 
-  if result.offline and result.probSpecsDir.len == 0:
-    showError(&"'{list(optOffline)}' was given without passing '{list(optProbSpecsDir)}'")
+  case result.action.kind
+  of actNil:
+    showHelp()
+  of actSync:
+    if result.action.offline and result.action.probSpecsDir.len == 0:
+      showError(&"'{list(optSyncOffline)}' was given without passing " &
+                &"'{list(optSyncProbSpecsDir)}'")

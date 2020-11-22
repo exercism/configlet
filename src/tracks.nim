@@ -79,7 +79,7 @@ proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
 
 proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
   for repoExercise in repo.exercises:
-    if conf.exercise.len == 0 or conf.exercise == repoExercise.slug:
+    if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(newTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
