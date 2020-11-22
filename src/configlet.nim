@@ -9,9 +9,13 @@ proc main =
 
   setupLogging(conf)
 
-  if conf.check:
-    check(conf)
-  else:
-    sync(conf)
+  case conf.action.kind
+  of actNil:
+    discard
+  of actSync:
+    if conf.action.check:
+      check(conf)
+    else:
+      sync(conf)
 
 main()
