@@ -75,29 +75,63 @@ func list(opt: Opt): string =
   else:
     &"-{short[opt]}, --{camelToKebab($opt)}"
 
-func allowedValues(T: typedesc[enum]): string =
-  ## Returns a string that describes the allowed values for an enum `T`.
-  result = "Allowed values: "
-  for val in T:
-    result &= &"{($val)[0]}"
-    result &= &"[{($val)[1 .. ^1]}], "
-  setLen(result, result.len - 2)
+func genHelpText: string =
+  ## Returns a string that lists all the CLI options.
+
+  func allowedValues(T: typedesc[enum]): string =
+    ## Returns a string that describes the allowed values for an enum `T`.
+    result = "Allowed values: "
+    for val in T:
+      result &= &"{($val)[0]}"
+      result &= &"[{($val)[1 .. ^1]}], "
+    setLen(result, result.len - 2)
+
+  func genSyntaxStrings: tuple[syntax: array[Opt, string], maxLen: int] =
+    ## Returns:
+    ## - A lookup that returns the start of the help text for each option.
+    ## - The length of the longest string in the above, which is useful to
+    ##   set the column width.
+    for opt in Opt:
+      let paramName =
+        case opt
+        of optExercise: "slug"
+        of optMode: "mode"
+        of optVerbosity: "verbosity"
+        of optProbSpecsDir: "dir"
+        else: ""
+
+      let paramText = if paramName.len > 0: &" <{paramName}>" else: ""
+      let optText = &"  {opt.list}{paramText}  "
+      result.syntax[opt] = optText
+      result.maxLen = max(result.maxLen, optText.len)
+
+  const (syntax, maxLen) = genSyntaxStrings()
+
+  const descriptions: array[Opt, string] = [
+    optExercise: "Only sync this exercise",
+    optCheck: "Terminates with a non-zero exit code if one or more tests " &
+              "are missing. Doesn't update the tests",
+    optMode: &"What to do with missing test cases. {allowedValues(Mode)}",
+    optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
+    optProbSpecsDir: "Use this `problem-specifications` directory, " &
+                     "rather than cloning temporarily",
+    optOffline: "Do not check that the directory specified by " &
+                &"`{list(optProbSpecsDir)}` is up-to-date",
+    optHelp: "Show this help message and exit",
+    optVersion: "Show this tool's version information and exit",
+  ]
+
+  result = "Options:\n"
+  for opt in Opt:
+    result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+  setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
+  const helpText = genHelpText()
   let applicationName = extractFilename(getAppFilename())
-
-  echo &"""Usage: {applicationName} [options]
-
-Options:
-  {list(optExercise)} <slug>        Only sync this exercise
-  {list(optCheck)}                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
-  {list(optMode)} <mode>            What to do with missing test cases. {allowedValues(Mode)}
-  {list(optVerbosity)} <verbosity>  The verbosity of output. {allowedValues(Verbosity)}
-  {list(optProbSpecsDir)} <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
-  {list(optOffline)}                Do not check that the directory specified by `{list(optProbSpecsDir)}` is up-to-date
-  {list(optHelp)}                   Show this help message and exit
-  {list(optVersion)}                Show this tool's version information and exit"""
-
+  let usage = &"Usage: {applicationName} [options]\n\n"
+  stdout.write usage
+  echo helpText
   quit(exitCode)
 
 proc showVersion =
