@@ -32,12 +32,12 @@ else
     HEADER="authorization: Bearer ${GITHUB_TOKEN}"
 fi
 
-FILENAME="configlet_v3-${OS}-${ARCH}.${EXT}"
+SUFFIX="${OS}-${ARCH}.${EXT}"
 
 get_url () {
-    curl --header "$HEADER" -s "$LATEST" |
-        awk -v filename=$FILENAME '$1 ~ /browser_download_url/ && $2 ~ filename { print $2 }' |
-        tr -d '"'
+    curl --header "$HEADER" -s --location "$LATEST" |
+        grep "\"browser_download_url\": \".*/download/.*/configlet.*${SUFFIX}\"$" |
+        cut -d'"' -f4
 }
 
 URL=$(get_url)
