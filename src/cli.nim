@@ -110,11 +110,24 @@ proc showError*(s: string) =
   stdout.write("\n\n")
   showHelp(exitCode = 1)
 
-proc prefix(kind: CmdLineKind): string =
-  case kind
-  of cmdShortOption: "-"
-  of cmdLongOption: "--"
-  of cmdArgument, cmdEnd, cmdError: ""
+func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
+  ## Returns a string that describes an option, given its `kind`, `key` and
+  ## optionally `val`. This is useful for displaying in error messages.
+  runnableExamples:
+    import pkg/[cligen/parseopt3]
+    assert formatOpt(cmdShortOption, "h") == "'-h'"
+    assert formatOpt(cmdLongOption, "help") == "'--help'"
+    assert formatOpt(cmdShortOption, "v", "quiet") == "'-v': 'quiet'"
+  let prefix =
+    case kind
+    of cmdShortOption: "-"
+    of cmdLongOption: "--"
+    of cmdArgument, cmdEnd, cmdError: ""
+  result =
+    if val.len > 0:
+      &"'{prefix}{key}': '{val}'"
+    else:
+      &"'{prefix}{key}'"
 
 proc initConf: Conf =
   result = Conf(
@@ -156,9 +169,9 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
   try:
     result = parseEnum[Opt](keyNormalized) # `parseEnum` does not normalize for `-`.
     if val.len == 0 and result notin optsNoVal:
-      showError(&"'{prefix(kind)}{key}' was given without a value")
+      showError(&"{formatOpt(kind, key)} was given without a value")
   except ValueError:
-    showError(&"invalid option: '{prefix(kind)}{key}'")
+    showError(&"invalid option: {formatOpt(kind, key)}")
 
 proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
   ## Parses `val` as a value of the enum `T`, using a case-insensitive
@@ -175,7 +188,7 @@ proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
   try:
     result = parseEnum[T](valNormalized)
   except ValueError:
-    showError(&"invalid value for '{prefix(kind)}{key}': '{val}'")
+    showError(&"invalid value for {formatOpt(kind, key, val)}")
 
 proc processCmdLine*: Conf =
   result = initConf()
