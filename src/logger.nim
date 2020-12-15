@@ -1,5 +1,5 @@
-import std/logging
-import cli
+import std/[logging]
+import "."/[cli]
 
 proc levelThreshold(verbosity: Verbosity): Level =
   case verbosity
