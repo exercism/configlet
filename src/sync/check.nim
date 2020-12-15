@@ -1,5 +1,6 @@
 import std/[sets, strformat]
-import cli, exercises, logger
+import ".."/[cli, logger]
+import "."/[exercises]
 
 proc check*(conf: Conf) =
   logNormal("Checking exercises...")

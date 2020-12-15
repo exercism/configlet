@@ -1,5 +1,5 @@
-import std/posix
-import check, cli, logger, sync
+import std/[posix]
+import "."/[cli, logger, sync/check, sync/sync]
 
 proc main =
   onSignal(SIGTERM):

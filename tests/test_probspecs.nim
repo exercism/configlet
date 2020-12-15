@@ -1,6 +1,6 @@
 # This module contains tests for `src/probspecs.nim`
 import std/[json, os, osproc, strformat, unittest]
-import cli, probspecs
+import "."/[cli, sync/probspecs]
 
 type
   ProblemSpecsDir = enum
