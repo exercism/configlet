@@ -1,5 +1,5 @@
 import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
-import cli, logger
+import ".."/[cli, logger]
 
 type
   ProbSpecsRepoExercise = object
