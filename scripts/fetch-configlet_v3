@@ -27,6 +27,8 @@ esac
 
 curlopts=(
     --silent
+    --show-error
+    --fail
     --location
 )
 
