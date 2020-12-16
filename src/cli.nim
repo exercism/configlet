@@ -14,12 +14,15 @@ type
 
   ActionKind* = enum
     actNil = "nil"
+    actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
 
   Action* = object
     case kind*: ActionKind
     of actNil:
+      discard
+    of actLint:
       discard
     of actSync:
       exercise*: string
@@ -203,6 +206,8 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
   case actionKind
   of actNil:
     Action(kind: actionKind)
+  of actLint:
+    Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir)
   of actUuid:
@@ -315,6 +320,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     case conf.action.kind
     of actNil:
       discard
+    of actLint:
+      discard
     of actSync:
       case opt
       of optSyncExercise:
@@ -365,6 +372,8 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
+  of actLint:
+    discard
   of actSync:
     if result.action.offline and result.action.probSpecsDir.len == 0:
       showError(&"'{list(optSyncOffline)}' was given without passing " &

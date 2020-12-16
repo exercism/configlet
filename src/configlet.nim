@@ -1,5 +1,5 @@
 import std/[posix]
-import "."/[cli, logger, sync/check, sync/sync, uuid/uuid]
+import "."/[cli, lint/lint, logger, sync/check, sync/sync, uuid/uuid]
 
 proc main =
   onSignal(SIGTERM):
@@ -12,6 +12,8 @@ proc main =
   case conf.action.kind
   of actNil:
     discard
+  of actLint:
+    lint()
   of actSync:
     if conf.action.check:
       check(conf)
