@@ -25,17 +25,20 @@ case "$(uname -m)" in
     (*)     ARCH='64bit' ;;
 esac
 
+curlopts=(
+    --silent
+    --location
+)
+
 if [ -z "${GITHUB_TOKEN}" ]
 then
-    HEADER=''
-else
-    HEADER="authorization: Bearer ${GITHUB_TOKEN}"
+    curlopts+=('--header' "authorization: Bearer ${GITHUB_TOKEN}")
 fi
 
 SUFFIX="${OS}-${ARCH}.${EXT}"
 
 get_url () {
-    curl --header "$HEADER" -s --location "$LATEST" |
+    curl "${curlopts[@]}" "$LATEST" |
         grep "\"browser_download_url\": \".*/download/.*/configlet.*${SUFFIX}\"$" |
         cut -d'"' -f4
 }
@@ -44,9 +47,9 @@ URL=$(get_url)
 
 case "$EXT" in
     (*zip)
-        curl --header "$HEADER" -s --location "$URL" -o bin/latest-configlet.zip
+        curl "${curlopts[@]}" "$URL" -o bin/latest-configlet.zip
         unzip bin/latest-configlet.zip -d bin/
         rm bin/latest-configlet.zip
         ;;
-    (*) curl --header "$HEADER" -s --location "$URL" | tar xz -C bin/ ;;
+    (*) curl "${curlopts[@]}" "$URL" | tar xz -C bin/ ;;
 esac
