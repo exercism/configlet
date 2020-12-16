@@ -1,5 +1,5 @@
 import std/[posix]
-import "."/[cli, logger, sync/check, sync/sync]
+import "."/[cli, logger, sync/check, sync/sync, uuid/uuid]
 
 proc main =
   onSignal(SIGTERM):
@@ -17,5 +17,7 @@ proc main =
       check(conf)
     else:
       sync(conf)
+  of actUuid:
+    uuid(conf.action.num)
 
 main()

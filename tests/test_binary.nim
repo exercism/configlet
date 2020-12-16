@@ -1,4 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
+import "."/[uuid/uuid]
 
 const
   binaryExt =
@@ -88,6 +89,16 @@ proc main =
             outp.contains(&"invalid value for '{option}': '{badValue}'")
             exitCode == 1
 
+  suite "valid option given to wrong command":
+    for (command, opt, val) in [("uuid", "-c", ""),
+                                ("uuid", "--mode", "choose"),
+                                ("sync", "-n", "10")]:
+      test &"{command} {opt} {val}":
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {command} {opt} {val}")
+        check:
+          outp.contains(&"invalid option for '{command}': '{opt}'")
+          exitCode == 1
+
   suite "version":
     test "--version":
       let (outp, exitCode) = execCmdEx(&"{binaryPath} --version")
@@ -103,6 +114,14 @@ proc main =
         check:
           outp.contains("'-o, --offline' was given without passing '-p, --prob-specs-dir'")
           exitCode == 1
+
+  suite "uuid":
+    for cmd in ["uuid", "uuid -n 100", &"uuid -vq -n {repeat('9', 50)}"]:
+      test &"{cmd}":
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {cmd}")
+        check exitCode == 0
+        for line in outp.strip.splitLines:
+          check line.isValidUuidV4
 
 main()
 {.used.}
