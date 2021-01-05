@@ -34,6 +34,10 @@ Running the `sync` command will prompt the user to choose whether to include or 
 
 To use the application in your track, you can copy the [`scripts/fetch-configlet_v3`](./scripts/fetch-configlet_v3) and/or [`scripts/fetch-configlet_v3.ps1`](./scripts/fetch-configlet_v3.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `configlet_v3` tool to your track's `bin` directory.
 
+## Linting
+
+The primary function of configlet is to do _linting_: checking if a track's configuration files are properly structured - both syntactically and semantically. Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism. The full list of rules that are checked by the linter can be found [here](https://github.com/exercism/v3-docs/blob/master/anatomy/tracks/configlet/linting.md).
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/exercism/configlet-v3.
