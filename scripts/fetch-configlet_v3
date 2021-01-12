@@ -5,24 +5,24 @@ set -eo pipefail
 readonly LATEST='https://api.github.com/repos/exercism/configlet-v3/releases/latest'
 
 case "$(uname)" in
-    (Darwin*)   os='mac'     ;;
-    (Linux*)    os='linux'   ;;
-    (Windows*)  os='windows' ;;
-    (MINGW*)    os='windows' ;;
-    (MSYS_NT-*) os='windows' ;;
-    (*)         os='linux'   ;;
+    Darwin*)   os='mac'     ;;
+    Linux*)    os='linux'   ;;
+    Windows*)  os='windows' ;;
+    MINGW*)    os='windows' ;;
+    MSYS_NT-*) os='windows' ;;
+    *)         os='linux'   ;;
 esac
 
 case "${os}" in
-    (windows*) ext='zip' ;;
-    (*)        ext='tgz' ;;
+    windows*) ext='zip' ;;
+    *)        ext='tgz' ;;
 esac
 
 case "$(uname -m)" in
-    (*64*)  arch='64bit' ;;
-    (*686*) arch='32bit' ;;
-    (*386*) arch='32bit' ;;
-    (*)     arch='64bit' ;;
+    *64*)  arch='64bit' ;;
+    *686*) arch='32bit' ;;
+    *386*) arch='32bit' ;;
+    *)     arch='64bit' ;;
 esac
 
 curlopts=(
@@ -47,10 +47,10 @@ get_download_url() {
 download_url="$(get_download_url)"
 
 case "${ext}" in
-    (*zip)
+    *zip)
         curl "${curlopts[@]}" "${download_url}" -o bin/latest-configlet.zip
         unzip bin/latest-configlet.zip -d bin/
         rm bin/latest-configlet.zip
         ;;
-    (*) curl "${curlopts[@]}" "${download_url}" | tar xzf - -C bin/ ;;
+    *) curl "${curlopts[@]}" "${download_url}" | tar xzf - -C bin/ ;;
 esac
