@@ -32,8 +32,7 @@ curlopts=(
     --location
 )
 
-if [ -n "${GITHUB_TOKEN}" ]
-then
+if [ -n "${GITHUB_TOKEN}" ]; then
     curlopts+=('--header' "authorization: Bearer ${GITHUB_TOKEN}")
 fi
 
