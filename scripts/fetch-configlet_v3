@@ -46,7 +46,7 @@ get_download_url() {
 
 download_url="$(get_download_url)"
 output_path="bin/latest-configlet.${ext}"
-curl "${curlopts[@]}" -o "${output_path}" "${download_url}"
+curl "${curlopts[@]}" --output "${output_path}" "${download_url}"
 
 case "${ext}" in
     *zip) unzip -d bin/ "${output_path}"   ;;
