@@ -2,7 +2,7 @@
 
 nimble install -d -Y
 
-case "$OS" in
+case "${OS}" in
   windows)
     nimble build -d:release --opt:size --passC:'-flto' --passL='-s' --passL='-static'
     ;;

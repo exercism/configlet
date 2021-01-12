@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 
-BUMP="minor"
-MESSAGE="$(git log --oneline --format=%B -n 1 HEAD | head -n 1)"
+level='minor'
+message="$(git log --oneline --format=%B -n 1 HEAD | head -n 1)"
 
 while [[ $# -gt 0 ]]
 do
   case "$1" in
     -b|--bump)
-      BUMP="$2"
+      level="$2"
       shift
       shift
     ;;
     -m|--message)
-      MESSAGE="$2"
+      message="$2"
       shift
       shift
     ;;
@@ -23,4 +23,4 @@ do
 done
 
 nimble install -Y bump
-bump --v --$BUMP "$MESSAGE"
+bump --v --"${level}" "${message}"

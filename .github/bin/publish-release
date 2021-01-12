@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-VERSION=$(echo $REF | cut -d "/" -f3)
+version="$(echo "${REF}" | cut -d'/' -f3)"
 
-gh release create $VERSION
-gh release upload $VERSION $ARTIFACT_FILE
+gh release create "${version}"
+gh release upload "${version}" "${ARTIFACT_FILE}"
