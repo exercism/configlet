@@ -39,19 +39,19 @@ fi
 
 suffix="${os}-${arch}.${ext}"
 
-get_url () {
+get_download_url () {
     curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${LATEST}" |
         grep "\"browser_download_url\": \".*/download/.*/configlet.*${suffix}\"$" |
         cut -d'"' -f4
 }
 
-url=$(get_url)
+download_url=$(get_download_url)
 
 case "${ext}" in
     (*zip)
-        curl "${curlopts[@]}" "${url}" -o bin/latest-configlet.zip
+        curl "${curlopts[@]}" "${download_url}" -o bin/latest-configlet.zip
         unzip bin/latest-configlet.zip -d bin/
         rm bin/latest-configlet.zip
         ;;
-    (*) curl "${curlopts[@]}" "${url}" | tar xzf - -C bin/ ;;
+    (*) curl "${curlopts[@]}" "${download_url}" | tar xzf - -C bin/ ;;
 esac
