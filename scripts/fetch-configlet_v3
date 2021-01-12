@@ -33,7 +33,7 @@ curlopts=(
 )
 
 if [[ -n "${GITHUB_TOKEN}" ]]; then
-  curlopts+=('--header' "authorization: Bearer ${GITHUB_TOKEN}")
+  curlopts+=(--header "authorization: Bearer ${GITHUB_TOKEN}")
 fi
 
 suffix="${os}-${arch}.${ext}"
