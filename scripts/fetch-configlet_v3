@@ -46,11 +46,11 @@ get_download_url() {
 
 download_url="$(get_download_url)"
 output_path="bin/latest-configlet.${ext}"
-curl "${curlopts[@]}" "${download_url}" -o "${output_path}"
+curl "${curlopts[@]}" -o "${output_path}" "${download_url}"
 
 case "${ext}" in
-    *zip) unzip "${output_path}" -d bin/   ;;
-    *)    tar xzf "${output_path}" -C bin/ ;;
+    *zip) unzip -d bin/ "${output_path}"   ;;
+    *)    tar xzf -C bin/ "${output_path}" ;;
 esac
 
 rm -f "${output_path}"
