@@ -45,7 +45,7 @@ get_download_url () {
         cut -d'"' -f4
 }
 
-download_url=$(get_download_url)
+download_url="$(get_download_url)"
 
 case "${ext}" in
     (*zip)
