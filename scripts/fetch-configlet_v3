@@ -5,24 +5,24 @@ set -eo pipefail
 readonly LATEST='https://api.github.com/repos/exercism/configlet-v3/releases/latest'
 
 case "$(uname)" in
-    (Darwin*)   OS='mac'     ;;
-    (Linux*)    OS='linux'   ;;
-    (Windows*)  OS='windows' ;;
-    (MINGW*)    OS='windows' ;;
-    (MSYS_NT-*) OS='windows' ;;
-    (*)         OS='linux'   ;;
+    (Darwin*)   os='mac'     ;;
+    (Linux*)    os='linux'   ;;
+    (Windows*)  os='windows' ;;
+    (MINGW*)    os='windows' ;;
+    (MSYS_NT-*) os='windows' ;;
+    (*)         os='linux'   ;;
 esac
 
-case "$OS" in
-    (windows*) EXT='zip' ;;
-    (*)        EXT='tgz' ;;
+case "$os" in
+    (windows*) ext='zip' ;;
+    (*)        ext='tgz' ;;
 esac
 
 case "$(uname -m)" in
-    (*64*)  ARCH='64bit' ;;
-    (*686*) ARCH='32bit' ;;
-    (*386*) ARCH='32bit' ;;
-    (*)     ARCH='64bit' ;;
+    (*64*)  arch='64bit' ;;
+    (*686*) arch='32bit' ;;
+    (*386*) arch='32bit' ;;
+    (*)     arch='64bit' ;;
 esac
 
 curlopts=(
@@ -37,21 +37,21 @@ then
     curlopts+=('--header' "authorization: Bearer ${GITHUB_TOKEN}")
 fi
 
-SUFFIX="${OS}-${ARCH}.${EXT}"
+suffix="${os}-${arch}.${ext}"
 
 get_url () {
     curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "$LATEST" |
-        grep "\"browser_download_url\": \".*/download/.*/configlet.*${SUFFIX}\"$" |
+        grep "\"browser_download_url\": \".*/download/.*/configlet.*${suffix}\"$" |
         cut -d'"' -f4
 }
 
-URL=$(get_url)
+url=$(get_url)
 
-case "$EXT" in
+case "$ext" in
     (*zip)
-        curl "${curlopts[@]}" "$URL" -o bin/latest-configlet.zip
+        curl "${curlopts[@]}" "$url" -o bin/latest-configlet.zip
         unzip bin/latest-configlet.zip -d bin/
         rm bin/latest-configlet.zip
         ;;
-    (*) curl "${curlopts[@]}" "$URL" | tar xzf - -C bin/ ;;
+    (*) curl "${curlopts[@]}" "$url" | tar xzf - -C bin/ ;;
 esac
