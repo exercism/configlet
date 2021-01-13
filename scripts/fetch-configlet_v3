@@ -53,5 +53,5 @@ case "$EXT" in
         unzip bin/latest-configlet.zip -d bin/
         rm bin/latest-configlet.zip
         ;;
-    (*) curl "${curlopts[@]}" "$URL" | tar xz -C bin/ ;;
+    (*) curl "${curlopts[@]}" "$URL" | tar xzf - -C bin/ ;;
 esac
