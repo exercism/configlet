@@ -30,6 +30,7 @@ curlopts=(
   --show-error
   --fail
   --location
+  --retry 3
 )
 
 if [[ -n "${GITHUB_TOKEN}" ]]; then
