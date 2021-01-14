@@ -20,7 +20,7 @@ A `tests.toml` file for a track's `two-fer` exercise looks like this:
 "653611c6-be9f-4935-ab42-978e25fe9a10" = false
 ```
 
-In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite. 
+In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
 The Canonical Data Syncer application allows tracks to keep `tests.toml` files up to date. When run, the Canonical Data Syncer will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It then interactively gives the maintainer the option to include or exclude test cases that are currently missing, updating the `tests.toml` file accordingly.
 
@@ -30,7 +30,7 @@ The application is a single binary and can be used as follows:
 
 ```
 Usage:
-  configlet_v3 [global-options] <command> [command-options]
+  configlet [global-options] <command> [command-options]
 
 Commands:
   sync
@@ -52,7 +52,7 @@ Running the `sync` command will prompt the user to choose whether to include or 
 
 ## Use in your track
 
-To use the application in your track, you can copy the [`scripts/fetch-configlet_v3`](./scripts/fetch-configlet_v3) and/or [`scripts/fetch-configlet_v3.ps1`](./scripts/fetch-configlet_v3.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `configlet_v3` tool to your track's `bin` directory.
+To use the application in your track, you can copy the [`scripts/fetch-configlet`](./scripts/fetch-configlet) and/or [`scripts/fetch-configlet.ps1`](./scripts/fetch-configlet.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `configlet` tool to your track's `bin` directory.
 
 ## Linting
 

@@ -3,7 +3,7 @@
 artifacts_dir='artifacts'
 mkdir -p "${artifacts_dir}"
 
-binary_name='configlet_v3'
+binary_name='configlet'
 
 case "${OS}" in
   windows)
