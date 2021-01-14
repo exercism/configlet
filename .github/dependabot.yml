@@ -1,0 +1,8 @@
+version: 2
+
+updates:
+  # Enable updates to the dependencies of our workflows
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: monthly
