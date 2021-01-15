@@ -20,8 +20,10 @@ $requestOpts = @{
 
 Function Get-DownloadUrl {
     $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
-    $json = Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts
-    $json.assets | Where-Object { $_.browser_download_url -match $FileName } | Select-Object -ExpandProperty browser_download_url
+    Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts
+    | Select-Object -ExpandProperty assets
+    | Where-Object { $_.browser_download_url -match $FileName }
+    | Select-Object -ExpandProperty browser_download_url
 }
 
 $downloadUrl = Get-DownloadUrl
