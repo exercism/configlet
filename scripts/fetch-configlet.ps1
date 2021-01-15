@@ -1,6 +1,6 @@
 Function DownloadUrl ([string] $FileName, $Headers) {
     $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
-    $json = Invoke-RestMethod -Headers $Headers -Uri $latestUrl -MaximumRetryCount 3 -RetryIntervalSec 1
+    $json = Invoke-RestMethod -Headers $Headers -Uri $latestUrl -MaximumRetryCount 3 -RetryIntervalSec 1 -PreserveAuthorizationOnRedirect
     $json.assets | Where-Object { $_.browser_download_url -match $FileName } | Select-Object -ExpandProperty browser_download_url
 }
 
@@ -19,6 +19,6 @@ $outputDirectory = "bin"
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 $zipUrl = DownloadUrl -FileName $fileName -Headers $headers
 
-Invoke-WebRequest -Headers $headers -Uri $zipUrl -OutFile $outputFile -MaximumRetryCount 3 -RetryIntervalSec 1
+Invoke-WebRequest -Headers $headers -Uri $zipUrl -OutFile $outputFile -MaximumRetryCount 3 -RetryIntervalSec 1 -PreserveAuthorizationOnRedirect
 Expand-Archive $outputFile -DestinationPath $outputDirectory -Force
 Remove-Item -Path $outputFile
