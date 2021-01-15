@@ -1,22 +1,13 @@
 $ErrorActionPreference = "Stop"
 
-Function Headers {
-    If ($env:GITHUB_TOKEN) { @{ Authorization = "Bearer ${env:GITHUB_TOKEN}" } } Else { @{ } }
-}
-
-Function Arch {
-    If ([Environment]::Is64BitOperatingSystem) { "64bit" } Else { "32bit" }
-}
-
-$headers = Headers
-$arch = Arch
-$fileName = "configlet-windows-$arch.zip"
-
 $requestOpts = @{
-    Headers = $headers
+    Headers = If ($env:GITHUB_TOKEN) { @{ Authorization = "Bearer ${env:GITHUB_TOKEN}" } } Else { @{ } }
     MaximumRetryCount = 3
     RetryIntervalSec = 1
 }
+
+$arch = If ([Environment]::Is64BitOperatingSystem) { "64bit" } Else { "32bit" }
+$fileName = "configlet-windows-$arch.zip"
 
 Function Get-DownloadUrl {
     $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
