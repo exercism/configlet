@@ -7,7 +7,7 @@ Function DownloadUrl ([string] $FileName, $Headers) {
 }
 
 Function Headers {
-    If ($GITHUB_TOKEN) { @{ Authorization = "Bearer ${GITHUB_TOKEN}" } } Else { @{ } }
+    If ($env:GITHUB_TOKEN) { @{ Authorization = "Bearer ${env:GITHUB_TOKEN}" } } Else { @{ } }
 }
 
 Function Arch {
