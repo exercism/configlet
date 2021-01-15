@@ -1,3 +1,5 @@
+$ErrorActionPreference = "Stop"
+
 Function DownloadUrl ([string] $FileName, $Headers) {
     $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
     $json = Invoke-RestMethod -Headers $Headers -Uri $latestUrl -MaximumRetryCount 3 -RetryIntervalSec 1 -PreserveAuthorizationOnRedirect
