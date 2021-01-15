@@ -99,6 +99,24 @@ proc main =
           outp.contains(&"invalid option for '{command}': '{opt}'")
           exitCode == 1
 
+  suite "more than one command":
+    for (command, badArg) in [("uuid", "sync"),
+                              ("sync", "uuid")]:
+      test &"{command} {badArg}":
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {command} {badArg}")
+        check:
+          outp.contains(&"invalid argument for command '{command}': '{badArg}'")
+          exitCode == 1
+    for cmd in ["uuid -n5 sync",
+                "uuid -n5 sync -c",
+                "sync -c uuid",
+                "sync -c -mc -o uuid -n5"]:
+      test &"{cmd}":
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} {cmd}")
+        check:
+          outp.contains(&"invalid argument for command")
+          exitCode == 1
+
   suite "version":
     test "--version":
       let (outp, exitCode) = execCmdEx(&"{binaryPath} --version")
