@@ -1,7 +1,14 @@
 import std/[unittest]
+import pkg/[uuids]
 import "."/[uuid/uuid]
 
 proc main =
+  suite "genUUID: returns a string that isValidUuidV4 says is valid":
+    test "1000 UUIDs":
+      for i in 1 .. 1000:
+        let uuid = $genUUID()
+        check isValidUuidV4(uuid)
+
   const ValidUuidV4 = "01234567-9012-4567-9012-456789012345"
   doAssert ValidUuidV4.len == 36
 
@@ -14,7 +21,7 @@ proc main =
 
   const (HyphenIndices, HexIndices) = uuidIndices()
 
-  suite "Valid version 4 UUIDs":
+  suite "isValidUuidV4: returns true for valid version 4 UUIDs":
     test "digits only":
       check:
         isValidUuidV4(ValidUuidV4)
@@ -41,7 +48,7 @@ proc main =
         check:
           isValidUuidV4(goodUuid)
 
-  suite "Invalid version 4 UUIDs":
+  suite "isValidUuidV4: returns false for invalid version 4 UUIDs":
     test "nil UUID":
       # The nil UUID is a valid UUID, but not a valid version 4 UUID.
       check:
