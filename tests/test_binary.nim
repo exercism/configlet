@@ -4,7 +4,7 @@ const
   binaryExt =
     when defined(windows): ".exe"
     else: ""
-  binaryName = "configlet_v3" & binaryExt
+  binaryName = "configlet" & binaryExt
 
 proc main =
   let repoRootDir = getAppDir().parentDir()

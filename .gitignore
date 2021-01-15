@@ -2,7 +2,7 @@
 .vscode/
 
 # Application binary
-configlet_v3
+configlet
 
 # Temporary prob-specs repo
 .problem-specifications/
