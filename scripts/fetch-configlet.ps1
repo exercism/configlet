@@ -14,7 +14,7 @@ Function Arch {
 
 $arch = Arch
 $headers = Headers
-$fileName = "configlet_v3-windows-$arch.zip"
+$fileName = "configlet-windows-$arch.zip"
 $outputDirectory = "bin"
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 $zipUrl = DownloadUrl -FileName $fileName -Headers $headers
