@@ -2,7 +2,7 @@ import std/[strformat]
 import pkg/[uuids]
 import ".."/[logger]
 
-proc writeUuids(n: Positive) =
+proc outputUuids(n: Positive) =
   ## Writes `n` version 4 UUIDs to stdout. Writes only 1000 UUIDs if `n` is
   ## greater than 1000.
   const maxNumUuids = 1000
@@ -13,7 +13,7 @@ proc writeUuids(n: Positive) =
     stdout.writeLine genUUID()
 
 proc uuid*(n: Positive) =
-  writeUuids(n)
+  outputUuids(n)
 
 func isValidUuidV4*(s: string): bool =
   ## Returns `true` if `s` is a valid version 4 UUID (compliant with RFC 4122)
