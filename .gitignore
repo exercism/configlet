@@ -4,5 +4,8 @@
 # Application binary
 configlet
 
+# Tests binary
+all_tests
+
 # Temporary prob-specs repo
 .problem-specifications/
