@@ -10,4 +10,4 @@ bin           = @["configlet"]
 requires "nim >= 1.4.0"
 requires "parsetoml"
 requires "cligen"
-requires "uuids"
+requires "uuids >= 0.1.11"
