@@ -9,8 +9,12 @@ proc outputUuids(n: Positive) =
   if n > maxNumUuids:
     logNormal &"The UUID output limit is {maxNumUuids}, but {n} UUIDs were requested."
     logNormal &"Outputting {maxNumUuids} UUIDs:"
-  for i in 1 .. min(n, maxNumUuids):
-    stdout.writeLine genUUID()
+  let numUuidsToGenerate = min(n, maxNumUuids)
+  var s = newStringOfCap(numUuidsToGenerate * 37)
+  for i in 1 .. numUuidsToGenerate:
+    s.add $genUUID()
+    s.add '\n'
+  stdout.write s
 
 proc uuid*(n: Positive) =
   outputUuids(n)
