@@ -43,11 +43,6 @@ jobs:
       - name: Install our Nimble dependencies
         run: nimble -y install --depsOnly
 
-      - name: Workaround `--styleCheck:error` issue in uuids package
-        if: matrix.target.os == 'windows'
-        shell: bash
-        run: find "${HOME}"/.nimble/pkgs/uuids* -name '*.nim' -exec sed -i 's/WinBool/WINBOOL/g' {} \;
-
       - name: Build binary
         shell: bash
         run: ./.github/bin/build
