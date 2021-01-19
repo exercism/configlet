@@ -7,7 +7,7 @@ proc outputUuids(n: Positive) =
   ## greater than 1000.
   const maxNumUuids = 1000
   if n > maxNumUuids:
-    logNormal &"The UUID output limit is 1000, but {n} UUIDs were requested."
+    logNormal &"The UUID output limit is {maxNumUuids}, but {n} UUIDs were requested."
     logNormal &"Outputting {maxNumUuids} UUIDs:"
   for i in 1 .. min(n, maxNumUuids):
     stdout.writeLine genUUID()
