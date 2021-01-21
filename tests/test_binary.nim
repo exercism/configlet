@@ -12,6 +12,16 @@ proc main =
   let binaryPath = repoRootDir / binaryName
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
+  const cmd = "nimble build -d:release"
+  stdout.write(&"Running `{cmd}`... ")
+  stdout.flushFile()
+  let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
+  if buildExitCode == 0:
+    echo "success"
+  else:
+    echo "failure"
+    raise newException(OSError, buildOutput)
+
   suite "help as an argument":
     test "help":
       let (outp, exitCode) = execCmdEx(&"{binaryPath} help")
