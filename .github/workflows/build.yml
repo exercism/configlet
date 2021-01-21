@@ -47,9 +47,6 @@ jobs:
       - name: Build binary
         shell: bash
         run: ./.github/bin/build
-        env:
-          OS: ${{ matrix.target.os }}
-          ARCH: ${{ matrix.target.arch }}
 
       - name: Create artifact
         shell: bash

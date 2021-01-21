@@ -1,15 +1,4 @@
 #!/usr/bin/env sh
 
 nimble install -d -Y
-
-case "${OS}" in
-  windows)
-    nimble build -d:release --opt:size --passC:'-flto' --passL='-s' --passL='-static'
-    ;;
-  linux)
-    nimble build -d:release --opt:size --passC:'-flto' --passL='-s' --passL='-static' --gcc.exe=musl-gcc --gcc.linkerexe=musl-gcc
-    ;;
-  mac)
-    nimble build -d:release --opt:size --passC:'-flto'
-    ;;
-esac
+nimble build -d:release
