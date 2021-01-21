@@ -33,7 +33,7 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  sync
+  sync, uuid
 
 Options for sync:
   -e, --exercise <slug>        Only sync this exercise
@@ -41,6 +41,9 @@ Options for sync:
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
+
+Options for uuid:
+  -n, --num <int>              Number of UUIDs to generate
 
 Global options:
   -h, --help                   Show this help message and exit
