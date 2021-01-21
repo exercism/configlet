@@ -11,7 +11,7 @@ proc main =
   let binaryPath = repoRootDir / binaryName
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
-  discard execCmdEx("nimble build", workingDir = repoRootDir)
+  discard execCmdEx("nimble build -d:release", workingDir = repoRootDir)
 
   suite "help as an argument":
     test "help":
