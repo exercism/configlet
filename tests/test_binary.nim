@@ -8,7 +8,7 @@ const
   binaryName = "configlet" & binaryExt
 
 proc main =
-  let repoRootDir = getAppDir().parentDir()
+  const repoRootDir = currentSourcePath.parentDir().parentDir()
   let binaryPath = repoRootDir / binaryName
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
