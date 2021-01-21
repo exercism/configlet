@@ -1,4 +1,4 @@
-import std/[os, strformat, strutils, terminal]
+import std/[os, parseutils, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3]
 
 type
@@ -15,6 +15,7 @@ type
   ActionKind* = enum
     actNil = "nil"
     actSync = "sync"
+    actUuid = "uuid"
 
   Action* = object
     case kind*: ActionKind
@@ -26,6 +27,8 @@ type
       mode*: Mode
       probSpecsDir*: string
       offline*: bool
+    of actUuid:
+      num*: int
 
   Conf* = object
     action*: Action
@@ -40,6 +43,7 @@ type
     optSyncMode = "mode"
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
+    optUuidNum = "num"
 
 func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
@@ -107,6 +111,7 @@ func genHelpText: string =
         of optSyncExercise: "slug"
         of optSyncMode: "mode"
         of optSyncProbSpecsDir: "dir"
+        of optUuidNum: "int"
         else: ""
 
       let paramText = if paramName.len > 0: &" <{paramName}>" else: ""
@@ -128,6 +133,7 @@ func genHelpText: string =
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
+    optUuidNum: "Number of UUIDs to generate",
   ]
 
   result = "Commands:\n  "
@@ -199,6 +205,8 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
     Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir)
+  of actUuid:
+    Action(kind: actionKind, num: 1)
 
 func initConf*(action = initAction(actNil), verbosity = verNormal): Conf =
   result = Conf(
@@ -321,6 +329,17 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(offline, true)
       else:
         discard
+    of actUuid:
+      case opt
+      of optUuidNum:
+        var num = -1
+        discard parseSaturatedNatural(val, num)
+        if num < 1:
+          showError(&"value for {formatOpt(kind, key)} is not a positive " &
+                    &"integer: {val}")
+        setActionOpt(num, num)
+      else:
+        discard
 
   if not isGlobalOpt and not isActionOpt:
     case conf.action.kind
@@ -350,3 +369,5 @@ proc processCmdLine*: Conf =
     if result.action.offline and result.action.probSpecsDir.len == 0:
       showError(&"'{list(optSyncOffline)}' was given without passing " &
                 &"'{list(optSyncProbSpecsDir)}'")
+  of actUuid:
+    discard
