@@ -15,7 +15,12 @@ proc main =
   const cmd = "nimble build -d:release"
   stdout.write(&"Running `{cmd}`... ")
   stdout.flushFile()
-  discard execCmdEx(cmd, workingDir = repoRootDir)
+  let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
+  if buildExitCode == 0:
+    echo "success"
+  else:
+    echo "failure"
+    raise newException(OSError, buildOutput)
 
   suite "help as an argument":
     test "help":
