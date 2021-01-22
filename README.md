@@ -4,7 +4,7 @@ This is a development version of Configlet for use with v3 of Exercism.
 
 It includes a `sync` command to help Exercism tracks keep their exercise-specific `tests.toml` files in sync with the latest canonical data in the [problem-specifications repo](https://github.com/exercism/problem-specifications).
 
-## Goal
+## Sync
 
 If a track implements an exercise for which test data exists, the exercise _must_ contain a `.meta/tests.toml` file. The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise. Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
 
@@ -22,7 +22,7 @@ A `tests.toml` file for a track's `two-fer` exercise looks like this:
 
 In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
-The Canonical Data Syncer application allows tracks to keep `tests.toml` files up to date. When run, the Canonical Data Syncer will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It then interactively gives the maintainer the option to include or exclude test cases that are currently missing, updating the `tests.toml` file accordingly.
+The `configlet sync` command allows tracks to keep `tests.toml` files up to date. The command will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It then interactively gives the maintainer the option to include or exclude test cases that are currently missing, updating the `tests.toml` file accordingly.
 
 ## Usage
 
