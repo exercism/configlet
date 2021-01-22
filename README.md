@@ -55,6 +55,8 @@ In this case, the track has chosen to implement two of the three available tests
 
 The `configlet sync` command allows tracks to keep `tests.toml` files up to date. The command will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It will then prompt the user to choose whether to include or exclude missing tests, and update the `tests.toml` files accordingly. If you only want a quick check, you can use the `--check` option.
 
+The `configlet sync` command replaces the functionality of the older `canonical_data_syncer` application.
+
 ## Use in your track
 
 To use the application in your track, you can copy the [`scripts/fetch-configlet`](./scripts/fetch-configlet) and/or [`scripts/fetch-configlet.ps1`](./scripts/fetch-configlet.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `configlet` tool to your track's `bin` directory.
