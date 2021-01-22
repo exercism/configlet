@@ -2,8 +2,6 @@
 
 This is a development version of Configlet for use with v3 of Exercism.
 
-It includes a `sync` command to help Exercism tracks keep their exercise-specific `tests.toml` files in sync with the latest canonical data in the [problem-specifications repo](https://github.com/exercism/problem-specifications).
-
 ## Usage
 
 The application is a single binary and can be used as follows:
@@ -31,8 +29,6 @@ Global options:
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
 ```
 
-Running the `sync` command will prompt the user to choose whether to include or exclude missing tests. It will update the `tests.toml` file accordingly. If you only want a quick check, you can use the `--check` option.
-
 ## Linting
 
 The primary function of configlet is to do _linting_: checking if a track's configuration files are properly structured - both syntactically and semantically. Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism. The full list of rules that are checked by the linter can be found [here](https://github.com/exercism/v3-docs/blob/master/anatomy/tracks/configlet/linting.md).
@@ -56,6 +52,10 @@ A `tests.toml` file for a track's `two-fer` exercise looks like this:
 In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
 The `configlet sync` command allows tracks to keep `tests.toml` files up to date. The command will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It then interactively gives the maintainer the option to include or exclude test cases that are currently missing, updating the `tests.toml` file accordingly.
+
+It includes a `sync` command to help Exercism tracks keep their exercise-specific `tests.toml` files in sync with the latest canonical data in the [problem-specifications repo](https://github.com/exercism/problem-specifications).
+
+Running the `sync` command will prompt the user to choose whether to include or exclude missing tests. It will update the `tests.toml` file accordingly. If you only want a quick check, you can use the `--check` option.
 
 ## Use in your track
 
