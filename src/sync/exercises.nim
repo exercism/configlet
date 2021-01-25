@@ -92,5 +92,4 @@ proc toToml(exercise: Exercise): string =
 proc writeFile*(exercise: Exercise) =
   createDir(parentDir(exercise.testsFile))
 
-  let file = open(exercise.testsFile, fmWrite)
-  write(file, exercise.toToml())
+  writeFile(exercise.testsFile, exercise.toToml())
