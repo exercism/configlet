@@ -100,7 +100,7 @@ proc sync(exercise: Exercise, mode: Mode): Exercise =
 
   result.tests = initExerciseTests(included, excluded, missing)
 
-  writeFile(result)
+  writeTestsToml(result)
 
 proc sync(exercises: seq[Exercise], mode: Mode): seq[Exercise] =
   for exercise in exercises:

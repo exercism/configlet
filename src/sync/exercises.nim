@@ -89,8 +89,9 @@ proc toToml(exercise: Exercise): string =
     result.add(&"\n# {testCase.description}")
     result.add(&"\n\"{testCase.uuid}\" = {isIncluded}\n")
 
-proc writeFile*(exercise: Exercise) =
-  createDir(parentDir(exercise.testsFile))
+proc writeTestsToml*(exercise: Exercise) =
+  let testsPath = testsFile(exercise)
+  createDir(testsPath.parentDir())
 
-  let file = open(exercise.testsFile, fmWrite)
-  write(file, exercise.toToml())
+  let contents = toToml(exercise)
+  writeFile(testsPath, contents)
