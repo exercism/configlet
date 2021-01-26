@@ -217,9 +217,11 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
   of actUuid:
     Action(kind: actionKind, num: 1)
 
-func initConf*(action = initAction(actNil), verbosity = verNormal): Conf =
+func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
+               verbosity = verNormal): Conf =
   result = Conf(
     action: action,
+    trackDir: trackDir,
     verbosity: verbosity,
   )
 
@@ -289,7 +291,7 @@ proc handleArgument(conf: var Conf; kind: CmdLineKind; key: string) =
   if conf.action.kind == actNil:
     let actionKind = parseActionKind(key)
     let action = initAction(actionKind)
-    conf = initConf(action, conf.verbosity)
+    conf = initConf(action, conf.trackDir, conf.verbosity)
   else:
     showError(&"invalid argument for command '{conf.action.kind}': '{key}'")
 

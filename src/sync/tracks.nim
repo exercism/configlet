@@ -24,9 +24,6 @@ type
     tests*: TrackExerciseTests
     repoExercise: TrackRepoExercise
 
-proc newTrackRepo: TrackRepo =
-  result.dir = getCurrentDir()
-
 proc configJsonFile(repo: TrackRepo): string =
   repo.dir / "config.json"
 
@@ -83,9 +80,5 @@ proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
       result.add(newTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
-  let trackRepo =
-    if conf.trackDir.len > 0:
-      TrackRepo(dir: conf.trackDir)
-    else:
-      newTrackRepo()
+  let trackRepo = TrackRepo(dir: conf.trackDir)
   trackRepo.findTrackExercises(conf)
