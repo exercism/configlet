@@ -35,11 +35,13 @@ type
 
   Conf* = object
     action*: Action
+    trackDir*: string
     verbosity*: Verbosity
 
   Opt = enum
     optHelp = "help"
     optVersion = "version"
+    optTrackDir = "trackDir"
     optVerbosity = "verbosity"
     optSyncExercise = "exercise"
     optSyncCheck = "check"
@@ -110,6 +112,7 @@ func genHelpText: string =
     for opt in Opt:
       let paramName =
         case opt
+        of optTrackDir: "dir"
         of optVerbosity: "verbosity"
         of optSyncExercise: "slug"
         of optSyncMode: "mode"
@@ -127,6 +130,7 @@ func genHelpText: string =
   const descriptions: array[Opt, string] = [
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
+    optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
     optSyncExercise: "Only sync this exercise",
     optSyncCheck: "Terminates with a non-zero exit code if one or more tests " &
@@ -213,9 +217,11 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
   of actUuid:
     Action(kind: actionKind, num: 1)
 
-func initConf*(action = initAction(actNil), verbosity = verNormal): Conf =
+func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
+               verbosity = verNormal): Conf =
   result = Conf(
     action: action,
+    trackDir: trackDir,
     verbosity: verbosity,
   )
 
@@ -285,7 +291,7 @@ proc handleArgument(conf: var Conf; kind: CmdLineKind; key: string) =
   if conf.action.kind == actNil:
     let actionKind = parseActionKind(key)
     let action = initAction(actionKind)
-    conf = initConf(action, conf.verbosity)
+    conf = initConf(action, conf.trackDir, conf.verbosity)
   else:
     showError(&"invalid argument for command '{conf.action.kind}': '{key}'")
 
@@ -310,6 +316,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     showHelp()
   of optVersion:
     showVersion()
+  of optTrackDir:
+    setGlobalOpt(trackDir, val)
   of optVerbosity:
     setGlobalOpt(verbosity, parseVal[Verbosity](kind, key, val))
   else:
