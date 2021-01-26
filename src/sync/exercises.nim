@@ -75,8 +75,8 @@ proc status*(exercise: Exercise): ExerciseStatus =
 proc hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0
 
-proc testsFile(exercise: Exercise): string =
-  getCurrentDir() / "exercises" / exercise.slug / ".meta" / "tests.toml"
+proc testsFile(exercise: Exercise, trackDir: string): string =
+  trackDir / "exercises" / exercise.slug / ".meta" / "tests.toml"
 
 proc toToml(exercise: Exercise): string =
   result.add("[canonical-tests]\n")
@@ -89,8 +89,8 @@ proc toToml(exercise: Exercise): string =
     result.add(&"\n# {testCase.description}")
     result.add(&"\n\"{testCase.uuid}\" = {isIncluded}\n")
 
-proc writeTestsToml*(exercise: Exercise) =
-  let testsPath = testsFile(exercise)
+proc writeTestsToml*(exercise: Exercise, trackDir: string) =
+  let testsPath = testsFile(exercise, trackDir)
   createDir(testsPath.parentDir())
 
   let contents = toToml(exercise)

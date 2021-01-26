@@ -64,9 +64,10 @@ proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   of modeChoose:
     chooseSyncDecision(testCase)
 
-proc sync(exercise: Exercise, mode: Mode): Exercise =
+proc sync(exercise: Exercise, conf: Conf): Exercise =
   result = exercise
 
+  let mode = conf.action.mode
   case mode
   of modeInclude:
     logNormal(&"[info] {exercise.slug}: included {exercise.tests.missing.len} missing test cases")
@@ -100,13 +101,13 @@ proc sync(exercise: Exercise, mode: Mode): Exercise =
 
   result.tests = initExerciseTests(included, excluded, missing)
 
-  writeTestsToml(result)
+  writeTestsToml(result, conf.trackDir)
 
-proc sync(exercises: seq[Exercise], mode: Mode): seq[Exercise] =
+proc sync(exercises: seq[Exercise], conf: Conf): seq[Exercise] =
   for exercise in exercises:
     case exercise.status
     of exOutOfSync:
-      result.add(sync(exercise, mode))
+      result.add(sync(exercise, conf))
     of exInSync:
       logDetailed(&"[skip] {exercise.slug} is up-to-date")
     of exNoCanonicalData:
@@ -116,7 +117,7 @@ proc sync*(conf: Conf) =
   logNormal("Syncing exercises...")
 
   let exercises = findExercises(conf)
-  let syncedExercises = sync(exercises, conf.action.mode)
+  let syncedExercises = sync(exercises, conf)
 
   if syncedExercises.anyIt(it.status == exOutOfSync):
     logNormal("[warn] some exercises are still missing test cases")
