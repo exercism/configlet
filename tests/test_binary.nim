@@ -132,7 +132,7 @@ proc main =
       let (outp, exitCode) = execCmdEx(&"{binaryPath} --version")
       var major, minor, patch: int
       check:
-        outp.scanf("v$i.$i.$i$s$.", major, minor, patch)
+        outp.scanf("$i.$i.$i", major, minor, patch)
         exitCode == 0
 
   suite "offline":
