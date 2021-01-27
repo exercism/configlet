@@ -34,7 +34,7 @@ jobs:
       - name: Install Nim
         uses: jiro4989/setup-nim-action@de456899a933296efa9d86e050300c1d9cc7e446 # 1.3.0
         with:
-          nim-version: "1.4.0"
+          nim-version: "1.4.2"
 
       - name: Install musl on Linux
         if: matrix.target.os == 'linux'
