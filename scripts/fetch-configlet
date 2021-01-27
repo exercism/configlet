@@ -4,4 +4,13 @@ set -eo pipefail
 
 script_url="https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet-script"
 script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
+
+if [[ "$*" == "--confirm" ]] || [[ "$*" == "-c" ]]; then
+    message=$(printf "\n\n%s\n\nDo you want the execute the above script (y/n)? " "${script}")
+    read -r -p "${message}" choice
+    if [[ "${choice}" != "y" ]] && [[ "${choice}" != "Y" ]]; then
+        exit 0
+    fi
+fi
+
 bash -c "${script}"

@@ -1,5 +1,18 @@
+param (
+    [Parameter(Mandatory = $false)]
+    [Switch]$Confirm
+)
+
 $ErrorActionPreference = "Stop"
 
 $scriptUrl = "https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet-script.ps1"
-$fetchConfigletScript = Invoke-WebRequest -Uri $scriptUrl -MaximumRetryCount 3 -RetryIntervalSec 1
-Invoke-Expression $fetchConfigletScript
+$script = Invoke-WebRequest -Uri "${scriptUrl}" -MaximumRetryCount 3 -RetryIntervalSec 1
+
+if ($Confirm.IsPresent) {
+    $choice = Read-Host "${script}`n`nDo you want the execute the above script (y/n)?"
+    if ("${choice}" -ne "y" -and "${choice}" -ne "Y") {
+        exit 0
+    }
+}
+
+Invoke-Expression "${script}"
