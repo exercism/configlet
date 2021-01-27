@@ -50,8 +50,8 @@ output_path="bin/latest-configlet.${ext}"
 curl "${curlopts[@]}" --output "${output_path}" "${download_url}"
 
 case "${ext}" in
-  *zip) unzip -d bin/ "${output_path}"   ;;
-  *)    tar xzf -C bin/ "${output_path}" ;;
+  *zip) unzip "${output_path}" -d bin/   ;;
+  *)    tar xzf "${output_path}" -C bin/ ;;
 esac
 
 rm -f "${output_path}"
