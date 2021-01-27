@@ -10,7 +10,7 @@ $arch = If ([Environment]::Is64BitOperatingSystem) { "64bit" } Else { "32bit" }
 $fileName = "configlet-windows-$arch.zip"
 
 Function Get-DownloadUrl {
-    $latestUrl = "https://api.github.com/repos/exercism/configlet-v3/releases/latest"
+    $latestUrl = "https://api.github.com/repos/exercism/configlet/releases/latest"
     Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts
     | Select-Object -ExpandProperty assets
     | Where-Object { $_.browser_download_url -match $FileName }
