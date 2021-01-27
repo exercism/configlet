@@ -5,7 +5,7 @@ param (
 
 $ErrorActionPreference = "Stop"
 
-$scriptUrl = "https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet-script.ps1"
+$scriptUrl = "https://raw.githubusercontent.com/exercism/configlet/main/scripts/fetch-configlet-script.ps1"
 $script = Invoke-WebRequest -Uri "${scriptUrl}" -MaximumRetryCount 3 -RetryIntervalSec 1
 
 if ($Confirm.IsPresent) {

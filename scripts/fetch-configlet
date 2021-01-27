@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-script_url="https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet-script"
+script_url="https://raw.githubusercontent.com/exercism/configlet/main/scripts/fetch-configlet-script"
 script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
 
 if [[ "$*" == "--confirm" ]] || [[ "$*" == "-c" ]]; then
