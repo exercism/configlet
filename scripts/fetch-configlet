@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+script_url="https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet-script"
+script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
+bash -c "${script}"
