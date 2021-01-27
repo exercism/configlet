@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-readonly LATEST='https://api.github.com/repos/exercism/configlet-v3/releases/latest'
+readonly LATEST='https://api.github.com/repos/exercism/configlet/releases/latest'
 
 case "$(uname)" in
   Darwin*)   os='mac'     ;;
