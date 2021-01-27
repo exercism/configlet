@@ -76,7 +76,7 @@ proc hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0
 
 proc testsFile(exercise: Exercise, trackDir: string): string =
-  trackDir / "exercises" / exercise.slug / ".meta" / "tests.toml"
+  trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
 proc toToml(exercise: Exercise): string =
   result.add("[canonical-tests]\n")
