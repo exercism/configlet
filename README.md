@@ -64,4 +64,4 @@ To use the application in your track, you can copy the [`scripts/fetch-configlet
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/exercism/configlet-v3.
+Bug reports and pull requests are welcome on GitHub at https://github.com/exercism/configlet.
