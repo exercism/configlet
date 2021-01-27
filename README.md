@@ -11,7 +11,7 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  sync, uuid
+  lint, sync, uuid
 
 Options for sync:
   -e, --exercise <slug>        Only sync this exercise
