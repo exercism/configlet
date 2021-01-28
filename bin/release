@@ -22,5 +22,5 @@ do
   esac
 done
 
-nimble install -Y bump
+nimble --accept install bump
 bump --v --"${level}" "${message}"
