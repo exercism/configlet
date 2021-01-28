@@ -7,7 +7,7 @@ type
     slug: string
 
   ConfigJson = object
-    exercises: seq[ConfigJsonExercise]
+    practice: seq[ConfigJsonExercise]
 
   TrackRepo = object
     dir: string
@@ -37,13 +37,13 @@ proc slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise.dir)
 
 proc testsFile(exercise: TrackRepoExercise): string =
-  exercise.dir / ".meta" / "tests.toml"
+  exercise.dir / "practice" / ".meta" / "tests.toml"
 
 proc testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
 
 proc parseConfigJson(filePath: string): ConfigJson =
-  let json = json.parseFile(filePath)
+  let json = json.parseFile(filePath)["exercises"]
   to(json, ConfigJson)
 
 proc newTrackRepoExercise(repo: TrackRepo,
@@ -53,7 +53,7 @@ proc newTrackRepoExercise(repo: TrackRepo,
 proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   let config = parseConfigJson(repo.configJsonFile)
 
-  for exercise in config.exercises:
+  for exercise in config.practice:
     result.add(newTrackRepoExercise(repo, exercise))
 
 proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
