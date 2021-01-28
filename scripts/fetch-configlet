@@ -1,10 +1,29 @@
 #!/usr/bin/env bash
 
+# Fetch the latest version of configlet. Once completed, the bin/ directory
+# will contain the configlet binary.
+#
+# Usage:
+#   fetch-configlet [options]
+#
+# Options:
+#  -c, --confirm  Require a confirmation from the user before fetching the configlet binary
+#
+# Notes:
+#   The script should be run from the track's root directory.
+#
+# Examples:
+#   $ ./bin/fetch-configlet            # Fetch configlet
+#   $ ./bin/fetch-configlet --confirm  # Require confirmation before fetching configlet
+
 set -eo pipefail
 
+# Download the script that will fetch the configlet binary
 script_url="https://raw.githubusercontent.com/exercism/configlet/main/scripts/fetch-configlet-script"
 script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
 
+# Require confirmation from the user before executing the fetch script
+# if the --confirm or -c command line argument was passed
 if [[ "$*" == "--confirm" ]] || [[ "$*" == "-c" ]]; then
     message=$(printf "\n\n%s\n\nDo you want the execute the above script (y/n)? " "${script}")
     read -r -p "${message}" choice
@@ -13,4 +32,5 @@ if [[ "$*" == "--confirm" ]] || [[ "$*" == "-c" ]]; then
     fi
 fi
 
+# Execute the fetch script
 bash -c "${script}"
