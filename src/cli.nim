@@ -178,7 +178,7 @@ proc showHelp(exitCode: range[0..255] = 0) =
   quit(exitCode)
 
 proc showVersion =
-  echo &"v{NimblePkgVersion}"
+  echo &"{NimblePkgVersion}"
   quit(0)
 
 proc showError*(s: string) =
