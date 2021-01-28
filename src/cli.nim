@@ -59,7 +59,8 @@ func genShortKeys: array[Opt, char] =
       result[opt] = ($opt)[0]
 
 const
-  NimblePkgVersion {.strdefine.}: string = "unknown"
+  repoRootDir = currentSourcePath().parentDir().parentDir()
+  configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optSyncCheck, optSyncOffline}
 
@@ -178,7 +179,7 @@ proc showHelp(exitCode: range[0..255] = 0) =
   quit(exitCode)
 
 proc showVersion =
-  echo &"{NimblePkgVersion}"
+  echo &"{configletVersion}"
   quit(0)
 
 proc showError*(s: string) =
