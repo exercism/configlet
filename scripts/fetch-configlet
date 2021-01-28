@@ -19,7 +19,7 @@
 set -eo pipefail
 
 # Download the script that will fetch the configlet binary
-script_url="https://raw.githubusercontent.com/exercism/configlet/main/scripts/fetch-configlet-script"
+script_url="https://raw.githubusercontent.com/exercism/configlet/master/scripts/fetch-configlet"
 script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
 
 # Require confirmation from the user before executing the fetch script
@@ -27,7 +27,7 @@ script=$(curl --silent --show-error --fail --location --retry 3 "${script_url}")
 if [[ "$*" == "--confirm" ]] || [[ "$*" == "-c" ]]; then
   message=$(printf "\n\n%s\n\nDo you want the execute the above script (y/n)? " "${script}")
   read -r -p "${message}" choice
-  if [[ "${choice}" != "y" ]] && [[ "${choice}" != "Y" ]]; then
+  if [[ "${choice}" != [yY] ]]; then
     exit 0
   fi
 fi
