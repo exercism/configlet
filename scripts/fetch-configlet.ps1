@@ -23,6 +23,7 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
+$ProgressPreference = "SilentlyContinue"
 
 # Download the script that will fetch the configlet.exe binary
 $scriptUrl = "https://raw.githubusercontent.com/exercism/configlet/main/scripts/fetch-configlet-script.ps1"
