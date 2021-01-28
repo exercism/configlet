@@ -132,7 +132,7 @@ proc getNameOfRemote(probSpecsDir, host, location: string): string =
 proc validate(probSpecsRepo: ProbSpecsRepo) =
   ## Raises an error if the given `probSpecsRepo` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
-  const mainBranchName = "master"
+  const mainBranchName = "main"
 
   let probSpecsDir = probSpecsRepo.dir
   logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
@@ -166,8 +166,8 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
       showError(&"failed to fetch `{mainBranchName}` in " &
                 &"problem-specifications directory: '{probSpecsDir}'")
 
-    # Allow HEAD to be on a non-`master` branch, as long as it's up-to-date
-    # with `upstream/master`.
+    # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
+    # with `upstream/main`.
     let (revHead, _) = execCmdEx("git rev-parse HEAD")
     let (revUpstream, _) = execCmdEx(&"git rev-parse {remoteName}/{mainBranchName}")
     if revHead != revUpstream:
