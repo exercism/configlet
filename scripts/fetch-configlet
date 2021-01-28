@@ -7,7 +7,7 @@
 #   fetch-configlet [options]
 #
 # Options:
-#  -c, --confirm  Require a confirmation from the user before fetching the configlet binary
+#   -c, --confirm  Require a confirmation from the user before fetching the configlet binary
 #
 # Notes:
 #   The script should be run from the track's root directory.
