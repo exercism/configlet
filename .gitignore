@@ -3,6 +3,7 @@
 
 # Application binary
 configlet
+configlet.exe
 
 # Temporary prob-specs repo
 .problem-specifications/
