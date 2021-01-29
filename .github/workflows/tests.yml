@@ -1,6 +1,13 @@
 name: tests
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    paths:
+      - "!**.md"
+  pull_request:
+    paths:
+      - "!**.md"
+  workflow_dispatch:
 
 jobs:
   all_tests:
