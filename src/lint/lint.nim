@@ -37,6 +37,24 @@ proc conceptExerciseFilesExist(trackDir: string): bool =
         if not fileExists(path):
           writeError("Missing file", path)
 
+proc conceptFilesExist(trackDir: string): bool =
+  const
+    conceptFiles = [
+      "about.md",
+      "introduction.md",
+      "links.json",
+    ]
+
+  let conceptsDir = trackDir / "concepts"
+  result = true
+
+  if dirExists(conceptsDir):
+    for dir in getSortedSubDirs(conceptsDir):
+      for conceptFile in conceptFiles:
+        let path = dir / conceptFile
+        if not fileExists(path):
+          writeError("Missing file", path)
+
 proc lint*(conf: Conf) =
   echo "The lint command is under development.\n"  &
        "Please re-run this command regularly to see if your track passes " &
@@ -45,11 +63,13 @@ proc lint*(conf: Conf) =
   let trackDir = conf.trackDir
   let b1 = isValidTrackConfig(trackDir)
   let b2 = conceptExerciseFilesExist(trackDir)
+  let b3 = conceptFilesExist(trackDir)
 
-  if b1 and b2:
+  if b1 and b2 and b3:
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
-- Every concept exercise has the required .md files and a .meta/config.json file"""
+- Every concept exercise has the required .md files and a .meta/config.json file
+- Every concept has the required .md files and links.json file"""
   else:
     quit(1)
