@@ -60,7 +60,9 @@ The `configlet sync` command replaces the functionality of the older `canonical_
 
 ## Use in your track
 
-To use the application in your track, you can copy the [`scripts/fetch-configlet`](./scripts/fetch-configlet) and/or [`scripts/fetch-configlet.ps1`](./scripts/fetch-configlet.ps1) files to your track's repository. Running either of these scripts will download the latest version of the `configlet` tool to your track's `bin` directory.
+Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too. The first is a bash script, and the second is a PowerShell script.
+
+Running one of these scripts downloads the latest version of configlet to the `bin` directory. You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
 
 ## Contributing
 
