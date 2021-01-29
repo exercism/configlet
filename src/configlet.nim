@@ -13,7 +13,7 @@ proc main =
   of actNil:
     discard
   of actLint:
-    lint()
+    lint(conf)
   of actSync:
     if conf.action.check:
       check(conf)
