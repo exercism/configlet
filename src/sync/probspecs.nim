@@ -1,5 +1,5 @@
 import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
-import ".."/[cli, logger]
+import ".."/[cli, helpers, logger]
 
 type
   ProbSpecsRepoExercise = object
@@ -101,15 +101,6 @@ proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExerc
   for repoExercise in repo.exercisesWithCanonicalData():
     if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(initProbSpecsExercise(repoExercise))
-
-template withDir(dir: string; body: untyped): untyped =
-  ## Changes the current directory to `dir` temporarily.
-  let startDir = getCurrentDir()
-  try:
-    setCurrentDir(dir)
-    body
-  finally:
-    setCurrentDir(startDir)
 
 proc getNameOfRemote(probSpecsDir, host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
