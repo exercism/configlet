@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 
 nimble --accept install --depsOnly
-nimble build -d:release
+nimble --verbose build -d:release
