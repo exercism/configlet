@@ -1,11 +1,6 @@
 import std/[json, os, terminal]
 import ".."/[cli, helpers]
-
-template writeError(description: string, details: string) =
-  stdout.styledWriteLine(fgRed, description & ":")
-  stdout.writeLine(details)
-  stdout.write "\n"
-  result = false
+import "."/concept_exercises
 
 proc isValidTrackConfig(trackDir: string): bool =
   result = true
@@ -68,12 +63,14 @@ proc lint*(conf: Conf) =
   let b1 = isValidTrackConfig(trackDir)
   let b2 = conceptExerciseFilesExist(trackDir)
   let b3 = conceptFilesExist(trackDir)
+  let b4 = isEveryConceptExerciseConfigValid(trackDir)
 
-  if b1 and b2 and b3:
+  if b1 and b2 and b3 and b4:
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
 - Every concept exercise has the required .md files and a .meta/config.json file
-- Every concept has the required .md files and links.json file"""
+- Every concept has the required .md files and links.json file
+- Every concept exercise .meta/config.json file is valid"""
   else:
     quit(1)
