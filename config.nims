@@ -1,3 +1,6 @@
+switch("styleCheck", "hint")
+hint("Name", on)
+
 if defined(release):
   switch("opt", "size")
   switch("passC", "-flto")
