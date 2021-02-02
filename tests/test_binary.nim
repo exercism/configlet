@@ -12,7 +12,7 @@ proc main =
   let binaryPath = repoRootDir / binaryName
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
-  const cmd = "nimble build -d:release"
+  const cmd = "nimble --verbose build -d:release"
   stdout.write(&"Running `{cmd}`... ")
   stdout.flushFile()
   let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
