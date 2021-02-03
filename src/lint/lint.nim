@@ -1,4 +1,4 @@
-import std/[json, os, strformat, terminal]
+import std/[json, os, terminal]
 import ".."/[cli, helpers]
 
 template writeError(description: string, details: string) =
@@ -18,7 +18,23 @@ proc isValidTrackConfig(trackDir: string): bool =
   else:
     writeError("Missing file", configJsonPath)
 
+proc subdirsContain(dir: string, files: openArray[string]): bool =
+  ## Returns `true` if every file in `files` exists in every subdirectory of
+  ## `dir`.
+  ##
+  ## Returns `true` if `dir` does not exist or has no subdirectories.
+  result = true
+
+  if dirExists(dir):
+    for subdir in getSortedSubdirs(dir):
+      for file in files:
+        let path = subdir / file
+        if not fileExists(path):
+          writeError("Missing file", path)
+
 proc conceptExerciseFilesExist(trackDir: string): bool =
+  ## Returns true if every subdirectory in `trackDir/exercises/concept` has the
+  ## required files.
   const
     conceptExerciseFiles = [
       ".docs" / "hints.md",
@@ -28,16 +44,11 @@ proc conceptExerciseFilesExist(trackDir: string): bool =
     ]
 
   let conceptDir = trackDir / "exercises" / "concept"
-  result = true
-
-  if dirExists(conceptDir):
-    for dir in getSortedSubDirs(conceptDir):
-      for conceptExerciseFile in conceptExerciseFiles:
-        let path = dir / conceptExerciseFile
-        if not fileExists(path):
-          writeError("Missing file", path)
+  result = subdirsContain(conceptDir, conceptExerciseFiles)
 
 proc conceptFilesExist(trackDir: string): bool =
+  ## Returns true if every subdirectory in `trackDir/concepts` has the required
+  ## files.
   const
     conceptFiles = [
       "about.md",
@@ -46,17 +57,10 @@ proc conceptFilesExist(trackDir: string): bool =
     ]
 
   let conceptsDir = trackDir / "concepts"
-  result = true
-
-  if dirExists(conceptsDir):
-    for dir in getSortedSubDirs(conceptsDir):
-      for conceptFile in conceptFiles:
-        let path = dir / conceptFile
-        if not fileExists(path):
-          writeError("Missing file", path)
+  result = subdirsContain(conceptsDir, conceptFiles)
 
 proc lint*(conf: Conf) =
-  echo "The lint command is under development.\n"  &
+  echo "The lint command is under development.\n" &
        "Please re-run this command regularly to see if your track passes " &
        "the latest linting rules.\n"
 
