@@ -1,5 +1,6 @@
 switch("styleCheck", "hint")
 hint("Name", on)
+switch("experimental", "strictFuncs")
 
 if defined(release):
   switch("opt", "size")
