@@ -37,7 +37,8 @@ template checkArrayOfStrings*(context, key: string; isRequired = true) =
   if d.hasKey(key):
     if d[key].kind == JArray:
       if d[key].len == 0:
-        writeError("Array is empty: " & format(context, key), path)
+        if isRequired:
+          writeError("Array is empty: " & format(context, key), path)
       else:
         for item in d[key]:
           if item.kind != JString:
@@ -55,7 +56,8 @@ template checkArrayOf*(key: string,
   if data.hasKey(key):
     if data[key].kind == JArray:
       if data[key].len == 0:
-        writeError("Array is empty: " & q(key), path)
+        if isRequired:
+          writeError("Array is empty: " & q(key), path)
       else:
         for item in data[key]:
           if not call(item, key, path):
