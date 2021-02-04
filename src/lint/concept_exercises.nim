@@ -6,7 +6,7 @@ proc isValidAuthorOrContributor(data: JsonNode, key: string, path: string): bool
   if isObject(data, "", path):
     result = true
     checkString("github_username")
-    checkString("exercism_username")
+    checkString("exercism_username", isRequired = false)
 
 template checkFiles(data: JsonNode, context, path: string) =
   if isObject(data, context, path):
