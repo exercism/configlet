@@ -1,18 +1,17 @@
-import std/json
+import std/[json, terminal]
 import ".."/helpers
 
-template checkObject*(key: string, isRequired = true) =
+proc isObject*(data: JsonNode, key: string, path: string,
+               isRequired = true): bool =
+  result = true
   if key.len == 0:
     if data.kind != JObject:
       writeError("JSON root is not an object", path)
-      return false
   elif data.hasKey(key):
     if data[key].kind != JObject:
       writeError("Not an object: " & key, path)
-      return false
   elif isRequired:
     writeError("Missing key: " & key, path)
-    return false
 
 template checkString*(key: string, isRequired = true) =
   if data.hasKey(key):

@@ -3,25 +3,27 @@ import ".."/helpers
 import "."/validators
 
 proc isValidAuthorOrContributor(data: JsonNode, key: string, path: string): bool =
-  result = true
-  checkObject("")
-  checkString("github_username")
-  checkString("exercism_username")
+  if isObject(data, "", path):
+    result = true
+    checkString("github_username")
+    checkString("exercism_username")
 
 template checkFiles(data: JsonNode, context, path: string) =
-  checkObject(context)
-  checkArrayOfStrings(context, "solution")
-  checkArrayOfStrings(context, "test")
-  checkArrayOfStrings(context, "exemplar")
+  if isObject(data, context, path):
+    checkArrayOfStrings(context, "solution")
+    checkArrayOfStrings(context, "test")
+    checkArrayOfStrings(context, "exemplar")
+  else:
+    result = false
 
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
-  result = true
-  checkObject("")
-  checkArrayOf("authors", isValidAuthorOrContributor)
-  checkArrayOf("contributors", isValidAuthorOrContributor, isRequired = false)
-  checkFiles(data, "files", path)
-  checkArrayOfStrings("", "forked_from", isRequired = false)
-  checkString("language_versions", isRequired = false)
+  if isObject(data, "", path):
+    result = true
+    checkArrayOf("authors", isValidAuthorOrContributor)
+    checkArrayOf("contributors", isValidAuthorOrContributor, isRequired = false)
+    checkFiles(data, "files", path)
+    checkArrayOfStrings("", "forked_from", isRequired = false)
+    checkString("language_versions", isRequired = false)
 
 proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
   let conceptExercisesDir = trackDir / "exercises" / "concept"
