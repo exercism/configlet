@@ -5,13 +5,15 @@ export strutils.strip
 proc q(s: string): string =
   "'" & s & "'"
 
-proc isObject*(data: JsonNode, key: string, path: string,
+proc isObject*(data: JsonNode; context, path: string): bool =
+  result = true
+  if data.kind != JObject:
+    writeError("Not an object: " & q(context), path)
+
+proc hasObject*(data: JsonNode; key, path: string,
                isRequired = true): bool =
   result = true
-  if key.len == 0:
-    if data.kind != JObject:
-      writeError("JSON root is not an object", path)
-  elif data.hasKey(key):
+  if data.hasKey(key):
     if data[key].kind != JObject:
       writeError("Not an object: " & q(key), path)
   elif isRequired:

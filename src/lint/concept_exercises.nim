@@ -2,14 +2,14 @@ import std/[json, os, terminal]
 import ".."/helpers
 import "."/validators
 
-proc isValidAuthorOrContributor(data: JsonNode, key: string, path: string): bool =
-  if isObject(data, "", path):
+proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): bool =
+  if isObject(data, context, path):
     result = true
     checkString("github_username")
     checkString("exercism_username", isRequired = false)
 
 template checkFiles(data: JsonNode, context, path: string) =
-  if isObject(data, context, path):
+  if hasObject(data, context, path):
     checkArrayOfStrings(context, "solution")
     checkArrayOfStrings(context, "test")
     checkArrayOfStrings(context, "exemplar")
@@ -17,7 +17,7 @@ template checkFiles(data: JsonNode, context, path: string) =
     result = false
 
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
-  if isObject(data, "", path):
+  if isObject(data, "root", path):
     result = true
     checkArrayOf("authors", isValidAuthorOrContributor)
     checkArrayOf("contributors", isValidAuthorOrContributor, isRequired = false)
