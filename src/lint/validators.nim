@@ -1,5 +1,6 @@
-import std/[json, terminal]
+import std/[json, strutils, terminal]
 import ".."/helpers
+export strutils.strip
 
 proc q(s: string): string =
   "'" & s & "'"
@@ -19,8 +20,11 @@ proc isObject*(data: JsonNode, key: string, path: string,
 template checkString*(key: string, isRequired = true) =
   if data.hasKey(key):
     if data[key].kind == JString:
-      if data[key].getStr().len == 0:
+      let s = data[key].getStr()
+      if s.len == 0:
         writeError("String is zero-length: " & q(key), path)
+      elif s.strip().len == 0:
+        writeError("String is whitespace-only: " & q(key), path)
     else:
       writeError("Not a string: " & q(key) & ": " & $data[key], path)
   elif isRequired:
@@ -41,10 +45,14 @@ template checkArrayOfStrings*(context, key: string; isRequired = true) =
           writeError("Array is empty: " & format(context, key), path)
       else:
         for item in d[key]:
-          if item.kind != JString:
+          if item.kind == JString:
+            let s = item.getStr()
+            if s.len == 0:
+              writeError("Array contains zero-length string: " & format(context, key), path)
+            elif s.strip().len == 0:
+              writeError("Array contains whitespace-only string: " & q(key), path)
+          else:
             writeError("Array contains non-string: " & format(context, key) & ": " & $item, path)
-          elif item.getStr().len == 0:
-            writeError("Array contains zero-length string: " & format(context, key), path)
     else:
       writeError("Not an array: " & format(context, key), path)
   elif isRequired:
