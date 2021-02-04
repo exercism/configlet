@@ -69,8 +69,8 @@ proc lint*(conf: Conf) =
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
-- Every concept exercise has the required .md files and a .meta/config.json file
 - Every concept has the required .md files and links.json file
+- Every concept exercise has the required .md files and a .meta/config.json file
 - Every concept exercise .meta/config.json file is valid"""
   else:
     quit(1)

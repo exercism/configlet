@@ -40,3 +40,5 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
             continue
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
+  else:
+    writeWarning("Directory does not exist", conceptExercisesDir)
