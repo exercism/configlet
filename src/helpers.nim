@@ -22,8 +22,3 @@ template writeError*(description: string, details: string) =
   stdout.writeLine(details)
   stdout.write "\n"
   result = false
-
-template writeWarning*(description: string, details: string) =
-  stdout.styledWriteLine(fgYellow, description & ":")
-  stdout.writeLine(details)
-  stdout.write "\n"
