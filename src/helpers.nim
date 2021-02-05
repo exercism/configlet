@@ -16,3 +16,9 @@ proc getSortedSubdirs*(dir: string): seq[string] =
     if kind == pcDir:
       result.add path
   sort result
+
+template writeError*(description: string, details: string) =
+  stdout.styledWriteLine(fgRed, description & ":")
+  stdout.writeLine(details)
+  stdout.write "\n"
+  result = false
