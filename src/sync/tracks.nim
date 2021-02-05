@@ -30,14 +30,14 @@ proc configJsonFile(repo: TrackRepo): string =
 proc exercisesDir(repo: TrackRepo): string =
   repo.dir / "exercises"
 
-proc exerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
-  repo.exercisesDir / exercise.slug
+proc practiceExerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
+  repo.exercisesDir / "practice" / exercise.slug
 
 proc slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise.dir)
 
 proc testsFile(exercise: TrackRepoExercise): string =
-  exercise.dir / "practice" / ".meta" / "tests.toml"
+  exercise.dir / ".meta" / "tests.toml"
 
 proc testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
@@ -48,7 +48,7 @@ proc parseConfigJson(filePath: string): ConfigJson =
 
 proc newTrackRepoExercise(repo: TrackRepo,
     exercise: ConfigJsonExercise): TrackRepoExercise =
-  result.dir = repo.exerciseDir(exercise)
+  result.dir = repo.practiceExerciseDir(exercise)
 
 proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   let config = parseConfigJson(repo.configJsonFile)
