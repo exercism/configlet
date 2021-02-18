@@ -83,3 +83,10 @@ template checkBoolean*(key: string, isRequired = true) =
       writeError("Not a bool: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     writeError("Missing key: " & q(key), path)
+
+template checkInteger*(key: string, isRequired = true) =
+  if data.hasKey(key):
+    if data[key].kind != JInt:
+      writeError("Not an integer: " & q(key) & ": " & $data[key], path)
+  elif isRequired:
+    writeError("Missing key: " & q(key), path)
