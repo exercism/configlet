@@ -46,10 +46,8 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
     let s = data.getStr()
     for tag in tags:
       if s == tag:
-        result = true
-
-    if not result:
-      writeError("Not a valid tag: " & $data, path)
+        return true
+    writeError("Not a valid tag: " & $data, path)
   else:
       writeError("Tag is not a string: " & $data, path)
 
