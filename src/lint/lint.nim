@@ -1,17 +1,6 @@
-import std/[json, os, terminal]
+import std/[os, terminal]
 import ".."/[cli, helpers]
-import "."/concept_exercises
-
-proc isValidTrackConfig(trackDir: string): bool =
-  result = true
-  let configJsonPath = trackDir / "config.json"
-  if fileExists(configJsonPath):
-    try:
-      let j = parseFile(configJsonPath)
-    except:
-      writeError("JSON parsing error", getCurrentExceptionMsg())
-  else:
-    writeError("Missing file", configJsonPath)
+import "."/[concept_exercises, track_config]
 
 proc subdirsContain(dir: string, files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
@@ -60,7 +49,7 @@ proc lint*(conf: Conf) =
        "the latest linting rules.\n"
 
   let trackDir = conf.trackDir
-  let b1 = isValidTrackConfig(trackDir)
+  let b1 = isTrackConfigValid(trackDir)
   let b2 = conceptExerciseFilesExist(trackDir)
   let b3 = conceptFilesExist(trackDir)
   let b4 = isEveryConceptExerciseConfigValid(trackDir)
@@ -69,6 +58,7 @@ proc lint*(conf: Conf) =
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
+- config.json has these valid fields: language, slug, active, blurb, version, tags
 - Every concept has the required .md files and links.json file
 - Every concept exercise has the required .md files and a .meta/config.json file
 - Every concept exercise .meta/config.json file is valid"""
