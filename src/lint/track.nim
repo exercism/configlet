@@ -60,12 +60,12 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
     checkBoolean("active")
     checkInteger("version")
     checkArrayOf("tags", isValidTag)
-    
+
 proc isTrackConfigValid*(trackDir: string): bool =
   result = true
   let configJsonPath = trackDir / "config.json"
   if fileExists(configJsonPath):
-    let j = 
+    let j =
       try:
         parseFile(configJsonPath)
       except:
