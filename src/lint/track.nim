@@ -49,7 +49,7 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
     else:
       writeError("Not a valid tag: " & $data, path)
   else:
-      writeError("Tag is not a string: " & $data, path)
+    writeError("Tag is not a string: " & $data, path)
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "root", path):
@@ -72,6 +72,6 @@ proc isTrackConfigValid*(trackDir: string): bool =
         writeError("JSON parsing error", getCurrentExceptionMsg())
         return
     if not isValidTrackConfig(j, configJsonPath):
-        result = false
+      result = false
   else:
     writeError("Missing file", configJsonPath)
