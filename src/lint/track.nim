@@ -2,7 +2,7 @@ import std/[json, os, terminal]
 import ".."/helpers
 import "."/validators
 
-const tags = @[
+const tags = [
   "paradigm/declarative",
   "paradigm/functional",
   "paradigm/imperative",
