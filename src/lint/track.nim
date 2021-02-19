@@ -56,8 +56,8 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
     result = true
     checkString("language")
     checkString("slug")
-    checkString("blurb")
     checkBoolean("active")
+    checkString("blurb")
     checkInteger("version")
     checkArrayOf("tags", isValidTag)
 
