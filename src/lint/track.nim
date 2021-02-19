@@ -1,4 +1,4 @@
-import std/[json, os, terminal]
+import std/[json, os, sets, terminal]
 import ".."/helpers
 import "."/validators
 
@@ -39,15 +39,15 @@ const tags = [
   "used_for/scientific_calculations",
   "used_for/scripts",
   "used_for/web_development"
-]
+].toHashSet()
 
 proc isValidTag(data: JsonNode, context: string, path: string): bool =
   if data.kind == JString:
     let s = data.getStr()
-    for tag in tags:
-      if s == tag:
-        return true
-    writeError("Not a valid tag: " & $data, path)
+    if tags.contains(s):
+      return true
+    else:
+      writeError("Not a valid tag: " & $data, path)
   else:
       writeError("Tag is not a string: " & $data, path)
 
