@@ -39,19 +39,23 @@ proc testsForSync(binaryPath: string) =
     removeDir(psDir)
     removeDir(trackDir)
 
-    test "can clone problem-specifications for test setup":
+    # Setup: clone the problem-specifications repo
+    block:
       execAndCheck(0):
         cloneExercismRepo("problem-specifications", psDir)
 
-    test "can clone track repo for test setup":
+    # Setup: clone a track repo
+    block:
       execAndCheck(0):
         cloneExercismRepo("nim", trackDir)
 
-    test "can set the problem-specifications repo to a known state":
+    # Setup: set the problem-specifications repo to a known state
+    block:
       execAndCheck(0):
         execCmdEx(&"git -C {psDir} checkout ef9e1e17c84721ee6e9d5a65c8dd3ba2122eac91")
 
-    test "can set the track repo to a known state":
+    # Setup: set the track repo to a known state
+    block:
       execAndCheck(0):
         execCmdEx(&"git -C {trackDir} checkout 798a250a5baf44468ff39bf016fafc3c6a5375c2")
 
