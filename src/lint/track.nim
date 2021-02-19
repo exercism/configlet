@@ -38,7 +38,7 @@ const tags = [
   "used_for/robotics",
   "used_for/scientific_calculations",
   "used_for/scripts",
-  "used_for/web_development"
+  "used_for/web_development",
 ].toHashSet()
 
 proc isValidTag(data: JsonNode, context: string, path: string): bool =
