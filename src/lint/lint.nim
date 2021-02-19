@@ -1,6 +1,6 @@
 import std/[os, terminal]
 import ".."/[cli, helpers]
-import "."/[concept_exercises, track]
+import "."/[concept_exercises, track_config]
 
 proc subdirsContain(dir: string, files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
