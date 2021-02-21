@@ -38,11 +38,34 @@ proc main =
         let exercise = probSpecsExercises[0]
 
         check:
-          exercise.slug == "acronym" # The first exercise with canonical data.
+          exercise.slug == "accumulate" # The first exercise with canonical data.
+          exercise.testCases.len >= 5 # Tests are never removed.
+
+      test "the first test case of first exercise is as expected":
+        let firstTestCase = probSpecsExercises[0].testCases[0].json
+        let firstTestCaseExpected = """{
+      "uuid": "64d97c14-36dd-44a8-9621-2cecebd6ed23",
+      "description": "accumulate empty",
+      "property": "accumulate",
+      "input": {
+        "list": [],
+        "accumulator": "(x) => x * x"
+      },
+      "expected": []
+    }""".parseJson()
+
+        check:
+          firstTestCase == firstTestCaseExpected
+
+      test "the second exercise is as expected":
+        let exercise = probSpecsExercises[1]
+
+        check:
+          exercise.slug == "acronym" # The second exercise with canonical data.
           exercise.testCases.len >= 9 # Tests are never removed.
 
-      test "the first test case is as expected":
-        let firstTestCase = probSpecsExercises[0].testCases[0].json
+      test "the first test case of second exercise is as expected":
+        let firstTestCase = probSpecsExercises[1].testCases[0].json
         let firstTestCaseExpected = """{
           "uuid": "1e22cceb-c5e4-4562-9afe-aef07ad1eaf4",
           "description": "basic",
