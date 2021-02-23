@@ -26,6 +26,7 @@ const tags = [
   "runtime/clr",
   "runtime/jvm",
   "runtime/beam",
+  "runtime/wasmtime",
   "used_for/artificial_intelligence",
   "used_for/backends",
   "used_for/cross_platform_development",
