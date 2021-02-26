@@ -30,7 +30,7 @@ proc checkString*(data: JsonNode; key, path: string; isRequired = true): bool =
           result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
       else:
         result.setFalseAndPrint("String is zero-length: " & q(key), path)
-    else:
+    elif data[key].kind != JNull or isRequired:
       result.setFalseAndPrint("Not a string: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
@@ -67,7 +67,7 @@ proc isArrayOfStrings*(data: JsonNode;
                                   format(context, key) & ": " & $item, path)
     elif isRequired:
       result.setFalseAndPrint("Array is empty: " & format(context, key), path)
-  else:
+  elif data.kind != JNull or isRequired:
     result.setFalseAndPrint("Not an array: " & format(context, key), path)
 
 proc hasArrayOfStrings*(data: JsonNode;
@@ -106,7 +106,7 @@ proc isArrayOf*(data: JsonNode;
           result = false
     elif isRequired:
       result.setFalseAndPrint("Array is empty: " & q(context), path)
-  else:
+  elif data.kind != JNull or isRequired:
     result.setFalseAndPrint("Not an array: " & q(context), path)
 
 proc hasArrayOf*(data: JsonNode;
@@ -127,7 +127,9 @@ proc hasArrayOf*(data: JsonNode;
 proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind != JBool:
+    if data[key].kind == JBool:
+      return
+    elif data[key].kind != JNull or isRequired:
       result.setFalseAndPrint("Not a bool: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
@@ -135,7 +137,9 @@ proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
 proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind != JInt:
+    if data[key].kind == JInt:
+      return
+    elif data[key].kind != JNull or isRequired:
       result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
