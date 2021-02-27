@@ -1,4 +1,4 @@
-import std/[json, os, sets, terminal]
+import std/[json, os, sets]
 import ".."/helpers
 import "."/validators
 
@@ -43,24 +43,32 @@ const tags = [
 ].toHashSet()
 
 proc isValidTag(data: JsonNode, context: string, path: string): bool =
+  result = true
+
   if data.kind == JString:
     let s = data.getStr()
-    if tags.contains(s):
-      return true
-    else:
+    if not tags.contains(s):
       writeError("Not a valid tag: " & $data, path)
+      result = false
   else:
     writeError("Tag is not a string: " & $data, path)
+    result = false
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "root", path):
     result = true
-    checkString("language")
-    checkString("slug")
-    checkBoolean("active")
-    checkString("blurb")
-    checkInteger("version")
-    checkArrayOf("tags", isValidTag)
+    if not checkString(data, "language", path):
+      result = false
+    if not checkString(data, "slug", path):
+      result = false
+    if not checkBoolean(data, "active", path):
+      result = false
+    if not checkString(data, "blurb", path):
+      result = false
+    if not checkInteger(data, "version", path):
+      result = false
+    if not checkArrayOf(data, "tags", path, isValidTag):
+      result = false
 
 proc isTrackConfigValid*(trackDir: string): bool =
   result = true
@@ -71,8 +79,9 @@ proc isTrackConfigValid*(trackDir: string): bool =
         parseFile(configJsonPath)
       except:
         writeError("JSON parsing error", getCurrentExceptionMsg())
-        return
+        return false
     if not isValidTrackConfig(j, configJsonPath):
       result = false
   else:
     writeError("Missing file", configJsonPath)
+    result = false

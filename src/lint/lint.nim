@@ -1,4 +1,4 @@
-import std/[os, terminal]
+import std/os
 import ".."/[cli, helpers]
 import "."/[concept_exercises, track_config]
 
