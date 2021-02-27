@@ -183,9 +183,9 @@ proc showVersion =
   quit(0)
 
 proc showError*(s: string) =
-  stdout.styledWrite(fgRed, "Error: ")
-  stdout.write(s)
-  stdout.write("\n\n")
+  stderr.styledWrite(fgRed, "Error: ")
+  stderr.write(s)
+  stderr.write("\n\n")
   showHelp(exitCode = 1)
 
 func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
