@@ -15,6 +15,7 @@ proc subdirsContain(dir: string, files: openArray[string]): bool =
         let path = subdir / file
         if not fileExists(path):
           writeError("Missing file", path)
+          result = false
 
 proc conceptExerciseFilesExist(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/concept` has the

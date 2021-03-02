@@ -48,6 +48,7 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
             parseFile(configPath)
           except:
             writeError("JSON parsing error", getCurrentExceptionMsg())
+            result = false
             continue
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
