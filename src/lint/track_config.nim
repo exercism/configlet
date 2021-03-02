@@ -48,11 +48,9 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
   if data.kind == JString:
     let s = data.getStr()
     if not tags.contains(s):
-      writeError("Not a valid tag: " & $data, path)
-      result = false
+      result.setFalseAndPrint("Not a valid tag: " & $data, path)
   else:
-    writeError("Tag is not a string: " & $data, path)
-    result = false
+    result.setFalseAndPrint("Tag is not a string: " & $data, path)
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "root", path):
@@ -78,10 +76,9 @@ proc isTrackConfigValid*(trackDir: string): bool =
       try:
         parseFile(configJsonPath)
       except:
-        writeError("JSON parsing error", getCurrentExceptionMsg())
+        result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
         return false
     if not isValidTrackConfig(j, configJsonPath):
       result = false
   else:
-    writeError("Missing file", configJsonPath)
-    result = false
+    result.setFalseAndPrint("Missing file", configJsonPath)

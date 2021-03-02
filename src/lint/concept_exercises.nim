@@ -47,8 +47,7 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
           try:
             parseFile(configPath)
           except:
-            writeError("JSON parsing error", getCurrentExceptionMsg())
-            result = false
+            result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
             continue
         if not isValidConceptExerciseConfig(j, configPath):
           result = false

@@ -8,19 +8,16 @@ proc q(s: string): string =
 proc isObject*(data: JsonNode; context, path: string): bool =
   result = true
   if data.kind != JObject:
-    writeError("Not an object: " & q(context), path)
-    result = false
+    result.setFalseAndPrint("Not an object: " & q(context), path)
 
 proc hasObject*(data: JsonNode; key, path: string,
                isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JObject:
-      writeError("Not an object: " & q(key), path)
-      result = false
+      result.setFalseAndPrint("Not an object: " & q(key), path)
   elif isRequired:
-    writeError("Missing key: " & q(key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & q(key), path)
 
 proc checkString*(data: JsonNode; key, path: string, isRequired = true): bool =
   result = true
@@ -28,17 +25,13 @@ proc checkString*(data: JsonNode; key, path: string, isRequired = true): bool =
     if data[key].kind == JString:
       let s = data[key].getStr()
       if s.len == 0:
-        writeError("String is zero-length: " & q(key), path)
-        result = false
+        result.setFalseAndPrint("String is zero-length: " & q(key), path)
       elif s.strip().len == 0:
-        writeError("String is whitespace-only: " & q(key), path)
-        result = false
+        result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
     else:
-      writeError("Not a string: " & q(key) & ": " & $data[key], path)
-      result = false
+      result.setFalseAndPrint("Not a string: " & q(key) & ": " & $data[key], path)
   elif isRequired:
-    writeError("Missing key: " & q(key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & q(key), path)
 
 proc format(context, key: string): string =
   if context.len > 0:
@@ -53,27 +46,24 @@ proc checkArrayOfStrings*(data: JsonNode, context, key, path: string; isRequired
     if d[key].kind == JArray:
       if d[key].len == 0:
         if isRequired:
-          writeError("Array is empty: " & format(context, key), path)
-          result = false
+          result.setFalseAndPrint("Array is empty: " & format(context, key), path)
       else:
         for item in d[key]:
           if item.kind == JString:
             let s = item.getStr()
             if s.len == 0:
-              writeError("Array contains zero-length string: " & format(context, key), path)
-              result = false
+              result.setFalseAndPrint("Array contains zero-length string: " &
+                                      format(context, key), path)
             elif s.strip().len == 0:
-              writeError("Array contains whitespace-only string: " & q(key), path)
-              result = false
+              result.setFalseAndPrint("Array contains whitespace-only string: " &
+                                      q(key), path)
           else:
-            writeError("Array contains non-string: " & format(context, key) & ": " & $item, path)
-            result = false
+            result.setFalseAndPrint("Array contains non-string: " &
+                                    format(context, key) & ": " & $item, path)
     else:
-      writeError("Not an array: " & format(context, key), path)
-      result = false
+      result.setFalseAndPrint("Not an array: " & format(context, key), path)
   elif isRequired:
-    writeError("Missing key: " & format(context, key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & format(context, key), path)
 
 proc checkArrayOf*(data: JsonNode, key, path: string,
                    call: proc(d: JsonNode; key, path: string): bool,
@@ -83,35 +73,28 @@ proc checkArrayOf*(data: JsonNode, key, path: string,
     if data[key].kind == JArray:
       if data[key].len == 0:
         if isRequired:
-          writeError("Array is empty: " & q(key), path)
-          result = false
+          result.setFalseAndPrint("Array is empty: " & q(key), path)
       else:
         for item in data[key]:
           if not call(item, key, path):
             result = false
     else:
-      writeError("Not an array: " & q(key), path)
-      result = false
+      result.setFalseAndPrint("Not an array: " & q(key), path)
   elif isRequired:
-    writeError("Missing key: " & q(key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & q(key), path)
 
 proc checkBoolean*(data: JsonNode; key, path: string, isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JBool:
-      writeError("Not a bool: " & q(key) & ": " & $data[key], path)
-      result = false
+      result.setFalseAndPrint("Not a bool: " & q(key) & ": " & $data[key], path)
   elif isRequired:
-    writeError("Missing key: " & q(key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & q(key), path)
 
 proc checkInteger*(data: JsonNode; key, path: string, isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JInt:
-      writeError("Not an integer: " & q(key) & ": " & $data[key], path)
-      result = false
+      result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data[key], path)
   elif isRequired:
-    writeError("Missing key: " & q(key), path)
-    result = false
+    result.setFalseAndPrint("Missing key: " & q(key), path)
