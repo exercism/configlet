@@ -5,5 +5,7 @@
 configlet
 configlet.exe
 
-# Temporary prob-specs repo
+# Temporary repos
 .problem-specifications/
+.test_binary_problem_specifications/
+.test_binary_nim_track_repo/
