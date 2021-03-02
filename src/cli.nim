@@ -173,9 +173,12 @@ proc showHelp(exitCode: range[0..255] = 0) =
   const helpText = genHelpText()
   let appName = extractFilename(getAppFilename())
   let usage = "Usage:\n" &
-              &"  {appName} [global-options] <command> [command-options]\n\n"
-  stdout.write usage
-  echo helpText
+              &"  {appName} [global-options] <command> [command-options]\n"
+  let f = if exitCode == 0: stdout else: stderr
+  f.writeLine usage
+  f.writeLine helpText
+  if f == stdout:
+    f.flushFile()
   quit(exitCode)
 
 proc showVersion =
