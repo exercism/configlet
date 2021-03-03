@@ -17,7 +17,7 @@ proc getSortedSubdirs*(dir: string): seq[string] =
       result.add path
   sort result
 
-proc setFalseAndPrint*(b: var bool, description: string, details: string) =
+proc setFalseAndPrint*(b: var bool; description: string; details: string) =
   ## Sets `b` to `false` and writes a message to stdout containing `description`
   ## and `details`.
   b = false
