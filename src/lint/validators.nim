@@ -10,8 +10,7 @@ proc isObject*(data: JsonNode; context, path: string): bool =
   if data.kind != JObject:
     result.setFalseAndPrint("Not an object: " & q(context), path)
 
-proc hasObject*(data: JsonNode; key, path: string,
-               isRequired = true): bool =
+proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JObject:
@@ -19,7 +18,7 @@ proc hasObject*(data: JsonNode; key, path: string,
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkString*(data: JsonNode; key, path: string, isRequired = true): bool =
+proc checkString*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind == JString:
@@ -39,7 +38,8 @@ proc format(context, key: string): string =
   else:
     q(key)
 
-proc checkArrayOfStrings*(data: JsonNode, context, key, path: string; isRequired = true): bool =
+proc checkArrayOfStrings*(data: JsonNode; context, key, path: string;
+                          isRequired = true): bool =
   result = true
   var d = if context.len == 0: data else: data[context]
   if d.hasKey(key):
@@ -65,8 +65,8 @@ proc checkArrayOfStrings*(data: JsonNode, context, key, path: string; isRequired
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & format(context, key), path)
 
-proc checkArrayOf*(data: JsonNode, key, path: string,
-                   call: proc(d: JsonNode; key, path: string): bool,
+proc checkArrayOf*(data: JsonNode; key, path: string;
+                   call: proc(d: JsonNode; key, path: string): bool;
                    isRequired = true): bool =
   result = true
   if data.hasKey(key):
@@ -83,7 +83,7 @@ proc checkArrayOf*(data: JsonNode, key, path: string,
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkBoolean*(data: JsonNode; key, path: string, isRequired = true): bool =
+proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JBool:
@@ -91,7 +91,7 @@ proc checkBoolean*(data: JsonNode; key, path: string, isRequired = true): bool =
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkInteger*(data: JsonNode; key, path: string, isRequired = true): bool =
+proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
     if data[key].kind != JInt:

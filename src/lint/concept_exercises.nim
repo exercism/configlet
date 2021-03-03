@@ -27,7 +27,8 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
     result = true
     if not checkArrayOf(data, "authors", path, isValidAuthorOrContributor):
       result = false
-    if not checkArrayOf(data, "contributors", path, isValidAuthorOrContributor, isRequired = false):
+    if not checkArrayOf(data, "contributors", path, isValidAuthorOrContributor,
+                        isRequired = false):
       result = false
     if not checkFiles(data, "files", path):
       result = false
