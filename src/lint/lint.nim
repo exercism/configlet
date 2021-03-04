@@ -1,4 +1,4 @@
-import std/[os, terminal]
+import std/os
 import ".."/[cli, helpers]
 import "."/[concept_exercises, track_config]
 
@@ -14,7 +14,7 @@ proc subdirsContain(dir: string, files: openArray[string]): bool =
       for file in files:
         let path = subdir / file
         if not fileExists(path):
-          writeError("Missing file", path)
+          result.setFalseAndPrint("Missing file", path)
 
 proc conceptExerciseFilesExist(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/concept` has the

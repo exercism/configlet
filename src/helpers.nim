@@ -1,4 +1,4 @@
-import std/[algorithm, os]
+import std/[algorithm, os, terminal]
 
 template withDir*(dir: string; body: untyped): untyped =
   ## Changes the current directory to `dir` temporarily.
@@ -17,8 +17,10 @@ proc getSortedSubdirs*(dir: string): seq[string] =
       result.add path
   sort result
 
-template writeError*(description: string, details: string) =
+proc setFalseAndPrint*(b: var bool; description: string; details: string) =
+  ## Sets `b` to `false` and writes a message to stdout containing `description`
+  ## and `details`.
+  b = false
   stdout.styledWriteLine(fgRed, description & ":")
   stdout.writeLine(details)
   stdout.write "\n"
-  result = false
