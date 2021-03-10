@@ -2,7 +2,10 @@ import std/[json, os, strutils]
 import ".."/helpers
 
 func q(s: string): string =
-  "'" & s & "'"
+  if s.len > 0:
+    "'" & s & "'"
+  else:
+    "root"
 
 proc isObject*(data: JsonNode; context, path: string): bool =
   result = true
@@ -65,20 +68,38 @@ proc checkArrayOfStrings*(data: JsonNode; context, key, path: string;
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & format(context, key), path)
 
-proc checkArrayOf*(data: JsonNode; key, path: string;
-                   call: proc(d: JsonNode; key, path: string): bool;
-                   isRequired = true): bool =
+proc isArrayOf*(data: JsonNode;
+                context, path: string;
+                call: proc(d: JsonNode; key, path: string): bool;
+                isRequired = true): bool =
+  ## Returns true in any of these cases:
+  ## - `data` is a non-empty `JArray` and `call` returns true for each of its
+  ##   items.
+  ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
+
+  if data.kind == JArray:
+    if data.len > 0:
+      for item in data:
+        if not call(item, context, path):
+          result = false
+    elif isRequired:
+      result.setFalseAndPrint("Array is empty: " & q(context), path)
+  else:
+    result.setFalseAndPrint("Not an array: " & q(context), path)
+
+proc hasArrayOf*(data: JsonNode;
+                 key, path: string;
+                 call: proc(d: JsonNode; key, path: string): bool;
+                 isRequired = true): bool =
+  ## Returns true in any of these cases:
+  ## - `isArrayOf` returns true for `data[key]`.
+  ## - `data` lacks the key `key` and `isRequired` is false.
+  result = true
+
   if data.hasKey(key):
-    if data[key].kind == JArray:
-      if data[key].len > 0:
-        for item in data[key]:
-          if not call(item, key, path):
-            result = false
-      elif isRequired:
-        result.setFalseAndPrint("Array is empty: " & q(key), path)
-    else:
-      result.setFalseAndPrint("Not an array: " & q(key), path)
+    if not isArrayOf(data[key], key, path, call, isRequired):
+      result = false
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 

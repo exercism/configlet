@@ -53,7 +53,7 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
     result.setFalseAndPrint("Tag is not a string: " & $data, path)
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
-  if isObject(data, "root", path):
+  if isObject(data, "", path):
     result = true
     if not checkString(data, "language", path):
       result = false
@@ -65,7 +65,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       result = false
     if not checkInteger(data, "version", path):
       result = false
-    if not checkArrayOf(data, "tags", path, isValidTag):
+    if not hasArrayOf(data, "tags", path, isValidTag):
       result = false
 
 proc isTrackConfigValid*(trackDir: string): bool =

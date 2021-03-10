@@ -23,12 +23,12 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
     result = false
 
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
-  if isObject(data, "root", path):
+  if isObject(data, "", path):
     result = true
-    if not checkArrayOf(data, "authors", path, isValidAuthorOrContributor):
+    if not hasArrayOf(data, "authors", path, isValidAuthorOrContributor):
       result = false
-    if not checkArrayOf(data, "contributors", path, isValidAuthorOrContributor,
-                        isRequired = false):
+    if not hasArrayOf(data, "contributors", path, isValidAuthorOrContributor,
+                      isRequired = false):
       result = false
     if not checkFiles(data, "files", path):
       result = false
