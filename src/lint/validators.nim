@@ -55,7 +55,7 @@ proc checkArrayOfStrings*(data: JsonNode; context, key, path: string;
                                       format(context, key), path)
             elif s.strip().len == 0:
               result.setFalseAndPrint("Array contains whitespace-only string: " &
-                                      q(key), path)
+                                      format(context, key), path)
           else:
             result.setFalseAndPrint("Array contains non-string: " &
                                     format(context, key) & ": " & $item, path)
