@@ -1,7 +1,7 @@
 import std/[json, strutils]
 import ".."/helpers
 
-proc q(s: string): string =
+func q(s: string): string =
   "'" & s & "'"
 
 proc isObject*(data: JsonNode; context, path: string): bool =
@@ -31,7 +31,7 @@ proc checkString*(data: JsonNode; key, path: string; isRequired = true): bool =
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc format(context, key: string): string =
+func format(context, key: string): string =
   if context.len > 0:
     q(context & "." & key)
   else:
