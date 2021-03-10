@@ -41,30 +41,51 @@ func format(context, key: string): string =
   else:
     q(key)
 
-proc checkArrayOfStrings*(data: JsonNode; context, key, path: string;
-                          isRequired = true): bool =
+proc isArrayOfStrings*(data: JsonNode;
+                       context, key, path: string;
+                       isRequired = true): bool =
+  ## Returns true in any of these cases:
+  ## - `data` is a non-empty `JArray` that contains only non-empty, non-blank
+  ##   strings.
+  ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
-  let d = if context.len > 0: data[context] else: data
-  if d.hasKey(key):
-    if d[key].kind == JArray:
-      if d[key].len > 0:
-        for item in d[key]:
-          if item.kind == JString:
-            let s = item.getStr()
-            if s.len > 0:
-              if s.strip().len == 0:
-                result.setFalseAndPrint("Array contains whitespace-only string: " &
-                                        format(context, key), path)
-            else:
-              result.setFalseAndPrint("Array contains zero-length string: " &
+
+  if data.kind == JArray:
+    if data.len > 0:
+      for item in data:
+        if item.kind == JString:
+          let s = item.getStr()
+          if s.len > 0:
+            if s.strip().len == 0:
+              result.setFalseAndPrint("Array contains whitespace-only string: " &
                                       format(context, key), path)
           else:
-            result.setFalseAndPrint("Array contains non-string: " &
-                                    format(context, key) & ": " & $item, path)
-      elif isRequired:
-        result.setFalseAndPrint("Array is empty: " & format(context, key), path)
-    else:
-      result.setFalseAndPrint("Not an array: " & format(context, key), path)
+            result.setFalseAndPrint("Array contains zero-length string: " &
+                                    format(context, key), path)
+        else:
+          result.setFalseAndPrint("Array contains non-string: " &
+                                  format(context, key) & ": " & $item, path)
+    elif isRequired:
+      result.setFalseAndPrint("Array is empty: " & format(context, key), path)
+  else:
+    result.setFalseAndPrint("Not an array: " & format(context, key), path)
+
+proc hasArrayOfStrings*(data: JsonNode;
+                        context, key, path: string;
+                        isRequired = true): bool =
+  ## When `context` is the empty string, returns true in any of these cases:
+  ## - `isArrayOfStrings` returns true for `data[key]`.
+  ## - `data` lacks the key `key` and `isRequired` is false.
+  ##
+  ## When `context` is a non-empty string, returns true in any of these cases:
+  ## - `isArrayOfStrings` returns true for `data[context][key]`.
+  ## - `data[context]` lacks the key `key` and `isRequired` is false.
+  result = true
+  let d = if context.len > 0: data[context] else: data
+
+  if d.hasKey(key):
+    if not isArrayOfStrings(d[key], context, key, path, isRequired):
+      result = false
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & format(context, key), path)
 

@@ -13,11 +13,11 @@ proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): 
 proc checkFiles(data: JsonNode, context, path: string): bool =
   result = true
   if hasObject(data, context, path):
-    if not checkArrayOfStrings(data, context, "solution", path):
+    if not hasArrayOfStrings(data, context, "solution", path):
       result = false
-    if not checkArrayOfStrings(data, context, "test", path):
+    if not hasArrayOfStrings(data, context, "test", path):
       result = false
-    if not checkArrayOfStrings(data, context, "exemplar", path):
+    if not hasArrayOfStrings(data, context, "exemplar", path):
       result = false
   else:
     result = false
@@ -32,7 +32,7 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
       result = false
     if not checkFiles(data, "files", path):
       result = false
-    if not checkArrayOfStrings(data, "", "forked_from", path, isRequired = false):
+    if not hasArrayOfStrings(data, "", "forked_from", path, isRequired = false):
       result = false
     if not checkString(data, "language_versions", path, isRequired = false):
       result = false

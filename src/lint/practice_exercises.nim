@@ -13,11 +13,11 @@ proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): 
 proc checkFiles(data: JsonNode, context, path: string): bool =
   result = true
   if hasObject(data, context, path):
-    if not checkArrayOfStrings(data, context, "solution", path):
+    if not hasArrayOfStrings(data, context, "solution", path):
       result = false
-    if not checkArrayOfStrings(data, context, "test", path):
+    if not hasArrayOfStrings(data, context, "test", path):
       result = false
-    if not checkArrayOfStrings(data, context, "example", path):
+    if not hasArrayOfStrings(data, context, "example", path):
       result = false
   else:
     result = false
