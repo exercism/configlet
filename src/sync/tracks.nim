@@ -24,29 +24,29 @@ type
     tests*: TrackExerciseTests
     repoExercise: TrackRepoExercise
 
-proc configJsonFile(repo: TrackRepo): string =
+func configJsonFile(repo: TrackRepo): string =
   repo.dir / "config.json"
 
-proc exercisesDir(repo: TrackRepo): string =
+func exercisesDir(repo: TrackRepo): string =
   repo.dir / "exercises"
 
-proc practiceExerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
+func practiceExerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
   repo.exercisesDir / "practice" / exercise.slug
 
-proc slug(exercise: TrackRepoExercise): string =
+func slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise.dir)
 
-proc testsFile(exercise: TrackRepoExercise): string =
+func testsFile(exercise: TrackRepoExercise): string =
   exercise.dir / ".meta" / "tests.toml"
 
-proc testsFile*(exercise: TrackExercise): string =
+func testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
 
 proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)["exercises"]
   to(json, ConfigJson)
 
-proc newTrackRepoExercise(repo: TrackRepo,
+func newTrackRepoExercise(repo: TrackRepo,
     exercise: ConfigJsonExercise): TrackRepoExercise =
   result.dir = repo.practiceExerciseDir(exercise)
 

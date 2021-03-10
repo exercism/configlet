@@ -22,7 +22,7 @@ type
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
-proc initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
+func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
   result.included = included
   result.excluded = excluded
   result.missing = missing
@@ -64,7 +64,7 @@ proc findExercises*(conf: Conf): seq[Exercise] =
   for trackExercise in findTrackExercises(conf).sortedByIt(it.slug):
     result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
 
-proc status*(exercise: Exercise): ExerciseStatus =
+func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
     exNoCanonicalData
   elif exercise.tests.missing.len > 0:
@@ -72,13 +72,13 @@ proc status*(exercise: Exercise): ExerciseStatus =
   else:
     exInSync
 
-proc hasCanonicalData*(exercise: Exercise): bool =
+func hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0
 
-proc testsFile(exercise: Exercise, trackDir: string): string =
+func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-proc toToml(exercise: Exercise): string =
+func toToml(exercise: Exercise): string =
   result.add("[canonical-tests]\n")
 
   for testCase in exercise.testCases:
