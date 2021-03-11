@@ -1,7 +1,7 @@
 import std/[logging]
 import "."/[cli]
 
-proc levelThreshold(verbosity: Verbosity): Level =
+func levelThreshold(verbosity: Verbosity): Level =
   case verbosity
   of verQuiet: lvlNone
   of verNormal: lvlNotice

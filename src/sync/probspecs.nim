@@ -33,17 +33,17 @@ proc clone(repo: ProbSpecsRepo) =
 proc remove(repo: ProbSpecsRepo) =
   removeDir(repo.dir)
 
-proc initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
+func initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
   result.dir = dir
 
-proc exercisesDir(repo: ProbSpecsRepo): string =
+func exercisesDir(repo: ProbSpecsRepo): string =
   repo.dir / "exercises"
 
 proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
   for exerciseDir in walkDirs(repo.exercisesDir / "*"):
     result.add(initProbSpecsRepoExercise(exerciseDir))
 
-proc canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
+func canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
   repoExercise.dir / "canonical-data.json"
 
 proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
@@ -53,10 +53,10 @@ proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise]
   for repoExercise in repo.exercises().filter(hasCanonicalDataFile):
     result.add(repoExercise)
 
-proc slug(repoExercise: ProbSpecsRepoExercise): string =
+func slug(repoExercise: ProbSpecsRepoExercise): string =
   extractFilename(repoExercise.dir)
 
-proc initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
+func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   result.json = node
 
 proc uuid*(testCase: ProbSpecsTestCase): string =
@@ -65,7 +65,7 @@ proc uuid*(testCase: ProbSpecsTestCase): string =
 proc description*(testCase: ProbSpecsTestCase): string =
   testCase.json["description"].getStr()
 
-proc isReimplementation*(testCase: ProbSpecsTestCase): bool =
+func isReimplementation*(testCase: ProbSpecsTestCase): bool =
   testCase.json.hasKey("reimplements")
 
 proc reimplements*(testCase: ProbSpecsTestCase): string =
