@@ -1,6 +1,5 @@
 import std/[json, strutils]
 import ".."/helpers
-export strutils.strip
 
 proc q(s: string): string =
   "'" & s & "'"
