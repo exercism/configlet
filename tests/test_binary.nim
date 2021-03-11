@@ -271,13 +271,12 @@ proc main =
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
   const cmd = "nimble --verbose build -d:release"
-  stdout.write(&"Running `{cmd}`... ")
-  stdout.flushFile()
+  stderr.write(&"Running `{cmd}`... ")
   let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
   if buildExitCode == 0:
-    echo "success"
+    stderr.writeLine "success"
   else:
-    echo "failure"
+    stderr.writeLine "failure"
     raise newException(OSError, buildOutput)
 
   suite "help as an argument":
