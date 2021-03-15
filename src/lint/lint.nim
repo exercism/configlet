@@ -1,47 +1,5 @@
-import std/os
-import ".."/[cli, helpers]
-import "."/[concept_exercises, track_config]
-
-proc subdirsContain(dir: string, files: openArray[string]): bool =
-  ## Returns `true` if every file in `files` exists in every subdirectory of
-  ## `dir`.
-  ##
-  ## Returns `true` if `dir` does not exist or has no subdirectories.
-  result = true
-
-  if dirExists(dir):
-    for subdir in getSortedSubdirs(dir):
-      for file in files:
-        let path = subdir / file
-        if not fileExists(path):
-          result.setFalseAndPrint("Missing file", path)
-
-proc conceptExerciseFilesExist(trackDir: string): bool =
-  ## Returns true if every subdirectory in `trackDir/exercises/concept` has the
-  ## required files.
-  const
-    conceptExerciseFiles = [
-      ".docs" / "hints.md",
-      ".docs" / "instructions.md",
-      ".docs" / "introduction.md",
-      ".meta" / "config.json",
-    ]
-
-  let conceptDir = trackDir / "exercises" / "concept"
-  result = subdirsContain(conceptDir, conceptExerciseFiles)
-
-proc conceptFilesExist(trackDir: string): bool =
-  ## Returns true if every subdirectory in `trackDir/concepts` has the required
-  ## files.
-  const
-    conceptFiles = [
-      "about.md",
-      "introduction.md",
-      "links.json",
-    ]
-
-  let conceptsDir = trackDir / "concepts"
-  result = subdirsContain(conceptsDir, conceptFiles)
+import ".."/cli
+import "."/[concept_exercises, concepts, track_config]
 
 proc lint*(conf: Conf) =
   echo "The lint command is under development.\n" &
