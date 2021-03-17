@@ -52,3 +52,17 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
             continue
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
+
+proc conceptExerciseFilesExist*(trackDir: string): bool =
+  ## Returns true if every subdirectory in `trackDir/exercises/concept` has the
+  ## required files.
+  const
+    requiredConceptExerciseFiles = [
+      ".docs" / "hints.md",
+      ".docs" / "instructions.md",
+      ".docs" / "introduction.md",
+      ".meta" / "config.json",
+    ]
+
+  let conceptExercisesDir = trackDir / "exercises" / "concept"
+  result = subdirsContain(conceptExercisesDir, requiredConceptExerciseFiles)

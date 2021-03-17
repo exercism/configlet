@@ -1,4 +1,4 @@
-import std/[json, strutils]
+import std/[json, os, strutils]
 import ".."/helpers
 
 func q(s: string): string =
@@ -97,3 +97,17 @@ proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
       result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
+
+proc subdirsContain*(dir: string, files: openArray[string]): bool =
+  ## Returns `true` if every file in `files` exists in every subdirectory of
+  ## `dir`.
+  ##
+  ## Returns `true` if `dir` does not exist or has no subdirectories.
+  result = true
+
+  if dirExists(dir):
+    for subdir in getSortedSubdirs(dir):
+      for file in files:
+        let path = subdir / file
+        if not fileExists(path):
+          result.setFalseAndPrint("Missing file", path)
