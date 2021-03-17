@@ -25,13 +25,17 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
 proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "root", path):
     result = true
-    if not checkArrayOf(data, "authors", path, isValidAuthorOrContributor):
-      result = false
+    # Temporarily disable the checking of authors as we'll be doing bulk PRs
+    # to pre-populate this field for all tracks
+    # if not checkArrayOf(data, "authors", path, isValidAuthorOrContributor):
+    #   result = false
     if not checkArrayOf(data, "contributors", path, isValidAuthorOrContributor,
                         isRequired = false):
       result = false
-    if not checkFiles(data, "files", path):
-      result = false
+    # Temporarily disable the checking of the files to give tracks the chance
+    # to update this manually
+    # if not checkFiles(data, "files", path):
+    #   result = false
     if not checkString(data, "language_versions", path, isRequired = false):
       result = false
 
