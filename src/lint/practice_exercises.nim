@@ -13,24 +13,24 @@ proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): 
 proc checkFiles(data: JsonNode, context, path: string): bool =
   result = true
   if hasObject(data, context, path):
-    if not checkArrayOfStrings(data, context, "solution", path):
+    if not hasArrayOfStrings(data, context, "solution", path):
       result = false
-    if not checkArrayOfStrings(data, context, "test", path):
+    if not hasArrayOfStrings(data, context, "test", path):
       result = false
-    if not checkArrayOfStrings(data, context, "example", path):
+    if not hasArrayOfStrings(data, context, "example", path):
       result = false
   else:
     result = false
 
 proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
-  if isObject(data, "root", path):
+  if isObject(data, "", path):
     result = true
     # Temporarily disable the checking of authors as we'll be doing bulk PRs
     # to pre-populate this field for all tracks
-    # if not checkArrayOf(data, "authors", path, isValidAuthorOrContributor):
+    # if not hasArrayOf(data, "authors", path, isValidAuthorOrContributor):
     #   result = false
-    if not checkArrayOf(data, "contributors", path, isValidAuthorOrContributor,
-                        isRequired = false):
+    if not hasArrayOf(data, "contributors", path, isValidAuthorOrContributor,
+                      isRequired = false):
       result = false
     # Temporarily disable the checking of the files to give tracks the chance
     # to update this manually
