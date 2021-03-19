@@ -41,14 +41,6 @@ proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
 proc isValidLinksFile(data: JsonNode, path: string): bool =
   result = isArrayOf(data, "", path, isValidLinkObject, isRequired = false)
 
-proc isNonBlank(path: string): bool =
-  ## Returns true if `path` points to a file that has at least one
-  ## non-whitespace character.
-  let contents = readFile(path)
-  for c in contents:
-    if c notin Whitespace:
-      return true
-
 proc isEveryConceptLinksFileValid*(trackDir: string): bool =
   let conceptsDir = trackDir / "concepts"
   result = true
@@ -57,7 +49,7 @@ proc isEveryConceptLinksFileValid*(trackDir: string): bool =
     for subdir in getSortedSubdirs(conceptsDir):
       let linksPath = subdir / "links.json"
       if fileExists(linksPath):
-        if isNonBlank(linksPath):
+        if not isEmptyOrWhitespace(readFile(linksPath)):
           let j =
             try:
               parseFile(linksPath) # Shows the filename in the exception message.
