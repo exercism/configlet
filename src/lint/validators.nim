@@ -23,13 +23,18 @@ proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
 proc checkString*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind == JString:
+    case data[key].kind
+    of JString:
       let s = data[key].getStr()
       if s.len > 0:
         if s.strip().len == 0:
           result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
       else:
         result.setFalseAndPrint("String is zero-length: " & q(key), path)
+    of JNull:
+      if isRequired:
+        result.setFalseAndPrint("Value is `null`, but must be a string: " &
+                                q(key), path)
     else:
       result.setFalseAndPrint("Not a string: " & q(key) & ": " & $data[key], path)
   elif isRequired:
@@ -50,7 +55,8 @@ proc isArrayOfStrings*(data: JsonNode;
   ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
 
-  if data.kind == JArray:
+  case data.kind
+  of JArray:
     if data.len > 0:
       for item in data:
         if item.kind == JString:
@@ -67,6 +73,10 @@ proc isArrayOfStrings*(data: JsonNode;
                                   format(context, key) & ": " & $item, path)
     elif isRequired:
       result.setFalseAndPrint("Array is empty: " & format(context, key), path)
+  of JNull:
+    if isRequired:
+      result.setFalseAndPrint("Value is `null`, but must be an array: " &
+                              format(context, key), path)
   else:
     result.setFalseAndPrint("Not an array: " & format(context, key), path)
 
@@ -99,13 +109,18 @@ proc isArrayOf*(data: JsonNode;
   ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
 
-  if data.kind == JArray:
+  case data.kind
+  of JArray:
     if data.len > 0:
       for item in data:
         if not call(item, context, path):
           result = false
     elif isRequired:
       result.setFalseAndPrint("Array is empty: " & q(context), path)
+  of JNull:
+    if isRequired:
+      result.setFalseAndPrint("Value is `null`, but must be an array: " &
+                              q(context), path)
   else:
     result.setFalseAndPrint("Not an array: " & q(context), path)
 
@@ -127,7 +142,14 @@ proc hasArrayOf*(data: JsonNode;
 proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind != JBool:
+    case data[key].kind
+    of JBool:
+      return true
+    of JNull:
+      if isRequired:
+        result.setFalseAndPrint("Value is `null`, but must be a bool: " &
+                                q(key), path)
+    else:
       result.setFalseAndPrint("Not a bool: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
@@ -135,7 +157,14 @@ proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
 proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind != JInt:
+    case data[key].kind
+    of JInt:
+      return true
+    of JNull:
+      if isRequired:
+        result.setFalseAndPrint("Value is `null`, but must be an integer: " &
+                                q(key), path)
+    else:
       result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data[key], path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
