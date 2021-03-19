@@ -3,15 +3,11 @@ import ".."/helpers
 import "."/validators
 
 proc isUrlLike(s: string): bool =
-  ## Returns true if `s` starts with `http://`, `https://` or `www`.
+  ## Returns true if `s` starts with `https://`, `http://` or `www`.
   # For now, this is deliberately simplistic. We probably don't need
   # sophisticated URL checking, and we don't want to use Nim's stdlib regular
   # expressions because that would add a dependency on PCRE.
-  if s.startsWith("http"):
-    if s.continuesWith("://", 4) or s.continuesWith("s://", 4):
-      result = true
-  elif s.startsWith("www"):
-    result = true
+  s.startsWith("https://") or s.startsWith("http://") or s.startsWith("www")
 
 proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   ## Returns true if `data` is a `JObject` that satisfies all of the below:
