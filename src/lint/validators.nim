@@ -144,7 +144,7 @@ proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   if data.hasKey(key):
     case data[key].kind
     of JBool:
-      return
+      return true
     of JNull:
       if isRequired:
         result.setFalseAndPrint("Value is `null`, but must be a bool: " &
@@ -159,7 +159,7 @@ proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
   if data.hasKey(key):
     case data[key].kind
     of JInt:
-      return
+      return true
     of JNull:
       if isRequired:
         result.setFalseAndPrint("Value is `null`, but must be an integer: " &
