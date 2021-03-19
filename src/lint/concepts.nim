@@ -4,15 +4,15 @@ import "."/validators
 
 proc isUrlLike(s: string): bool =
   ## Returns true if `s` starts with `https://`, `http://` or `www`.
-  # For now, this is deliberately simplistic. We probably don't need
-  # sophisticated URL checking, and we don't want to use Nim's stdlib regular
-  # expressions because that would add a dependency on PCRE.
+  # We probably only need simplistic URL checking, and we want to avoid using
+  # Nim's stdlib regular expressions in order to avoid a dependency on PCRE.
   s.startsWith("https://") or s.startsWith("http://") or s.startsWith("www")
 
 proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   ## Returns true if `data` is a `JObject` that satisfies all of the below:
   ## - has a `url` key, with a value that is a URL-like string.
-  ## - has a `description` key, with a value that is a non-empty, non-blank string.
+  ## - has a `description` key, with a value that is a non-empty, non-blank
+  ##   string.
   ## - if it has a `icon_url` key, the corresponding value is a URL-like string.
   if isObject(data, context, path):
     result = true
@@ -54,7 +54,8 @@ proc isEveryConceptLinksFileValid*(trackDir: string): bool =
             try:
               parseFile(linksPath) # Shows the filename in the exception message.
             except CatchableError:
-              result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
+              result.setFalseAndPrint("JSON parsing error",
+                                      getCurrentExceptionMsg())
               continue
           if not isValidLinksFile(j, linksPath):
             result = false
