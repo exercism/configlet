@@ -1,21 +1,33 @@
 import ".."/cli
 import "."/[concept_exercises, concepts, practice_exercises, track_config]
 
+proc allChecksPass(trackDir: string): bool =
+  ## Returns true if all the linting checks pass for the track at `trackDir`.
+  # We avoid some short-circuit evaluation here (e.g. due to `and`) because we
+  # want to see errors from later checks even if earlier ones return `false`.
+  let checks = [
+    isTrackConfigValid(trackDir),
+    conceptExerciseFilesExist(trackDir),
+    practiceExerciseFilesExist(trackDir),
+    conceptFilesExist(trackDir),
+    isEveryConceptLinksFileValid(trackDir),
+    isEveryConceptExerciseConfigValid(trackDir),
+    isEveryPracticeExerciseConfigValid(trackDir),
+  ]
+  result = true
+
+  for check in checks:
+    if not check:
+      return false
+
 proc lint*(conf: Conf) =
   echo "The lint command is under development.\n" &
        "Please re-run this command regularly to see if your track passes " &
        "the latest linting rules.\n"
 
   let trackDir = conf.trackDir
-  let b1 = isTrackConfigValid(trackDir)
-  let b2 = conceptExerciseFilesExist(trackDir)
-  let b3 = practiceExerciseFilesExist(trackDir)
-  let b4 = conceptFilesExist(trackDir)
-  let b5 = isEveryConceptLinksFileValid(trackDir)
-  let b6 = isEveryConceptExerciseConfigValid(trackDir)
-  let b7 = isEveryPracticeExerciseConfigValid(trackDir)
 
-  if b1 and b2 and b3 and b4 and b5 and b6 and b7:
+  if allChecksPass(trackDir):
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
