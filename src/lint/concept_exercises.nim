@@ -43,13 +43,8 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
   if dirExists(conceptExercisesDir):
     for exerciseDir in getSortedSubdirs(conceptExercisesDir):
       let configPath = exerciseDir / ".meta" / "config.json"
-      if fileExists(configPath):
-        let j =
-          try:
-            parseFile(configPath)
-          except:
-            result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
-            continue
+      let j = parseJsonFile(configPath, result)
+      if j != nil:
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
 

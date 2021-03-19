@@ -47,13 +47,8 @@ proc isEveryPracticeExerciseConfigValid*(trackDir: string): bool =
   if dirExists(practiceExercisesDir):
     for exerciseDir in getSortedSubdirs(practiceExercisesDir):
       let configPath = exerciseDir / ".meta" / "config.json"
-      if fileExists(configPath):
-        let j =
-          try:
-            parseFile(configPath)
-          except:
-            result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
-            continue
+      let j = parseJsonFile(configPath, result)
+      if j != nil:
         if not isValidPracticeExerciseConfig(j, configPath):
           result = false
 

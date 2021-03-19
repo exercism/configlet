@@ -1,4 +1,4 @@
-import std/[json, os, strutils]
+import std/[json, os, streams, strutils]
 import ".."/helpers
 
 func q(s: string): string =
@@ -182,3 +182,24 @@ proc subdirsContain*(dir: string, files: openArray[string]): bool =
         let path = subdir / file
         if not fileExists(path):
           result.setFalseAndPrint("Missing file", path)
+
+proc parseJsonFile*(path: string, b: var bool, allowEmptyArray = false): JsonNode =
+  ## Parses the file at `path` and returns the resultant JsonNode.
+  ##
+  ## Sets `b` to false if unsuccessful.
+  if fileExists(path):
+    let contents = readFile(path)
+    if not isEmptyOrWhitespace(contents):
+      try:
+        result = parseJson(newStringStream(contents), path)
+      except JsonParsingError:
+        b.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
+    else:
+      let msg =
+        if allowEmptyArray:
+          ", but must contain at least the empty array, `[]`"
+        else:
+          ""
+      b.setFalseAndPrint("File is empty" & msg, path)
+  else:
+    b.setFalseAndPrint("Missing file", path)
