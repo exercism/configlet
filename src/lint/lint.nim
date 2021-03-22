@@ -39,4 +39,8 @@ Basic linting finished successfully:
 - Every practice exercise has the required .md files and a .meta/config.json file
 - Every practice exercise .meta/config.json file is valid"""
   else:
+    echo """
+Configlet detected at least one problem.
+For more information on resolving the problems, please see the documentation:
+https://github.com/exercism/docs/blob/main/building/configlet/lint.md"""
     quit(1)
