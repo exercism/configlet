@@ -48,32 +48,19 @@ proc isEveryConceptLinksFileValid*(trackDir: string): bool =
   if dirExists(conceptsDir):
     for subdir in getSortedSubdirs(conceptsDir):
       let linksPath = subdir / "links.json"
-      if fileExists(linksPath):
-        if not isEmptyOrWhitespace(readFile(linksPath)):
-          let j =
-            try:
-              parseFile(linksPath) # Shows the filename in the exception message.
-            except CatchableError:
-              result.setFalseAndPrint("JSON parsing error",
-                                      getCurrentExceptionMsg())
-              continue
-          if not isValidLinksFile(j, linksPath):
-            result = false
-        else:
-          result.setFalseAndPrint("File is empty, but must contain at least " &
-                                  "the empty array, `[]`", linksPath)
-      else:
-        result.setFalseAndPrint("Missing file", linksPath)
+      let j = parseJsonFile(linksPath, result, allowEmptyArray = true)
+      if j != nil:
+        if not isValidLinksFile(j, linksPath):
+          result = false
 
-proc conceptFilesExist*(trackDir: string): bool =
+proc conceptDocsExist*(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/concepts` has the required
-  ## files.
+  ## Markdown files.
   const
-    requiredConceptFiles = [
+    requiredConceptDocs = [
       "about.md",
       "introduction.md",
-      "links.json",
     ]
 
   let conceptsDir = trackDir / "concepts"
-  result = subdirsContain(conceptsDir, requiredConceptFiles)
+  result = subdirsContain(conceptsDir, requiredConceptDocs)

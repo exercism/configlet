@@ -70,15 +70,8 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
 
 proc isTrackConfigValid*(trackDir: string): bool =
   result = true
-  let configJsonPath = trackDir / "config.json"
-  if fileExists(configJsonPath):
-    let j =
-      try:
-        parseFile(configJsonPath)
-      except:
-        result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
-        return false
-    if not isValidTrackConfig(j, configJsonPath):
+  let trackConfigPath = trackDir / "config.json"
+  let j = parseJsonFile(trackConfigPath, result)
+  if j != nil:
+    if not isValidTrackConfig(j, trackConfigPath):
       result = false
-  else:
-    result.setFalseAndPrint("Missing file", configJsonPath)

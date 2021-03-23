@@ -43,26 +43,20 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
   if dirExists(conceptExercisesDir):
     for exerciseDir in getSortedSubdirs(conceptExercisesDir):
       let configPath = exerciseDir / ".meta" / "config.json"
-      if fileExists(configPath):
-        let j =
-          try:
-            parseFile(configPath)
-          except:
-            result.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
-            continue
+      let j = parseJsonFile(configPath, result)
+      if j != nil:
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
 
-proc conceptExerciseFilesExist*(trackDir: string): bool =
+proc conceptExerciseDocsExist*(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/concept` has the
-  ## required files.
+  ## required Markdown files.
   const
-    requiredConceptExerciseFiles = [
+    requiredConceptExerciseDocs = [
       ".docs" / "hints.md",
       ".docs" / "instructions.md",
       ".docs" / "introduction.md",
-      ".meta" / "config.json",
     ]
 
   let conceptExercisesDir = trackDir / "exercises" / "concept"
-  result = subdirsContain(conceptExercisesDir, requiredConceptExerciseFiles)
+  result = subdirsContain(conceptExercisesDir, requiredConceptExerciseDocs)
