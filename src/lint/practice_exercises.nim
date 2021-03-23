@@ -52,14 +52,13 @@ proc isEveryPracticeExerciseConfigValid*(trackDir: string): bool =
         if not isValidPracticeExerciseConfig(j, configPath):
           result = false
 
-proc practiceExerciseFilesExist*(trackDir: string): bool =
+proc practiceExerciseDocsExist*(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/practice` has the
-  ## required files.
+  ## required Markdown files.
   const
-    requiredPracticeExerciseFiles = [
+    requiredPracticeExerciseDocs = [
       ".docs" / "instructions.md",
-      ".meta" / "config.json",
     ]
 
   let practiceExercisesDir = trackDir / "exercises" / "practice"
-  result = subdirsContain(practiceExercisesDir, requiredPracticeExerciseFiles)
+  result = subdirsContain(practiceExercisesDir, requiredPracticeExerciseDocs)

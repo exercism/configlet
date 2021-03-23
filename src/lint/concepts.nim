@@ -53,15 +53,14 @@ proc isEveryConceptLinksFileValid*(trackDir: string): bool =
         if not isValidLinksFile(j, linksPath):
           result = false
 
-proc conceptFilesExist*(trackDir: string): bool =
+proc conceptDocsExist*(trackDir: string): bool =
   ## Returns true if every subdirectory in `trackDir/concepts` has the required
-  ## files.
+  ## Markdown files.
   const
-    requiredConceptFiles = [
+    requiredConceptDocs = [
       "about.md",
       "introduction.md",
-      "links.json",
     ]
 
   let conceptsDir = trackDir / "concepts"
-  result = subdirsContain(conceptsDir, requiredConceptFiles)
+  result = subdirsContain(conceptsDir, requiredConceptDocs)
