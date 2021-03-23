@@ -2,14 +2,6 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): bool =
-  if isObject(data, context, path):
-    result = true
-    if not checkString(data, "github_username", path):
-      result = false
-    if not checkString(data, "exercism_username", path, isRequired = false):
-      result = false
-
 proc checkFiles(data: JsonNode, context, path: string): bool =
   result = true
   if hasObject(data, context, path):
@@ -25,10 +17,9 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
-    if not hasArrayOf(data, "authors", path, isValidAuthorOrContributor):
+    if not hasArrayOfStrings(data, "", "authors", path):
       result = false
-    if not hasArrayOf(data, "contributors", path, isValidAuthorOrContributor,
-                      isRequired = false):
+    if not hasArrayOfStrings(data, "", "contributors", path, isRequired = false):
       result = false
     if not checkFiles(data, "files", path):
       result = false

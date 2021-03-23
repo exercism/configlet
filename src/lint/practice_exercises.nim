@@ -2,14 +2,6 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc isValidAuthorOrContributor(data: JsonNode, context: string, path: string): bool =
-  if isObject(data, context, path):
-    result = true
-    if not checkString(data, "github_username", path):
-      result = false
-    if not checkString(data, "exercism_username", path, isRequired = false):
-      result = false
-
 proc checkFiles(data: JsonNode, context, path: string): bool =
   result = true
   if hasObject(data, context, path):
@@ -25,12 +17,9 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
 proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
-    # Temporarily disable the checking of authors as we'll be doing bulk PRs
-    # to pre-populate this field for all tracks
-    # if not hasArrayOf(data, "authors", path, isValidAuthorOrContributor):
-    #   result = false
-    if not hasArrayOf(data, "contributors", path, isValidAuthorOrContributor,
-                      isRequired = false):
+    if not hasArrayOfStrings(data, "", "authors", path):
+      result = false
+    if not hasArrayOfStrings(data, "", "contributors", path, isRequired = false):
       result = false
     # Temporarily disable the checking of the files to give tracks the chance
     # to update this manually
