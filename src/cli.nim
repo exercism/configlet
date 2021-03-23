@@ -185,8 +185,21 @@ proc showVersion =
   echo &"{configletVersion}"
   quit(0)
 
+proc shouldUseColor(f: File): bool =
+  ## Returns true if we should write to `f` with color.
+  existsEnv("CI") or
+    (isatty(f) and not existsEnv("NO_COLOR") and getEnv("TERM") != "dumb")
+
+let
+  colorStdout* = shouldUseColor(stdout)
+  colorStderr* = shouldUseColor(stderr)
+
 proc showError*(s: string) =
-  stderr.styledWrite(fgRed, "Error: ")
+  const errorPrefix = "Error: "
+  if colorStderr:
+    stderr.styledWrite(fgRed, errorPrefix)
+  else:
+    stderr.write(errorPrefix)
   stderr.write(s)
   stderr.write("\n\n")
   showHelp(exitCode = 1)
