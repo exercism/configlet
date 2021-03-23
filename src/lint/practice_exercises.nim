@@ -17,7 +17,7 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
 proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
-    if not hasArrayOfStrings(data, "", "authors", path):
+    if not hasArrayOfStrings(data, "", "authors", path, isRequired = false):
       result = false
     if not hasArrayOfStrings(data, "", "contributors", path, isRequired = false):
       result = false
