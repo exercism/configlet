@@ -1,4 +1,5 @@
 import std/[algorithm, os, terminal]
+import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
   ## Changes the current directory to `dir` temporarily.
@@ -21,6 +22,10 @@ proc setFalseAndPrint*(b: var bool; description: string; details: string) =
   ## Sets `b` to `false` and writes a message to stdout containing `description`
   ## and `details`.
   b = false
-  stdout.styledWriteLine(fgRed, description & ":")
+  let descriptionPrefix = description & ":"
+  if colorStdout:
+    stdout.styledWriteLine(fgRed, descriptionPrefix)
+  else:
+    stdout.writeLine(descriptionPrefix)
   stdout.writeLine(details)
   stdout.write "\n"
