@@ -55,6 +55,7 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
+
     if not checkString(data, "language", path):
       result = false
     if not checkString(data, "slug", path):
@@ -63,8 +64,16 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       result = false
     if not checkString(data, "blurb", path):
       result = false
-    if not checkInteger(data, "version", path):
+
+    if checkInteger(data, "version", path):
+      let version = data["version"].getInt()
+      if version != 3:
+        let msg = "The value of `version` is `" & $version &
+                  "`, but it must be the integer `3`"
+        result.setFalseAndPrint(msg, path)
+    else:
       result = false
+
     if not hasArrayOf(data, "tags", path, isValidTag):
       result = false
 
