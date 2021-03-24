@@ -52,6 +52,43 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
   else:
     result.setFalseAndPrint("Tag is not a string: " & $data, path)
 
+proc hasValidStatus(data: JsonNode, path: string): bool =
+  if hasObject(data, "status", path):
+    result = true
+    let d = data["status"]
+
+    if not checkBoolean(d, "concept_exercises", path):
+      result = false
+    if not checkBoolean(d, "test_runner", path):
+      result = false
+    if not checkBoolean(d, "representer", path):
+      result = false
+    if not checkBoolean(d, "analyzer", path):
+      result = false
+
+proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
+  if hasObject(data, "online_editor", path):
+    result = true
+    let d = data["online_editor"]
+
+    if checkString(d, "indent_style", path):
+      let s = d["indent_style"].getStr()
+      if s != "space" and s != "tab":
+        let msg = "The value of `online_editor.indent_style` is `" & s &
+                  "`, but it must be `space` or `tab`"
+        result.setFalseAndPrint(msg, path)
+    else:
+      result = false
+
+    if checkInteger(d, "indent_size", path):
+      let num = d["indent_size"].getInt()
+      if num < 0:
+        let msg = "The value of `online_editor.indent_size` is `" & $num &
+                  "`, but it must be an integer >= 0"
+        result.setFalseAndPrint(msg, path)
+    else:
+      result = false
+
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
@@ -72,6 +109,11 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
                   "`, but it must be the integer `3`"
         result.setFalseAndPrint(msg, path)
     else:
+      result = false
+
+    if not hasValidStatus(data, path):
+      result = false
+    if not hasValidOnlineEditor(data, path):
       result = false
 
     if not hasArrayOf(data, "tags", path, isValidTag):
