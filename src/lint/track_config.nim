@@ -89,6 +89,43 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
     else:
       result = false
 
+proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
+  if isObject(data, context, path):
+    result = true
+
+    # TODO: Enable the `icon` checks when we have a list of valid icons.
+    if false:
+      const icons = [
+        "todo",
+      ].toHashSet()
+
+      if checkString(data, "icon", path):
+        let s = data["icon"].getStr()
+
+        if s notin icons:
+          let msg = "The value of `key_features.icon` is `" & s &
+                    "` which is not one of the valid values"
+          result.setFalseAndPrint(msg, path)
+
+    if not checkString(data, "title", path, maxLen = 25):
+      result = false
+    if not checkString(data, "content", path, maxLen = 100):
+      result = false
+
+proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
+  result = true
+  if data.hasKey("key_features"):
+    let d = data["key_features"]
+    if isArrayOf(d, "key_features", path, isValidKeyFeature,
+                 isRequired = false):
+      let arrayLen = d.len
+      if arrayLen != 0 and arrayLen != 6:
+        let msg = "The `key_features` array has length " & $arrayLen &
+                  ", but must have length 6"
+        result.setFalseAndPrint(msg, path)
+    else:
+      result = false
+
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     result = true
@@ -114,6 +151,8 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
     if not hasValidStatus(data, path):
       result = false
     if not hasValidOnlineEditor(data, path):
+      result = false
+    if not hasValidKeyFeatures(data, path):
       result = false
 
     if not hasArrayOf(data, "tags", path, isValidTag):
