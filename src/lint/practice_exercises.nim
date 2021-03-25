@@ -21,10 +21,10 @@ proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
       result = false
     if not hasArrayOfStrings(data, "", "contributors", path, isRequired = false):
       result = false
-    # Temporarily disable the checking of the files to give tracks the chance
-    # to update this manually
-    # if not checkFiles(data, "files", path):
-    #   result = false
+    # TODO: Enable the `files` checks after the tracks have had some time to update.
+    if false:
+      if not checkFiles(data, "files", path):
+        result = false
     if not checkString(data, "language_versions", path, isRequired = false):
       result = false
 
