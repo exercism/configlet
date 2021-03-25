@@ -1,4 +1,5 @@
 import std/[json, os, streams, strutils]
+import std/unicode except strip
 import ".."/helpers
 
 func q(s: string): string =
@@ -20,14 +21,31 @@ proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkString*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
+  ## Returns true if `s` has a rune length that does not exceed `maxLen`.
+  result = true
+  if s.len > maxLen:
+    let sRuneLen = s.runeLen
+    if sRuneLen > maxLen:
+      const truncLen = 25
+      let sTrunc = if sRuneLen > truncLen: s.runeSubStr(0, truncLen) else: s
+      let msg = "The value of `" & key & "` that starts with `" & sTrunc &
+                "...` is " & $sRuneLen & " characters, but must not exceed " &
+                $maxLen & " characters"
+      result.setFalseAndPrint(msg, path)
+
+proc checkString*(data: JsonNode; key, path: string; isRequired = true,
+                  maxLen = int.high): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
     of JString:
       let s = data[key].getStr()
       if s.len > 0:
-        if s.strip().len == 0:
+        if s.strip().len > 0:
+          if not hasValidRuneLength(s, key, path, maxLen):
+            result = false
+        else:
           result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
       else:
         result.setFalseAndPrint("String is zero-length: " & q(key), path)
