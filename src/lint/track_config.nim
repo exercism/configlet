@@ -99,7 +99,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       result = false
     if not checkBoolean(data, "active", path):
       result = false
-    if not checkString(data, "blurb", path):
+    if not checkString(data, "blurb", path, maxLen = 400):
       result = false
 
     if checkInteger(data, "version", path):
