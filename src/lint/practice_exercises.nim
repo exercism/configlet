@@ -3,16 +3,14 @@ import ".."/helpers
 import "."/validators
 
 proc checkFiles(data: JsonNode, context, path: string): bool =
-  result = true
   if hasObject(data, context, path):
+    result = true
     if not hasArrayOfStrings(data, context, "solution", path):
       result = false
     if not hasArrayOfStrings(data, context, "test", path):
       result = false
     if not hasArrayOfStrings(data, context, "example", path):
       result = false
-  else:
-    result = false
 
 proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
