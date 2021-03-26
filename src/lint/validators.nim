@@ -172,12 +172,22 @@ proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkInteger*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc checkInteger*(data: JsonNode; key, path: string; isRequired = true;
+                   allowed: Slice): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
     of JInt:
-      return true
+      let num = data[key].getInt()
+      if num notin allowed:
+        let msgStart = "The value of `" & key & "` is `" & $num &
+                       "`, but it must be "
+        let msgEnd =
+          if allowed.len == 1:
+            "`" & $allowed.a & "`"
+          else:
+            "between " & $allowed.a & " and " & $allowed.b & " (inclusive)"
+        result.setFalseAndPrint(msgStart & msgEnd, path)
     of JNull:
       if isRequired:
         result.setFalseAndPrint("Value is `null`, but must be an integer: " &
