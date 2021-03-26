@@ -1,4 +1,4 @@
-import std/[json, os, streams, strutils]
+import std/[json, os, sets, streams, strutils]
 import std/unicode except strip
 import ".."/helpers
 
@@ -34,14 +34,27 @@ proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
                 $maxLen & " characters"
       result.setFalseAndPrint(msg, path)
 
+const
+  emptySetOfStrings = initHashSet[string](0)
+
 proc checkString*(data: JsonNode; key, path: string; isRequired = true,
-                  maxLen = int.high): bool =
+                  allowed = emptySetOfStrings, maxLen = int.high): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
     of JString:
       let s = data[key].getStr()
-      if s.len > 0:
+      if allowed.len > 0:
+        if s notin allowed:
+          let msgStart = "The value of `" & key & "` is `" & s &
+                          "`, but it must be one of "
+          let msgEnd =
+            if allowed.len < 6:
+              $allowed
+            else:
+              "the allowed values"
+          result.setFalseAndPrint(msgStart & msgEnd, path)
+      elif s.len > 0:
         if s.strip().len > 0:
           if not hasValidRuneLength(s, key, path, maxLen):
             result = false
