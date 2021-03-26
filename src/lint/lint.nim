@@ -31,7 +31,8 @@ proc lint*(conf: Conf) =
     echo """
 Basic linting finished successfully:
 - config.json exists and is valid JSON
-- config.json has these valid fields: language, slug, active, blurb, version, tags
+- config.json has these valid fields:
+    language, slug, active, blurb, version, status, online_editor, key_features, tags
 - Every concept has the required .md files
 - Every concept has a valid links.json file
 - Every concept exercise has the required .md files
