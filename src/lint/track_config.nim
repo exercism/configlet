@@ -80,13 +80,7 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
     else:
       result = false
 
-    if checkInteger(d, "indent_size", path):
-      let num = d["indent_size"].getInt()
-      if num < 0:
-        let msg = "The value of `online_editor.indent_size` is `" & $num &
-                  "`, but it must be an integer >= 0"
-        result.setFalseAndPrint(msg, path)
-    else:
+    if not checkInteger(d, "indent_size", path, allowed = 0..8):
       result = false
 
 proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
@@ -138,14 +132,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       result = false
     if not checkString(data, "blurb", path, maxLen = 400):
       result = false
-
-    if checkInteger(data, "version", path):
-      let version = data["version"].getInt()
-      if version != 3:
-        let msg = "The value of `version` is `" & $version &
-                  "`, but it must be the integer `3`"
-        result.setFalseAndPrint(msg, path)
-    else:
+    if not checkInteger(data, "version", path, allowed = 3..3):
       result = false
 
     if not hasValidStatus(data, path):
