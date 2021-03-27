@@ -4,29 +4,24 @@ import "."/validators
 
 proc checkFiles(data: JsonNode, context, path: string): bool =
   if hasObject(data, context, path):
-    result = true
-    if not hasArrayOfStrings(data, context, "solution", path):
-      result = false
-    if not hasArrayOfStrings(data, context, "test", path):
-      result = false
-    if not hasArrayOfStrings(data, context, "exemplar", path):
-      result = false
+    let checks = [
+      hasArrayOfStrings(data, context, "solution", path),
+      hasArrayOfStrings(data, context, "test", path),
+      hasArrayOfStrings(data, context, "exemplar", path),
+    ]
+    result = allTrue(checks)
 
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
-    result = true
-    if not checkString(data, "blurb", path, maxLen = 350):
-      result = false
-    if not hasArrayOfStrings(data, "", "authors", path):
-      result = false
-    if not hasArrayOfStrings(data, "", "contributors", path, isRequired = false):
-      result = false
-    if not checkFiles(data, "files", path):
-      result = false
-    if not hasArrayOfStrings(data, "", "forked_from", path, isRequired = false):
-      result = false
-    if not checkString(data, "language_versions", path, isRequired = false):
-      result = false
+    let checks = [
+      checkString(data, "blurb", path, maxLen = 350),
+      hasArrayOfStrings(data, "", "authors", path),
+      hasArrayOfStrings(data, "", "contributors", path, isRequired = false),
+      checkFiles(data, "files", path),
+      hasArrayOfStrings(data, "", "forked_from", path, isRequired = false),
+      checkString(data, "language_versions", path, isRequired = false),
+    ]
+    result = allTrue(checks)
 
 proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
   let conceptExercisesDir = trackDir / "exercises" / "concept"

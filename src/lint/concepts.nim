@@ -9,15 +9,13 @@ proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   ##   string.
   ## - if it has a `icon_url` key, the corresponding value is a URL-like string.
   if isObject(data, context, path):
-    result = true
-
-    if not checkString(data, "url", path, checkIsUrlLike = true):
-      result = false
-    if not checkString(data, "description", path):
-      result = false
-    if not checkString(data, "icon_url", path, isRequired = false,
-                       checkIsUrlLike = true):
-        result = false
+    let checks = [
+      checkString(data, "url", path, checkIsUrlLike = true),
+      checkString(data, "description", path),
+      checkString(data, "icon_url", path, isRequired = false,
+                  checkIsUrlLike = true),
+    ]
+    result = allTrue(checks)
   else:
     result.setFalseAndPrint("At least one element of the top-level array is " &
                             "not an object: " & $data[context], path)

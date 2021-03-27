@@ -54,46 +54,37 @@ proc isValidTag(data: JsonNode, context: string, path: string): bool =
 
 proc hasValidStatus(data: JsonNode, path: string): bool =
   if hasObject(data, "status", path):
-    result = true
     let d = data["status"]
-
-    if not checkBoolean(d, "concept_exercises", path):
-      result = false
-    if not checkBoolean(d, "test_runner", path):
-      result = false
-    if not checkBoolean(d, "representer", path):
-      result = false
-    if not checkBoolean(d, "analyzer", path):
-      result = false
+    let checks = [
+      checkBoolean(d, "concept_exercises", path),
+      checkBoolean(d, "test_runner", path),
+      checkBoolean(d, "representer", path),
+      checkBoolean(d, "analyzer", path),
+    ]
+    result = allTrue(checks)
 
 proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
   if hasObject(data, "online_editor", path):
-    result = true
     let d = data["online_editor"]
     const indentStyles = ["space", "tab"].toHashSet()
-
-    if not checkString(d, "indent_style", path, allowed = indentStyles):
-      result = false
-    if not checkInteger(d, "indent_size", path, allowed = 0..8):
-      result = false
+    let checks = [
+      checkString(d, "indent_style", path, allowed = indentStyles),
+      checkInteger(d, "indent_size", path, allowed = 0..8),
+    ]
+    result = allTrue(checks)
 
 proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
   if isObject(data, context, path):
-    result = true
-
+    const icons = [
+      "todo",
+    ].toHashSet()
     # TODO: Enable the `icon` checks when we have a list of valid icons.
-    if false:
-      const icons = [
-        "todo",
-      ].toHashSet()
-
-      if not checkString(data, "icon", path, allowed = icons):
-        result = false
-
-    if not checkString(data, "title", path, maxLen = 25):
-      result = false
-    if not checkString(data, "content", path, maxLen = 100):
-      result = false
+    let checks = [
+      if false: checkString(data, "icon", path, allowed = icons) else: true,
+      checkString(data, "title", path, maxLen = 25),
+      checkString(data, "content", path, maxLen = 100),
+    ]
+    result = allTrue(checks)
 
 proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
@@ -101,28 +92,18 @@ proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
-    result = true
-
-    if not checkString(data, "language", path):
-      result = false
-    if not checkString(data, "slug", path):
-      result = false
-    if not checkBoolean(data, "active", path):
-      result = false
-    if not checkString(data, "blurb", path, maxLen = 400):
-      result = false
-    if not checkInteger(data, "version", path, allowed = 3..3):
-      result = false
-
-    if not hasValidStatus(data, path):
-      result = false
-    if not hasValidOnlineEditor(data, path):
-      result = false
-    if not hasValidKeyFeatures(data, path):
-      result = false
-
-    if not hasArrayOf(data, "tags", path, isValidTag):
-      result = false
+    let checks = [
+      checkString(data, "language", path),
+      checkString(data, "slug", path),
+      checkBoolean(data, "active", path),
+      checkString(data, "blurb", path, maxLen = 400),
+      checkInteger(data, "version", path, allowed = 3..3),
+      hasValidStatus(data, path),
+      hasValidOnlineEditor(data, path),
+      hasValidKeyFeatures(data, path),
+      hasArrayOf(data, "tags", path, isValidTag),
+    ]
+    result = allTrue(checks)
 
 proc isTrackConfigValid*(trackDir: string): bool =
   result = true
