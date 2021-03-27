@@ -34,11 +34,18 @@ proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
                 $maxLen & " characters"
       result.setFalseAndPrint(msg, path)
 
+proc isUrlLike(s: string): bool =
+  ## Returns true if `s` starts with `https://`, `http://` or `www`.
+  # We probably only need simplistic URL checking, and we want to avoid using
+  # Nim's stdlib regular expressions in order to avoid a dependency on PCRE.
+  s.startsWith("https://") or s.startsWith("http://") or s.startsWith("www")
+
 const
   emptySetOfStrings = initHashSet[string](0)
 
 proc checkString*(data: JsonNode; key, path: string; isRequired = true,
-                  allowed = emptySetOfStrings, maxLen = int.high): bool =
+                  allowed = emptySetOfStrings, checkIsUrlLike = false,
+                  maxLen = int.high): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
@@ -54,6 +61,9 @@ proc checkString*(data: JsonNode; key, path: string; isRequired = true,
             else:
               "the allowed values"
           result.setFalseAndPrint(msgStart & msgEnd, path)
+      elif checkIsUrlLike:
+        if not isUrlLike(s):
+          result.setFalseAndPrint("Not a valid URL: " & s, path)
       elif s.len > 0:
         if s.strip().len > 0:
           if not hasValidRuneLength(s, key, path, maxLen):
