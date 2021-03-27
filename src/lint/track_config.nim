@@ -70,16 +70,10 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
   if hasObject(data, "online_editor", path):
     result = true
     let d = data["online_editor"]
+    const indentStyles = ["space", "tab"].toHashSet()
 
-    if checkString(d, "indent_style", path):
-      let s = d["indent_style"].getStr()
-      if s != "space" and s != "tab":
-        let msg = "The value of `online_editor.indent_style` is `" & s &
-                  "`, but it must be `space` or `tab`"
-        result.setFalseAndPrint(msg, path)
-    else:
+    if not checkString(d, "indent_style", path, allowed = indentStyles):
       result = false
-
     if not checkInteger(d, "indent_size", path, allowed = 0..8):
       result = false
 
@@ -93,13 +87,8 @@ proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
         "todo",
       ].toHashSet()
 
-      if checkString(data, "icon", path):
-        let s = data["icon"].getStr()
-
-        if s notin icons:
-          let msg = "The value of `key_features.icon` is `" & s &
-                    "` which is not one of the valid values"
-          result.setFalseAndPrint(msg, path)
+      if not checkString(data, "icon", path, allowed = icons):
+        result = false
 
     if not checkString(data, "title", path, maxLen = 25):
       result = false
