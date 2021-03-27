@@ -1,12 +1,6 @@
-import std/[json, os, strutils]
+import std/[json, os]
 import ".."/helpers
 import "."/validators
-
-proc isUrlLike(s: string): bool =
-  ## Returns true if `s` starts with `https://`, `http://` or `www`.
-  # We probably only need simplistic URL checking, and we want to avoid using
-  # Nim's stdlib regular expressions in order to avoid a dependency on PCRE.
-  s.startsWith("https://") or s.startsWith("http://") or s.startsWith("www")
 
 proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   ## Returns true if `data` is a `JObject` that satisfies all of the below:
@@ -17,22 +11,12 @@ proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   if isObject(data, context, path):
     result = true
 
-    if checkString(data, "url", path):
-      let s = data["url"].getStr()
-      if not isUrlLike(s):
-        result.setFalseAndPrint("Not a valid URL: " & s, path)
-    else:
+    if not checkString(data, "url", path, checkIsUrlLike = true):
       result = false
-
     if not checkString(data, "description", path):
       result = false
-
-    if data.hasKey("icon_url"):
-      if checkString(data, "icon_url", path, isRequired = false):
-        let s = data["icon_url"].getStr()
-        if not isUrlLike(s):
-          result.setFalseAndPrint("Not a valid URL: " & s, path)
-      else:
+    if not checkString(data, "icon_url", path, isRequired = false,
+                       checkIsUrlLike = true):
         result = false
   else:
     result.setFalseAndPrint("At least one element of the top-level array is " &
