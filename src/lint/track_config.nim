@@ -96,18 +96,8 @@ proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
       result = false
 
 proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
-  result = true
-  if data.hasKey("key_features"):
-    let d = data["key_features"]
-    if isArrayOf(d, "key_features", path, isValidKeyFeature,
-                 isRequired = false):
-      let arrayLen = d.len
-      if arrayLen != 0 and arrayLen != 6:
-        let msg = "The `key_features` array has length " & $arrayLen &
-                  ", but must have length 6"
-        result.setFalseAndPrint(msg, path)
-    else:
-      result = false
+  result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
+                      isRequired = false, allowedLength = 6..6)
 
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):

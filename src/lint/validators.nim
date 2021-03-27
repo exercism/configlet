@@ -143,7 +143,8 @@ proc hasArrayOfStrings*(data: JsonNode;
 proc isArrayOf*(data: JsonNode;
                 context, path: string;
                 call: proc(d: JsonNode; key, path: string): bool;
-                isRequired = true): bool =
+                isRequired = true,
+                allowedLength: Slice): bool =
   ## Returns true in any of these cases:
   ## - `data` is a non-empty `JArray` and `call` returns true for each of its
   ##   items.
@@ -152,10 +153,23 @@ proc isArrayOf*(data: JsonNode;
 
   case data.kind
   of JArray:
-    if data.len > 0:
-      for item in data:
-        if not call(item, context, path):
-          result = false
+    let arrayLen = data.len
+    if arrayLen > 0:
+      if arrayLen in allowedLength:
+        for item in data:
+          if not call(item, context, path):
+            result = false
+      else:
+        let msgStart = "The `" & context & "` array has length " & $arrayLen &
+                       ", but must have length "
+        let msgEnd =
+          if allowedLength.len == 1:
+            "of exactly " & $allowedLength.a
+          else:
+            "between " & $allowedLength.a & " and " & $allowedLength.b &
+            " (inclusive)"
+        result.setFalseAndPrint(msgStart & msgEnd, path)
+
     elif isRequired:
       result.setFalseAndPrint("Array is empty: " & q(context), path)
   of JNull:
@@ -168,14 +182,15 @@ proc isArrayOf*(data: JsonNode;
 proc hasArrayOf*(data: JsonNode;
                  key, path: string;
                  call: proc(d: JsonNode; key, path: string): bool;
-                 isRequired = true): bool =
+                 isRequired = true,
+                 allowedLength: Slice = 0..int.high): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
   result = true
 
   if data.hasKey(key):
-    if not isArrayOf(data[key], key, path, call, isRequired):
+    if not isArrayOf(data[key], key, path, call, isRequired, allowedLength):
       result = false
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
