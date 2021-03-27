@@ -2,7 +2,8 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc checkFiles(data: JsonNode, context, path: string): bool =
+proc hasValidFiles(data: JsonNode, path: string): bool =
+  const context = "files"
   if hasObject(data, context, path):
     let checks = [
       hasArrayOfStrings(data, context, "solution", path),
@@ -15,11 +16,11 @@ proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
-      checkString(data, "blurb", path, maxLen = 350),
+      hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "", "authors", path, isRequired = false),
       hasArrayOfStrings(data, "", "contributors", path, isRequired = false),
-      if false: checkFiles(data, "files", path) else: true,
-      checkString(data, "language_versions", path, isRequired = false),
+      if false: hasValidFiles(data, path) else: true,
+      hasString(data, "language_versions", path, isRequired = false),
     ]
     result = allTrue(checks)
 

@@ -50,9 +50,9 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
-proc checkString*(data: JsonNode; key, path: string; isRequired = true,
-                  allowed = emptySetOfStrings, checkIsUrlLike = false,
-                  maxLen = int.high): bool =
+proc hasString*(data: JsonNode; key, path: string; isRequired = true,
+                allowed = emptySetOfStrings, checkIsUrlLike = false,
+                maxLen = int.high): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
@@ -202,7 +202,7 @@ proc hasArrayOf*(data: JsonNode;
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc hasBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind
@@ -217,8 +217,8 @@ proc checkBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
-proc checkInteger*(data: JsonNode; key, path: string; isRequired = true;
-                   allowed: Slice): bool =
+proc hasInteger*(data: JsonNode; key, path: string; isRequired = true;
+                 allowed: Slice): bool =
   result = true
   if data.hasKey(key):
     case data[key].kind

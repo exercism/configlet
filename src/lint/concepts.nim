@@ -10,10 +10,10 @@ proc isValidLinkObject(data: JsonNode, context: string, path: string): bool =
   ## - if it has a `icon_url` key, the corresponding value is a URL-like string.
   if isObject(data, context, path):
     let checks = [
-      checkString(data, "url", path, checkIsUrlLike = true),
-      checkString(data, "description", path),
-      checkString(data, "icon_url", path, isRequired = false,
-                  checkIsUrlLike = true),
+      hasString(data, "url", path, checkIsUrlLike = true),
+      hasString(data, "description", path),
+      hasString(data, "icon_url", path, isRequired = false,
+                checkIsUrlLike = true),
     ]
     result = allTrue(checks)
   else:
