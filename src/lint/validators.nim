@@ -1,5 +1,4 @@
-import std/[json, os, sets, streams, strutils]
-import std/unicode except strip
+import std/[json, os, sets, streams, strutils, unicode]
 import ".."/helpers
 
 func allTrue*(bools: openArray[bool]): bool =
@@ -72,7 +71,7 @@ proc checkString*(data: JsonNode; key, path: string; isRequired = true,
         if not isUrlLike(s):
           result.setFalseAndPrint("Not a valid URL: " & s, path)
       elif s.len > 0:
-        if s.strip().len > 0:
+        if not isEmptyOrWhitespace(s):
           if not hasValidRuneLength(s, key, path, maxLen):
             result = false
         else:
@@ -110,7 +109,7 @@ proc isArrayOfStrings*(data: JsonNode;
         if item.kind == JString:
           let s = item.getStr()
           if s.len > 0:
-            if s.strip().len == 0:
+            if isEmptyOrWhitespace(s):
               result.setFalseAndPrint("Array contains whitespace-only string: " &
                                       format(context, key), path)
           else:
