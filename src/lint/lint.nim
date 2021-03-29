@@ -1,5 +1,6 @@
 import ".."/cli
-import "."/[concept_exercises, concepts, practice_exercises, track_config]
+import "."/[concept_exercises, concepts, practice_exercises, track_config,
+            validators]
 
 proc allChecksPass(trackDir: string): bool =
   ## Returns true if all the linting checks pass for the track at `trackDir`.
@@ -14,11 +15,7 @@ proc allChecksPass(trackDir: string): bool =
     isEveryConceptExerciseConfigValid(trackDir),
     isEveryPracticeExerciseConfigValid(trackDir),
   ]
-  result = true
-
-  for check in checks:
-    if not check:
-      return false
+  result = allTrue(checks)
 
 proc lint*(conf: Conf) =
   echo "The lint command is under development.\n" &

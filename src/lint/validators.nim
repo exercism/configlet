@@ -2,6 +2,13 @@ import std/[json, os, sets, streams, strutils]
 import std/unicode except strip
 import ".."/helpers
 
+func allTrue*(bools: openArray[bool]): bool =
+  ## Returns true if every item in `bools` is `true`.
+  result = true
+  for b in bools:
+    if not b:
+      return false
+
 func q(s: string): string =
   if s.len > 0:
     "'" & s & "'"
