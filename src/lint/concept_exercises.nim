@@ -2,7 +2,8 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc checkFiles(data: JsonNode, context, path: string): bool =
+proc hasValidFiles(data: JsonNode, path: string): bool =
+  const context = "files"
   if hasObject(data, context, path):
     let checks = [
       hasArrayOfStrings(data, context, "solution", path),
@@ -14,12 +15,12 @@ proc checkFiles(data: JsonNode, context, path: string): bool =
 proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     let checks = [
-      checkString(data, "blurb", path, maxLen = 350),
+      hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "", "authors", path),
       hasArrayOfStrings(data, "", "contributors", path, isRequired = false),
-      checkFiles(data, "files", path),
+      hasValidFiles(data, path),
       hasArrayOfStrings(data, "", "forked_from", path, isRequired = false),
-      checkString(data, "language_versions", path, isRequired = false),
+      hasString(data, "language_versions", path, isRequired = false),
     ]
     result = allTrue(checks)
 

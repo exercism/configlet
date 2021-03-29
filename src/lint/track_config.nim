@@ -56,10 +56,10 @@ proc hasValidStatus(data: JsonNode, path: string): bool =
   if hasObject(data, "status", path):
     let d = data["status"]
     let checks = [
-      checkBoolean(d, "concept_exercises", path),
-      checkBoolean(d, "test_runner", path),
-      checkBoolean(d, "representer", path),
-      checkBoolean(d, "analyzer", path),
+      hasBoolean(d, "concept_exercises", path),
+      hasBoolean(d, "test_runner", path),
+      hasBoolean(d, "representer", path),
+      hasBoolean(d, "analyzer", path),
     ]
     result = allTrue(checks)
 
@@ -68,8 +68,8 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
     let d = data["online_editor"]
     const indentStyles = ["space", "tab"].toHashSet()
     let checks = [
-      checkString(d, "indent_style", path, allowed = indentStyles),
-      checkInteger(d, "indent_size", path, allowed = 0..8),
+      hasString(d, "indent_style", path, allowed = indentStyles),
+      hasInteger(d, "indent_size", path, allowed = 0..8),
     ]
     result = allTrue(checks)
 
@@ -80,9 +80,9 @@ proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
     ].toHashSet()
     # TODO: Enable the `icon` checks when we have a list of valid icons.
     let checks = [
-      if false: checkString(data, "icon", path, allowed = icons) else: true,
-      checkString(data, "title", path, maxLen = 25),
-      checkString(data, "content", path, maxLen = 100),
+      if false: hasString(data, "icon", path, allowed = icons) else: true,
+      hasString(data, "title", path, maxLen = 25),
+      hasString(data, "content", path, maxLen = 100),
     ]
     result = allTrue(checks)
 
@@ -93,11 +93,11 @@ proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
 proc isValidTrackConfig(data: JsonNode, path: string): bool =
   if isObject(data, "", path):
     let checks = [
-      checkString(data, "language", path),
-      checkString(data, "slug", path),
-      checkBoolean(data, "active", path),
-      checkString(data, "blurb", path, maxLen = 400),
-      checkInteger(data, "version", path, allowed = 3..3),
+      hasString(data, "language", path),
+      hasString(data, "slug", path),
+      hasBoolean(data, "active", path),
+      hasString(data, "blurb", path, maxLen = 400),
+      hasInteger(data, "version", path, allowed = 3..3),
       hasValidStatus(data, path),
       hasValidOnlineEditor(data, path),
       hasValidKeyFeatures(data, path),
