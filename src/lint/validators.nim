@@ -14,6 +14,21 @@ func q*(s: string): string =
   else:
     "root"
 
+func format(context, key: string): string =
+  if context.len > 0:
+    q(&"{context}.{key}")
+  else:
+    q(key)
+
+proc hasKey(data: JsonNode; key, path: string; isRequired: bool;
+            context = ""): bool =
+  ## Returns true if `data` contains the key `key`. Otherwise, returns false
+  ## and, if `isRequired` is true, prints an error message.
+  if data.hasKey(key):
+    result = true
+  elif isRequired:
+    result.setFalseAndPrint(&"Missing key: {format(context, key)}", path)
+
 proc isObject*(data: JsonNode; context, path: string): bool =
   if data.kind == JObject:
     result = true
@@ -21,11 +36,10 @@ proc isObject*(data: JsonNode; context, path: string): bool =
     result.setFalseAndPrint(&"Not an object: {q context}", path)
 
 proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
-  result = true
-  if data.hasKey(key):
+  if data.hasKey(key, path, isRequired):
     result = isObject(data[key], key, path)
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {q key}", path)
+  elif not isRequired:
+    result = true
 
 proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
   ## Returns true if `s` has a rune length that does not exceed `maxLen`.
@@ -86,18 +100,11 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
 proc hasString*(data: JsonNode; key, path: string; isRequired = true;
                 allowed = emptySetOfStrings; checkIsUrlLike = false;
                 maxLen = int.high): bool =
-  result = true
-  if data.hasKey(key):
+  if data.hasKey(key, path, isRequired):
     result = isString(data[key], key, path, isRequired, allowed, checkIsUrlLike,
                       maxLen)
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {q key}", path)
-
-func format(context, key: string): string =
-  if context.len > 0:
-    q(&"{context}.{key}")
-  else:
-    q(key)
+  elif not isRequired:
+    result = true
 
 proc isArrayOfStrings*(data: JsonNode;
                        context, key, path: string;
@@ -143,14 +150,11 @@ proc hasArrayOfStrings*(data: JsonNode;
   ## When `context` is a non-empty string, returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[context][key]`.
   ## - `data[context]` lacks the key `key` and `isRequired` is false.
-  result = true
   let d = if context.len > 0: data[context] else: data
-
-  if d.hasKey(key):
-    if not isArrayOfStrings(d[key], context, key, path, isRequired):
-      result = false
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {format(context, key)}", path)
+  if d.hasKey(key, path, isRequired, context):
+    result = isArrayOfStrings(d[key], context, key, path, isRequired)
+  elif not isRequired:
+    result = true
 
 proc isArrayOf*(data: JsonNode;
                 context, path: string;
@@ -198,13 +202,10 @@ proc hasArrayOf*(data: JsonNode;
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
-  result = true
-
-  if data.hasKey(key):
-    if not isArrayOf(data[key], key, path, call, isRequired, allowedLength):
-      result = false
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {q key}", path)
+  if data.hasKey(key, path, isRequired):
+    result = isArrayOf(data[key], key, path, call, isRequired, allowedLength)
+  elif not isRequired:
+    result = true
 
 proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
@@ -219,11 +220,10 @@ proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
     result.setFalseAndPrint(&"Not a bool: {q key}: {data}", path)
 
 proc hasBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
-  result = true
-  if data.hasKey(key):
+  if data.hasKey(key, path, isRequired):
     result = isBoolean(data[key], key, path, isRequired)
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {q key}", path)
+  elif not isRequired:
+    result = true
 
 proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
                 allowed: Slice): bool =
@@ -248,11 +248,10 @@ proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
 
 proc hasInteger*(data: JsonNode; key, path: string; isRequired = true;
                  allowed: Slice): bool =
-  result = true
-  if data.hasKey(key):
+  if data.hasKey(key, path, isRequired):
     result = isInteger(data[key], key, path, isRequired, allowed)
-  elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {q key}", path)
+  elif not isRequired:
+    result = true
 
 proc subdirsContain*(dir: string, files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
