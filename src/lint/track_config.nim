@@ -42,11 +42,8 @@ const tags = [
   "used_for/web_development",
 ].toHashSet()
 
-proc isValidTag(data: JsonNode, context: string, path: string): bool =
-  result = isString(data, context, path, allowed = tags)
-
 proc hasValidTags(data: JsonNode, path: string): bool =
-  result = hasArrayOf(data, "tags", path, isValidTag)
+  result = hasArrayOfStrings(data, "", "tags", path, allowed = tags)
 
 proc hasValidStatus(data: JsonNode, path: string): bool =
   if hasObject(data, "status", path):
