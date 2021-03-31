@@ -15,15 +15,15 @@ func q(s: string): string =
     "root"
 
 proc isObject*(data: JsonNode; context, path: string): bool =
-  result = true
-  if data.kind != JObject:
+  if data.kind == JObject:
+    result = true
+  else:
     result.setFalseAndPrint("Not an object: " & q(context), path)
 
 proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    if data[key].kind != JObject:
-      result.setFalseAndPrint("Not an object: " & q(key), path)
+    result = isObject(data[key], key, path)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
@@ -49,41 +49,48 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
-proc hasString*(data: JsonNode; key, path: string; isRequired = true,
-                allowed = emptySetOfStrings, checkIsUrlLike = false,
+proc isString*(data: JsonNode; key, path: string; isRequired = true;
+               allowed = emptySetOfStrings; checkIsUrlLike = false;
+               maxLen = int.high): bool =
+  result = true
+  case data.kind
+  of JString:
+    let s = data.getStr()
+    if allowed.len > 0:
+      if s notin allowed:
+        let msgStart = "The value of `" & key & "` is `" & s &
+                       "`, but it must be one of "
+        let msgEnd =
+          if allowed.len < 6:
+            $allowed
+          else:
+            "the allowed values"
+        result.setFalseAndPrint(msgStart & msgEnd, path)
+    elif checkIsUrlLike:
+      if not isUrlLike(s):
+        result.setFalseAndPrint("Not a valid URL: " & s, path)
+    elif s.len > 0:
+      if not isEmptyOrWhitespace(s):
+        if not hasValidRuneLength(s, key, path, maxLen):
+          result = false
+      else:
+        result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
+    else:
+      result.setFalseAndPrint("String is zero-length: " & q(key), path)
+  of JNull:
+    if isRequired:
+      result.setFalseAndPrint("Value is `null`, but must be a string: " &
+                              q(key), path)
+  else:
+    result.setFalseAndPrint("Not a string: " & q(key) & ": " & $data, path)
+
+proc hasString*(data: JsonNode; key, path: string; isRequired = true;
+                allowed = emptySetOfStrings; checkIsUrlLike = false;
                 maxLen = int.high): bool =
   result = true
   if data.hasKey(key):
-    case data[key].kind
-    of JString:
-      let s = data[key].getStr()
-      if allowed.len > 0:
-        if s notin allowed:
-          let msgStart = "The value of `" & key & "` is `" & s &
-                          "`, but it must be one of "
-          let msgEnd =
-            if allowed.len < 6:
-              $allowed
-            else:
-              "the allowed values"
-          result.setFalseAndPrint(msgStart & msgEnd, path)
-      elif checkIsUrlLike:
-        if not isUrlLike(s):
-          result.setFalseAndPrint("Not a valid URL: " & s, path)
-      elif s.len > 0:
-        if not isEmptyOrWhitespace(s):
-          if not hasValidRuneLength(s, key, path, maxLen):
-            result = false
-        else:
-          result.setFalseAndPrint("String is whitespace-only: " & q(key), path)
-      else:
-        result.setFalseAndPrint("String is zero-length: " & q(key), path)
-    of JNull:
-      if isRequired:
-        result.setFalseAndPrint("Value is `null`, but must be a string: " &
-                                q(key), path)
-    else:
-      result.setFalseAndPrint("Not a string: " & q(key) & ": " & $data[key], path)
+    result = isString(data[key], key, path, isRequired, allowed, checkIsUrlLike,
+                      maxLen)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
@@ -201,43 +208,52 @@ proc hasArrayOf*(data: JsonNode;
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
+proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
+  result = true
+  case data.kind
+  of JBool:
+    return true
+  of JNull:
+    if isRequired:
+      result.setFalseAndPrint("Value is `null`, but must be a bool: " &
+                              q(key), path)
+  else:
+    result.setFalseAndPrint("Not a bool: " & q(key) & ": " & $data, path)
+
 proc hasBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   result = true
   if data.hasKey(key):
-    case data[key].kind
-    of JBool:
-      return true
-    of JNull:
-      if isRequired:
-        result.setFalseAndPrint("Value is `null`, but must be a bool: " &
-                                q(key), path)
-    else:
-      result.setFalseAndPrint("Not a bool: " & q(key) & ": " & $data[key], path)
+    result = isBoolean(data[key], key, path, isRequired)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
+
+proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
+                allowed: Slice): bool =
+  result = true
+  case data.kind
+  of JInt:
+    let num = data.getInt()
+    if num notin allowed:
+      let msgStart = "The value of `" & key & "` is `" & $num &
+                     "`, but it must be "
+      let msgEnd =
+        if allowed.len == 1:
+          "`" & $allowed.a & "`"
+        else:
+          "between " & $allowed.a & " and " & $allowed.b & " (inclusive)"
+      result.setFalseAndPrint(msgStart & msgEnd, path)
+  of JNull:
+    if isRequired:
+      result.setFalseAndPrint("Value is `null`, but must be an integer: " &
+                              q(key), path)
+  else:
+    result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data, path)
 
 proc hasInteger*(data: JsonNode; key, path: string; isRequired = true;
                  allowed: Slice): bool =
   result = true
   if data.hasKey(key):
-    case data[key].kind
-    of JInt:
-      let num = data[key].getInt()
-      if num notin allowed:
-        let msgStart = "The value of `" & key & "` is `" & $num &
-                       "`, but it must be "
-        let msgEnd =
-          if allowed.len == 1:
-            "`" & $allowed.a & "`"
-          else:
-            "between " & $allowed.a & " and " & $allowed.b & " (inclusive)"
-        result.setFalseAndPrint(msgStart & msgEnd, path)
-    of JNull:
-      if isRequired:
-        result.setFalseAndPrint("Value is `null`, but must be an integer: " &
-                                q(key), path)
-    else:
-      result.setFalseAndPrint("Not an integer: " & q(key) & ": " & $data[key], path)
+    result = isInteger(data[key], key, path, isRequired, allowed)
   elif isRequired:
     result.setFalseAndPrint("Missing key: " & q(key), path)
 
