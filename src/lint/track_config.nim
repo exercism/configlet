@@ -43,14 +43,10 @@ const tags = [
 ].toHashSet()
 
 proc isValidTag(data: JsonNode, context: string, path: string): bool =
-  result = true
+  result = isString(data, context, path, allowed = tags)
 
-  if data.kind == JString:
-    let s = data.getStr()
-    if not tags.contains(s):
-      result.setFalseAndPrint("Not a valid tag: " & $data, path)
-  else:
-    result.setFalseAndPrint("Tag is not a string: " & $data, path)
+proc hasValidTags(data: JsonNode, path: string): bool =
+  result = hasArrayOf(data, "tags", path, isValidTag)
 
 proc hasValidStatus(data: JsonNode, path: string): bool =
   if hasObject(data, "status", path):
@@ -101,7 +97,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       hasValidStatus(data, path),
       hasValidOnlineEditor(data, path),
       hasValidKeyFeatures(data, path),
-      hasArrayOf(data, "tags", path, isValidTag),
+      hasValidTags(data, path),
     ]
     result = allTrue(checks)
 
