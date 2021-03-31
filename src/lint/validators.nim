@@ -72,7 +72,11 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
     let s = data.getStr()
     if allowed.len > 0:
       if s notin allowed:
-        let msgStart = &"The value of `{key}` is `{s}`, but it must be one of "
+        let msgStart =
+          if isInArray:
+            &"The `{key}` array contains `{s}`, which is not one of "
+          else:
+            &"The value of `{key}` is `{s}`, but it must be one of "
         let msgEnd =
           if allowed.len < 6:
             $allowed
@@ -123,7 +127,8 @@ proc hasString*(data: JsonNode; key, path: string; isRequired = true;
 
 proc isArrayOfStrings*(data: JsonNode;
                        context, key, path: string;
-                       isRequired = true): bool =
+                       isRequired = true;
+                       allowed: HashSet[string]): bool =
   ## Returns true in any of these cases:
   ## - `data` is a non-empty `JArray` that contains only non-empty, non-blank
   ##   strings.
@@ -135,7 +140,7 @@ proc isArrayOfStrings*(data: JsonNode;
     if data.len > 0:
       for item in data:
         let k = if context.len > 0: &"{context}.{key}" else: key
-        if not isString(item, k, path, isRequired, isInArray = true):
+        if not isString(item, k, path, isRequired, allowed, isInArray = true):
           result = false
     elif isRequired:
       result.setFalseAndPrint(&"Array is empty: {format(context, key)}", path)
@@ -148,7 +153,8 @@ proc isArrayOfStrings*(data: JsonNode;
 
 proc hasArrayOfStrings*(data: JsonNode;
                         context, key, path: string;
-                        isRequired = true): bool =
+                        isRequired = true;
+                        allowed = emptySetOfStrings): bool =
   ## When `context` is the empty string, returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
@@ -158,7 +164,7 @@ proc hasArrayOfStrings*(data: JsonNode;
   ## - `data[context]` lacks the key `key` and `isRequired` is false.
   let d = if context.len > 0: data[context] else: data
   if d.hasKey(key, path, isRequired, context):
-    result = isArrayOfStrings(d[key], context, key, path, isRequired)
+    result = isArrayOfStrings(d[key], context, key, path, isRequired, allowed)
   elif not isRequired:
     result = true
 
