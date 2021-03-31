@@ -65,7 +65,7 @@ const
 
 proc isString*(data: JsonNode; key, path: string; isRequired = true;
                allowed = emptySetOfStrings; checkIsUrlLike = false;
-               maxLen = int.high): bool =
+               maxLen = int.high; isInArray = false): bool =
   result = true
   case data.kind
   of JString:
@@ -87,15 +87,30 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
         if not hasValidRuneLength(s, key, path, maxLen):
           result = false
       else:
-        result.setFalseAndPrint(&"String is whitespace-only: {q key}", path)
+        let msg =
+          if isInArray:
+            &"The {q key} array contains a whitespace-only string"
+          else:
+            &"String is whitespace-only: {q key}"
+        result.setFalseAndPrint(msg, path)
     else:
-      result.setFalseAndPrint(&"String is zero-length: {q key}", path)
+      let msg =
+        if isInArray:
+          &"The {q key} array contains a zero-length string"
+        else:
+          &"String is zero-length: {q key}"
+      result.setFalseAndPrint(msg, path)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"Value is `null`, but must be a string: {q key}",
                               path)
   else:
-    result.setFalseAndPrint(&"Not a string: {q key}: {data}", path)
+    let msg =
+      if isInArray:
+        &"The {q key} array contains a non-string: {data}"
+      else:
+        &"Not a string: {q key}: {data}"
+    result.setFalseAndPrint(msg, path)
 
 proc hasString*(data: JsonNode; key, path: string; isRequired = true;
                 allowed = emptySetOfStrings; checkIsUrlLike = false;
@@ -119,18 +134,9 @@ proc isArrayOfStrings*(data: JsonNode;
   of JArray:
     if data.len > 0:
       for item in data:
-        if item.kind == JString:
-          let s = item.getStr()
-          if s.len > 0:
-            if isEmptyOrWhitespace(s):
-              result.setFalseAndPrint("Array contains whitespace-only string: " &
-                                      format(context, key), path)
-          else:
-            result.setFalseAndPrint("Array contains zero-length string: " &
-                                    format(context, key), path)
-        else:
-          result.setFalseAndPrint("Array contains non-string: " &
-                                  &"{format(context, key)}: {item}", path)
+        let k = if context.len > 0: &"{context}.{key}" else: key
+        if not isString(item, k, path, isRequired, isInArray = true):
+          result = false
     elif isRequired:
       result.setFalseAndPrint(&"Array is empty: {format(context, key)}", path)
   of JNull:
