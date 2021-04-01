@@ -128,22 +128,34 @@ proc hasString*(data: JsonNode; key, path: string; isRequired = true;
 proc isArrayOfStrings*(data: JsonNode;
                        context, key, path: string;
                        isRequired = true;
-                       allowed: HashSet[string]): bool =
+                       allowed: HashSet[string];
+                       allowedArrayLen: Slice): bool =
   ## Returns true in any of these cases:
-  ## - `data` is a non-empty `JArray` that contains only non-empty, non-blank
-  ##   strings.
+  ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
+  ##   non-empty, non-blank strings.
   ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
 
   case data.kind
   of JArray:
-    if data.len > 0:
-      for item in data:
-        let k = if context.len > 0: &"{context}.{key}" else: key
-        if not isString(item, k, path, isRequired, allowed, isInArray = true):
-          result = false
+    let k = if context.len > 0: &"{context}.{key}" else: key
+    let arrayLen = data.len
+    if arrayLen > 0:
+      if arrayLen in allowedArrayLen:
+        for item in data:
+          if not isString(item, k, path, isRequired, allowed, isInArray = true):
+            result = false
+      else:
+        let msgStart = &"The {q k} array has length {arrayLen}, " &
+                        "but must have length "
+        let msgEnd =
+          if allowedArrayLen.len == 1:
+            &"of exactly {allowedArrayLen.a}"
+          else:
+            &"between {allowedArrayLen.a} and {allowedArrayLen.b} (inclusive)"
     elif isRequired:
-      result.setFalseAndPrint(&"Array is empty: {format(context, key)}", path)
+      if 0 notin allowedArrayLen:
+        result.setFalseAndPrint(&"Array is empty: {q k}", path)
   of JNull:
     if isRequired:
       result.setFalseAndPrint("Value is `null`, but must be an array: " &
@@ -154,7 +166,8 @@ proc isArrayOfStrings*(data: JsonNode;
 proc hasArrayOfStrings*(data: JsonNode;
                         context, key, path: string;
                         isRequired = true;
-                        allowed = emptySetOfStrings): bool =
+                        allowed = emptySetOfStrings;
+                        allowedArrayLen = 1..int.high): bool =
   ## When `context` is the empty string, returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
@@ -164,7 +177,8 @@ proc hasArrayOfStrings*(data: JsonNode;
   ## - `data[context]` lacks the key `key` and `isRequired` is false.
   let d = if context.len > 0: data[context] else: data
   if d.hasKey(key, path, isRequired, context):
-    result = isArrayOfStrings(d[key], context, key, path, isRequired, allowed)
+    result = isArrayOfStrings(d[key], context, key, path, isRequired, allowed,
+                              allowedArrayLen)
   elif not isRequired:
     result = true
 
@@ -174,8 +188,8 @@ proc isArrayOf*(data: JsonNode;
                 isRequired = true,
                 allowedLength: Slice): bool =
   ## Returns true in any of these cases:
-  ## - `data` is a non-empty `JArray` and `call` returns true for each of its
-  ##   items.
+  ## - `data` is a `JArray` with length in `allowedLength`, and `call` returns
+  ##   true for each of its items.
   ## - `data` is an empty `JArray` and `isRequired` is false.
   result = true
 
@@ -198,7 +212,8 @@ proc isArrayOf*(data: JsonNode;
         result.setFalseAndPrint(msgStart & msgEnd, path)
 
     elif isRequired:
-      result.setFalseAndPrint(&"Array is empty: {q context}", path)
+      if 0 notin allowedLength:
+        result.setFalseAndPrint(&"Array is empty: {q context}", path)
   of JNull:
     if isRequired:
       result.setFalseAndPrint("Value is `null`, but must be an array: " &
@@ -210,7 +225,7 @@ proc hasArrayOf*(data: JsonNode;
                  key, path: string;
                  call: proc(d: JsonNode; key, path: string): bool;
                  isRequired = true,
-                 allowedLength: Slice = 0..int.high): bool =
+                 allowedLength: Slice = 1..int.high): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
