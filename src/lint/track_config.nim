@@ -66,6 +66,50 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
+const
+  statuses = ["wip", "beta", "active", "deprecated"].toHashSet()
+
+proc isValidConceptExercise(data: JsonNode; context, path: string): bool =
+  if isObject(data, context, path):
+    let checks = [
+      hasString(data, "slug", path),
+      hasString(data, "name", path),
+      hasString(data, "uuid", path),
+      hasBoolean(data, "deprecated", path, isRequired = false),
+      hasArrayOfStrings(data, "", "concepts", path),
+      hasArrayOfStrings(data, "", "prerequisites", path),
+      hasString(data, "status", path, isRequired = false, allowed = statuses),
+    ]
+    result = allTrue(checks)
+
+proc isValidPracticeExercise(data: JsonNode; context, path: string): bool =
+  if isObject(data, context, path):
+    let checks = [
+      hasString(data, "slug", path),
+      hasString(data, "name", path),
+      hasString(data, "uuid", path),
+      hasBoolean(data, "deprecated", path, isRequired = false),
+      hasInteger(data, "difficulty", path, allowed = 0..10),
+      hasArrayOfStrings(data, "", "practices", path,
+                        allowedArrayLen = 0..int.high),
+      hasArrayOfStrings(data, "", "prerequisites", path,
+                        allowedArrayLen = 0..int.high),
+      hasString(data, "status", path, isRequired = false, allowed = statuses),
+    ]
+    result = allTrue(checks)
+
+proc hasValidExercises(data: JsonNode; path: string): bool =
+  if hasObject(data, "exercises", path):
+    let exercises = data["exercises"]
+    let checks = [
+      hasArrayOf(exercises, "concept", path, isValidConceptExercise,
+                 allowedLength = 0..int.high),
+      hasArrayOf(exercises, "practice", path, isValidPracticeExercise,
+                 allowedLength = 0..int.high),
+      hasArrayOfStrings(exercises, "", "foregone", path, isRequired = false),
+    ]
+    result = allTrue(checks)
+
 proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
   if isObject(data, context, path):
     const icons = [
@@ -93,6 +137,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       hasInteger(data, "version", path, allowed = 3..3),
       hasValidStatus(data, path),
       hasValidOnlineEditor(data, path),
+      hasValidExercises(data, path),
       hasValidKeyFeatures(data, path),
       hasValidTags(data, path),
     ]
