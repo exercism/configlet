@@ -5,10 +5,11 @@ import "."/validators
 proc hasValidFiles(data: JsonNode, path: string): bool =
   const context = "files"
   if hasObject(data, context, path):
+    let d = data[context]
     let checks = [
-      hasArrayOfStrings(data, context, "solution", path),
-      hasArrayOfStrings(data, context, "test", path),
-      hasArrayOfStrings(data, context, "example", path),
+      hasArrayOfStrings(d, context, "solution", path),
+      hasArrayOfStrings(d, context, "test", path),
+      hasArrayOfStrings(d, context, "example", path),
     ]
     result = allTrue(checks)
 

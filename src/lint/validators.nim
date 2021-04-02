@@ -172,17 +172,12 @@ proc hasArrayOfStrings*(data: JsonNode;
                         isRequired = true;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high): bool =
-  ## When `context` is the empty string, returns true in any of these cases:
+  ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
-  ##
-  ## When `context` is a non-empty string, returns true in any of these cases:
-  ## - `isArrayOfStrings` returns true for `data[context][key]`.
-  ## - `data[context]` lacks the key `key` and `isRequired` is false.
-  let d = if context.len > 0: data[context] else: data
-  if d.hasKey(key, path, isRequired, context):
-    result = isArrayOfStrings(d[key], context, key, path, isRequired, allowed,
-                              allowedArrayLen)
+  if data.hasKey(key, path, isRequired, context):
+    result = isArrayOfStrings(data[key], context, key, path, isRequired,
+                              allowed, allowedArrayLen)
   elif not isRequired:
     result = true
 
