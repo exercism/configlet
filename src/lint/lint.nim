@@ -12,6 +12,7 @@ proc allChecksPass(trackDir: Path): bool =
     practiceExerciseDocsExist(trackDir),
     conceptDocsExist(trackDir),
     isEveryConceptLinksFileValid(trackDir),
+    isEveryConceptConfigValid(trackDir),
     isEveryConceptExerciseConfigValid(trackDir),
     isEveryPracticeExerciseConfigValid(trackDir),
   ]
@@ -32,6 +33,7 @@ Basic linting finished successfully:
     language, slug, active, blurb, version, status, online_editor, key_features, tags
 - Every concept has the required .md files
 - Every concept has a valid links.json file
+- Every concept has a valid .meta/config.json file
 - Every concept exercise has the required .md files
 - Every concept exercise has a valid .meta/config.json file
 - Every practice exercise has the required .md files
