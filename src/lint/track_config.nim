@@ -110,6 +110,19 @@ proc hasValidExercises(data: JsonNode; path: string): bool =
     ]
     result = allTrue(checks)
 
+proc isValidConcept(data: JsonNode, context: string, path: string): bool =
+  if isObject(data, context, path):
+    let checks = [
+      hasString(data, "uuid", path),
+      hasString(data, "slug", path),
+      hasString(data, "name", path),
+    ]
+    result = allTrue(checks)
+
+proc hasValidConcepts(data: JsonNode; path: string): bool =
+  result = hasArrayOf(data, "concepts", path, isValidConcept,
+                      allowedLength = 0..int.high)
+
 proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
   if isObject(data, context, path):
     const icons = [
@@ -138,6 +151,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
       hasValidStatus(data, path),
       hasValidOnlineEditor(data, path),
       hasValidExercises(data, path),
+      hasValidConcepts(data, path),
       hasValidKeyFeatures(data, path),
       hasValidTags(data, path),
     ]
