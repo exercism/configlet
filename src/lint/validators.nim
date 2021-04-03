@@ -10,9 +10,12 @@ func allTrue*(bools: openArray[bool]): bool =
 
 func q*(s: string): string =
   if s.len > 0:
-    &"'{s}'"
+    &"`{s}`"
   else:
     "root"
+
+const
+  qNull* = q("null") # So we don't have to write &"""Foo is {q "null"}""" later
 
 func format(context, key: string): string =
   if context.len > 0:
@@ -27,13 +30,13 @@ proc hasKey(data: JsonNode; key, path: string; isRequired: bool;
   if data.hasKey(key):
     result = true
   elif isRequired:
-    result.setFalseAndPrint(&"Missing key: {format(context, key)}", path)
+    result.setFalseAndPrint(&"The {format(context, key)} key is missing", path)
 
 proc isObject*(data: JsonNode; context, path: string): bool =
   if data.kind == JObject:
     result = true
   else:
-    result.setFalseAndPrint(&"Not an object: {q context}", path)
+    result.setFalseAndPrint(&"The value of {q context} is not an object", path)
 
 proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
   if data.hasKey(key, path, isRequired):
@@ -49,9 +52,9 @@ proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
     if sRuneLen > maxLen:
       const truncLen = 25
       let sTrunc = if sRuneLen > truncLen: s.runeSubStr(0, truncLen) else: s
-      let msg = &"The value of `{key}` that starts with `{sTrunc}...` is " &
-                &"{sRuneLen} characters, but must not exceed {maxLen} " &
-                "characters"
+      let msg = &"The value of {q key} that starts with {q sTrunc}... is " &
+                &"{sRuneLen} characters, but it must not exceed {maxLen} " &
+                 "characters"
       result.setFalseAndPrint(msg, path)
 
 proc isUrlLike(s: string): bool =
@@ -74,9 +77,9 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
       if s notin allowed:
         let msgStart =
           if isInArray:
-            &"The `{key}` array contains `{s}`, which is not one of "
+            &"The {q key} array contains {q s}, which is not one of "
           else:
-            &"The value of `{key}` is `{s}`, but it must be one of "
+            &"The value of {q key} is {q s}, but it must be one of "
         let msgEnd =
           if allowed.len < 6:
             $allowed
@@ -85,7 +88,7 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
         result.setFalseAndPrint(msgStart & msgEnd, path)
     elif checkIsUrlLike:
       if not isUrlLike(s):
-        result.setFalseAndPrint(&"Not a valid URL: {s}", path)
+        result.setFalseAndPrint(&"Not a valid URL: {q s}", path)
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
         if not hasValidRuneLength(s, key, path, maxLen):
@@ -95,25 +98,25 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
           if isInArray:
             &"The {q key} array contains a whitespace-only string"
           else:
-            &"String is whitespace-only: {q key}"
+            &"The value of {q key} is a whitespace-only string"
         result.setFalseAndPrint(msg, path)
     else:
       let msg =
         if isInArray:
           &"The {q key} array contains a zero-length string"
         else:
-          &"String is zero-length: {q key}"
+          &"The value of {q key} is a zero-length string"
       result.setFalseAndPrint(msg, path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"Value is `null`, but must be a string: {q key}",
-                              path)
+      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+                               "but it must be a string", path)
   else:
     let msg =
       if isInArray:
-        &"The {q key} array contains a non-string: {data}"
+        &"The {q key} array contains a non-string: {q $data}"
       else:
-        &"Not a string: {q key}: {data}"
+        &"The value of {q key} is {q $data}, but it must be a string"
     result.setFalseAndPrint(msg, path)
 
 proc hasString*(data: JsonNode; key, path: string; isRequired = true;
@@ -147,7 +150,7 @@ proc isArrayOfStrings*(data: JsonNode;
             result = false
       else:
         let msgStart = &"The {q k} array has length {arrayLen}, " &
-                        "but must have length "
+                        "but it must have length "
         let msgEnd =
           if allowedArrayLen.len == 1:
             &"of exactly {allowedArrayLen.a}"
@@ -155,13 +158,14 @@ proc isArrayOfStrings*(data: JsonNode;
             &"between {allowedArrayLen.a} and {allowedArrayLen.b} (inclusive)"
     elif isRequired:
       if 0 notin allowedArrayLen:
-        result.setFalseAndPrint(&"Array is empty: {q k}", path)
+        result.setFalseAndPrint(&"The {q k} array is empty", path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint("Value is `null`, but must be an array: " &
-                              format(context, key), path)
+      result.setFalseAndPrint(&"The value of {format(context, key)} is " &
+                              &"{qNull}, but it must be an array", path)
   else:
-    result.setFalseAndPrint(&"Not an array: {format(context, key)}", path)
+    result.setFalseAndPrint(&"The value of {format(context, key)} is " &
+                             "not an array", path)
 
 proc hasArrayOfStrings*(data: JsonNode;
                         context, key, path: string;
@@ -202,8 +206,8 @@ proc isArrayOf*(data: JsonNode;
           if not call(item, context, path):
             result = false
       else:
-        let msgStart = &"The `{context}` array has length {arrayLen}, " &
-                        "but must have length "
+        let msgStart = &"The {q context} array has length {arrayLen}, " &
+                        "but it must have length "
         let msgEnd =
           if allowedLength.len == 1:
             &"of exactly {allowedLength.a}"
@@ -216,10 +220,10 @@ proc isArrayOf*(data: JsonNode;
         result.setFalseAndPrint(&"Array is empty: {q context}", path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint("Value is `null`, but must be an array: " &
-                              q(context), path)
+      result.setFalseAndPrint(&"The value of {q context} is {qNull}, " &
+                               "but it must be an array", path)
   else:
-    result.setFalseAndPrint(&"Not an array: {q context}", path)
+    result.setFalseAndPrint(&"The value of {q context} is not an array", path)
 
 proc hasArrayOf*(data: JsonNode;
                  key, path: string;
@@ -241,10 +245,11 @@ proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
     return true
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"Value is `null`, but must be a bool: {q key}",
-                              path)
+      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+                               "but it must be a bool", path)
   else:
-    result.setFalseAndPrint(&"Not a bool: {q key}: {data}", path)
+    result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
+                             "but it must be a bool", path)
 
 proc hasBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
   if data.hasKey(key, path, isRequired):
@@ -259,19 +264,20 @@ proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
   of JInt:
     let num = data.getInt()
     if num notin allowed:
-      let msgStart = &"The value of `{key}` is `{num}`, but it must be "
+      let msgStart = &"The value of {q key} is {num}, but it must be "
       let msgEnd =
         if allowed.len == 1:
-          &"`{allowed.a}`"
+          &"{allowed.a}"
         else:
           &"between {allowed.a} and {allowed.b} (inclusive)"
       result.setFalseAndPrint(msgStart & msgEnd, path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint("Value is `null`, but must be an integer: " &
-                              q(key), path)
+      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+                               "but it must be an integer", path)
   else:
-    result.setFalseAndPrint(&"Not an integer: {q key}: {data}", path)
+    result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
+                             "but it must be an integer", path)
 
 proc hasInteger*(data: JsonNode; key, path: string; isRequired = true;
                  allowed: Slice): bool =
@@ -308,7 +314,7 @@ proc parseJsonFile*(path: string, b: var bool, allowEmptyArray = false): JsonNod
     else:
       let msg =
         if allowEmptyArray:
-          ", but must contain at least the empty array, `[]`"
+          &""", but must contain at least the empty array, {q "[]"}"""
         else:
           ""
       b.setFalseAndPrint("File is empty" & msg, path)
