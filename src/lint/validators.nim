@@ -184,10 +184,13 @@ proc hasArrayOfStrings*(data: JsonNode;
   elif not isRequired:
     result = true
 
+type
+  ItemCall = proc(data: JsonNode; context: string; path: Path): bool {.nimcall.}
+
 proc isArrayOf*(data: JsonNode;
                 context: string;
                 path: Path;
-                call: proc(d: JsonNode; key: string; path: Path): bool;
+                call: ItemCall;
                 isRequired = true;
                 allowedLength: Slice): bool =
   ## Returns true in any of these cases:
@@ -227,7 +230,7 @@ proc isArrayOf*(data: JsonNode;
 proc hasArrayOf*(data: JsonNode;
                  key: string;
                  path: Path;
-                 call: proc(d: JsonNode; key: string; path: Path): bool;
+                 call: ItemCall;
                  isRequired = true;
                  allowedLength: Slice = 1..int.high): bool =
   ## Returns true in any of these cases:
