@@ -1,8 +1,8 @@
-import ".."/cli
+import ".."/[cli, helpers]
 import "."/[concept_exercises, concepts, practice_exercises, track_config,
             validators]
 
-proc allChecksPass(trackDir: string): bool =
+proc allChecksPass(trackDir: Path): bool =
   ## Returns true if all the linting checks pass for the track at `trackDir`.
   # We avoid some short-circuit evaluation here (e.g. due to `and`) because we
   # want to see errors from later checks even if earlier ones return `false`.
@@ -22,7 +22,7 @@ proc lint*(conf: Conf) =
        "Please re-run this command regularly to see if your track passes " &
        "the latest linting rules.\n"
 
-  let trackDir = conf.trackDir
+  let trackDir = Path(conf.trackDir)
 
   if allChecksPass(trackDir):
     echo """

@@ -2,7 +2,7 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc hasValidFiles(data: JsonNode, path: string): bool =
+proc hasValidFiles(data: JsonNode, path: Path): bool =
   const context = "files"
   if hasObject(data, context, path):
     let d = data[context]
@@ -13,7 +13,7 @@ proc hasValidFiles(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
+proc isValidPracticeExerciseConfig(data: JsonNode, path: Path): bool =
   if isObject(data, "", path):
     # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
@@ -25,7 +25,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isEveryPracticeExerciseConfigValid*(trackDir: string): bool =
+proc isEveryPracticeExerciseConfigValid*(trackDir: Path): bool =
   let practiceExercisesDir = trackDir / "exercises" / "practice"
   result = true
   # Return true even if the directory does not exist - this allows a future
@@ -38,7 +38,7 @@ proc isEveryPracticeExerciseConfigValid*(trackDir: string): bool =
         if not isValidPracticeExerciseConfig(j, configPath):
           result = false
 
-proc practiceExerciseDocsExist*(trackDir: string): bool =
+proc practiceExerciseDocsExist*(trackDir: Path): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/practice` has the
   ## required Markdown files.
   const

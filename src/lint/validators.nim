@@ -23,7 +23,7 @@ func format(context, key: string): string =
   else:
     q(key)
 
-proc hasKey(data: JsonNode; key, path: string; isRequired: bool;
+proc hasKey(data: JsonNode; key: string; path: Path; isRequired: bool;
             context = ""): bool =
   ## Returns true if `data` contains the key `key`. Otherwise, returns false
   ## and, if `isRequired` is true, prints an error message.
@@ -32,19 +32,20 @@ proc hasKey(data: JsonNode; key, path: string; isRequired: bool;
   elif isRequired:
     result.setFalseAndPrint(&"The {format(context, key)} key is missing", path)
 
-proc isObject*(data: JsonNode; context, path: string): bool =
+proc isObject*(data: JsonNode; context: string; path: Path): bool =
   if data.kind == JObject:
     result = true
   else:
     result.setFalseAndPrint(&"The value of {q context} is not an object", path)
 
-proc hasObject*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc hasObject*(data: JsonNode; key: string; path: Path;
+                isRequired = true): bool =
   if data.hasKey(key, path, isRequired):
     result = isObject(data[key], key, path)
   elif not isRequired:
     result = true
 
-proc hasValidRuneLength(s, key, path: string; maxLen: int): bool =
+proc hasValidRuneLength(s, key: string; path: Path; maxLen: int): bool =
   ## Returns true if `s` has a rune length that does not exceed `maxLen`.
   result = true
   if s.len > maxLen:
@@ -66,7 +67,7 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
-proc isString*(data: JsonNode; key, path: string; isRequired = true;
+proc isString*(data: JsonNode; key: string; path: Path; isRequired = true;
                allowed = emptySetOfStrings; checkIsUrlLike = false;
                maxLen = int.high; isInArray = false): bool =
   result = true
@@ -119,7 +120,7 @@ proc isString*(data: JsonNode; key, path: string; isRequired = true;
         &"The value of {q key} is {q $data}, but it must be a string"
     result.setFalseAndPrint(msg, path)
 
-proc hasString*(data: JsonNode; key, path: string; isRequired = true;
+proc hasString*(data: JsonNode; key: string; path: Path; isRequired = true;
                 allowed = emptySetOfStrings; checkIsUrlLike = false;
                 maxLen = int.high): bool =
   if data.hasKey(key, path, isRequired):
@@ -129,7 +130,8 @@ proc hasString*(data: JsonNode; key, path: string; isRequired = true;
     result = true
 
 proc isArrayOfStrings*(data: JsonNode;
-                       context, key, path: string;
+                       context, key: string;
+                       path: Path;
                        isRequired = true;
                        allowed: HashSet[string];
                        allowedArrayLen: Slice): bool =
@@ -168,7 +170,8 @@ proc isArrayOfStrings*(data: JsonNode;
                              "not an array", path)
 
 proc hasArrayOfStrings*(data: JsonNode;
-                        context, key, path: string;
+                        context, key: string;
+                        path: Path;
                         isRequired = true;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high): bool =
@@ -182,9 +185,10 @@ proc hasArrayOfStrings*(data: JsonNode;
     result = true
 
 proc isArrayOf*(data: JsonNode;
-                context, path: string;
-                call: proc(d: JsonNode; key, path: string): bool;
-                isRequired = true,
+                context: string;
+                path: Path;
+                call: proc(d: JsonNode; key: string; path: Path): bool;
+                isRequired = true;
                 allowedLength: Slice): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedLength`, and `call` returns
@@ -221,9 +225,10 @@ proc isArrayOf*(data: JsonNode;
     result.setFalseAndPrint(&"The value of {q context} is not an array", path)
 
 proc hasArrayOf*(data: JsonNode;
-                 key, path: string;
-                 call: proc(d: JsonNode; key, path: string): bool;
-                 isRequired = true,
+                 key: string;
+                 path: Path;
+                 call: proc(d: JsonNode; key: string; path: Path): bool;
+                 isRequired = true;
                  allowedLength: Slice = 1..int.high): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
@@ -233,7 +238,8 @@ proc hasArrayOf*(data: JsonNode;
   elif not isRequired:
     result = true
 
-proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc isBoolean*(data: JsonNode; key: string; path: Path;
+                isRequired = true): bool =
   result = true
   case data.kind
   of JBool:
@@ -246,13 +252,14 @@ proc isBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
     result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
                              "but it must be a bool", path)
 
-proc hasBoolean*(data: JsonNode; key, path: string; isRequired = true): bool =
+proc hasBoolean*(data: JsonNode; key: string; path: Path;
+                 isRequired = true): bool =
   if data.hasKey(key, path, isRequired):
     result = isBoolean(data[key], key, path, isRequired)
   elif not isRequired:
     result = true
 
-proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
+proc isInteger*(data: JsonNode; key: string; path: Path; isRequired = true;
                 allowed: Slice): bool =
   result = true
   case data.kind
@@ -274,14 +281,20 @@ proc isInteger*(data: JsonNode; key, path: string; isRequired = true;
     result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
                              "but it must be an integer", path)
 
-proc hasInteger*(data: JsonNode; key, path: string; isRequired = true;
+proc hasInteger*(data: JsonNode; key: string; path: Path; isRequired = true;
                  allowed: Slice): bool =
   if data.hasKey(key, path, isRequired):
     result = isInteger(data[key], key, path, isRequired, allowed)
   elif not isRequired:
     result = true
 
-proc subdirsContain*(dir: string, files: openArray[string]): bool =
+proc dirExists*(path: Path): bool {.borrow.}
+proc fileExists(path: Path): bool {.borrow.}
+proc readFile(path: Path): string {.borrow.}
+proc parseJson(s: Stream; filename: Path; rawIntegers = false;
+               rawFloats = false): JsonNode {.borrow.}
+
+proc subdirsContain*(dir: Path; files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
   ## `dir`.
   ##
@@ -295,7 +308,8 @@ proc subdirsContain*(dir: string, files: openArray[string]): bool =
         if not fileExists(path):
           result.setFalseAndPrint("Missing file", path)
 
-proc parseJsonFile*(path: string, b: var bool, allowEmptyArray = false): JsonNode =
+proc parseJsonFile*(path: Path; b: var bool;
+                    allowEmptyArray = false): JsonNode =
   ## Parses the file at `path` and returns the resultant JsonNode.
   ##
   ## Sets `b` to false if unsuccessful.
@@ -305,7 +319,9 @@ proc parseJsonFile*(path: string, b: var bool, allowEmptyArray = false): JsonNod
       try:
         result = parseJson(newStringStream(contents), path)
       except JsonParsingError:
-        b.setFalseAndPrint("JSON parsing error", getCurrentExceptionMsg())
+        # Workaround: Convert to `Path` to satisfy current `setFalseAndPrint`.
+        let msg = Path(getCurrentExceptionMsg())
+        b.setFalseAndPrint("JSON parsing error", msg)
     else:
       let msg =
         if allowEmptyArray:
