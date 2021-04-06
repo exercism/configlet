@@ -2,7 +2,7 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc hasValidFiles(data: JsonNode, path: string): bool =
+proc hasValidFiles(data: JsonNode, path: Path): bool =
   const context = "files"
   if hasObject(data, context, path):
     let d = data[context]
@@ -13,7 +13,7 @@ proc hasValidFiles(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
+proc isValidConceptExerciseConfig(data: JsonNode, path: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
@@ -25,7 +25,7 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
+proc isEveryConceptExerciseConfigValid*(trackDir: Path): bool =
   let conceptExercisesDir = trackDir / "exercises" / "concept"
   result = true
   if dirExists(conceptExercisesDir):
@@ -36,7 +36,7 @@ proc isEveryConceptExerciseConfigValid*(trackDir: string): bool =
         if not isValidConceptExerciseConfig(j, configPath):
           result = false
 
-proc conceptExerciseDocsExist*(trackDir: string): bool =
+proc conceptExerciseDocsExist*(trackDir: Path): bool =
   ## Returns true if every subdirectory in `trackDir/exercises/concept` has the
   ## required Markdown files.
   const

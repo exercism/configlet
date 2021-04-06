@@ -42,10 +42,10 @@ const tags = [
   "used_for/web_development",
 ].toHashSet()
 
-proc hasValidTags(data: JsonNode, path: string): bool =
+proc hasValidTags(data: JsonNode; path: Path): bool =
   result = hasArrayOfStrings(data, "", "tags", path, allowed = tags)
 
-proc hasValidStatus(data: JsonNode, path: string): bool =
+proc hasValidStatus(data: JsonNode; path: Path): bool =
   if hasObject(data, "status", path):
     let d = data["status"]
     let checks = [
@@ -56,7 +56,7 @@ proc hasValidStatus(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
+proc hasValidOnlineEditor(data: JsonNode; path: Path): bool =
   if hasObject(data, "online_editor", path):
     let d = data["online_editor"]
     const indentStyles = ["space", "tab"].toHashSet()
@@ -69,7 +69,7 @@ proc hasValidOnlineEditor(data: JsonNode, path: string): bool =
 const
   statuses = ["wip", "beta", "active", "deprecated"].toHashSet()
 
-proc isValidConceptExercise(data: JsonNode; context, path: string): bool =
+proc isValidConceptExercise(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "slug", path),
@@ -82,7 +82,8 @@ proc isValidConceptExercise(data: JsonNode; context, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isValidPracticeExercise(data: JsonNode; context, path: string): bool =
+proc isValidPracticeExercise(data: JsonNode; context: string;
+                             path: Path): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "slug", path),
@@ -98,7 +99,7 @@ proc isValidPracticeExercise(data: JsonNode; context, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc hasValidExercises(data: JsonNode; path: string): bool =
+proc hasValidExercises(data: JsonNode; path: Path): bool =
   if hasObject(data, "exercises", path):
     let exercises = data["exercises"]
     let checks = [
@@ -110,7 +111,7 @@ proc hasValidExercises(data: JsonNode; path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isValidConcept(data: JsonNode, context: string, path: string): bool =
+proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "uuid", path),
@@ -119,11 +120,11 @@ proc isValidConcept(data: JsonNode, context: string, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc hasValidConcepts(data: JsonNode; path: string): bool =
+proc hasValidConcepts(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "concepts", path, isValidConcept,
                       allowedLength = 0..int.high)
 
-proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
+proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     const icons = [
       "todo",
@@ -136,11 +137,11 @@ proc isValidKeyFeature(data: JsonNode, context: string, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc hasValidKeyFeatures(data: JsonNode, path: string): bool =
+proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
                       isRequired = false, allowedLength = 6..6)
 
-proc isValidTrackConfig(data: JsonNode, path: string): bool =
+proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "language", path),
@@ -157,7 +158,7 @@ proc isValidTrackConfig(data: JsonNode, path: string): bool =
     ]
     result = allTrue(checks)
 
-proc isTrackConfigValid*(trackDir: string): bool =
+proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
   let trackConfigPath = trackDir / "config.json"
   let j = parseJsonFile(trackConfigPath, result)
