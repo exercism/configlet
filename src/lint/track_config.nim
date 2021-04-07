@@ -79,7 +79,8 @@ proc isValidConceptExercise(data: JsonNode; context: string; path: Path): bool =
       hasString(data, "uuid", path, context),
       hasBoolean(data, "deprecated", path, context, isRequired = false),
       hasArrayOfStrings(data, "concepts", path, context),
-      hasArrayOfStrings(data, "prerequisites", path, context),
+      hasArrayOfStrings(data, "prerequisites", path, context,
+                        allowedArrayLen = 0..int.high),
       hasString(data, "status", path, context, isRequired = false,
                 allowed = statuses),
     ]
