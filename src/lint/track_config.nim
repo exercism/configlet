@@ -43,26 +43,28 @@ const tags = [
 ].toHashSet()
 
 proc hasValidTags(data: JsonNode; path: Path): bool =
-  result = hasArrayOfStrings(data, "", "tags", path, allowed = tags)
+  result = hasArrayOfStrings(data, "tags", path, allowed = tags)
 
 proc hasValidStatus(data: JsonNode; path: Path): bool =
-  if hasObject(data, "status", path):
-    let d = data["status"]
+  const k = "status"
+  if hasObject(data, k, path):
+    let d = data[k]
     let checks = [
-      hasBoolean(d, "concept_exercises", path),
-      hasBoolean(d, "test_runner", path),
-      hasBoolean(d, "representer", path),
-      hasBoolean(d, "analyzer", path),
+      hasBoolean(d, "concept_exercises", path, k),
+      hasBoolean(d, "test_runner", path, k),
+      hasBoolean(d, "representer", path, k),
+      hasBoolean(d, "analyzer", path, k),
     ]
     result = allTrue(checks)
 
 proc hasValidOnlineEditor(data: JsonNode; path: Path): bool =
-  if hasObject(data, "online_editor", path):
-    let d = data["online_editor"]
+  const k = "online_editor"
+  if hasObject(data, k, path):
+    let d = data[k]
     const indentStyles = ["space", "tab"].toHashSet()
     let checks = [
-      hasString(d, "indent_style", path, allowed = indentStyles),
-      hasInteger(d, "indent_size", path, allowed = 0..8),
+      hasString(d, "indent_style", path, k, allowed = indentStyles),
+      hasInteger(d, "indent_size", path, k, allowed = 0..8),
     ]
     result = allTrue(checks)
 
@@ -72,13 +74,14 @@ const
 proc isValidConceptExercise(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path),
-      hasString(data, "name", path),
-      hasString(data, "uuid", path),
-      hasBoolean(data, "deprecated", path, isRequired = false),
-      hasArrayOfStrings(data, "", "concepts", path),
-      hasArrayOfStrings(data, "", "prerequisites", path),
-      hasString(data, "status", path, isRequired = false, allowed = statuses),
+      hasString(data, "slug", path, context),
+      hasString(data, "name", path, context),
+      hasString(data, "uuid", path, context),
+      hasBoolean(data, "deprecated", path, context, isRequired = false),
+      hasArrayOfStrings(data, "concepts", path, context),
+      hasArrayOfStrings(data, "prerequisites", path, context),
+      hasString(data, "status", path, context, isRequired = false,
+                allowed = statuses),
     ]
     result = allTrue(checks)
 
@@ -86,37 +89,39 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
                              path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path),
-      hasString(data, "name", path),
-      hasString(data, "uuid", path),
-      hasBoolean(data, "deprecated", path, isRequired = false),
-      hasInteger(data, "difficulty", path, allowed = 0..10),
-      hasArrayOfStrings(data, "", "practices", path,
+      hasString(data, "slug", path, context),
+      hasString(data, "name", path, context),
+      hasString(data, "uuid", path, context),
+      hasBoolean(data, "deprecated", path, context, isRequired = false),
+      hasInteger(data, "difficulty", path, context, allowed = 0..10),
+      hasArrayOfStrings(data, "practices", path, context,
                         allowedArrayLen = 0..int.high),
-      hasArrayOfStrings(data, "", "prerequisites", path,
+      hasArrayOfStrings(data, "prerequisites", path, context,
                         allowedArrayLen = 0..int.high),
-      hasString(data, "status", path, isRequired = false, allowed = statuses),
+      hasString(data, "status", path, context, isRequired = false,
+                allowed = statuses),
     ]
     result = allTrue(checks)
 
 proc hasValidExercises(data: JsonNode; path: Path): bool =
-  if hasObject(data, "exercises", path):
-    let exercises = data["exercises"]
+  const k = "exercises"
+  if hasObject(data, k, path):
+    let exercises = data[k]
     let checks = [
-      hasArrayOf(exercises, "concept", path, isValidConceptExercise,
+      hasArrayOf(exercises, "concept", path, isValidConceptExercise, k,
                  allowedLength = 0..int.high),
-      hasArrayOf(exercises, "practice", path, isValidPracticeExercise,
+      hasArrayOf(exercises, "practice", path, isValidPracticeExercise, k,
                  allowedLength = 0..int.high),
-      hasArrayOfStrings(exercises, "", "foregone", path, isRequired = false),
+      hasArrayOfStrings(exercises, "foregone", path, k, isRequired = false),
     ]
     result = allTrue(checks)
 
 proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "uuid", path),
-      hasString(data, "slug", path),
-      hasString(data, "name", path),
+      hasString(data, "uuid", path, context),
+      hasString(data, "slug", path, context),
+      hasString(data, "name", path, context),
     ]
     result = allTrue(checks)
 
@@ -131,9 +136,10 @@ proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
     ].toHashSet()
     # TODO: Enable the `icon` checks when we have a list of valid icons.
     let checks = [
-      if false: hasString(data, "icon", path, allowed = icons) else: true,
-      hasString(data, "title", path, maxLen = 25),
-      hasString(data, "content", path, maxLen = 100),
+      if false: hasString(data, "icon", path, context,
+                          allowed = icons) else: true,
+      hasString(data, "title", path, context, maxLen = 25),
+      hasString(data, "content", path, context, maxLen = 100),
     ]
     result = allTrue(checks)
 
