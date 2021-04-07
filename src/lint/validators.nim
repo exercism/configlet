@@ -14,7 +14,7 @@ func q*(s: string): string =
   else:
     "root"
 
-func concat(context, key: string): string =
+func joinWithDot(context, key: string): string =
   if context.len > 0:
     &"{context}.{key}"
   else:
@@ -42,7 +42,8 @@ proc isObject*(data: JsonNode; key: string; path: Path; context = ""): bool =
   if data.kind == JObject:
     result = true
   else:
-    result.setFalseAndPrint(&"The value of {format(context, key)} is not an object", path)
+    result.setFalseAndPrint(&"The value of {format(context, key)} is not an object",
+                            path)
 
 proc hasObject*(data: JsonNode; key: string; path: Path; context = "";
                 isRequired = true): bool =
@@ -60,9 +61,9 @@ proc hasValidRuneLength(s, key: string; path: Path; context: string;
     if sRuneLen > maxLen:
       const truncLen = 25
       let sTrunc = if sRuneLen > truncLen: s.runeSubStr(0, truncLen) else: s
-      let msg = &"The value of {format(context, key)} that starts with {q sTrunc}... is " &
-                &"{sRuneLen} characters, but it must not exceed {maxLen} " &
-                 "characters"
+      let msg = &"The value of {format(context, key)} that starts with " &
+                &"{q sTrunc}... is {sRuneLen} characters, but it must not " &
+                &"exceed {maxLen} characters"
       result.setFalseAndPrint(msg, path)
 
 proc isUrlLike(s: string): bool =
@@ -188,7 +189,7 @@ proc hasArrayOfStrings*(data: JsonNode;
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
   if data.hasKey(key, path, context, isRequired):
-    let contextAndKey = concat(context, key)
+    let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
                               allowed, allowedArrayLen)
   elif not isRequired:
@@ -248,8 +249,9 @@ proc hasArrayOf*(data: JsonNode;
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
   if data.hasKey(key, path, context, isRequired):
-    let contextAndKey = concat(context, key)
-    result = isArrayOf(data[key], contextAndKey, path, call, isRequired, allowedLength)
+    let contextAndKey = joinWithDot(context, key)
+    result = isArrayOf(data[key], contextAndKey, path, call, isRequired,
+                       allowedLength)
   elif not isRequired:
     result = true
 
