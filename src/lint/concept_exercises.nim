@@ -3,13 +3,13 @@ import ".."/helpers
 import "."/validators
 
 proc hasValidFiles(data: JsonNode, path: Path): bool =
-  const context = "files"
-  if hasObject(data, context, path):
-    let d = data[context]
+  const k = "files"
+  if hasObject(data, k, path):
+    let d = data[k]
     let checks = [
-      hasArrayOfStrings(d, context, "solution", path),
-      hasArrayOfStrings(d, context, "test", path),
-      hasArrayOfStrings(d, context, "exemplar", path),
+      hasArrayOfStrings(d, "solution", path, k),
+      hasArrayOfStrings(d, "test", path, k),
+      hasArrayOfStrings(d, "exemplar", path, k),
     ]
     result = allTrue(checks)
 
@@ -17,10 +17,10 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
-      hasArrayOfStrings(data, "", "authors", path),
-      hasArrayOfStrings(data, "", "contributors", path, isRequired = false),
+      hasArrayOfStrings(data, "authors", path),
+      hasArrayOfStrings(data, "contributors", path, isRequired = false),
       hasValidFiles(data, path),
-      hasArrayOfStrings(data, "", "forked_from", path, isRequired = false),
+      hasArrayOfStrings(data, "forked_from", path, isRequired = false),
       hasString(data, "language_versions", path, isRequired = false),
     ]
     result = allTrue(checks)

@@ -14,17 +14,23 @@ func q*(s: string): string =
   else:
     "root"
 
+func joinWithDot(context, key: string): string =
+  if context.len > 0:
+    &"{context}.{key}"
+  else:
+    key
+
 const
   qNull* = q("null") # So we don't have to write &"""Foo is {q "null"}""" later
 
-func format(context, key: string): string =
+func format*(context, key: string): string =
   if context.len > 0:
     q(&"{context}.{key}")
   else:
     q(key)
 
-proc hasKey(data: JsonNode; key: string; path: Path; isRequired: bool;
-            context = ""): bool =
+proc hasKey(data: JsonNode; key: string; path: Path; context: string;
+            isRequired: bool): bool =
   ## Returns true if `data` contains the key `key`. Otherwise, returns false
   ## and, if `isRequired` is true, prints an error message.
   if data.hasKey(key):
@@ -32,20 +38,22 @@ proc hasKey(data: JsonNode; key: string; path: Path; isRequired: bool;
   elif isRequired:
     result.setFalseAndPrint(&"The {format(context, key)} key is missing", path)
 
-proc isObject*(data: JsonNode; context: string; path: Path): bool =
+proc isObject*(data: JsonNode; key: string; path: Path; context = ""): bool =
   if data.kind == JObject:
     result = true
   else:
-    result.setFalseAndPrint(&"The value of {q context} is not an object", path)
+    result.setFalseAndPrint(&"The value of {format(context, key)} is not an object",
+                            path)
 
-proc hasObject*(data: JsonNode; key: string; path: Path;
+proc hasObject*(data: JsonNode; key: string; path: Path; context = "";
                 isRequired = true): bool =
-  if data.hasKey(key, path, isRequired):
+  if data.hasKey(key, path, context, isRequired):
     result = isObject(data[key], key, path)
   elif not isRequired:
     result = true
 
-proc hasValidRuneLength(s, key: string; path: Path; maxLen: int): bool =
+proc hasValidRuneLength(s, key: string; path: Path; context: string;
+                        maxLen: int): bool =
   ## Returns true if `s` has a rune length that does not exceed `maxLen`.
   result = true
   if s.len > maxLen:
@@ -53,9 +61,9 @@ proc hasValidRuneLength(s, key: string; path: Path; maxLen: int): bool =
     if sRuneLen > maxLen:
       const truncLen = 25
       let sTrunc = if sRuneLen > truncLen: s.runeSubStr(0, truncLen) else: s
-      let msg = &"The value of {q key} that starts with {q sTrunc}... is " &
-                &"{sRuneLen} characters, but it must not exceed {maxLen} " &
-                 "characters"
+      let msg = &"The value of {format(context, key)} that starts with " &
+                &"{q sTrunc}... is {sRuneLen} characters, but it must not " &
+                &"exceed {maxLen} characters"
       result.setFalseAndPrint(msg, path)
 
 proc isUrlLike(s: string): bool =
@@ -67,9 +75,10 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
-proc isString*(data: JsonNode; key: string; path: Path; isRequired = true;
-               allowed = emptySetOfStrings; checkIsUrlLike = false;
-               maxLen = int.high; isInArray = false): bool =
+proc isString*(data: JsonNode; key: string; path: Path; context: string;
+               isRequired = true; allowed = emptySetOfStrings;
+               checkIsUrlLike = false; maxLen = int.high;
+               isInArray = false): bool =
   result = true
   case data.kind
   of JString:
@@ -78,9 +87,9 @@ proc isString*(data: JsonNode; key: string; path: Path; isRequired = true;
       if s notin allowed:
         let msgStart =
           if isInArray:
-            &"The {q key} array contains {q s}, which is not one of "
+            &"The {format(context, key)} array contains {q s}, which is not one of "
           else:
-            &"The value of {q key} is {q s}, but it must be one of "
+            &"The value of {format(context, key)} is {q s}, but it must be one of "
         let msgEnd =
           if allowed.len < 6:
             $allowed
@@ -92,45 +101,45 @@ proc isString*(data: JsonNode; key: string; path: Path; isRequired = true;
         result.setFalseAndPrint(&"Not a valid URL: {q s}", path)
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
-        if not hasValidRuneLength(s, key, path, maxLen):
+        if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
       else:
         let msg =
           if isInArray:
-            &"The {q key} array contains a whitespace-only string"
+            &"The {format(context, key)} array contains a whitespace-only string"
           else:
-            &"The value of {q key} is a whitespace-only string"
+            &"The value of {format(context, key)} is a whitespace-only string"
         result.setFalseAndPrint(msg, path)
     else:
       let msg =
         if isInArray:
-          &"The {q key} array contains a zero-length string"
+          &"The {format(context, key)} array contains a zero-length string"
         else:
-          &"The value of {q key} is a zero-length string"
+          &"The value of {format(context, key)} is a zero-length string"
       result.setFalseAndPrint(msg, path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+      result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
                                "but it must be a string", path)
   else:
     let msg =
       if isInArray:
-        &"The {q key} array contains a non-string: {q $data}"
+        &"The {format(context, key)} array contains a non-string: {q $data}"
       else:
-        &"The value of {q key} is {q $data}, but it must be a string"
+        &"The value of {format(context, key)} is {q $data}, but it must be a string"
     result.setFalseAndPrint(msg, path)
 
-proc hasString*(data: JsonNode; key: string; path: Path; isRequired = true;
-                allowed = emptySetOfStrings; checkIsUrlLike = false;
-                maxLen = int.high): bool =
-  if data.hasKey(key, path, isRequired):
-    result = isString(data[key], key, path, isRequired, allowed, checkIsUrlLike,
-                      maxLen)
+proc hasString*(data: JsonNode; key: string; path: Path; context = "";
+                isRequired = true; allowed = emptySetOfStrings;
+                checkIsUrlLike = false; maxLen = int.high): bool =
+  if data.hasKey(key, path, context, isRequired):
+    result = isString(data[key], key, path, context, isRequired, allowed,
+                      checkIsUrlLike, maxLen)
   elif not isRequired:
     result = true
 
 proc isArrayOfStrings*(data: JsonNode;
-                       context, key: string;
+                       context: string;
                        path: Path;
                        isRequired = true;
                        allowed: HashSet[string];
@@ -143,15 +152,15 @@ proc isArrayOfStrings*(data: JsonNode;
 
   case data.kind
   of JArray:
-    let k = if context.len > 0: &"{context}.{key}" else: key
     let arrayLen = data.len
     if arrayLen > 0:
       if arrayLen in allowedArrayLen:
         for item in data:
-          if not isString(item, k, path, isRequired, allowed, isInArray = true):
+          if not isString(item, context, path, "", isRequired, allowed,
+                          isInArray = true):
             result = false
       else:
-        let msgStart = &"The {q k} array has length {arrayLen}, " &
+        let msgStart = &"The {q context} array has length {arrayLen}, " &
                         "but it must have length "
         let msgEnd =
           if allowedArrayLen.len == 1:
@@ -160,26 +169,28 @@ proc isArrayOfStrings*(data: JsonNode;
             &"between {allowedArrayLen.a} and {allowedArrayLen.b} (inclusive)"
     elif isRequired:
       if 0 notin allowedArrayLen:
-        result.setFalseAndPrint(&"The {q k} array is empty", path)
+        result.setFalseAndPrint(&"The {q context} array is empty", path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"The value of {format(context, key)} is " &
+      result.setFalseAndPrint(&"The value of {q context} is " &
                               &"{qNull}, but it must be an array", path)
   else:
-    result.setFalseAndPrint(&"The value of {format(context, key)} is " &
+    result.setFalseAndPrint(&"The value of {q context} is " &
                              "not an array", path)
 
 proc hasArrayOfStrings*(data: JsonNode;
-                        context, key: string;
+                        key: string;
                         path: Path;
+                        context = "";
                         isRequired = true;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
-  if data.hasKey(key, path, isRequired, context):
-    result = isArrayOfStrings(data[key], context, key, path, isRequired,
+  if data.hasKey(key, path, context, isRequired):
+    let contextAndKey = joinWithDot(context, key)
+    result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
                               allowed, allowedArrayLen)
   elif not isRequired:
     result = true
@@ -231,17 +242,20 @@ proc hasArrayOf*(data: JsonNode;
                  key: string;
                  path: Path;
                  call: ItemCall;
+                 context = "";
                  isRequired = true;
                  allowedLength: Slice = 1..int.high): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
-  if data.hasKey(key, path, isRequired):
-    result = isArrayOf(data[key], key, path, call, isRequired, allowedLength)
+  if data.hasKey(key, path, context, isRequired):
+    let contextAndKey = joinWithDot(context, key)
+    result = isArrayOf(data[key], contextAndKey, path, call, isRequired,
+                       allowedLength)
   elif not isRequired:
     result = true
 
-proc isBoolean*(data: JsonNode; key: string; path: Path;
+proc isBoolean*(data: JsonNode; key: string; path: Path; context: string;
                 isRequired = true): bool =
   result = true
   case data.kind
@@ -249,27 +263,27 @@ proc isBoolean*(data: JsonNode; key: string; path: Path;
     return true
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+      result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
                                "but it must be a bool", path)
   else:
-    result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
+    result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
                              "but it must be a bool", path)
 
-proc hasBoolean*(data: JsonNode; key: string; path: Path;
+proc hasBoolean*(data: JsonNode; key: string; path: Path; context = "";
                  isRequired = true): bool =
-  if data.hasKey(key, path, isRequired):
-    result = isBoolean(data[key], key, path, isRequired)
+  if data.hasKey(key, path, context, isRequired):
+    result = isBoolean(data[key], key, path, context, isRequired)
   elif not isRequired:
     result = true
 
-proc isInteger*(data: JsonNode; key: string; path: Path; isRequired = true;
-                allowed: Slice): bool =
+proc isInteger*(data: JsonNode; key: string; path: Path; context: string;
+                isRequired = true; allowed: Slice): bool =
   result = true
   case data.kind
   of JInt:
     let num = data.getInt()
     if num notin allowed:
-      let msgStart = &"The value of {q key} is {num}, but it must be "
+      let msgStart = &"The value of {format(context, key)} is {num}, but it must be "
       let msgEnd =
         if allowed.len == 1:
           &"{allowed.a}"
@@ -278,16 +292,16 @@ proc isInteger*(data: JsonNode; key: string; path: Path; isRequired = true;
       result.setFalseAndPrint(msgStart & msgEnd, path)
   of JNull:
     if isRequired:
-      result.setFalseAndPrint(&"The value of {q key} is {qNull}, " &
+      result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
                                "but it must be an integer", path)
   else:
-    result.setFalseAndPrint(&"The value of {q key} is {q $data}, " &
+    result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
                              "but it must be an integer", path)
 
-proc hasInteger*(data: JsonNode; key: string; path: Path; isRequired = true;
-                 allowed: Slice): bool =
-  if data.hasKey(key, path, isRequired):
-    result = isInteger(data[key], key, path, isRequired, allowed)
+proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
+                 isRequired = true; allowed: Slice): bool =
+  if data.hasKey(key, path, context, isRequired):
+    result = isInteger(data[key], key, path, context, isRequired, allowed)
   elif not isRequired:
     result = true
 
