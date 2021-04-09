@@ -167,6 +167,7 @@ proc isArrayOfStrings*(data: JsonNode;
             &"of exactly {allowedArrayLen.a}"
           else:
             &"between {allowedArrayLen.a} and {allowedArrayLen.b} (inclusive)"
+        result.setFalseAndPrint(msgStart & msgEnd, path)
     elif isRequired:
       if 0 notin allowedArrayLen:
         result.setFalseAndPrint(&"The {q context} array is empty", path)
