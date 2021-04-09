@@ -7,7 +7,7 @@ srcDir        = "src"
 bin           = @["configlet"]
 
 # Dependencies
-requires "nim >= 1.4.2"
+requires "nim >= 1.4.4"
 requires "parsetoml"
 requires "cligen"
 requires "uuids >= 0.1.11"
