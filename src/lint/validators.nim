@@ -211,7 +211,8 @@ proc hasArrayOfStrings*(data: JsonNode;
   if data.hasKey(key, path, context, isRequired):
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
-                              allowed, allowedArrayLen, checkIsKebab = checkIsKebab)
+                              allowed, allowedArrayLen,
+                              checkIsKebab = checkIsKebab)
   elif not isRequired:
     result = true
 
