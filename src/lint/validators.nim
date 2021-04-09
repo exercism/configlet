@@ -1,4 +1,4 @@
-import std/[json, os, sets, streams, strformat, strutils, unicode]
+import std/[json, os, parseutils, sets, streams, strformat, strutils, unicode]
 import ".."/helpers
 
 func allTrue*(bools: openArray[bool]): bool =
@@ -75,12 +75,29 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
-func isLowerKebab(s: string): bool =
-  ## Returns true if `s` is a lowercase and kebab-case string.
-  result = true
-  for c in s:
-    if c notin {'a'..'z', '0'..'9', '-'}:
-      return false
+func isKebabCase*(s: string): bool =
+  ## Returns true if `s` satisfies these rules:
+  ## - Has a length > 0
+  ## - Begins and ends with a character in [a-z0-9]
+  ## - Consists only of characters in [a-z0-9-]
+  ## - Does not contain two adjacent `-` characters
+  ## This corresponds to the regex pattern `^[a-z0-9]+(-[a-z0-9]+)*$`.
+  const lowerAndDigits = {'a'..'z', '0'..'9'}
+  let L = s.len
+
+  if L > 0 and s[0] in lowerAndDigits and s[^1] in lowerAndDigits:
+    var i = 0
+    while true:
+      i += s.skipWhile(lowerAndDigits, start = i)
+      if i == L:
+        return true
+      elif s[i] == '-':
+        if s[i-1] == '-':
+          return false
+        else:
+          inc i
+      else:
+        return false
 
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
@@ -109,7 +126,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
         if checkIsKebab:
-          if not isLowerKebab(s):
+          if not isKebabCase(s):
             let msg =
               if isInArray:
                 &"The {format(context, key)} array contains {s}, but every " &
