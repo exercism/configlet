@@ -76,12 +76,23 @@ const
   emptySetOfStrings = initHashSet[string](0)
 
 func isKebabCase*(s: string): bool =
-  ## Returns true if `s` satisfies these rules:
-  ## - Has a length > 0
-  ## - Begins and ends with a character in [a-z0-9]
-  ## - Consists only of characters in [a-z0-9-]
-  ## - Does not contain two adjacent `-` characters
-  ## This corresponds to the regex pattern `^[a-z0-9]+(-[a-z0-9]+)*$`.
+  ## Returns true if `s` is a kebab-case string. By our definition, `s` must:
+  ## - Have a non-zero length
+  ## - Begin and end with a character in [a-z0-9]
+  ## - Consist only of characters in [a-z0-9-]
+  ## - Not contain consecutive `-` characters
+  ## This corresponds to the regex pattern `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+  runnableExamples:
+    assert isKebabCase("hello")
+    assert isKebabCase("hello-world")
+    assert isKebabCase("123")              # Can contain only digits.
+    assert not isKebabCase("")             # Cannot be the empty string.
+    assert not isKebabCase("hello world")  # Cannot contain a space.
+    assert not isKebabCase("hello_world")  # Cannot contain an underscore.
+    assert not isKebabCase("helloWorld")   # Cannot contain an uppercase letter.
+    assert not isKebabCase("hello--world") # Cannot contain consecutive dashes.
+    assert not isKebabCase("hello!")       # Cannot contain a special character.
+
   const lowerAndDigits = {'a'..'z', '0'..'9'}
   let sLen = s.len
   var i = 0
