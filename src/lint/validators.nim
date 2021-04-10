@@ -85,13 +85,13 @@ func isKebabCase*(s: string): bool =
   runnableExamples:
     assert isKebabCase("hello")
     assert isKebabCase("hello-world")
-    assert isKebabCase("123")              # Can contain only digits.
-    assert not isKebabCase("")             # Cannot be the empty string.
-    assert not isKebabCase("hello world")  # Cannot contain a space.
-    assert not isKebabCase("hello_world")  # Cannot contain an underscore.
-    assert not isKebabCase("helloWorld")   # Cannot contain an uppercase letter.
+    assert isKebabCase("123") # Can contain only digits.
+    assert not isKebabCase("") # Cannot be the empty string.
+    assert not isKebabCase("hello world") # Cannot contain a space.
+    assert not isKebabCase("hello_world") # Cannot contain an underscore.
+    assert not isKebabCase("helloWorld") # Cannot contain an uppercase letter.
     assert not isKebabCase("hello--world") # Cannot contain consecutive dashes.
-    assert not isKebabCase("hello!")       # Cannot contain a special character.
+    assert not isKebabCase("hello!") # Cannot contain a special character.
 
   const lowerAndDigits = {'a'..'z', '0'..'9'}
   let sLen = s.len
