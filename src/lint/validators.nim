@@ -1,4 +1,4 @@
-import std/[json, os, sets, streams, strformat, strutils, unicode]
+import std/[json, os, parseutils, sets, streams, strformat, strutils, unicode]
 import ".."/helpers
 
 func allTrue*(bools: openArray[bool]): bool =
@@ -75,9 +75,47 @@ proc isUrlLike(s: string): bool =
 const
   emptySetOfStrings = initHashSet[string](0)
 
+func isKebabCase*(s: string): bool =
+  ## Returns true if `s` is a kebab-case string. By our definition, `s` must:
+  ## - Have a non-zero length
+  ## - Start and end with a character in `[a-z0-9]`
+  ## - Consist only of characters in `[a-z0-9-]`
+  ## - Not contain consecutive `-` characters
+  ##
+  ## This is equivalent to matching the below regular expression:
+  ##
+  ## `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+  ##
+  ## However, this func's implementation is faster than one that uses
+  ## `re.match`, and doesn't add a PCRE dependency.
+  runnableExamples:
+    assert isKebabCase("hello")
+    assert isKebabCase("hello-world")
+    assert isKebabCase("123") # Can contain only digits.
+    assert not isKebabCase("") # Cannot be the empty string.
+    assert not isKebabCase("hello world") # Cannot contain a space.
+    assert not isKebabCase("hello_world") # Cannot contain an underscore.
+    assert not isKebabCase("helloWorld") # Cannot contain an uppercase letter.
+    assert not isKebabCase("hello--world") # Cannot contain consecutive dashes.
+    assert not isKebabCase("hello!") # Cannot contain a special character.
+
+  const lowerAndDigits = {'a'..'z', '0'..'9'}
+  let sLen = s.len
+  var i = 0
+  while i < sLen:
+    if s[i] == '-':
+      return false
+    i += s.skipWhile(lowerAndDigits, start = i)
+    if i == sLen:
+      return true
+    elif s[i] == '-':
+      inc i
+    else:
+      return false
+
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
-               checkIsUrlLike = false; maxLen = int.high;
+               checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
                isInArray = false): bool =
   result = true
   case data.kind
@@ -101,6 +139,16 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
         result.setFalseAndPrint(&"Not a valid URL: {q s}", path)
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
+        if checkIsKebab:
+          if not isKebabCase(s):
+            let msg =
+              if isInArray:
+                &"The {format(context, key)} array contains {q s}, but every " &
+                 "value must be lowercase and kebab-case"
+              else:
+                &"The {format(context, key)} value is {q s}, but it must be " &
+                 "a lowercase and kebab-case string"
+            result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
       else:
@@ -131,10 +179,11 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
 
 proc hasString*(data: JsonNode; key: string; path: Path; context = "";
                 isRequired = true; allowed = emptySetOfStrings;
-                checkIsUrlLike = false; maxLen = int.high): bool =
+                checkIsUrlLike = false; maxLen = int.high;
+                checkIsKebab = false): bool =
   if data.hasKey(key, path, context, isRequired):
     result = isString(data[key], key, path, context, isRequired, allowed,
-                      checkIsUrlLike, maxLen)
+                      checkIsUrlLike, maxLen, checkIsKebab = checkIsKebab)
   elif not isRequired:
     result = true
 
@@ -143,7 +192,8 @@ proc isArrayOfStrings*(data: JsonNode;
                        path: Path;
                        isRequired = true;
                        allowed: HashSet[string];
-                       allowedArrayLen: Slice): bool =
+                       allowedArrayLen: Slice;
+                       checkIsKebab: bool): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
   ##   non-empty, non-blank strings.
@@ -157,7 +207,7 @@ proc isArrayOfStrings*(data: JsonNode;
       if arrayLen in allowedArrayLen:
         for item in data:
           if not isString(item, context, path, "", isRequired, allowed,
-                          isInArray = true):
+                          checkIsKebab = checkIsKebab, isInArray = true):
             result = false
       else:
         let msgStart = &"The {q context} array has length {arrayLen}, " &
@@ -184,14 +234,16 @@ proc hasArrayOfStrings*(data: JsonNode;
                         context = "";
                         isRequired = true;
                         allowed = emptySetOfStrings;
-                        allowedArrayLen = 1..int.high): bool =
+                        allowedArrayLen = 1..int.high;
+                        checkIsKebab = false): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
   if data.hasKey(key, path, context, isRequired):
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
-                              allowed, allowedArrayLen)
+                              allowed, allowedArrayLen,
+                              checkIsKebab = checkIsKebab)
   elif not isRequired:
     result = true
 

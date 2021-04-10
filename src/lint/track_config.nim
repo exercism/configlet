@@ -74,14 +74,14 @@ const
 proc isValidConceptExercise(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path, context),
+      hasString(data, "slug", path, context, checkIsKebab = true),
       hasString(data, "name", path, context),
       hasString(data, "uuid", path, context),
       hasBoolean(data, "deprecated", path, context, isRequired = false),
       hasArrayOfStrings(data, "concepts", path, context,
-                        allowedArrayLen = 0..int.high),
+                        allowedArrayLen = 0..int.high, checkIsKebab = true),
       hasArrayOfStrings(data, "prerequisites", path, context,
-                        allowedArrayLen = 0..int.high),
+                        allowedArrayLen = 0..int.high, checkIsKebab = true),
       hasString(data, "status", path, context, isRequired = false,
                 allowed = statuses),
     ]
@@ -91,15 +91,15 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
                              path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path, context),
+      hasString(data, "slug", path, context, checkIsKebab = true),
       hasString(data, "name", path, context),
       hasString(data, "uuid", path, context),
       hasBoolean(data, "deprecated", path, context, isRequired = false),
       hasInteger(data, "difficulty", path, context, allowed = 0..10),
       hasArrayOfStrings(data, "practices", path, context,
-                        allowedArrayLen = 0..int.high),
+                        allowedArrayLen = 0..int.high, checkIsKebab = true),
       hasArrayOfStrings(data, "prerequisites", path, context,
-                        allowedArrayLen = 0..int.high),
+                        allowedArrayLen = 0..int.high, checkIsKebab = true),
       hasString(data, "status", path, context, isRequired = false,
                 allowed = statuses),
     ]
@@ -114,7 +114,8 @@ proc hasValidExercises(data: JsonNode; path: Path): bool =
                  allowedLength = 0..int.high),
       hasArrayOf(exercises, "practice", path, isValidPracticeExercise, k,
                  allowedLength = 0..int.high),
-      hasArrayOfStrings(exercises, "foregone", path, k, isRequired = false),
+      hasArrayOfStrings(exercises, "foregone", path, k, isRequired = false,
+                        checkIsKebab = true),
     ]
     result = allTrue(checks)
 
@@ -122,7 +123,7 @@ proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "uuid", path, context),
-      hasString(data, "slug", path, context),
+      hasString(data, "slug", path, context, checkIsKebab = true),
       hasString(data, "name", path, context),
     ]
     result = allTrue(checks)
@@ -153,7 +154,7 @@ proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "language", path),
-      hasString(data, "slug", path),
+      hasString(data, "slug", path, checkIsKebab = true),
       hasBoolean(data, "active", path),
       hasString(data, "blurb", path, maxLen = 400),
       hasInteger(data, "version", path, allowed = 3..3),
