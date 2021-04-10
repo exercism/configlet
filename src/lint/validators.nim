@@ -78,10 +78,16 @@ const
 func isKebabCase*(s: string): bool =
   ## Returns true if `s` is a kebab-case string. By our definition, `s` must:
   ## - Have a non-zero length
-  ## - Begin and end with a character in [a-z0-9]
-  ## - Consist only of characters in [a-z0-9-]
+  ## - Start and end with a character in `[a-z0-9]`
+  ## - Consist only of characters in `[a-z0-9-]`
   ## - Not contain consecutive `-` characters
-  ## This corresponds to the regex pattern `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+  ##
+  ## This is equivalent to matching the below regular expression:
+  ##
+  ## `^[a-z0-9]+(?:-[a-z0-9]+)*$`.
+  ##
+  ## However, this func's implementation is faster than one that uses
+  ## `re.match`, and doesn't add a PCRE dependency.
   runnableExamples:
     assert isKebabCase("hello")
     assert isKebabCase("hello-world")
