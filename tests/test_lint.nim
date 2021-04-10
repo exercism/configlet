@@ -3,13 +3,15 @@ import "."/[lint/validators]
 
 proc main =
   suite "isKebabCase":
-    test "invalid kebab strings":
+    test "invalid kebab-case strings":
       check:
         # Some short, bad strings
         not isKebabCase("")
         not isKebabCase(" ")
         not isKebabCase("-")
         not isKebabCase("_")
+        not isKebabCase("--")
+        not isKebabCase("---")
         not isKebabCase("a ")
         not isKebabCase(" a")
         not isKebabCase("a-")
@@ -45,15 +47,20 @@ proc main =
         not isKebabCase("Hello-world")
         not isKebabCase("Hello-World")
         not isKebabCase("HELLO-WORLD")
-        # No spaces, but with capitals
+        # No separator, but with capitals
         not isKebabCase("helloWorld")
         not isKebabCase("Helloworld")
         not isKebabCase("HelloWorld")
         not isKebabCase("HELLOWORLD")
 
-    test "valid kebab strings":
+    test "valid kebab-case strings":
       check:
         isKebabCase("a")
+        isKebabCase("1")
+        isKebabCase("123")
+        isKebabCase("123-456")
+        isKebabCase("hello-123")
+        isKebabCase("123-hello")
         isKebabCase("hello")
         isKebabCase("hello-world")
         isKebabCase("hello-world-hello")
