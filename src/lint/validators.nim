@@ -83,21 +83,18 @@ func isKebabCase*(s: string): bool =
   ## - Does not contain two adjacent `-` characters
   ## This corresponds to the regex pattern `^[a-z0-9]+(-[a-z0-9]+)*$`.
   const lowerAndDigits = {'a'..'z', '0'..'9'}
-  let L = s.len
-
-  if L > 0 and s[0] in lowerAndDigits and s[^1] in lowerAndDigits:
-    var i = 0
-    while true:
-      i += s.skipWhile(lowerAndDigits, start = i)
-      if i == L:
-        return true
-      elif s[i] == '-':
-        if s[i-1] == '-':
-          return false
-        else:
-          inc i
-      else:
-        return false
+  let sLen = s.len
+  var i = 0
+  while i < sLen:
+    if s[i] == '-':
+      return false
+    i += s.skipWhile(lowerAndDigits, start = i)
+    if i == sLen:
+      return true
+    elif s[i] == '-':
+      inc i
+    else:
+      return false
 
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
