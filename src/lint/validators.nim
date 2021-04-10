@@ -143,11 +143,11 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
           if not isKebabCase(s):
             let msg =
               if isInArray:
-                &"The {format(context, key)} array contains {s}, but every " &
+                &"The {format(context, key)} array contains {q s}, but every " &
                  "value must be lowercase and kebab-case"
               else:
-                &"The {format(context, key)} value is {s}, but it must be a " &
-                "lowercase and kebab-case string"
+                &"The {format(context, key)} value is {q s}, but it must be " &
+                 "a lowercase and kebab-case string"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
