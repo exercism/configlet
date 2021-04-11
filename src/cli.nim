@@ -1,5 +1,5 @@
 import std/[os, parseutils, strformat, strutils, terminal]
-import pkg/[cligen/parseopt3]
+import pkg/cligen/parseopt3
 
 type
   Verbosity* = enum
@@ -208,7 +208,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
   ## Returns a string that describes an option, given its `kind`, `key` and
   ## optionally `val`. This is useful for displaying in error messages.
   runnableExamples:
-    import pkg/[cligen/parseopt3]
+    import pkg/cligen/parseopt3
     assert formatOpt(cmdShortOption, "h") == "'-h'"
     assert formatOpt(cmdLongOption, "help") == "'--help'"
     assert formatOpt(cmdShortOption, "v", "quiet") == "'-v': 'quiet'"

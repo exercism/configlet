@@ -1,6 +1,6 @@
-import std/[unittest]
-import pkg/[uuids]
-import "."/[uuid/uuid]
+import std/unittest
+import pkg/uuids
+import "."/uuid/uuid
 
 proc main =
   suite "genUUID: returns a string that isValidUuidV4 says is valid":

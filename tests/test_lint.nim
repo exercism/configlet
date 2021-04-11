@@ -1,5 +1,5 @@
 import std/unittest
-import "."/[lint/validators]
+import "."/lint/validators
 
 proc main =
   suite "isKebabCase":

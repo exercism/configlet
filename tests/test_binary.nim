@@ -1,5 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/[uuid/uuid]
+import "."/uuid/uuid
 
 const
   binaryExt =

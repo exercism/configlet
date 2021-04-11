@@ -1,4 +1,4 @@
-import std/[posix]
+import std/posix
 import "."/[cli, lint/lint, logger, sync/check, sync/sync, uuid/uuid]
 
 proc main =

@@ -1,6 +1,6 @@
 import std/[json, os, sets]
-import pkg/[parsetoml]
-import ".."/[cli]
+import pkg/parsetoml
+import ".."/cli
 
 type
   ConfigJsonExercise = object

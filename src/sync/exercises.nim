@@ -1,5 +1,5 @@
 import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
-import ".."/[cli]
+import ".."/cli
 import "."/[probspecs, tracks]
 
 type
