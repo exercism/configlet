@@ -113,7 +113,7 @@ func isKebabCase*(s: string): bool =
     else:
       return false
 
-func isValidUuidV4*(s: string): bool =
+func isUuidV4*(s: string): bool =
   ## Returns `true` if `s` is a valid version 4 UUID (compliant with RFC 4122)
   ## in the canonical textual representation.
   ##

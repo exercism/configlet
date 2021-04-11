@@ -66,7 +66,7 @@ proc testIsKebabCase =
         isKebabCase("hello-world-hello")
         isKebabCase("hello-world-hello-world")
 
-proc testIsValidUuidV4 =
+proc testIsUuidV4 =
   const ValidUuidV4 = "01234567-9012-4567-9012-456789012345"
   doAssert ValidUuidV4.len == 36
 
@@ -79,15 +79,15 @@ proc testIsValidUuidV4 =
 
   const (HyphenIndices, HexIndices) = uuidIndices()
 
-  suite "isValidUuidV4: returns true for valid version 4 UUIDs":
+  suite "isUuidV4: returns true for valid version 4 UUIDs":
     test "digits only":
       check:
-        isValidUuidV4(ValidUuidV4)
+        isUuidV4(ValidUuidV4)
 
     test "only letters, apart from version number":
       const uuid = "abcdefab-abcd-4bcd-abcd-abcdefabcdef"
       check:
-        isValidUuidV4(uuid)
+        isUuidV4(uuid)
 
     test "some valid version 4 UUIDs":
       const goodUuids = [
@@ -104,53 +104,53 @@ proc testIsValidUuidV4 =
       ]
       for goodUuid in goodUuids:
         check:
-          isValidUuidV4(goodUuid)
+          isUuidV4(goodUuid)
 
-  suite "isValidUuidV4: returns false for invalid version 4 UUIDs":
+  suite "isUuidV4: returns false for invalid version 4 UUIDs":
     test "nil UUID":
       # The nil UUID is a valid UUID, but not a valid version 4 UUID.
       check:
-        not isValidUuidV4("00000000-0000-0000-0000-000000000000")
+        not isUuidV4("00000000-0000-0000-0000-000000000000")
 
     test "version 1 UUID":
       check:
-        not isValidUuidV4("2ad51c8c-4a93-11eb-b378-0242ac130002")
+        not isUuidV4("2ad51c8c-4a93-11eb-b378-0242ac130002")
 
     test "non-canonical form: without hyphens":
       check:
-        not isValidUuidV4("01234567901245679012456789012345")
+        not isUuidV4("01234567901245679012456789012345")
 
     test "non-canonical form: with uppercase":
       var uuid = ValidUuidV4
       for i in HexIndices:
         uuid[i] = "ABCDEF"[i mod 6]
         check:
-          not isValidUuidV4(uuid)
+          not isUuidV4(uuid)
         uuid[i] = ValidUuidV4[i]
 
     test "length: too short":
       check:
-        not isValidUuidV4("")
-        not isValidUuidV4(ValidUuidV4[0 .. ^2])
+        not isUuidV4("")
+        not isUuidV4(ValidUuidV4[0 .. ^2])
 
     test "length: too long":
       check:
-        not isValidUuidV4(ValidUuidV4 & '6')
-        not isValidUuidV4(ValidUuidV4 & ValidUuidV4)
+        not isUuidV4(ValidUuidV4 & '6')
+        not isUuidV4(ValidUuidV4 & ValidUuidV4)
 
     test "separators: each replaced by a hexadecimal digit":
       var uuid = ValidUuidV4
       for i in HyphenIndices:
         uuid[i] = char(i mod 10 + '0'.ord)
       check:
-        not isValidUuidV4(uuid)
+        not isUuidV4(uuid)
 
     test "separators: one replaced by a hexadecimal digit":
       var uuid = ValidUuidV4
       for i in HyphenIndices:
         uuid[i] = char(i mod 10 + '0'.ord)
         check:
-          not isValidUuidV4(uuid)
+          not isUuidV4(uuid)
         uuid[i] = '-'
 
     test "separators: one extra":
@@ -158,7 +158,7 @@ proc testIsValidUuidV4 =
       for i in HexIndices:
         uuid[i] = '-'
         check:
-          not isValidUuidV4(uuid)
+          not isUuidV4(uuid)
         uuid[i] = ValidUuidV4[i]
 
     test "separators: one in the wrong place":
@@ -168,7 +168,7 @@ proc testIsValidUuidV4 =
         for j in HexIndices:
           uuid[j] = '-'
           check:
-            not isValidUuidV4(uuid)
+            not isUuidV4(uuid)
           uuid[j] = ValidUuidV4[j]
         uuid[i] = '-'
 
@@ -177,7 +177,7 @@ proc testIsValidUuidV4 =
       for i in 0 .. uuid.high:
         uuid[i] = char(i mod 10 + 'g'.ord)
         check:
-          not isValidUuidV4(uuid)
+          not isUuidV4(uuid)
         uuid[i] = ValidUuidV4[i]
 
     const
@@ -188,22 +188,22 @@ proc testIsValidUuidV4 =
       for c in Hex:
         uuid[14] = c
         if c == '4':
-          check isValidUuidV4(uuid)
+          check isUuidV4(uuid)
         else:
-          check not isValidUuidV4(uuid)
+          check not isUuidV4(uuid)
 
     test "character at the start of the fourth grouping":
       var uuid = ValidUuidV4
       for c in Hex:
         uuid[19] = c
         if c in {'8', '9', 'a', 'b'}:
-          check isValidUuidV4(uuid)
+          check isUuidV4(uuid)
         else:
-          check not isValidUuidV4(uuid)
+          check not isUuidV4(uuid)
 
 proc main =
   testIsKebabCase()
-  testisValidUuidV4()
+  testIsUuidV4()
 
 main()
 {.used.}

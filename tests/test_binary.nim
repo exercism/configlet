@@ -406,7 +406,7 @@ proc main =
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {cmd}")
         check exitCode == 0
         for line in outp.strip.splitLines:
-          check line.isValidUuidV4
+          check line.isUuidV4
 
   testsForSync(binaryPath)
 
