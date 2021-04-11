@@ -170,7 +170,7 @@ func isUuidV4*(s: string): bool =
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
-               isInArray = false): bool =
+               checkIsUuid = false; isInArray = false): bool =
   result = true
   case data.kind
   of JString:
@@ -203,6 +203,12 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                 &"The {format(context, key)} value is {q s}, but it must be " &
                  "a lowercase and kebab-case string"
             result.setFalseAndPrint(msg, path)
+        elif checkIsUuid:
+          if not isUuidV4(s):
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not a " &
+               "lowercased version 4 UUID"
+            result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
       else:
@@ -234,10 +240,11 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
 proc hasString*(data: JsonNode; key: string; path: Path; context = "";
                 isRequired = true; allowed = emptySetOfStrings;
                 checkIsUrlLike = false; maxLen = int.high;
-                checkIsKebab = false): bool =
+                checkIsKebab = false; checkIsUuid = false): bool =
   if data.hasKey(key, path, context, isRequired):
     result = isString(data[key], key, path, context, isRequired, allowed,
-                      checkIsUrlLike, maxLen, checkIsKebab = checkIsKebab)
+                      checkIsUrlLike, maxLen, checkIsKebab = checkIsKebab,
+                      checkIsUuid = checkIsUuid)
   elif not isRequired:
     result = true
 
