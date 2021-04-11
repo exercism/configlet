@@ -1,5 +1,5 @@
-import std/[logging]
-import "."/[cli]
+import std/logging
+import "."/cli
 
 func levelThreshold(verbosity: Verbosity): Level =
   case verbosity

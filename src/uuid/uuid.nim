@@ -1,6 +1,6 @@
-import std/[strformat]
-import pkg/[uuids]
-import ".."/[logger]
+import std/strformat
+import pkg/uuids
+import ".."/logger
 
 proc outputUuids(n: Positive) =
   ## Writes `n` version 4 UUIDs to stdout. Writes only 1000 UUIDs if `n` is
