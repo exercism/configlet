@@ -167,6 +167,8 @@ func isUuidV4*(s: string): bool =
     s[34] in Hex and
     s[35] in Hex
 
+var seenUuids = initHashSet[string](250)
+
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
@@ -204,6 +206,11 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                  "a lowercase and kebab-case string"
             result.setFalseAndPrint(msg, path)
         elif checkIsUuid:
+          if seenUuids.containsOrIncl(s):
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not unique " &
+               "on the track"
+            result.setFalseAndPrint(msg, path)
           if not isUuidV4(s):
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
