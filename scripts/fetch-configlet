@@ -45,14 +45,29 @@ get_download_url() {
     cut -d'"' -f4
 }
 
-download_url="$(get_download_url)"
-output_dir="bin"
-output_path="${output_dir}/latest-configlet.${ext}"
-curl "${curlopts[@]}" --output "${output_path}" "${download_url}"
+# Check if we are in a repo that has a ./bin
+# This is needed as `curl` will output to `./bin/`
+in_repo () {
+  git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ -d bin ]]
+}
 
-case "${ext}" in
-  *zip) unzip "${output_path}" -d "${output_dir}"   ;;
-  *)    tar xzf "${output_path}" -C "${output_dir}" ;;
-esac
+main () {
+  if ! in_repo; then
+    echo "This script must be ran from the repo root. $PWD does not seem to be a repo root."
+    return 1
+  fi
 
-rm -f "${output_path}"
+  download_url="$(get_download_url)"
+  output_dir="bin"
+  output_path="${output_dir}/latest-configlet.${ext}"
+  curl "${curlopts[@]}" --output "${output_path}" "${download_url}"
+
+  case "${ext}" in
+    *zip) unzip "${output_path}" -d "${output_dir}"   ;;
+    *)    tar xzf "${output_path}" -C "${output_dir}" ;;
+  esac
+
+  rm -f "${output_path}"
+}
+
+main
