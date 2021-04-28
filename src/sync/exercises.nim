@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, tables, lists]
+import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
 import parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
