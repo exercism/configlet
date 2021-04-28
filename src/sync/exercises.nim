@@ -1,5 +1,5 @@
 import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
-import parsetoml
+import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
 
