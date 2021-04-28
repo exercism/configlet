@@ -105,16 +105,14 @@ proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
     return initTable[string, ExerciseTestConfig]()
 
   let toml = parsetoml.parseFile(testsPath)
-  var exerciseConfigMapByUuid = initTable[string, ExerciseTestConfig]()
+  result = initTable[string, ExerciseTestConfig]()
   for uuid, data in toml.getTable():
     var exerciseConfig: ExerciseTestConfig
     exerciseConfig.uuid = uuid
     exerciseConfig.description = data["description"].getStr()
     if data.hasKey("comment"):
       exerciseConfig.comments = data["comment"].getElems().mapIt(it.getStr())
-    exerciseConfigMapByUuid[uuid] = exerciseConfig
-
-  return exerciseConfigMapByUuid
+    result[uuid] = exerciseConfig
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
