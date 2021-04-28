@@ -1,7 +1,5 @@
-from os import fileExists
+import std/[algorithm, json, options, os, sequtils, sets, strformat, tables, lists]
 import parsetoml
-import tables
-import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
 import ".."/cli
 import "."/[probspecs, tracks]
 
@@ -28,9 +26,7 @@ type
   ExerciseTestConfig = object
     uuid: string
     description: string
-    comments: List[String]
-
-  ExerciseTestsConfig = TableRef[string, ExerciseTestConfig]
+    comments: seq[string]
 
 func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
   result.included = included
@@ -88,7 +84,7 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-func toToml(exercise: Exercise, currContents: List[ExerciseTestConfig]): string =
+func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig]): string =
   result.add(&"""# This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
 # so comments can be added in a "comment" key.""")
@@ -104,18 +100,18 @@ func toToml(exercise: Exercise, currContents: List[ExerciseTestConfig]): string 
       result.add(&"\n\"included\" = false\n")
     #Comments to be added
 
-func parseTomlFile(testsPath: string): List[ExerciseTestConfig] =
+func parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
     return initTable[string, ExerciseTestConfig]()
 
-  const toml = parseFile(testsPath)
-  exerciseConfigMapByUuid = initTable[string, ExerciseTestConfig]()
-  for uuid, data in toml:
-    exerciseConfig = new(ExerciseTestConfig)
+  let toml = parsetoml.parseFile(testsPath)
+  let exerciseConfigMapByUuid = initTable[string, ExerciseTestConfig]()
+  for uuid, data in toml.getTable():
+    let exerciseConfig = new(ExerciseTestConfig)
     exerciseConfig.uuid = uuid
-    exerciseConfig.description = data['description'].getStr()
-    if table.hasKey('comment'):
-      if exerciseConfig.comments = table['comment'].getElems().map(x = x.getStr())
+    exerciseConfig.description = data["description"].getStr()
+    if data.hasKey("comment"):
+      exerciseConfig.comments = data["comment"].getElems().map((x) => x.getStr())
     exerciseConfigMapByUuid[uuid] = exerciseConfig
 
   return exerciseConfigMapByUuid
