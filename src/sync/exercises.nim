@@ -100,7 +100,7 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
       result.add(&"\n\"included\" = false\n")
     #Comments to be added
 
-func parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
+proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
     return initTable[string, ExerciseTestConfig]()
 
