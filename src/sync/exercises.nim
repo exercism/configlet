@@ -111,7 +111,7 @@ func parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
     exerciseConfig.uuid = uuid
     exerciseConfig.description = data["description"].getStr()
     if data.hasKey("comment"):
-      exerciseConfig.comments = data["comment"].getElems().map((x) => x.getStr())
+      exerciseConfig.comments = data["comment"].getElems().mapIt(it.getStr())
     exerciseConfigMapByUuid[uuid] = exerciseConfig
 
   return exerciseConfigMapByUuid
