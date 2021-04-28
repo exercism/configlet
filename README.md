@@ -40,19 +40,28 @@ The `configlet lint` command is currently in the process of being implemented.
 
 If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file. The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise. Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
 
-A `tests.toml` file for a track's `two-fer` exercise looks like this:
+A `tests.toml` file has this format:
 
 ```toml
-[canonical-tests]
-# no name given
-"19709124-b82e-4e86-a722-9e5c5ebf3952" = true
-# a name given
-"3451eebd-123f-4256-b667-7b109affce32" = true
-# another name given
-"653611c6-be9f-4935-ab42-978e25fe9a10" = false
+# This is an auto-generated file. Regular comments will be removed when this
+# file is regenerated. Regenerating will not touch any manually added keys,
+# so comments can be added in a "comment" key.
+
+[1e22cceb-c5e4-4562-9afe-aef07ad1eaf4]
+description = "basic"
+
+[79ae3889-a5c0-4b01-baf0-232d31180c08]
+description = "lowercase words"
+
+[ec7000a7-3931-4a17-890e-33ca2073a548]
+description = "invalid input"
+include = false
+comment = "excluded because we don't want to add error handling to the exercise"
 ```
 
 In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
+
+**Warning**: the format of a `tests.toml` file was previously different, and `configlet sync` has not yet been updated to output the new format. Sorry. This issue is tracked in https://github.com/exercism/configlet/issues/198.
 
 The `configlet sync` command allows tracks to keep `tests.toml` files up to date. The command will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It will then prompt the user to choose whether to include or exclude missing tests, and update the `tests.toml` files accordingly. If you only want a quick check, you can use the `--check` option.
 
