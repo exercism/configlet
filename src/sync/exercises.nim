@@ -1,3 +1,6 @@
+from os import fileExists
+import parsetoml
+import tables
 import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
 import ".."/cli
 import "."/[probspecs, tracks]
@@ -21,6 +24,13 @@ type
     slug*: string
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
+
+  ExerciseTestConfig = object
+    uuid: string
+    description: string
+    comments: List[String]
+
+  ExerciseTestsConfig = TableRef[string, ExerciseTestConfig]
 
 func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
   result.included = included
@@ -78,20 +88,42 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-func toToml(exercise: Exercise): string =
-  result.add("[canonical-tests]\n")
+func toToml(exercise: Exercise, currContents: List[ExerciseTestConfig]): string =
+  result.add(&"""# This is an auto-generated file. Regular comments will be removed when this
+# file is regenerated. Regenerating will not touch any manually added keys,
+# so comments can be added in a "comment" key.""")
 
   for testCase in exercise.testCases:
     if testCase.uuid in exercise.tests.missing:
       continue
 
     let isIncluded = testCase.uuid in exercise.tests.included
-    result.add(&"\n# {testCase.description}")
-    result.add(&"\n\"{testCase.uuid}\" = {isIncluded}\n")
+    result.add(&"\n[{testCase.uuid}]")
+    result.add(&"\n \"description\" = {testCase.description}")
+    if not isIncluded:
+      result.add(&"\n\"included\" = false\n")
+    #Comments to be added
+
+func parseTomlFile(testsPath: string): List[ExerciseTestConfig] =
+  if not fileExists(testsPath):
+    return initTable[string, ExerciseTestConfig]()
+
+  const toml = parseFile(testsPath)
+  exerciseConfigMapByUuid = initTable[string, ExerciseTestConfig]()
+  for uuid, data in toml:
+    exerciseConfig = new(ExerciseTestConfig)
+    exerciseConfig.uuid = uuid
+    exerciseConfig.description = data['description'].getStr()
+    if table.hasKey('comment'):
+      if exerciseConfig.comments = table['comment'].getElems().map(x = x.getStr())
+    exerciseConfigMapByUuid[uuid] = exerciseConfig
+
+  return exerciseConfigMapByUuid
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
   createDir(testsPath.parentDir())
 
-  let contents = toToml(exercise)
+  let currContents = parseTomlFile(testsPath)
+  let contents = toToml(exercise, currContents)
   writeFile(testsPath, contents)
