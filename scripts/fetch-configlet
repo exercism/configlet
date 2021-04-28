@@ -45,10 +45,11 @@ get_download_url() {
     cut -d'"' -f4
 }
 
-# Check if we are in a repo that has a ./bin
+# Check if we are in the root of repo that has a ./bin
 # This is needed as `curl` will output to `./bin/`
 in_repo () {
-  git rev-parse --is-inside-work-tree >/dev/null 2>&1 && [[ -d bin ]]
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || return
+  [[ "$PWD" = "$root" ]] && [[ -d bin ]]
 }
 
 main () {
