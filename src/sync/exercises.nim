@@ -95,7 +95,7 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
 
     let isIncluded = testCase.uuid in exercise.tests.included
     result.add(&"\n[{testCase.uuid}]")
-    result.add(&"\n \"description\" = {testCase.description}")
+    result.add(&"\n\"description\" = {testCase.description}")
     if not isIncluded:
       result.add(&"\n\"included\" = false\n")
     #Comments to be added
