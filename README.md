@@ -61,8 +61,6 @@ comment = "excluded because we don't want to add error handling to the exercise"
 
 In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
-**Warning**: the format of a `tests.toml` file was previously different, and `configlet sync` has not yet been updated to output the new format. Sorry. This issue is tracked in https://github.com/exercism/configlet/issues/198.
-
 The `configlet sync` command allows tracks to keep `tests.toml` files up to date. The command will compare the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data. It will then prompt the user to choose whether to include or exclude missing tests, and update the `tests.toml` files accordingly. If you only want a quick check, you can use the `--check` option.
 
 The `configlet sync` command replaces the functionality of the older `canonical_data_syncer` application.
