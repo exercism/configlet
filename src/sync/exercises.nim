@@ -95,22 +95,24 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
       continue
 
     let isIncluded = testCase.uuid in exercise.tests.included
-    
+
+    result.add(&"\n")
     result.add(&"\n[{testCase.uuid}]")
     result.add(&"\ndescription = \"{testCase.description}\"")
 
     if not isIncluded:
-      result.add(&"\nincluded = false\n")
+      result.add(&"\nincluded = false")
 
     if currContents.hasKey(testCase.uuid):
       if currContents[testCase.uuid].comment != "":
         result.add(&"\ncomment = \"{currContents[testCase.uuid].comment}\"")
       if currContents[testCase.uuid].comments.len() != 0:
-        result.add(&"\n\"comments = [")
+        result.add(&"\ncomments = [")
         for ind, comment in currContents[testCase.uuid].comments:
-          result.add(&"\n\"comment\"")
+          result.add(&"\n\t\"{comment}\"")
           if ind != currContents[testCase.uuid].comments.len()-1:
             result.add(&",")
+        result.add(&"\n]")
 
 proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
