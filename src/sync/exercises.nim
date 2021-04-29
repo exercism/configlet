@@ -89,12 +89,10 @@ proc toToml(exercise: Exercise, currContents: TomlValueRef): string =
 
   for testCase in exercise.testCases:
     if testCase.uuid notin exercise.tests.missing:
-      let isIncluded = testCase.uuid in exercise.tests.included
-
       result.add &"[{testCase.uuid}]\n"
       result.add &"description = \"{testCase.description}\"\n"
 
-      if not isIncluded:
+      if testCase.uuid notin exercise.tests.included:
         result.add "include = false\n"
 
       if currContents.hasKey(testCase.uuid):
