@@ -1,5 +1,5 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, tables, lists]
-import parsetoml
+import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
+import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
 
@@ -95,26 +95,24 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
 
     let isIncluded = testCase.uuid in exercise.tests.included
     result.add(&"\n[{testCase.uuid}]")
-    result.add(&"\n \"description\" = {testCase.description}")
+    result.add(&"\n\"description\" = {testCase.description}")
     if not isIncluded:
       result.add(&"\n\"included\" = false\n")
     #Comments to be added
 
-func parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
+proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
     return initTable[string, ExerciseTestConfig]()
 
   let toml = parsetoml.parseFile(testsPath)
-  let exerciseConfigMapByUuid = initTable[string, ExerciseTestConfig]()
+  result = initTable[string, ExerciseTestConfig]()
   for uuid, data in toml.getTable():
-    let exerciseConfig = new(ExerciseTestConfig)
+    var exerciseConfig: ExerciseTestConfig
     exerciseConfig.uuid = uuid
     exerciseConfig.description = data["description"].getStr()
     if data.hasKey("comment"):
-      exerciseConfig.comments = data["comment"].getElems().map((x) => x.getStr())
-    exerciseConfigMapByUuid[uuid] = exerciseConfig
-
-  return exerciseConfigMapByUuid
+      exerciseConfig.comments = data["comment"].getElems().mapIt(it.getStr())
+    result[uuid] = exerciseConfig
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
