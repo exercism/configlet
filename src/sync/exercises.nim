@@ -80,7 +80,7 @@ func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
 proc toToml(exercise: Exercise, currContents: TomlValueRef): string =
-  result.add """
+  result = """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
 # so comments can be added in a "comment" key.
