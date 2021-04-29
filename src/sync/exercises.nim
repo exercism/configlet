@@ -86,7 +86,7 @@ func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
 func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig]): string =
-  result.add &"""
+  result.add """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
 # so comments can be added in a "comment" key."""
@@ -97,23 +97,23 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
 
     let isIncluded = testCase.uuid in exercise.tests.included
 
-    result.add &"\n"
+    result.add "\n"
     result.add &"\n[{testCase.uuid}]"
     result.add &"\ndescription = \"{testCase.description}\""
 
     if not isIncluded:
-      result.add &"\ninclude = false"
+      result.add "\ninclude = false"
 
     if currContents.hasKey(testCase.uuid):
       if currContents[testCase.uuid].comment != "":
         result.add &"\ncomment = \"{currContents[testCase.uuid].comment}\""
       if currContents[testCase.uuid].comments.len() != 0:
-        result.add &"\ncomments = ["
+        result.add "\ncomments = ["
         for ind, comment in currContents[testCase.uuid].comments:
           result.add &"\n\t\"{comment}\""
           if ind != currContents[testCase.uuid].comments.len()-1:
-            result.add &","
-        result.add &"\n]"
+            result.add ","
+        result.add "\n]"
 
 proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
