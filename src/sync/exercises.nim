@@ -23,11 +23,6 @@ type
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
-  ExerciseTestConfig = object
-    uuid: string
-    comment: string
-    comments: seq[string]
-
 func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
   result.included = included
   result.excluded = excluded
@@ -84,7 +79,7 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig]): string =
+proc toToml(exercise: Exercise, currContents: TomlValueRef): string =
   result.add """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
@@ -103,33 +98,17 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
         result.add "include = false\n"
 
       if currContents.hasKey(testCase.uuid):
-        if currContents[testCase.uuid].comment.len > 0:
-          result.add &"comment = \"{currContents[testCase.uuid].comment}\"\n"
-        if currContents[testCase.uuid].comments.len > 0:
-          result.add "comments = [\n"
-          for ind, comment in currContents[testCase.uuid].comments:
-            result.add &"\t\"{comment}\""
-            if ind == currContents[testCase.uuid].comments.high:
-              result.add "\n"
-            else:
-              result.add ",\n"
-          result.add "]\n"
+        for k, v in currContents[testCase.uuid].getTable():
+          if k notin ["description", "include"].toHashSet():
+            result.add &"{k} = {v.toTomlString()}\n"
 
       result.add "\n"
 
   result.setLen(result.len - 1)
 
-proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
-  result = initTable[string, ExerciseTestConfig]()
+proc parseTomlFile(testsPath: string): TomlValueRef =
   if fileExists(testsPath):
-    let toml = parsetoml.parseFile(testsPath)
-    for uuid, data in toml.getTable():
-      var exerciseConfig = ExerciseTestConfig(uuid: uuid)
-      if data.hasKey("comment"):
-        exerciseConfig.comment = data["comment"].getStr()
-      if data.hasKey("comments"):
-        exerciseConfig.comments = data["comments"].getElems().mapIt(it.getStr())
-      result[uuid] = exerciseConfig
+    result = parsetoml.parseFile(testsPath)
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
