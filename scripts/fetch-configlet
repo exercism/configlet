@@ -45,22 +45,17 @@ get_download_url() {
     cut -d'"' -f4
 }
 
-# Check if we are in the root of repo that has a $REPO_ROOT/bin
-# This is needed as `curl` will output to `$REPO_ROOT/bin/`
-in_repo () {
-  local root
-  root=$(git rev-parse --show-toplevel 2>/dev/null) || return
-  [[ "${PWD}" = "${root}"/* ]] && [[ -d "${root}/bin" ]]
-}
-
 main () {
-  if ! in_repo; then
-    echo "This script must be ran from the repo. $PWD does not seem to be in the repo."
+  if [[ -d ./bin ]]; then
+    output_dir="./bin"
+  elif [[ $PWD = */bin ]]; then
+    output_dir="$PWD"
+  else
+    echo "Error: no ./bin directory found. This script should be ran from a repo root." >&2
     return 1
   fi
 
   download_url="$(get_download_url)"
-  output_dir="$(git rev-parse --show-toplevel)/bin"
   output_path="${output_dir}/latest-configlet.${ext}"
   curl "${curlopts[@]}" --output "${output_path}" "${download_url}"
 
