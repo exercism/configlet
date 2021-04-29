@@ -80,6 +80,9 @@ func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
 proc toToml(exercise: Exercise, testsPath: string): string =
+  ## Returns the new contents of a `tests.toml` file that corresponds to an
+  ## `exercise`. This proc reads the previous contents at `testsPath` and
+  ## preserves every property apart from `description` and `include = true`.
   result = """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
@@ -90,14 +93,17 @@ proc toToml(exercise: Exercise, testsPath: string): string =
   for testCase in exercise.testCases:
     if testCase.uuid notin exercise.tests.missing:
       result.add &"[{testCase.uuid}]\n"
+      # Always use the latest `description` value
       result.add &"description = \"{testCase.description}\"\n"
 
+      # Omit `include = true`
       if testCase.uuid notin exercise.tests.included:
         result.add "include = false\n"
 
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
         if currContents.hasKey(testCase.uuid):
+          # Preserve custom properties
           for k, v in currContents[testCase.uuid].getTable():
             if k notin ["description", "include"].toHashSet():
               result.add &"{k} = {v.toTomlString()}\n"
