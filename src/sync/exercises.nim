@@ -79,7 +79,7 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-proc toToml(exercise: Exercise, currContents: TomlValueRef): string =
+proc toToml(exercise: Exercise, testsPath: string): string =
   result = """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
@@ -95,23 +95,20 @@ proc toToml(exercise: Exercise, currContents: TomlValueRef): string =
       if testCase.uuid notin exercise.tests.included:
         result.add "include = false\n"
 
-      if currContents.hasKey(testCase.uuid):
-        for k, v in currContents[testCase.uuid].getTable():
-          if k notin ["description", "include"].toHashSet():
-            result.add &"{k} = {v.toTomlString()}\n"
+      if fileExists(testsPath):
+        let currContents = parsetoml.parseFile(testsPath)
+        if currContents.hasKey(testCase.uuid):
+          for k, v in currContents[testCase.uuid].getTable():
+            if k notin ["description", "include"].toHashSet():
+              result.add &"{k} = {v.toTomlString()}\n"
 
       result.add "\n"
 
   result.setLen(result.len - 1)
 
-proc parseTomlFile(testsPath: string): TomlValueRef =
-  if fileExists(testsPath):
-    result = parsetoml.parseFile(testsPath)
-
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
   createDir(testsPath.parentDir())
 
-  let currContents = parseTomlFile(testsPath)
-  let contents = toToml(exercise, currContents)
+  let contents = toToml(exercise, testsPath)
   writeFile(testsPath, contents)
