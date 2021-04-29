@@ -57,7 +57,7 @@ proc testsForSync(binaryPath: string) =
     # Setup: set the track repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout 798a250a5baf44468ff39bf016fafc3c6a5375c2")
+        execCmdEx(&"git -C {trackDir} checkout 6e909c9e5338cd567c20224069df00e031fb2efa")
 
     test "`sync --check` exits with 1 and prints the expected output":
       execAndCheck(1):
@@ -127,111 +127,125 @@ All exercises are synced!
     const expectedDiffOutput = """
 --- exercises/practice/diffie-hellman/.meta/tests.toml
 +++ exercises/practice/diffie-hellman/.meta/tests.toml
-+# can calculate public key when given a different private key
-+"0d25f8d7-4897-4338-a033-2d3d7a9af688" = true
++[0d25f8d7-4897-4338-a033-2d3d7a9af688]
++description = "can calculate public key when given a different private key"
 +
 --- exercises/practice/grade-school/.meta/tests.toml
 +++ exercises/practice/grade-school/.meta/tests.toml
-+# A student can't be in two different grades
-+"c125dab7-2a53-492f-a99a-56ad511940d8" = true
++[c125dab7-2a53-492f-a99a-56ad511940d8]
++description = "A student can't be in two different grades"
 +
 --- exercises/practice/hamming/.meta/tests.toml
 +++ exercises/practice/hamming/.meta/tests.toml
-+# disallow left empty strand
-+"db92e77e-7c72-499d-8fe6-9354d2bfd504" = true
++[db92e77e-7c72-499d-8fe6-9354d2bfd504]
++description = "disallow left empty strand"
 +
 +
-+# disallow right empty strand
-+"920cd6e3-18f4-4143-b6b8-74270bb8f8a3" = true
++[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
++description = "disallow right empty strand"
 --- exercises/practice/high-scores/.meta/tests.toml
 +++ exercises/practice/high-scores/.meta/tests.toml
 +
-+# Latest score after personal top scores
-+"2df075f9-fec9-4756-8f40-98c52a11504f" = true
++[2df075f9-fec9-4756-8f40-98c52a11504f]
++description = "Latest score after personal top scores"
 +
-+# Scores after personal top scores
-+"809c4058-7eb1-4206-b01e-79238b9b71bc" = true
++[809c4058-7eb1-4206-b01e-79238b9b71bc]
++description = "Scores after personal top scores"
 --- exercises/practice/kindergarten-garden/.meta/tests.toml
 +++ exercises/practice/kindergarten-garden/.meta/tests.toml
--# first student's garden
-+# for Alice, first student's garden
--# second student's garden
-+# for Bob, second student's garden
--# second to last student's garden
-+# for Charlie
-+"566b621b-f18e-4c5f-873e-be30544b838c" = true
+-description = "first student's garden"
++description = "for Alice, first student's garden"
+-description = "second student's garden"
++description = "for Bob, second student's garden"
 +
-+# for David
-+"3ad3df57-dd98-46fc-9269-1877abf612aa" = true
++[566b621b-f18e-4c5f-873e-be30544b838c]
++description = "for Charlie"
 +
-+# for Eve
-+"0f0a55d1-9710-46ed-a0eb-399ba8c72db2" = true
++[3ad3df57-dd98-46fc-9269-1877abf612aa]
++description = "for David"
 +
-+# for Fred
-+"a7e80c90-b140-4ea1-aee3-f4625365c9a4" = true
++[0f0a55d1-9710-46ed-a0eb-399ba8c72db2]
++description = "for Eve"
 +
-+# for Ginny
-+"9d94b273-2933-471b-86e8-dba68694c615" = true
++[a7e80c90-b140-4ea1-aee3-f4625365c9a4]
++description = "for Fred"
 +
-+# for Harriet
-+"f55bc6c2-ade8-4844-87c4-87196f1b7258" = true
++[9d94b273-2933-471b-86e8-dba68694c615]
++description = "for Ginny"
 +
-+# for Ileana
-+"759070a3-1bb1-4dd4-be2c-7cce1d7679ae" = true
++[f55bc6c2-ade8-4844-87c4-87196f1b7258]
++description = "for Harriet"
 +
-+# for Joseph
-+"78578123-2755-4d4a-9c7d-e985b8dda1c6" = true
++[759070a3-1bb1-4dd4-be2c-7cce1d7679ae]
++description = "for Ileana"
 +
-+# for Kincaid, second to last student's garden
--# last student's garden
-+# for Larry, last student's garden
++[78578123-2755-4d4a-9c7d-e985b8dda1c6]
++description = "for Joseph"
+-description = "second to last student's garden"
++description = "for Kincaid, second to last student's garden"
+-description = "last student's garden"
++description = "for Larry, last student's garden"
 --- exercises/practice/prime-factors/.meta/tests.toml
 +++ exercises/practice/prime-factors/.meta/tests.toml
-+# another prime number
-+"238d57c8-4c12-42ef-af34-ae4929f94789" = true
++[238d57c8-4c12-42ef-af34-ae4929f94789]
++description = "another prime number"
 +
-+# product of first prime
-+"756949d3-3158-4e3d-91f2-c4f9f043ee70" = true
++[756949d3-3158-4e3d-91f2-c4f9f043ee70]
++description = "product of first prime"
 +
-+# product of second prime
-+"7d6a3300-a4cb-4065-bd33-0ced1de6cb44" = true
++[7d6a3300-a4cb-4065-bd33-0ced1de6cb44]
++description = "product of second prime"
 +
-+# product of third prime
-+"073ac0b2-c915-4362-929d-fc45f7b9a9e4" = true
++[073ac0b2-c915-4362-929d-fc45f7b9a9e4]
++description = "product of third prime"
 +
-+# product of first and second prime
-+"6e0e4912-7fb6-47f3-a9ad-dbcd79340c75" = true
++[6e0e4912-7fb6-47f3-a9ad-dbcd79340c75]
++description = "product of first and second prime"
 +
 --- exercises/practice/react/.meta/tests.toml
 +++ exercises/practice/react/.meta/tests.toml
--# "c51ee736-d001-4f30-88d1-0c8e8b43cd07" = true
-+"c51ee736-d001-4f30-88d1-0c8e8b43cd07" = true
--# "dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851" = true
-+"dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851" = true
--# "5854b975-f545-4f93-8968-cc324cde746e" = true
-+"5854b975-f545-4f93-8968-cc324cde746e" = true
--# "25795a3d-b86c-4e91-abe7-1c340e71560c" = true
-+"25795a3d-b86c-4e91-abe7-1c340e71560c" = true
--# "c62689bf-7be5-41bb-b9f8-65178ef3e8ba" = true
-+"c62689bf-7be5-41bb-b9f8-65178ef3e8ba" = true
--# "5ff36b09-0a88-48d4-b7f8-69dcf3feea40" = true
-+"5ff36b09-0a88-48d4-b7f8-69dcf3feea40" = true
--# "abe33eaf-68ad-42a5-b728-05519ca88d2d" = true
-+"abe33eaf-68ad-42a5-b728-05519ca88d2d" = true
--# "9e5cb3a4-78e5-4290-80f8-a78612c52db2" = true
-+"9e5cb3a4-78e5-4290-80f8-a78612c52db2" = true
--# "ada17cb6-7332-448a-b934-e3d7495c13d3" = true
-+"ada17cb6-7332-448a-b934-e3d7495c13d3" = true
--# "ac271900-ea5c-461c-9add-eeebcb8c03e5" = true
-+"ac271900-ea5c-461c-9add-eeebcb8c03e5" = true
--# "95a82dcc-8280-4de3-a4cd-4f19a84e3d6f" = true
-+"95a82dcc-8280-4de3-a4cd-4f19a84e3d6f" = true
--# "f2a7b445-f783-4e0e-8393-469ab4915f2a" = true
-+"f2a7b445-f783-4e0e-8393-469ab4915f2a" = true
--# "daf6feca-09e0-4ce5-801d-770ddfe1c268" = true
-+"daf6feca-09e0-4ce5-801d-770ddfe1c268" = true
--# "9a5b159f-b7aa-4729-807e-f1c38a46d377" = true
-+"9a5b159f-b7aa-4729-807e-f1c38a46d377" = true
++
++[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
++description = "input cells have a value"
++
++[dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851]
++description = "an input cell's value can be set"
++
++[5854b975-f545-4f93-8968-cc324cde746e]
++description = "compute cells calculate initial value"
++
++[25795a3d-b86c-4e91-abe7-1c340e71560c]
++description = "compute cells take inputs in the right order"
++
++[c62689bf-7be5-41bb-b9f8-65178ef3e8ba]
++description = "compute cells update value when dependencies are changed"
++
++[5ff36b09-0a88-48d4-b7f8-69dcf3feea40]
++description = "compute cells can depend on other compute cells"
++
++[abe33eaf-68ad-42a5-b728-05519ca88d2d]
++description = "compute cells fire callbacks"
++
++[9e5cb3a4-78e5-4290-80f8-a78612c52db2]
++description = "callback cells only fire on change"
++
++[ada17cb6-7332-448a-b934-e3d7495c13d3]
++description = "callbacks do not report already reported values"
++
++[ac271900-ea5c-461c-9add-eeebcb8c03e5]
++description = "callbacks can fire from multiple cells"
++
++[95a82dcc-8280-4de3-a4cd-4f19a84e3d6f]
++description = "callbacks can be added and removed"
++
++[f2a7b445-f783-4e0e-8393-469ab4915f2a]
++description = "removing a callback multiple times doesn't interfere with other callbacks"
++
++[daf6feca-09e0-4ce5-801d-770ddfe1c268]
++description = "callbacks should only be called once even if multiple dependencies change"
++
++[9a5b159f-b7aa-4729-807e-f1c38a46d377]
++description = "callbacks should not be called if dependencies change but output value doesn't change"
 """
 
     const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
