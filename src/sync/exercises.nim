@@ -121,20 +121,18 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
   result.setLen(result.len - 1)
 
 proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
-  if not fileExists(testsPath):
-    return initTable[string, ExerciseTestConfig]()
-
-  let toml = parsetoml.parseFile(testsPath)
   result = initTable[string, ExerciseTestConfig]()
-  for uuid, data in toml.getTable():
-    var exerciseConfig = ExerciseTestConfig(uuid: uuid)
-    if data.hasKey("description"):
-      exerciseConfig.description = data["description"].getStr()
-    if data.hasKey("comment"):
-      exerciseConfig.comment = data["comment"].getStr()
-    if data.hasKey("comments"):
-      exerciseConfig.comments = data["comments"].getElems().mapIt(it.getStr())
-    result[uuid] = exerciseConfig
+  if fileExists(testsPath):
+    let toml = parsetoml.parseFile(testsPath)
+    for uuid, data in toml.getTable():
+      var exerciseConfig = ExerciseTestConfig(uuid: uuid)
+      if data.hasKey("description"):
+        exerciseConfig.description = data["description"].getStr()
+      if data.hasKey("comment"):
+        exerciseConfig.comment = data["comment"].getStr()
+      if data.hasKey("comments"):
+        exerciseConfig.comments = data["comments"].getElems().mapIt(it.getStr())
+      result[uuid] = exerciseConfig
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
