@@ -22,6 +22,7 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: Path): bool =
       hasValidFiles(data, path),
       hasArrayOfStrings(data, "forked_from", path, isRequired = false),
       hasString(data, "language_versions", path, isRequired = false),
+      hasString(data, "icon", path, isRequired = false, checkIsKebab = true),
     ]
     result = allTrue(checks)
 
