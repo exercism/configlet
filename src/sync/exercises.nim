@@ -26,6 +26,7 @@ type
   ExerciseTestConfig = object
     uuid: string
     description: string
+    comment: string
     comments: seq[string]
 
 func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
@@ -94,11 +95,22 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
       continue
 
     let isIncluded = testCase.uuid in exercise.tests.included
+    
     result.add(&"\n[{testCase.uuid}]")
-    result.add(&"\n\"description\" = {testCase.description}")
+    result.add(&"\ndescription = \"{testCase.description}\"")
+
     if not isIncluded:
-      result.add(&"\n\"included\" = false\n")
-    #Comments to be added
+      result.add(&"\nincluded = false\n")
+
+    if currContents.hasKey(testCase.uuid):
+      if currContents[testCase.uuid].comment != "":
+        result.add(&"\ncomment = \"{currContents[testCase.uuid].comment}\"")
+      if currContents[testCase.uuid].comments.len() != 0:
+        result.add(&"\n\"comments = [")
+        for ind, comment in currContents[testCase.uuid].comments:
+          result.add(&"\n\"comment\"")
+          if ind != currContents[testCase.uuid].comments.len()-1:
+            result.add(&",")
 
 proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
@@ -111,7 +123,9 @@ proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
     exerciseConfig.uuid = uuid
     exerciseConfig.description = data["description"].getStr()
     if data.hasKey("comment"):
-      exerciseConfig.comments = data["comment"].getElems().mapIt(it.getStr())
+      exerciseConfig.comment = data["comment"].getStr()
+    if data.hasKey("comments"):
+      exerciseConfig.comments = data["comments"].getElems().mapIt(it.getStr())
     result[uuid] = exerciseConfig
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
