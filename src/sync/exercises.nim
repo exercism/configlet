@@ -89,7 +89,9 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
   result.add """
 # This is an auto-generated file. Regular comments will be removed when this
 # file is regenerated. Regenerating will not touch any manually added keys,
-# so comments can be added in a "comment" key."""
+# so comments can be added in a "comment" key.
+
+"""
 
   for testCase in exercise.testCases:
     if testCase.uuid in exercise.tests.missing:
@@ -97,23 +99,28 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
 
     let isIncluded = testCase.uuid in exercise.tests.included
 
-    result.add "\n"
-    result.add &"\n[{testCase.uuid}]"
-    result.add &"\ndescription = \"{testCase.description}\""
+    result.add &"[{testCase.uuid}]\n"
+    result.add &"description = \"{testCase.description}\"\n"
 
     if not isIncluded:
-      result.add "\ninclude = false"
+      result.add "include = false\n"
 
     if currContents.hasKey(testCase.uuid):
       if currContents[testCase.uuid].comment != "":
-        result.add &"\ncomment = \"{currContents[testCase.uuid].comment}\""
+        result.add &"comment = \"{currContents[testCase.uuid].comment}\"\n"
       if currContents[testCase.uuid].comments.len() != 0:
-        result.add "\ncomments = ["
+        result.add "comments = [\n"
         for ind, comment in currContents[testCase.uuid].comments:
-          result.add &"\n\t\"{comment}\""
-          if ind != currContents[testCase.uuid].comments.len()-1:
-            result.add ","
-        result.add "\n]"
+          result.add &"\t\"{comment}\""
+          if ind == currContents[testCase.uuid].comments.high:
+            result.add "\n"
+          else:
+            result.add ",\n"
+        result.add "]\n"
+
+    result.add "\n"
+
+  result.setLen(result.len - 1)
 
 proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   if not fileExists(testsPath):
