@@ -124,7 +124,8 @@ proc parseTomlFile(testsPath: string): Table[string, ExerciseTestConfig] =
   for uuid, data in toml.getTable():
     var exerciseConfig: ExerciseTestConfig
     exerciseConfig.uuid = uuid
-    exerciseConfig.description = data["description"].getStr()
+    if data.hasKey("description"):
+      exerciseConfig.description = data["description"].getStr()
     if data.hasKey("comment"):
       exerciseConfig.comment = data["comment"].getStr()
     if data.hasKey("comments"):
