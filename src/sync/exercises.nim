@@ -106,9 +106,9 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
       result.add "include = false\n"
 
     if currContents.hasKey(testCase.uuid):
-      if currContents[testCase.uuid].comment != "":
+      if currContents[testCase.uuid].comment.len > 0:
         result.add &"comment = \"{currContents[testCase.uuid].comment}\"\n"
-      if currContents[testCase.uuid].comments.len() != 0:
+      if currContents[testCase.uuid].comments.len > 0:
         result.add "comments = [\n"
         for ind, comment in currContents[testCase.uuid].comments:
           result.add &"\t\"{comment}\""
