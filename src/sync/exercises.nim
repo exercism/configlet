@@ -94,31 +94,29 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
 """
 
   for testCase in exercise.testCases:
-    if testCase.uuid in exercise.tests.missing:
-      continue
+    if testCase.uuid notin exercise.tests.missing:
+      let isIncluded = testCase.uuid in exercise.tests.included
 
-    let isIncluded = testCase.uuid in exercise.tests.included
+      result.add &"[{testCase.uuid}]\n"
+      result.add &"description = \"{testCase.description}\"\n"
 
-    result.add &"[{testCase.uuid}]\n"
-    result.add &"description = \"{testCase.description}\"\n"
+      if not isIncluded:
+        result.add "include = false\n"
 
-    if not isIncluded:
-      result.add "include = false\n"
+      if currContents.hasKey(testCase.uuid):
+        if currContents[testCase.uuid].comment.len > 0:
+          result.add &"comment = \"{currContents[testCase.uuid].comment}\"\n"
+        if currContents[testCase.uuid].comments.len > 0:
+          result.add "comments = [\n"
+          for ind, comment in currContents[testCase.uuid].comments:
+            result.add &"\t\"{comment}\""
+            if ind == currContents[testCase.uuid].comments.high:
+              result.add "\n"
+            else:
+              result.add ",\n"
+          result.add "]\n"
 
-    if currContents.hasKey(testCase.uuid):
-      if currContents[testCase.uuid].comment.len > 0:
-        result.add &"comment = \"{currContents[testCase.uuid].comment}\"\n"
-      if currContents[testCase.uuid].comments.len > 0:
-        result.add "comments = [\n"
-        for ind, comment in currContents[testCase.uuid].comments:
-          result.add &"\t\"{comment}\""
-          if ind == currContents[testCase.uuid].comments.high:
-            result.add "\n"
-          else:
-            result.add ",\n"
-        result.add "]\n"
-
-    result.add "\n"
+      result.add "\n"
 
   result.setLen(result.len - 1)
 
