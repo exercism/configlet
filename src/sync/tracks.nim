@@ -64,11 +64,17 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
 
   for uuid, val in tests.getTable():
     if val.hasKey("include"):
-      let isIncluded = val["include"].getBool()
-      if isIncluded:
-        result.included.incl(uuid)
+      if val["include"].kind == Bool:
+        let isIncluded = val["include"].getBool()
+        if isIncluded:
+          result.included.incl(uuid)
+        else:
+          result.excluded.incl(uuid)
       else:
-        result.excluded.incl(uuid)
+        let msg = "Error: the value of an `include` key is `" &
+                  $val["include"] & "`, but it must be a bool:\n" &
+                  $exercise.testsFile
+        stderr.writeLine(msg)
     else:
       result.included.incl(uuid)
 
