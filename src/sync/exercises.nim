@@ -101,7 +101,7 @@ func toToml(exercise: Exercise, currContents: Table[string, ExerciseTestConfig])
     result.add(&"\ndescription = \"{testCase.description}\"")
 
     if not isIncluded:
-      result.add(&"\nincluded = false")
+      result.add(&"\ninclude = false")
 
     if currContents.hasKey(testCase.uuid):
       if currContents[testCase.uuid].comment != "":
