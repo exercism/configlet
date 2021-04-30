@@ -72,7 +72,7 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
           result.excluded.incl(uuid)
       else:
         let msg = "Error: the value of an `include` key is `" &
-                  $val["include"] & "`, but it must be a bool:\n" &
+                  val["include"].toTomlString() & "`, but it must be a bool:\n" &
                   exercise.testsFile()
         stderr.writeLine(msg)
     else:
