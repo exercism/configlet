@@ -259,6 +259,7 @@ proc isArrayOfStrings*(data: JsonNode;
                        context: string;
                        path: Path;
                        isRequired = true;
+                       uniqueValues = false;
                        allowed: HashSet[string];
                        allowedArrayLen: Slice;
                        checkIsKebab: bool): bool =
@@ -273,10 +274,16 @@ proc isArrayOfStrings*(data: JsonNode;
     let arrayLen = data.len
     if arrayLen > 0:
       if arrayLen in allowedArrayLen:
+        var processedItems = initHashSet[string](arrayLen)
+
         for item in data:
           if not isString(item, context, path, "", isRequired, allowed,
                           checkIsKebab = checkIsKebab, isInArray = true):
             result = false
+          elif uniqueValues:
+            let itemStr = item.getStr()
+            if processedItems.containsOrIncl(itemStr):
+              result.setFalseAndPrint(&"The {q context} array contains duplicate {q itemStr} values", path)
       else:
         let msgStart = &"The {q context} array has length {arrayLen}, " &
                         "but it must have length "
@@ -302,6 +309,7 @@ proc hasArrayOfStrings*(data: JsonNode;
                         path: Path;
                         context = "";
                         isRequired = true;
+                        uniqueValues = false;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high;
                         checkIsKebab = false): bool =
@@ -311,7 +319,7 @@ proc hasArrayOfStrings*(data: JsonNode;
   if data.hasKey(key, path, context, isRequired):
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
-                              allowed, allowedArrayLen,
+                              uniqueValues, allowed, allowedArrayLen,
                               checkIsKebab = checkIsKebab)
   elif not isRequired:
     result = true
