@@ -73,7 +73,7 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
       else:
         let msg = "Error: the value of an `include` key is `" &
                   $val["include"] & "`, but it must be a bool:\n" &
-                  $exercise.testsFile
+                  exercise.testsFile()
         stderr.writeLine(msg)
     else:
       result.included.incl(uuid)
