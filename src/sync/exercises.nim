@@ -1,4 +1,5 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
+import std/[algorithm, json, options, os, sequtils, sets, strformat, strutils,
+            tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
@@ -106,7 +107,12 @@ proc toToml(exercise: Exercise, testsPath: string): string =
           # Preserve custom properties
           for k, v in currContents[testCase.uuid].getTable():
             if k notin ["description", "include"].toHashSet():
-              result.add &"{k} = {v.toTomlString()}\n"
+              let vTomlString =
+                if v.kind == String and v.stringVal.contains("\n"):
+                  &"\"\"\"\n{v.stringVal}\"\"\""
+                else:
+                  toTomlString(v)
+              result.add &"{k} = {vTomlString}\n"
 
       result.add "\n"
 
