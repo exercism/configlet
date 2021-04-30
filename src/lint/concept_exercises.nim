@@ -17,10 +17,12 @@ proc isValidConceptExerciseConfig(data: JsonNode, path: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
-      hasArrayOfStrings(data, "authors", path),
-      hasArrayOfStrings(data, "contributors", path, isRequired = false),
+      hasArrayOfStrings(data, "authors", path, uniqueValues = true),
+      hasArrayOfStrings(data, "contributors", path, isRequired = false,
+                        uniqueValues = true),
       hasValidFiles(data, path),
-      hasArrayOfStrings(data, "forked_from", path, isRequired = false),
+      hasArrayOfStrings(data, "forked_from", path, isRequired = false,
+                        uniqueValues = true),
       hasString(data, "language_versions", path, isRequired = false),
       hasString(data, "icon", path, isRequired = false, checkIsKebab = true),
     ]
