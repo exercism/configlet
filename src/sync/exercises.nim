@@ -80,6 +80,24 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
+func prettyTomlString(s: string): string =
+  ## Returns `s` as a TOML string. This tries to handle multi-line strings,
+  ## which `parsetoml.toTomlString` doesn't handle properly.
+  if s.contains("\n"):
+    &"\"\"\"\n{s}\"\"\""
+  else:
+    &"\"{s}\""
+
+proc prettyTomlString(a: openArray[TomlValueRef]): string =
+  ## Returns the array `a` as a prettified TOML string.
+  if a.len > 0:
+    result = "[\n"
+    for item in a:
+      result.add &"  {item.toTomlString()},\n" # Keep the final trailing comma.
+    result.add "]"
+  else:
+    result = "[]"
+
 proc toToml(exercise: Exercise, testsPath: string): string =
   ## Returns the new contents of a `tests.toml` file that corresponds to an
   ## `exercise`. This proc reads the previous contents at `testsPath` and
@@ -108,8 +126,10 @@ proc toToml(exercise: Exercise, testsPath: string): string =
           for k, v in currContents[testCase.uuid].getTable():
             if k notin ["description", "include"].toHashSet():
               let vTomlString =
-                if v.kind == String and v.stringVal.contains("\n"):
-                  &"\"\"\"\n{v.stringVal}\"\"\""
+                if v.kind == String:
+                  prettyTomlString(v.stringVal)
+                elif v.kind == Array:
+                  prettyTomlString(v.arrayVal)
                 else:
                   toTomlString(v)
               result.add &"{k} = {vTomlString}\n"
