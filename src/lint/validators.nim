@@ -283,7 +283,9 @@ proc isArrayOfStrings*(data: JsonNode;
           elif uniqueValues:
             let itemStr = item.getStr()
             if processedItems.containsOrIncl(itemStr):
-              result.setFalseAndPrint(&"The {q context} array contains duplicate {q itemStr} values", path)
+              let msg = &"The {q context} array contains duplicate " &
+                        &"{q itemStr} values"
+              result.setFalseAndPrint(msg, path)
       else:
         let msgStart = &"The {q context} array has length {arrayLen}, " &
                         "but it must have length "
