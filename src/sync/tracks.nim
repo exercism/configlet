@@ -61,14 +61,22 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
     return
 
   let tests = parsetoml.parseFile(exercise.testsFile)
-  if not tests.hasKey("canonical-tests"):
-    return
 
-  for uuid, enabled in tests["canonical-tests"].getTable():
-    if enabled.getBool():
-      result.included.incl(uuid)
+  for uuid, val in tests.getTable():
+    if val.hasKey("include"):
+      if val["include"].kind == Bool:
+        let isIncluded = val["include"].getBool()
+        if isIncluded:
+          result.included.incl(uuid)
+        else:
+          result.excluded.incl(uuid)
+      else:
+        let msg = "Error: the value of an `include` key is `" &
+                  val["include"].toTomlString() & "`, but it must be a bool:\n" &
+                  exercise.testsFile()
+        stderr.writeLine(msg)
     else:
-      result.excluded.incl(uuid)
+      result.included.incl(uuid)
 
 proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   result.slug = exercise.slug

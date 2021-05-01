@@ -1,4 +1,6 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, tables]
+import std/[algorithm, json, options, os, sequtils, sets, strformat, strutils,
+            tables]
+import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
 
@@ -78,20 +80,67 @@ func hasCanonicalData*(exercise: Exercise): bool =
 func testsFile(exercise: Exercise, trackDir: string): string =
   trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
-func toToml(exercise: Exercise): string =
-  result.add("[canonical-tests]\n")
+func prettyTomlString(s: string): string =
+  ## Returns `s` as a TOML string. This tries to handle multi-line strings,
+  ## which `parsetoml.toTomlString` doesn't handle properly.
+  if s.contains("\n"):
+    &"\"\"\"\n{s}\"\"\""
+  else:
+    &"\"{s}\""
+
+proc prettyTomlString(a: openArray[TomlValueRef]): string =
+  ## Returns the array `a` as a prettified TOML string.
+  if a.len > 0:
+    result = "[\n"
+    for item in a:
+      result.add &"  {item.toTomlString()},\n" # Keep the final trailing comma.
+    result.add "]"
+  else:
+    result = "[]"
+
+proc toToml(exercise: Exercise, testsPath: string): string =
+  ## Returns the new contents of a `tests.toml` file that corresponds to an
+  ## `exercise`. This proc reads the previous contents at `testsPath` and
+  ## preserves every property apart from `description` and `include = true`.
+  result = """
+# This is an auto-generated file. Regular comments will be removed when this
+# file is regenerated. Regenerating will not touch any manually added keys,
+# so comments can be added in a "comment" key.
+
+"""
 
   for testCase in exercise.testCases:
-    if testCase.uuid in exercise.tests.missing:
-      continue
+    if testCase.uuid notin exercise.tests.missing:
+      result.add &"[{testCase.uuid}]\n"
+      # Always use the latest `description` value
+      result.add &"description = \"{testCase.description}\"\n"
 
-    let isIncluded = testCase.uuid in exercise.tests.included
-    result.add(&"\n# {testCase.description}")
-    result.add(&"\n\"{testCase.uuid}\" = {isIncluded}\n")
+      # Omit `include = true`
+      if testCase.uuid notin exercise.tests.included:
+        result.add "include = false\n"
+
+      if fileExists(testsPath):
+        let currContents = parsetoml.parseFile(testsPath)
+        if currContents.hasKey(testCase.uuid):
+          # Preserve custom properties
+          for k, v in currContents[testCase.uuid].getTable():
+            if k notin ["description", "include"].toHashSet():
+              let vTomlString =
+                if v.kind == String:
+                  prettyTomlString(v.stringVal)
+                elif v.kind == Array:
+                  prettyTomlString(v.arrayVal)
+                else:
+                  toTomlString(v)
+              result.add &"{k} = {vTomlString}\n"
+
+      result.add "\n"
+
+  result.setLen(result.len - 1)
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
   let testsPath = testsFile(exercise, trackDir)
   createDir(testsPath.parentDir())
 
-  let contents = toToml(exercise)
+  let contents = toToml(exercise, testsPath)
   writeFile(testsPath, contents)
