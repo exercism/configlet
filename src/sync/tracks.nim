@@ -50,26 +50,24 @@ proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
           result.add(initTrackRepoExercise(trackDir, configJsonExercise))
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
-  if not fileExists(exercise.testsFile):
-    return
+  if fileExists(exercise.testsFile):
+    let tests = parsetoml.parseFile(exercise.testsFile)
 
-  let tests = parsetoml.parseFile(exercise.testsFile)
-
-  for uuid, val in tests.getTable():
-    if val.hasKey("include"):
-      if val["include"].kind == Bool:
-        let isIncluded = val["include"].getBool()
-        if isIncluded:
-          result.included.incl(uuid)
+    for uuid, val in tests.getTable():
+      if val.hasKey("include"):
+        if val["include"].kind == Bool:
+          let isIncluded = val["include"].getBool()
+          if isIncluded:
+            result.included.incl(uuid)
+          else:
+            result.excluded.incl(uuid)
         else:
-          result.excluded.incl(uuid)
+          let msg = "Error: the value of an `include` key is `" &
+                    val["include"].toTomlString() & "`, but it must be a bool:\n" &
+                    exercise.testsFile()
+          stderr.writeLine(msg)
       else:
-        let msg = "Error: the value of an `include` key is `" &
-                  val["include"].toTomlString() & "`, but it must be a bool:\n" &
-                  exercise.testsFile()
-        stderr.writeLine(msg)
-    else:
-      result.included.incl(uuid)
+        result.included.incl(uuid)
 
 proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   TrackExercise(
