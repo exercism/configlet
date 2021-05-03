@@ -52,5 +52,5 @@ jobs:
       - name: Install our Nimble dependencies
         run: nimble --accept install --depsOnly
 
-      - name: Run `tests/all_tests.nim`
-        run: nim c --styleCheck:error -r ./tests/all_tests.nim
+      - name: Run our test suite
+        run: nimble test
