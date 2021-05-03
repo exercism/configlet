@@ -6,9 +6,6 @@ type
   ConfigJsonExercise = object
     slug: string
 
-  ConfigJson = object
-    practice: seq[ConfigJsonExercise]
-
   TrackDir = distinct string
 
   TrackRepoExercise = distinct string
@@ -44,9 +41,8 @@ func testsFile(exercise: TrackRepoExercise): string =
 func testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
 
-proc parseConfigJson(filePath: string): ConfigJson =
-  let json = json.parseFile(filePath)["exercises"]
-  to(json, ConfigJson)
+proc parseConfigJson(filePath: string): JsonNode =
+  result = json.parseFile(filePath)["exercises"]
 
 func initTrackRepoExercise(trackDir: TrackDir,
     exercise: ConfigJsonExercise): TrackRepoExercise =
@@ -55,8 +51,12 @@ func initTrackRepoExercise(trackDir: TrackDir,
 proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
   let config = parseConfigJson(trackDir.configJsonFile)
 
-  for exercise in config.practice:
-    result.add(initTrackRepoExercise(trackDir, exercise))
+  if config.hasKey("practice"):
+    for exercise in config["practice"]:
+      if exercise.hasKey("slug"):
+        if exercise["slug"].kind == JString:
+          let configJsonExercise = ConfigJsonExercise(slug: exercise["slug"].getStr())
+          result.add(initTrackRepoExercise(trackDir, configJsonExercise))
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
   if not fileExists(exercise.testsFile):
