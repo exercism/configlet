@@ -7,7 +7,7 @@ type
 
   TrackDir = distinct string
 
-  TrackRepoExercise = distinct string
+  ExercisePath = distinct string
 
   TrackExerciseTests* = object
     included*: HashSet[string]
@@ -16,41 +16,40 @@ type
   TrackExercise* = object
     slug*: string
     tests*: TrackExerciseTests
-    repoExercise: TrackRepoExercise
+    exercisePath: ExercisePath
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: TrackRepoExercise, tail: string): string {.borrow.}
+proc `/`(head: ExercisePath, tail: string): string {.borrow.}
 proc `/`(head: string, tail: ConfigJsonSlug): string {.borrow.}
-proc extractFilename(exercise: TrackRepoExercise): string {.borrow.}
+proc extractFilename(exercise: ExercisePath): string {.borrow.}
 
-func slug(exercise: TrackRepoExercise): string =
-  extractFilename(exercise)
+func slug(exercisePath: ExercisePath): string =
+  extractFilename(exercisePath)
 
-func testsFile(exercise: TrackRepoExercise): string =
-  exercise / ".meta" / "tests.toml"
+func testsFile(exercisePath: ExercisePath): string =
+  exercisePath / ".meta" / "tests.toml"
 
 func testsFile*(exercise: TrackExercise): string =
-  exercise.repoExercise.testsFile()
+  exercise.exercisePath.testsFile()
 
-func initTrackRepoExercise(trackDir: TrackDir,
-    slug: ConfigJsonSlug): TrackRepoExercise =
-  TrackRepoExercise(trackDir / "exercises" / "practice" / slug)
+func initExercisePath(trackDir: TrackDir, slug: ConfigJsonSlug): ExercisePath =
+  ExercisePath(trackDir / "exercises" / "practice" / slug)
 
-proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
+proc exercises(trackDir: TrackDir): seq[ExercisePath] =
   let config = json.parseFile(trackDir / "config.json")["exercises"]
 
   if config.hasKey("practice"):
     let practiceExercises = config["practice"]
-    result = newSeqOfCap[TrackRepoExercise](practiceExercises.len)
+    result = newSeqOfCap[ExercisePath](practiceExercises.len)
 
     for exercise in practiceExercises:
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let configJsonSlug = ConfigJsonSlug(exercise["slug"].getStr())
-          result.add initTrackRepoExercise(trackDir, configJsonSlug)
+          result.add initExercisePath(trackDir, configJsonSlug)
 
-proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
-  let testsFile = testsFile(exercise)
+proc initTrackExerciseTests(exercisePath: ExercisePath): TrackExerciseTests =
+  let testsFile = testsFile(exercisePath)
   if fileExists(testsFile):
     let tests = parsetoml.parseFile(testsFile)
 
@@ -65,24 +64,24 @@ proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
         else:
           let msg = "Error: the value of an `include` key is `" &
                     val["include"].toTomlString() & "`, but it must be a bool:\n" &
-                    exercise.testsFile()
+                    exercisePath.testsFile()
           stderr.writeLine(msg)
       else:
         result.included.incl(uuid)
 
-proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
+proc initTrackExercise(exercisePath: ExercisePath): TrackExercise =
   TrackExercise(
-    slug: slug(exercise),
-    tests: initTrackExerciseTests(exercise),
+    slug: slug(exercisePath),
+    tests: initTrackExerciseTests(exercisePath),
   )
 
 proc findTrackExercises(trackDir: TrackDir, userExercise: string): seq[TrackExercise] =
-  let repoExercises = exercises(trackDir)
-  result = newSeqOfCap[TrackExercise](repoExercises.len)
+  let exercisePaths = exercises(trackDir)
+  result = newSeqOfCap[TrackExercise](exercisePaths.len)
 
-  for repoExercise in repoExercises:
-    if userExercise.len == 0 or userExercise == slug(repoExercise):
-      result.add initTrackExercise(repoExercise)
+  for exercisePath in exercisePaths:
+    if userExercise.len == 0 or userExercise == slug(exercisePath):
+      result.add initTrackExercise(exercisePath)
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackDir = TrackDir(conf.trackDir)
