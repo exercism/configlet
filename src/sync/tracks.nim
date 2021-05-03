@@ -3,8 +3,6 @@ import pkg/parsetoml
 import ".."/cli
 
 type
-  ConfigJsonSlug = distinct string
-
   TrackDir = distinct string
 
   ExercisePath = distinct string
@@ -20,7 +18,6 @@ type
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: ExercisePath, tail: string): string {.borrow.}
-proc `/`(head: string, tail: ConfigJsonSlug): string {.borrow.}
 proc extractFilename(exercise: ExercisePath): string {.borrow.}
 
 func slug(exercisePath: ExercisePath): string =
@@ -32,7 +29,7 @@ func testsFile(exercisePath: ExercisePath): string =
 func testsFile*(exercise: TrackExercise): string =
   exercise.exercisePath.testsFile()
 
-func initExercisePath(trackDir: TrackDir, slug: ConfigJsonSlug): ExercisePath =
+func initExercisePath(trackDir: TrackDir, slug: string): ExercisePath =
   ExercisePath(trackDir / "exercises" / "practice" / slug)
 
 proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
@@ -45,8 +42,8 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
     for exercise in practiceExercises:
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
-          let configJsonSlug = ConfigJsonSlug(exercise["slug"].getStr())
-          result.add initExercisePath(trackDir, configJsonSlug)
+          let slug = exercise["slug"].getStr()
+          result.add initExercisePath(trackDir, slug)
 
 proc initTrackExerciseTests(exercisePath: ExercisePath): TrackExerciseTests =
   let testsFile = testsFile(exercisePath)
