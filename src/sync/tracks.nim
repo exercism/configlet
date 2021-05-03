@@ -46,7 +46,7 @@ proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)["exercises"]
   to(json, ConfigJson)
 
-func newTrackRepoExercise(repo: TrackRepo,
+func initTrackRepoExercise(repo: TrackRepo,
     exercise: ConfigJsonExercise): TrackRepoExercise =
   TrackRepoExercise(dir: repo.practiceExerciseDir(exercise))
 
@@ -54,7 +54,7 @@ proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   let config = parseConfigJson(repo.configJsonFile)
 
   for exercise in config.practice:
-    result.add(newTrackRepoExercise(repo, exercise))
+    result.add(initTrackRepoExercise(repo, exercise))
 
 proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
   if not fileExists(exercise.testsFile):
