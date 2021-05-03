@@ -36,6 +36,28 @@ proc isEveryConceptLinksFileValid*(trackDir: Path): bool =
         if not isValidLinksFile(j, linksPath):
           result = false
 
+proc isValidConceptConfig(data: JsonNode, path: Path): bool =
+  if isObject(data, "", path):
+    let checks = [
+      hasString(data, "blurb", path, maxLen = 350),
+      hasArrayOfStrings(data, "authors", path, uniqueValues = true),
+      hasArrayOfStrings(data, "contributors", path, isRequired = false,
+                        uniqueValues = true),
+    ]
+    result = allTrue(checks)
+
+proc isEveryConceptConfigValid*(trackDir: Path): bool =
+  let conceptsDir = trackDir / "concepts"
+  result = true
+
+  if dirExists(conceptsDir):
+    for conceptDir in getSortedSubdirs(conceptsDir):
+      let configPath = conceptDir / ".meta" / "config.json"
+      let j = parseJsonFile(configPath, result)
+      if j != nil:
+        if not isValidConceptConfig(j, configPath):
+          result = false
+
 proc conceptDocsExist*(trackDir: Path): bool =
   ## Returns true if every subdirectory in `trackDir/concepts` has the required
   ## Markdown files.
