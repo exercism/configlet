@@ -86,4 +86,4 @@ proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackDir = TrackDir(conf.trackDir)
-  trackDir.findTrackExercises(conf)
+  result = findTrackExercises(trackDir, conf)
