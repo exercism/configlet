@@ -40,7 +40,10 @@ proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
   let config = json.parseFile(trackDir / "config.json")["exercises"]
 
   if config.hasKey("practice"):
-    for exercise in config["practice"]:
+    let practiceExercises = config["practice"]
+    result = newSeqOfCap[TrackRepoExercise](practiceExercises.len)
+
+    for exercise in practiceExercises:
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let configJsonExercise = ConfigJsonExercise(exercise["slug"].getStr())
@@ -73,7 +76,10 @@ proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   )
 
 proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
-  for repoExercise in trackDir.exercises:
+  let repoExercises = exercises(trackDir)
+  result = newSeqOfCap[TrackExercise](repoExercises.len)
+
+  for repoExercise in repoExercises:
     if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(initTrackExercise(repoExercise))
 
