@@ -23,11 +23,8 @@ proc `/`(head: TrackRepoExercise, tail: string): string {.borrow.}
 proc `/`(head: string, tail: ConfigJsonExercise): string {.borrow.}
 proc extractFilename(exercise: TrackRepoExercise): string {.borrow.}
 
-func exercisesDir(trackDir: TrackDir): string =
-  trackDir / "exercises"
-
 func practiceExerciseDir(trackDir: TrackDir, exercise: ConfigJsonExercise): string =
-  trackDir.exercisesDir / "practice" / exercise
+  trackDir / "exercises" / "practice" / exercise
 
 func slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise)
