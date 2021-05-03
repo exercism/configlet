@@ -47,7 +47,7 @@ proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let configJsonExercise = ConfigJsonExercise(exercise["slug"].getStr())
-          result.add(initTrackRepoExercise(trackDir, configJsonExercise))
+          result.add initTrackRepoExercise(trackDir, configJsonExercise)
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
   let testsFile = testsFile(exercise)
@@ -82,7 +82,7 @@ proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
 
   for repoExercise in repoExercises:
     if conf.action.exercise.len == 0 or conf.action.exercise == slug(repoExercise):
-      result.add(initTrackExercise(repoExercise))
+      result.add initTrackExercise(repoExercise)
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackDir = TrackDir(conf.trackDir)
