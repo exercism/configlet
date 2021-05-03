@@ -48,7 +48,7 @@ proc parseConfigJson(filePath: string): ConfigJson =
 
 func newTrackRepoExercise(repo: TrackRepo,
     exercise: ConfigJsonExercise): TrackRepoExercise =
-  result.dir = repo.practiceExerciseDir(exercise)
+  TrackRepoExercise(dir: repo.practiceExerciseDir(exercise))
 
 proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   let config = parseConfigJson(repo.configJsonFile)
@@ -79,8 +79,10 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
       result.included.incl(uuid)
 
 proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
-  result.slug = exercise.slug
-  result.tests = newTrackExerciseTests(exercise)
+  TrackExercise(
+    slug: exercise.slug,
+    tests: newTrackExerciseTests(exercise),
+  )
 
 proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
   for repoExercise in repo.exercises:
