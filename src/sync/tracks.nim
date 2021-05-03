@@ -3,7 +3,7 @@ import pkg/parsetoml
 import ".."/cli
 
 type
-  TrackDir = distinct string
+  TrackDir {.requiresInit.} = distinct string
 
   ExercisePath {.requiresInit.} = distinct string
 
