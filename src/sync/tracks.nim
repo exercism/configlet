@@ -32,15 +32,12 @@ func testsFile(exercise: TrackRepoExercise): string =
 func testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
 
-proc parseConfigJson(filePath: string): JsonNode =
-  result = json.parseFile(filePath)["exercises"]
-
 func initTrackRepoExercise(trackDir: TrackDir,
     exercise: ConfigJsonExercise): TrackRepoExercise =
   TrackRepoExercise(trackDir / "exercises" / "practice" / exercise)
 
 proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
-  let config = parseConfigJson(trackDir / "config.json")
+  let config = json.parseFile(trackDir / "config.json")["exercises"]
 
   if config.hasKey("practice"):
     for exercise in config["practice"]:
