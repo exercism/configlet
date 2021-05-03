@@ -76,14 +76,14 @@ proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
     tests: initTrackExerciseTests(exercise),
   )
 
-proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
+proc findTrackExercises(trackDir: TrackDir, userExercise: string): seq[TrackExercise] =
   let repoExercises = exercises(trackDir)
   result = newSeqOfCap[TrackExercise](repoExercises.len)
 
   for repoExercise in repoExercises:
-    if conf.action.exercise.len == 0 or conf.action.exercise == slug(repoExercise):
+    if userExercise.len == 0 or userExercise == slug(repoExercise):
       result.add initTrackExercise(repoExercise)
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackDir = TrackDir(conf.trackDir)
-  result = findTrackExercises(trackDir, conf)
+  result = findTrackExercises(trackDir, conf.action.exercise)
