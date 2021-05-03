@@ -35,7 +35,7 @@ func testsFile*(exercise: TrackExercise): string =
 func initExercisePath(trackDir: TrackDir, slug: ConfigJsonSlug): ExercisePath =
   ExercisePath(trackDir / "exercises" / "practice" / slug)
 
-proc exercises(trackDir: TrackDir): seq[ExercisePath] =
+proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
   let config = json.parseFile(trackDir / "config.json")["exercises"]
 
   if config.hasKey("practice"):
@@ -76,12 +76,12 @@ proc initTrackExercise(exercisePath: ExercisePath): TrackExercise =
   )
 
 proc findTrackExercises(trackDir: TrackDir, userExercise: string): seq[TrackExercise] =
-  let exercisePaths = exercises(trackDir)
-  result = newSeqOfCap[TrackExercise](exercisePaths.len)
+  let practiceExercisePaths = getPracticeExercisePaths(trackDir)
+  result = newSeqOfCap[TrackExercise](practiceExercisePaths.len)
 
-  for exercisePath in exercisePaths:
-    if userExercise.len == 0 or userExercise == slug(exercisePath):
-      result.add initTrackExercise(exercisePath)
+  for practiceExercisePath in practiceExercisePaths:
+    if userExercise.len == 0 or userExercise == slug(practiceExercisePath):
+      result.add initTrackExercise(practiceExercisePath)
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackDir = TrackDir(conf.trackDir)
