@@ -14,7 +14,6 @@ type
   TrackExercise* = object
     slug*: string
     tests*: TrackExerciseTests
-    exercisePath: ExercisePath
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: ExercisePath, tail: string): string {.borrow.}
@@ -27,7 +26,7 @@ func testsFile(exercisePath: ExercisePath): string =
   exercisePath / ".meta" / "tests.toml"
 
 func testsFile*(exercise: TrackExercise): string =
-  exercise.exercisePath.testsFile()
+  ExercisePath("").testsFile()
 
 func initExercisePath(trackDir: TrackDir, slug: string): ExercisePath =
   ExercisePath(trackDir / "exercises" / "practice" / slug)
