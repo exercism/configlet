@@ -56,7 +56,7 @@ proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
   for exercise in config.practice:
     result.add(initTrackRepoExercise(repo, exercise))
 
-proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
+proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
   if not fileExists(exercise.testsFile):
     return
 
@@ -81,7 +81,7 @@ proc newTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
 proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   TrackExercise(
     slug: exercise.slug,
-    tests: newTrackExerciseTests(exercise),
+    tests: initTrackExerciseTests(exercise),
   )
 
 proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
