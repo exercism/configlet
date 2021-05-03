@@ -69,7 +69,17 @@ proc main =
       check:
         trackExercises[1].`$` == expectedTwoFer
 
-    removeDir(trackDir)
+    # Try to remove the track directory, but allow the tests to pass if there
+    # was an error removing it.
+    # This resolves a CI failure on Windows.
+    # "The process cannot access the file because it is being used by another
+    # process."
+    try:
+      sleep(1000)
+      removeDir(trackDir)
+    except CatchableError:
+      stderr.writeLine &"Error: could not remove the directory: {trackDir}"
+      stderr.writeLine getCurrentExceptionMsg()
 
 main()
 {.used.}
