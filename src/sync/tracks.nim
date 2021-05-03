@@ -39,7 +39,8 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let slug = exercise["slug"].getStr()
-          result.add PracticeExercisePath(trackDir / "exercises" / "practice" / slug)
+          let path = trackDir / "exercises" / "practice" / slug
+          result.add PracticeExercisePath(path)
 
 proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTests =
   let testsFile = testsFile(exercisePath)
@@ -56,8 +57,8 @@ proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTe
             result.excluded.incl(uuid)
         else:
           let msg = "Error: the value of an `include` key is `" &
-                    val["include"].toTomlString() & "`, but it must be a bool:\n" &
-                    exercisePath.testsFile()
+                    val["include"].toTomlString() & "`, but it must be a " &
+                    "bool:\n" & exercisePath.testsFile()
           stderr.writeLine(msg)
       else:
         result.included.incl(uuid)
@@ -68,7 +69,8 @@ proc initTrackExercise(exercisePath: PracticeExercisePath): TrackExercise =
     tests: initTrackExerciseTests(exercisePath),
   )
 
-proc findTrackExercises(trackDir: TrackDir, userExercise: string): seq[TrackExercise] =
+proc findTrackExercises(trackDir: TrackDir,
+                        userExercise: string): seq[TrackExercise] =
   let practiceExercisePaths = getPracticeExercisePaths(trackDir)
   result = newSeqOfCap[TrackExercise](practiceExercisePaths.len)
 
