@@ -5,7 +5,7 @@ import ".."/cli
 type
   TrackDir {.requiresInit.} = distinct string
 
-  ExercisePath {.requiresInit.} = distinct string
+  PracticeExercisePath {.requiresInit.} = distinct string
 
   TrackExerciseTests* = object
     included*: HashSet[string]
@@ -16,32 +16,32 @@ type
     tests*: TrackExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: ExercisePath, tail: string): string {.borrow.}
-proc extractFilename(exercise: ExercisePath): string {.borrow.}
+proc `/`(head: PracticeExercisePath, tail: string): string {.borrow.}
+proc extractFilename(exercisePath: PracticeExercisePath): string {.borrow.}
 
-func slug(exercisePath: ExercisePath): string =
+func slug(exercisePath: PracticeExercisePath): string =
   extractFilename(exercisePath)
 
-func testsFile(exercisePath: ExercisePath): string =
+func testsFile(exercisePath: PracticeExercisePath): string =
   exercisePath / ".meta" / "tests.toml"
 
 func testsFile*(exercise: TrackExercise): string =
-  ExercisePath("").testsFile()
+  PracticeExercisePath("").testsFile()
 
-proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
+proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
   let config = json.parseFile(trackDir / "config.json")["exercises"]
 
   if config.hasKey("practice"):
     let practiceExercises = config["practice"]
-    result = newSeqOfCap[ExercisePath](practiceExercises.len)
+    result = newSeqOfCap[PracticeExercisePath](practiceExercises.len)
 
     for exercise in practiceExercises:
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let slug = exercise["slug"].getStr()
-          result.add ExercisePath(trackDir / "exercises" / "practice" / slug)
+          result.add PracticeExercisePath(trackDir / "exercises" / "practice" / slug)
 
-proc initTrackExerciseTests(exercisePath: ExercisePath): TrackExerciseTests =
+proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTests =
   let testsFile = testsFile(exercisePath)
   if fileExists(testsFile):
     let tests = parsetoml.parseFile(testsFile)
@@ -62,7 +62,7 @@ proc initTrackExerciseTests(exercisePath: ExercisePath): TrackExerciseTests =
       else:
         result.included.incl(uuid)
 
-proc initTrackExercise(exercisePath: ExercisePath): TrackExercise =
+proc initTrackExercise(exercisePath: PracticeExercisePath): TrackExercise =
   TrackExercise(
     slug: slug(exercisePath),
     tests: initTrackExerciseTests(exercisePath),
