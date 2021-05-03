@@ -23,7 +23,7 @@ proc probSpecsDir: string =
   getCurrentDir() / ".problem-specifications"
 
 proc initProbSpecsRepo: ProbSpecsRepo =
-  result.dir = probSpecsDir()
+  ProbSpecsRepo(dir: probSpecsDir())
 
 proc clone(repo: ProbSpecsRepo) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
@@ -34,7 +34,7 @@ proc remove(repo: ProbSpecsRepo) =
   removeDir(repo.dir)
 
 func initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
-  result.dir = dir
+  ProbSpecsRepoExercise(dir: dir)
 
 func exercisesDir(repo: ProbSpecsRepo): string =
   repo.dir / "exercises"
@@ -57,7 +57,7 @@ func slug(repoExercise: ProbSpecsRepoExercise): string =
   extractFilename(repoExercise.dir)
 
 func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  result.json = node
+  ProbSpecsTestCase(json: node)
 
 proc uuid*(testCase: ProbSpecsTestCase): string =
   testCase.json["uuid"].getStr()
@@ -94,8 +94,10 @@ proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecs
     repoExercise.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
 proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
-  result.slug = repoExercise.slug
-  result.testCases = parseProbSpecsTestCases(repoExercise)
+  ProbSpecsExercise(
+    slug: repoExercise.slug,
+    testCases: parseProbSpecsTestCases(repoExercise),
+  )
 
 proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
   for repoExercise in repo.exercisesWithCanonicalData():

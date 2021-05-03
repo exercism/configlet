@@ -25,9 +25,11 @@ type
     testCases*: seq[ExerciseTestCase]
 
 func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
-  result.included = included
-  result.excluded = excluded
-  result.missing = missing
+  ExerciseTests(
+    included: included,
+    excluded: excluded,
+    missing: missing,
+  )
 
 proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
   for testCase in probSpecsExercise.testCases:
@@ -39,10 +41,11 @@ proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpec
       result.missing.incl(testCase.uuid)
 
 proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
-  result = new(ExerciseTestCase)
-  result.uuid = testCase.uuid
-  result.description = testCase.description
-  result.json = testCase.json
+  ExerciseTestCase(
+    uuid: testCase.uuid,
+    description: testCase.description,
+    json: testCase.json,
+  )
 
 proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   for testCase in testCases:
@@ -56,9 +59,11 @@ proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCa
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
 proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
-  result.slug = trackExercise.slug
-  result.tests = initExerciseTests(trackExercise, probSpecsExercise)
-  result.testCases = newExerciseTestCases(probSpecsExercise.testCases)
+  Exercise(
+    slug: trackExercise.slug,
+    tests: initExerciseTests(trackExercise, probSpecsExercise),
+    testCases: newExerciseTestCases(probSpecsExercise.testCases),
+  )
 
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
