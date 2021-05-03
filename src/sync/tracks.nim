@@ -78,7 +78,7 @@ proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
     else:
       result.included.incl(uuid)
 
-proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
+proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   TrackExercise(
     slug: exercise.slug,
     tests: initTrackExerciseTests(exercise),
@@ -87,7 +87,7 @@ proc newTrackExercise(exercise: TrackRepoExercise): TrackExercise =
 proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
   for repoExercise in repo.exercises:
     if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
-      result.add(newTrackExercise(repoExercise))
+      result.add(initTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
   let trackRepo = TrackRepo(dir: conf.trackDir)
