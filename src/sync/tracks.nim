@@ -28,9 +28,6 @@ func testsFile(exercisePath: ExercisePath): string =
 func testsFile*(exercise: TrackExercise): string =
   ExercisePath("").testsFile()
 
-func initExercisePath(trackDir: TrackDir, slug: string): ExercisePath =
-  ExercisePath(trackDir / "exercises" / "practice" / slug)
-
 proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
   let config = json.parseFile(trackDir / "config.json")["exercises"]
 
@@ -42,7 +39,7 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[ExercisePath] =
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
           let slug = exercise["slug"].getStr()
-          result.add initExercisePath(trackDir, slug)
+          result.add ExercisePath(trackDir / "exercises" / "practice" / slug)
 
 proc initTrackExerciseTests(exercisePath: ExercisePath): TrackExerciseTests =
   let testsFile = testsFile(exercisePath)
