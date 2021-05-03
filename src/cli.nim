@@ -17,6 +17,7 @@ type
     actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
+    actGenerate = "generate"
 
   Action* = object
     case kind*: ActionKind
@@ -32,6 +33,8 @@ type
       offline*: bool
     of actUuid:
       num*: int
+    of actGenerate:
+      discard
 
   Conf* = object
     action*: Action
@@ -233,6 +236,8 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
     Action(kind: actionKind, probSpecsDir: probSpecsDir)
   of actUuid:
     Action(kind: actionKind, num: 1)
+  of actGenerate:
+    Action(kind: actionKind)
 
 func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
                verbosity = verNormal): Conf =
@@ -372,6 +377,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(num, num)
       else:
         discard
+    of actGenerate:
+      discard
 
   if not isGlobalOpt and not isActionOpt:
     case conf.action.kind
@@ -404,4 +411,6 @@ proc processCmdLine*: Conf =
       showError(&"'{list(optSyncOffline)}' was given without passing " &
                 &"'{list(optSyncProbSpecsDir)}'")
   of actUuid:
+    discard
+  of actGenerate:
     discard
