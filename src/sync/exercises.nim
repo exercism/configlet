@@ -47,7 +47,7 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
     json: testCase.json,
   )
 
-proc newExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   for testCase in testCases:
     result.add(newExerciseTestCase(testCase))
 
@@ -62,7 +62,7 @@ proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExer
   Exercise(
     slug: trackExercise.slug,
     tests: initExerciseTests(trackExercise, probSpecsExercise),
-    testCases: newExerciseTestCases(probSpecsExercise.testCases),
+    testCases: initExerciseTestCases(probSpecsExercise.testCases),
   )
 
 proc findExercises*(conf: Conf): seq[Exercise] =
