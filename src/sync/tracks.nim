@@ -5,7 +5,7 @@ import ".."/cli
 type
   TrackDir = distinct string
 
-  ExercisePath = distinct string
+  ExercisePath {.requiresInit.} = distinct string
 
   TrackExerciseTests* = object
     included*: HashSet[string]
