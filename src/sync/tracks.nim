@@ -11,8 +11,7 @@ type
 
   TrackDir = distinct string
 
-  TrackRepoExercise = object
-    dir: string
+  TrackRepoExercise = distinct string
 
   TrackExerciseTests* = object
     included*: HashSet[string]
@@ -24,6 +23,8 @@ type
     repoExercise: TrackRepoExercise
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
+proc `/`(head: TrackRepoExercise, tail: string): string {.borrow.}
+proc extractFilename(exercise: TrackRepoExercise): string {.borrow.}
 
 func configJsonFile(trackDir: TrackDir): string =
   trackDir / "config.json"
@@ -35,10 +36,10 @@ func practiceExerciseDir(trackDir: TrackDir, exercise: ConfigJsonExercise): stri
   trackDir.exercisesDir / "practice" / exercise.slug
 
 func slug(exercise: TrackRepoExercise): string =
-  extractFilename(exercise.dir)
+  extractFilename(exercise)
 
 func testsFile(exercise: TrackRepoExercise): string =
-  exercise.dir / ".meta" / "tests.toml"
+  exercise / ".meta" / "tests.toml"
 
 func testsFile*(exercise: TrackExercise): string =
   exercise.repoExercise.testsFile
@@ -49,7 +50,7 @@ proc parseConfigJson(filePath: string): ConfigJson =
 
 func initTrackRepoExercise(trackDir: TrackDir,
     exercise: ConfigJsonExercise): TrackRepoExercise =
-  TrackRepoExercise(dir: trackDir.practiceExerciseDir(exercise))
+  TrackRepoExercise(trackDir.practiceExerciseDir(exercise))
 
 proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
   let config = parseConfigJson(trackDir.configJsonFile)

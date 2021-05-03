@@ -51,7 +51,7 @@ proc main =
         (slug: "hello-world",
         tests: (included: {"af9ffe10-dc13-42d8-a742-e7bdafac449d"},
                 excluded: {}),
-        repoExercise: (dir: ""))
+        repoExercise: ...)
       """.oneLine()
 
       check:
@@ -64,7 +64,7 @@ proc main =
                            "3549048d-1a6e-4653-9a79-b0bda163e8d5",
                            "b4c6dbb8-b4fb-42c2-bafd-10785abe7709"},
                 excluded: {}),
-        repoExercise: (dir: ""))
+        repoExercise: ...)
       """.oneLine()
       check:
         trackExercises[1].`$` == expectedTwoFer
