@@ -9,8 +9,7 @@ type
   ConfigJson = object
     practice: seq[ConfigJsonExercise]
 
-  TrackRepo = object
-    dir: string
+  TrackDir = distinct string
 
   TrackRepoExercise = object
     dir: string
@@ -24,14 +23,16 @@ type
     tests*: TrackExerciseTests
     repoExercise: TrackRepoExercise
 
-func configJsonFile(repo: TrackRepo): string =
-  repo.dir / "config.json"
+proc `/`(head: TrackDir, tail: string): string {.borrow.}
 
-func exercisesDir(repo: TrackRepo): string =
-  repo.dir / "exercises"
+func configJsonFile(trackDir: TrackDir): string =
+  trackDir / "config.json"
 
-func practiceExerciseDir(repo: TrackRepo, exercise: ConfigJsonExercise): string =
-  repo.exercisesDir / "practice" / exercise.slug
+func exercisesDir(trackDir: TrackDir): string =
+  trackDir / "exercises"
+
+func practiceExerciseDir(trackDir: TrackDir, exercise: ConfigJsonExercise): string =
+  trackDir.exercisesDir / "practice" / exercise.slug
 
 func slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise.dir)
@@ -46,15 +47,15 @@ proc parseConfigJson(filePath: string): ConfigJson =
   let json = json.parseFile(filePath)["exercises"]
   to(json, ConfigJson)
 
-func initTrackRepoExercise(repo: TrackRepo,
+func initTrackRepoExercise(trackDir: TrackDir,
     exercise: ConfigJsonExercise): TrackRepoExercise =
-  TrackRepoExercise(dir: repo.practiceExerciseDir(exercise))
+  TrackRepoExercise(dir: trackDir.practiceExerciseDir(exercise))
 
-proc exercises(repo: TrackRepo): seq[TrackRepoExercise] =
-  let config = parseConfigJson(repo.configJsonFile)
+proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
+  let config = parseConfigJson(trackDir.configJsonFile)
 
   for exercise in config.practice:
-    result.add(initTrackRepoExercise(repo, exercise))
+    result.add(initTrackRepoExercise(trackDir, exercise))
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
   if not fileExists(exercise.testsFile):
@@ -84,11 +85,11 @@ proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
     tests: initTrackExerciseTests(exercise),
   )
 
-proc findTrackExercises(repo: TrackRepo, conf: Conf): seq[TrackExercise] =
-  for repoExercise in repo.exercises:
+proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
+  for repoExercise in trackDir.exercises:
     if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(initTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
-  let trackRepo = TrackRepo(dir: conf.trackDir)
-  trackRepo.findTrackExercises(conf)
+  let trackDir = TrackDir(conf.trackDir)
+  trackDir.findTrackExercises(conf)
