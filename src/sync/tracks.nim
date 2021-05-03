@@ -3,8 +3,7 @@ import pkg/parsetoml
 import ".."/cli
 
 type
-  ConfigJsonExercise = object
-    slug: string
+  ConfigJsonExercise = distinct string
 
   TrackDir = distinct string
 
@@ -21,6 +20,7 @@ type
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: TrackRepoExercise, tail: string): string {.borrow.}
+proc `/`(head: string, tail: ConfigJsonExercise): string {.borrow.}
 proc extractFilename(exercise: TrackRepoExercise): string {.borrow.}
 
 func configJsonFile(trackDir: TrackDir): string =
@@ -30,7 +30,7 @@ func exercisesDir(trackDir: TrackDir): string =
   trackDir / "exercises"
 
 func practiceExerciseDir(trackDir: TrackDir, exercise: ConfigJsonExercise): string =
-  trackDir.exercisesDir / "practice" / exercise.slug
+  trackDir.exercisesDir / "practice" / exercise
 
 func slug(exercise: TrackRepoExercise): string =
   extractFilename(exercise)
@@ -55,7 +55,7 @@ proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
     for exercise in config["practice"]:
       if exercise.hasKey("slug"):
         if exercise["slug"].kind == JString:
-          let configJsonExercise = ConfigJsonExercise(slug: exercise["slug"].getStr())
+          let configJsonExercise = ConfigJsonExercise(exercise["slug"].getStr())
           result.add(initTrackRepoExercise(trackDir, configJsonExercise))
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
