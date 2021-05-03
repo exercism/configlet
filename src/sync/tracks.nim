@@ -30,7 +30,7 @@ func testsFile(exercise: TrackRepoExercise): string =
   exercise / ".meta" / "tests.toml"
 
 func testsFile*(exercise: TrackExercise): string =
-  exercise.repoExercise.testsFile
+  exercise.repoExercise.testsFile()
 
 func initTrackRepoExercise(trackDir: TrackDir,
     exercise: ConfigJsonExercise): TrackRepoExercise =
@@ -50,8 +50,9 @@ proc exercises(trackDir: TrackDir): seq[TrackRepoExercise] =
           result.add(initTrackRepoExercise(trackDir, configJsonExercise))
 
 proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
-  if fileExists(exercise.testsFile):
-    let tests = parsetoml.parseFile(exercise.testsFile)
+  let testsFile = testsFile(exercise)
+  if fileExists(testsFile):
+    let tests = parsetoml.parseFile(testsFile)
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):
@@ -71,7 +72,7 @@ proc initTrackExerciseTests(exercise: TrackRepoExercise): TrackExerciseTests =
 
 proc initTrackExercise(exercise: TrackRepoExercise): TrackExercise =
   TrackExercise(
-    slug: exercise.slug,
+    slug: slug(exercise),
     tests: initTrackExerciseTests(exercise),
   )
 
@@ -80,7 +81,7 @@ proc findTrackExercises(trackDir: TrackDir, conf: Conf): seq[TrackExercise] =
   result = newSeqOfCap[TrackExercise](repoExercises.len)
 
   for repoExercise in repoExercises:
-    if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
+    if conf.action.exercise.len == 0 or conf.action.exercise == slug(repoExercise):
       result.add(initTrackExercise(repoExercise))
 
 proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
