@@ -2,8 +2,7 @@
 
 # This file is a copy of the
 # https://github.com/exercism/configlet/blob/main/scripts/fetch-configlet file.
-# Please submit bugfixes/improvements to the above file to ensure that all tracks
-# benefit from the changes.
+# Please submit bugfixes/improvements to the above file to ensure that all tracks benefit from the changes.
 
 set -eo pipefail
 
