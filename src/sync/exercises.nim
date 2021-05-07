@@ -145,8 +145,8 @@ proc toToml(exercise: Exercise, testsPath: string): string =
         result.add "include = false\n"
 
       # Always output the `reimplements` value, if present
-      if testCase.reimplements.isSome:
-        result.add &"reimplements = \"{testCase.reimplements.get.uuid}\"\n"
+      if testCase.reimplements.isSome():
+        result.add &"reimplements = \"{testCase.reimplements.get().uuid}\"\n"
 
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
