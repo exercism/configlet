@@ -144,7 +144,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       if uuid in exercise.tests.excluded:
         result.add "include = false\n"
 
-      # Always output the `reimplements` value, if present
+      # Always add the `reimplements` property, if present
       if testCase.reimplements.isSome():
         result.add &"reimplements = \"{testCase.reimplements.get().uuid}\"\n"
 
