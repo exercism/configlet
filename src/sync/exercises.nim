@@ -124,12 +124,16 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       if testCase.uuid notin exercise.tests.included:
         result.add "include = false\n"
 
+      # Always output the `reimplements` value, if present
+      if testCase.reimplements.isSome:
+        result.add &"reimplements = \"{testCase.reimplements.get.uuid}\"\n"
+
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
         if currContents.hasKey(testCase.uuid):
           # Preserve custom properties
           for k, v in currContents[testCase.uuid].getTable():
-            if k notin ["description", "include"].toHashSet():
+            if k notin ["description", "include", "reimplements"].toHashSet():
               let vTomlString =
                 if v.kind == String:
                   prettyTomlString(v.stringVal)
