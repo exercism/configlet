@@ -139,10 +139,12 @@ All exercises are synced!
 +++ exercises/practice/hamming/.meta/tests.toml
 +[db92e77e-7c72-499d-8fe6-9354d2bfd504]
 +description = "disallow left empty strand"
++reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
 +
 +
 +[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
 +description = "disallow right empty strand"
++reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
 --- exercises/practice/high-scores/.meta/tests.toml
 +++ exercises/practice/high-scores/.meta/tests.toml
 +
