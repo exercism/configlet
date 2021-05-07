@@ -2,18 +2,18 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc hasValidFiles(data: JsonNode, path: Path): bool =
+proc hasValidFiles(data: JsonNode, path, exerciseDir: Path): bool =
   const k = "files"
   if hasObject(data, k, path):
     let d = data[k]
     let checks = [
-      hasArrayOfStrings(d, "solution", path, k),
-      hasArrayOfStrings(d, "test", path, k),
-      hasArrayOfStrings(d, "example", path, k),
+      hasArrayOfFiles(d, "solution", path, k, exerciseDir),
+      hasArrayOfFiles(d, "test", path, k, exerciseDir),
+      hasArrayOfFiles(d, "example", path, k, exerciseDir),
     ]
     result = allTrue(checks)
 
-proc isValidPracticeExerciseConfig(data: JsonNode, path: Path): bool =
+proc isValidPracticeExerciseConfig(data: JsonNode, path, exerciseDir: Path): bool =
   if isObject(data, "", path):
     # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
@@ -22,7 +22,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode, path: Path): bool =
                         uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, isRequired = false,
                         uniqueValues = true),
-      if false: hasValidFiles(data, path) else: true,
+      hasValidFiles(data, path, exerciseDir),
       hasString(data, "language_versions", path, isRequired = false),
     ]
     result = allTrue(checks)
@@ -37,7 +37,7 @@ proc isEveryPracticeExerciseConfigValid*(trackDir: Path): bool =
       let configPath = exerciseDir / ".meta" / "config.json"
       let j = parseJsonFile(configPath, result)
       if j != nil:
-        if not isValidPracticeExerciseConfig(j, configPath):
+        if not isValidPracticeExerciseConfig(j, configPath, exerciseDir):
           result = false
 
 proc practiceExerciseDocsExist*(trackDir: Path): bool =
