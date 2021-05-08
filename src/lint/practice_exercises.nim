@@ -2,7 +2,7 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc hasValidFiles(data: JsonNode, path, exerciseDir: Path): bool =
+proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
   const k = "files"
   if hasObject(data, k, path):
     let d = data[k]
@@ -13,7 +13,7 @@ proc hasValidFiles(data: JsonNode, path, exerciseDir: Path): bool =
     ]
     result = allTrue(checks)
 
-proc isValidPracticeExerciseConfig(data: JsonNode, path, exerciseDir: Path): bool =
+proc isValidPracticeExerciseConfig(data: JsonNode; path, exerciseDir: Path): bool =
   if isObject(data, "", path):
     # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
