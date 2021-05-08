@@ -1,11 +1,25 @@
-# IDE files
+# The first 3 rules below cause every file without an extension to be ignored
+# Ignore everything
+*
+
+# Unignore all directories, including subdirectories
+!/**/
+
+# Unignore all files with extensions
+!*.*
+
+# Unignore files without an extension in these directories
+!.github/**
+!bin/**
+!scripts/**
+
+# Ignore Windows executables
+*.exe
+
+# Ignore IDE files
 .vscode/
 
-# Application binary
-configlet
-configlet.exe
-
-# Temporary repos
+# Ignore temporary repos
 .problem-specifications/
 .test_binary_problem_specifications/
 .test_binary_nim_track_repo/
