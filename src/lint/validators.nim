@@ -332,14 +332,8 @@ proc hasArrayOfFiles*(data: JsonNode;
                       key: string;
                       path: Path;
                       context = "";
-                      relativeToPath: Path;
-                      isRequired = true;
-                      uniqueValues = false;
-                      allowed = emptySetOfStrings;
-                      allowedArrayLen = 1..int.high;
-                      checkIsKebab = false): bool =
-  if hasArrayOfStrings(data, key, path, context, isRequired, uniqueValues,
-                       allowed, allowedArrayLen, checkIsKebab):
+                      relativeToPath: Path): bool =
+  if hasArrayOfStrings(data, key, path, context):
     result = true
 
     for item in data[key]:
