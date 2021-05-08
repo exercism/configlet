@@ -342,7 +342,6 @@ proc hasArrayOfFiles*(data: JsonNode;
       if not fileExists(absoluteFilePath):
         let msg = &"The {q context} array contains value " &
                   &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
-
         result.setFalseAndPrint(msg, path)
 
 type
