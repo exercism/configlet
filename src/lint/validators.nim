@@ -326,6 +326,24 @@ proc hasArrayOfStrings*(data: JsonNode;
   elif not isRequired:
     result = true
 
+proc fileExists(path: Path): bool {.borrow.}
+
+proc hasArrayOfFiles*(data: JsonNode;
+                      key: string;
+                      path: Path;
+                      context = "";
+                      relativeToPath: Path): bool =
+  if hasArrayOfStrings(data, key, path, context):
+    result = true
+
+    for item in data[key]:
+      let relativeFilePath = item.getStr()
+      let absoluteFilePath = relativeToPath / relativeFilePath
+      if not fileExists(absoluteFilePath):
+        let msg = &"The {q context} array contains value " &
+                  &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
+        result.setFalseAndPrint(msg, path)
+
 type
   ItemCall = proc(data: JsonNode; context: string; path: Path): bool {.nimcall.}
 
@@ -437,7 +455,6 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
     result = true
 
 proc dirExists*(path: Path): bool {.borrow.}
-proc fileExists(path: Path): bool {.borrow.}
 proc readFile(path: Path): string {.borrow.}
 proc parseJson(s: Stream; filename: Path; rawIntegers = false;
                rawFloats = false): JsonNode {.borrow.}
