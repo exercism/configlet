@@ -16,7 +16,6 @@ proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
 proc isValidPracticeExerciseConfig(data: JsonNode;
                                    path, exerciseDir: Path): bool =
   if isObject(data, "", path):
-    # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "authors", path, isRequired = false,
