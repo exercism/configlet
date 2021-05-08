@@ -49,7 +49,7 @@ get_download_url() {
     cut -d'"' -f4
 }
 
-main () {
+main() {
   if [[ -d ./bin ]]; then
     output_dir="./bin"
   elif [[ $PWD = */bin ]]; then
