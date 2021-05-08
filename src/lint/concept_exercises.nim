@@ -2,25 +2,26 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
-proc hasValidFiles(data: JsonNode, path: Path): bool =
+proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
   const k = "files"
   if hasObject(data, k, path):
     let d = data[k]
     let checks = [
-      hasArrayOfStrings(d, "solution", path, k),
-      hasArrayOfStrings(d, "test", path, k),
-      hasArrayOfStrings(d, "exemplar", path, k),
+      hasArrayOfFiles(d, "solution", path, k, exerciseDir),
+      hasArrayOfFiles(d, "test", path, k, exerciseDir),
+      hasArrayOfFiles(d, "exemplar", path, k, exerciseDir),
     ]
     result = allTrue(checks)
 
-proc isValidConceptExerciseConfig(data: JsonNode, path: Path): bool =
+proc isValidConceptExerciseConfig(data: JsonNode;
+                                  path, exerciseDir: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "authors", path, uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, isRequired = false,
                         uniqueValues = true),
-      hasValidFiles(data, path),
+      hasValidFiles(data, path, exerciseDir),
       hasArrayOfStrings(data, "forked_from", path, isRequired = false,
                         uniqueValues = true),
       hasString(data, "language_versions", path, isRequired = false),
@@ -36,7 +37,7 @@ proc isEveryConceptExerciseConfigValid*(trackDir: Path): bool =
       let configPath = exerciseDir / ".meta" / "config.json"
       let j = parseJsonFile(configPath, result)
       if j != nil:
-        if not isValidConceptExerciseConfig(j, configPath):
+        if not isValidConceptExerciseConfig(j, configPath, exerciseDir):
           result = false
 
 proc conceptExerciseDocsExist*(trackDir: Path): bool =
