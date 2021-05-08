@@ -13,7 +13,8 @@ proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
     ]
     result = allTrue(checks)
 
-proc isValidConceptExerciseConfig(data: JsonNode; path, exerciseDir: Path): bool =
+proc isValidConceptExerciseConfig(data: JsonNode;
+                                  path, exerciseDir: Path): bool =
   if isObject(data, "", path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),

@@ -13,7 +13,8 @@ proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
     ]
     result = allTrue(checks)
 
-proc isValidPracticeExerciseConfig(data: JsonNode; path, exerciseDir: Path): bool =
+proc isValidPracticeExerciseConfig(data: JsonNode;
+                                   path, exerciseDir: Path): bool =
   if isObject(data, "", path):
     # TODO: Enable the `files` checks after the tracks have had some time to update.
     let checks = [
