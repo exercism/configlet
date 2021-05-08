@@ -344,8 +344,6 @@ proc hasArrayOfFiles*(data: JsonNode;
                   &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
 
         result.setFalseAndPrint(msg, path)
-  else:
-    result = false
 
 type
   ItemCall = proc(data: JsonNode; context: string; path: Path): bool {.nimcall.}
