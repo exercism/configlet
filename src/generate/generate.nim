@@ -43,11 +43,11 @@ proc generateIntroduction(trackDir: Path, templatePath: Path): string =
   while idx < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
-    # where we allow spaces/tabs after the opening brace, around the
-    # colon, and before the closing brace. The slug must be in kebab-case.
+    # where we allow spaces after the opening brace, around the colon,
+    # and before the closing brace. The slug must be in kebab-case.
     if scanp(content, idx,
-            "%{", *{' ', '\t'}, "concept", *{' ', '\t'}, ':', *{' ', '\t'},
-            +{'a'..'z', '-'} -> conceptSlug.add($_), *{' ', '\t'}, '}'):
+             "%{", *{' '}, "concept", *{' '}, ':', *{' '},
+             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       result.add conceptIntroduction(trackDir, conceptSlug, templatePath)
     else:
       result.add content[idx]
