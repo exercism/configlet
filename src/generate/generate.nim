@@ -31,11 +31,11 @@ proc conceptIntroduction(conf: Conf, slug: string, templateFilePath: Path): stri
 
 proc generateIntroduction(conf: Conf, templateFilePath: Path): string =
   let content = readFile(templateFilePath)
-  
+
   var idx = 0
   while idx < content.len:
     var conceptSlug = ""
-    if scanp(content, idx, 
+    if scanp(content, idx,
             "%{", *{' ', '\t'}, "concept", *{' ', '\t'}, ':', *{' ', '\t'},
             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' ', '\t'}, '}'):
       result.add(conceptIntroduction(conf, conceptSlug, templateFilePath))
