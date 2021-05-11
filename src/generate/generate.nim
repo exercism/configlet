@@ -10,7 +10,8 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path): string =
+proc conceptIntroduction(trackDir: Path, slug: string,
+                         templatePath: Path): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but
   ## without any top-level heading, and without any leading/trailing whitespace.
   let conceptDir = trackDir / "concepts" / slug
@@ -20,7 +21,8 @@ proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path): stri
       let content = readFile(path)
       var idx = 0
       # Strip the top-level heading (if any)
-      if scanp(content, idx, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ', +(~'\n')):
+      if scanp(content, idx, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
+               +(~'\n')):
         result = content.substr(idx).strip
       else:
         result = content.strip
@@ -28,7 +30,8 @@ proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path): stri
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
   else:
-    writeError(&"Directory {conceptDir} not found for concept '{slug}'", templatePath)
+    writeError(&"Directory {conceptDir} not found for concept '{slug}'",
+               templatePath)
     quit(1)
 
 proc generateIntroduction(trackDir: Path, templatePath: Path): string =
