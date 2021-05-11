@@ -157,7 +157,7 @@ func genHelpText: string =
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actLint}:
+    if actionKind notin {actNil, actLint, actGenerate}:
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
