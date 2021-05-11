@@ -43,4 +43,4 @@ proc `/`*(head: Path; tail: string): Path {.borrow.}
 proc dirExists*(path: Path): bool {.borrow.}
 proc fileExists*(path: Path): bool {.borrow.}
 proc readFile*(path: Path): string {.borrow.}
-proc writeFile*(path: Path, content: string) {.borrow.}
+proc writeFile*(path: Path; content: string) {.borrow.}
