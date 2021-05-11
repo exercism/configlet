@@ -3,12 +3,12 @@ import ".."/[cli, helpers]
 
 proc writeError(description, path: string) =
   let descriptionPrefix = description & ":"
-  if colorStdout:
-    stdout.styledWriteLine(fgRed, descriptionPrefix)
+  if colorStderr:
+    stderr.styledWriteLine(fgRed, descriptionPrefix)
   else:
-    stdout.writeLine(descriptionPrefix)
-  stdout.writeLine(path)
-  stdout.write "\n"
+    stderr.writeLine(descriptionPrefix)
+  stderr.writeLine(path)
+  stderr.write "\n"
 
 proc conceptIntroduction(conf: Conf, slug: string, templateFilePath: Path): string =
   let conceptDir = conf.trackDir / "concepts" / slug
