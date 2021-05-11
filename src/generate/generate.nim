@@ -38,9 +38,9 @@ proc generateIntroduction(trackDir: Path, templateFilePath: Path): string =
     if scanp(content, idx,
             "%{", *{' ', '\t'}, "concept", *{' ', '\t'}, ':', *{' ', '\t'},
             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' ', '\t'}, '}'):
-      result.add(conceptIntroduction(trackDir, conceptSlug, templateFilePath))
+      result.add conceptIntroduction(trackDir, conceptSlug, templateFilePath)
     else:
-      result.add(content[idx])
+      result.add content[idx]
       inc idx
 
 proc generate*(conf: Conf) =
