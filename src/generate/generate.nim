@@ -1,7 +1,7 @@
-import std/[os, strformat, strscans, strutils, terminal]
+import std/[strformat, strscans, strutils, terminal]
 import ".."/[cli, helpers]
 
-proc writeError(description, path: string) =
+proc writeError(description: string, path: Path) =
   let descriptionPrefix = description & ":"
   if colorStderr:
     stderr.styledWriteLine(fgRed, descriptionPrefix)
@@ -10,8 +10,8 @@ proc writeError(description, path: string) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(conf: Conf, slug: string, templateFilePath: Path): string =
-  let conceptDir = conf.trackDir / "concepts" / slug
+proc conceptIntroduction(trackDir: Path, slug: string, templateFilePath: Path): string =
+  let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
@@ -23,13 +23,13 @@ proc conceptIntroduction(conf: Conf, slug: string, templateFilePath: Path): stri
       else:
         result = content.strip
     else:
-      writeError(&"File {path} not found for concept '{slug}'", $templateFilePath)
+      writeError(&"File {path} not found for concept '{slug}'", templateFilePath)
       quit(1)
   else:
-    writeError(&"Directory {conceptDir} not found for concept '{slug}'", $templateFilePath)
+    writeError(&"Directory {conceptDir} not found for concept '{slug}'", templateFilePath)
     quit(1)
 
-proc generateIntroduction(conf: Conf, templateFilePath: Path): string =
+proc generateIntroduction(trackDir: Path, templateFilePath: Path): string =
   let content = readFile(templateFilePath)
 
   var idx = 0
@@ -38,7 +38,7 @@ proc generateIntroduction(conf: Conf, templateFilePath: Path): string =
     if scanp(content, idx,
             "%{", *{' ', '\t'}, "concept", *{' ', '\t'}, ':', *{' ', '\t'},
             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' ', '\t'}, '}'):
-      result.add(conceptIntroduction(conf, conceptSlug, templateFilePath))
+      result.add(conceptIntroduction(trackDir, conceptSlug, templateFilePath))
     else:
       result.add(content[idx])
       inc idx
@@ -51,6 +51,6 @@ proc generate*(conf: Conf) =
     for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
       let introductionTemplateFilePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
       if fileExists(introductionTemplateFilePath):
-        let introduction = generateIntroduction(conf, introductionTemplateFilePath)
+        let introduction = generateIntroduction(trackDir, introductionTemplateFilePath)
         let introductionFilePath = conceptExerciseDir / ".docs" / "introduction.md"
         writeFile(introductionFilePath, introduction)
