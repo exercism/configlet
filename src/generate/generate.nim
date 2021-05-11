@@ -10,7 +10,7 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(trackDir: Path, slug: string, templateFilePath: Path): string =
+proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path): string =
   let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
@@ -23,14 +23,14 @@ proc conceptIntroduction(trackDir: Path, slug: string, templateFilePath: Path): 
       else:
         result = content.strip
     else:
-      writeError(&"File {path} not found for concept '{slug}'", templateFilePath)
+      writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
   else:
-    writeError(&"Directory {conceptDir} not found for concept '{slug}'", templateFilePath)
+    writeError(&"Directory {conceptDir} not found for concept '{slug}'", templatePath)
     quit(1)
 
-proc generateIntroduction(trackDir: Path, templateFilePath: Path): string =
-  let content = readFile(templateFilePath)
+proc generateIntroduction(trackDir: Path, templatePath: Path): string =
+  let content = readFile(templatePath)
 
   var idx = 0
   while idx < content.len:
@@ -38,7 +38,7 @@ proc generateIntroduction(trackDir: Path, templateFilePath: Path): string =
     if scanp(content, idx,
             "%{", *{' ', '\t'}, "concept", *{' ', '\t'}, ':', *{' ', '\t'},
             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' ', '\t'}, '}'):
-      result.add conceptIntroduction(trackDir, conceptSlug, templateFilePath)
+      result.add conceptIntroduction(trackDir, conceptSlug, templatePath)
     else:
       result.add content[idx]
       inc idx
@@ -49,8 +49,8 @@ proc generate*(conf: Conf) =
   let conceptExercisesDir = trackDir / "exercises" / "concept"
   if dirExists(conceptExercisesDir):
     for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
-      let introductionTemplateFilePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
-      if fileExists(introductionTemplateFilePath):
-        let introduction = generateIntroduction(trackDir, introductionTemplateFilePath)
-        let introductionFilePath = conceptExerciseDir / ".docs" / "introduction.md"
-        writeFile(introductionFilePath, introduction)
+      let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
+      if fileExists(introductionTemplatePath):
+        let introduction = generateIntroduction(trackDir, introductionTemplatePath)
+        let introductionPath = conceptExerciseDir / ".docs" / "introduction.md"
+        writeFile(introductionPath, introduction)
