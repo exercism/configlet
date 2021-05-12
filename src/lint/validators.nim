@@ -333,11 +333,18 @@ proc hasArrayOfFiles*(data: JsonNode;
                       relativeToPath: Path): bool =
   if hasArrayOfStrings(data, key, path, context):
     result = true
+    var processedItems = initHashSet[string](data[key].len)
 
     for item in data[key]:
       let relativeFilePath = item.getStr()
       let absoluteFilePath = relativeToPath / relativeFilePath
-      if not fileExists(absoluteFilePath):
+      if fileExists(absoluteFilePath):
+        let itemStr = item.getStr()
+        if processedItems.containsOrIncl(itemStr):
+          let msg = &"The {q context} array contains duplicate " &
+                    &"{q itemStr} values"
+          result.setFalseAndPrint(msg, path)
+      else:
         let msg = &"The {q context} array contains value " &
                   &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
         result.setFalseAndPrint(msg, path)
