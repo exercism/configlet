@@ -29,18 +29,28 @@ func testsFile*(exercise: TrackExercise): string =
   PracticeExercisePath("").testsFile()
 
 proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
-  let config = json.parseFile(trackDir / "config.json")["exercises"]
+  let configFile = trackDir / "config.json"
+  if fileExists(configFile):
+    let config = json.parseFile(configFile)
+    if config.hasKey("exercises"):
+      let exercises = config["exercises"]
+      if exercises.hasKey("practice"):
+        let practiceExercises = exercises["practice"]
+        result = newSeqOfCap[PracticeExercisePath](practiceExercises.len)
 
-  if config.hasKey("practice"):
-    let practiceExercises = config["practice"]
-    result = newSeqOfCap[PracticeExercisePath](practiceExercises.len)
-
-    for exercise in practiceExercises:
-      if exercise.hasKey("slug"):
-        if exercise["slug"].kind == JString:
-          let slug = exercise["slug"].getStr()
-          let path = trackDir / "exercises" / "practice" / slug
-          result.add PracticeExercisePath(path)
+        for exercise in practiceExercises:
+          if exercise.hasKey("slug"):
+            if exercise["slug"].kind == JString:
+              let slug = exercise["slug"].getStr()
+              let path = trackDir / "exercises" / "practice" / slug
+              result.add PracticeExercisePath(path)
+    else:
+      stderr.writeLine "Error: file does not have an `exercises` key:\n" &
+                       configFile
+      quit(1)
+  else:
+    stderr.writeLine "Error: file does not exist:\n" & configFile
+    quit(1)
 
 proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTests =
   let testsFile = testsFile(exercisePath)
