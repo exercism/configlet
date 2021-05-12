@@ -453,7 +453,7 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
   elif not isRequired:
     result = true
 
-proc isFloat*(data: JsonNode; key: string; path: Path; context: string;
+proc isFloat*(data: JsonNode; key: static string; path: Path; context: string;
               isRequired = true; requirePositive: bool;
               decimalPlaces: int): bool =
   result = true
@@ -469,7 +469,7 @@ proc isFloat*(data: JsonNode; key: string; path: Path; context: string;
       var digitsBeforeDecimalPoint = ""
       var digitsAfterDecimalPoint = "" # An int would fail for e.g. 1.01
       for line in path.string.lines:
-        if line.scanf("$s\"average_run_time\"$s:$s$*.$*$.",
+        if line.scanf(&"""$s"{key}"$s:$s$*.$*$.""",
                       digitsBeforeDecimalPoint,
                       digitsAfterDecimalPoint):
           if digitsAfterDecimalPoint.`$`.len == decimalPlaces:
@@ -491,7 +491,7 @@ proc isFloat*(data: JsonNode; key: string; path: Path; context: string;
     result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
                              "but it must be a float", path)
 
-proc hasFloat*(data: JsonNode; key: string; path: Path; context = "";
+proc hasFloat*(data: JsonNode; key: static string; path: Path; context = "";
                isRequired = true; requirePositive: bool;
                decimalPlaces: int): bool =
   if data.hasKey(key, path, context, isRequired):
