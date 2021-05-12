@@ -279,6 +279,87 @@ All exercises are up-to-date!
 
       check outp.conciseDiff() == expectedDiffOutput
 
+proc prepareIntroductionFiles(trackDir, header, placeholder: string;
+                              removeIntro: bool) =
+  # Writes an `introduction.md.tpl` file for the `bird-count` Concept Exercise,
+  # containing the given `header` and `placeholder`. Also removes the
+  # `introduction.md` file if `removeIntro` is `true`.
+  let
+    docsPath = trackDir / "exercises" / "concept" / "bird-count" / ".docs"
+    introPath = docsPath / "introduction.md"
+    templatePath = introPath & ".tpl"
+    templateContents = fmt"""
+      # {header}
+
+      {placeholder}
+    """.dedent()
+  writeFile(templatePath, templateContents)
+  if removeIntro:
+    removeFile(introPath)
+
+proc testsForGenerate(binaryPath: string) =
+  suite "generate":
+    const trackDir = ".test_binary_elixir_track_repo"
+    let generateCmd = &"{binaryPath} -t {trackDir} generate"
+    let diffCmd = &"git -C {trackDir} diff --exit-code"
+
+    removeDir(trackDir)
+
+    # Setup: clone a track repo
+    block:
+      execAndCheck(0):
+        cloneExercismRepo("elixir", trackDir)
+
+    # Setup: set the track repo to a known state
+    block:
+      execAndCheck(0):
+        execCmdEx(&"git -C {trackDir} checkout f3974abf6e0d4a434dfe3494d58581d399c18edb")
+
+    test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
+      execAndCheck(0):
+        execCmdEx(generateCmd)
+
+    test "and does not make a change":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+
+    # Valid placeholder syntax without spaces, and invalid slug
+    prepareIntroductionFiles(trackDir, "Recursion",
+                             "%{concept:not-a-real-concept-slug}",
+                             removeIntro = false)
+
+    test "`configlet generate` exits with 1 for an invalid placeholder usage":
+      execAndCheck(1):
+        execCmdEx(generateCmd)
+
+    test "and does not make a change":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+
+    # Valid placeholder syntax without spaces, and valid slug
+    prepareIntroductionFiles(trackDir, "Recursion", "%{concept:recursion}",
+                             removeIntro = true)
+
+    test "`configlet generate` exits with 0 for a valid `.md.tpl` file":
+      execAndCheck(0):
+        execCmdEx(generateCmd)
+
+    test "and writes the `introduction.md` file as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+
+    # Valid placeholder syntax with spaces, and valid slug
+    prepareIntroductionFiles(trackDir, "Recursion", "%{ concept : recursion }",
+                             removeIntro = true)
+
+    test "`configlet generate` exits with 0 for valid placeholder usage with spaces":
+      execAndCheck(0):
+        execCmdEx(generateCmd)
+
+    test "and writes the `introduction.md` file as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+
 proc main =
   const repoRootDir = currentSourcePath.parentDir().parentDir()
   let binaryPath = repoRootDir / binaryName
@@ -423,6 +504,8 @@ proc main =
           check line.isUuidV4
 
   testsForSync(binaryPath)
+
+  testsForGenerate(binaryPath)
 
 main()
 {.used.}
