@@ -46,7 +46,7 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
               result.add PracticeExercisePath(path)
     else:
       stderr.writeLine "Error: file does not have an `exercises` key:\n" &
-                      configFile
+                       configFile
       quit(1)
   else:
     stderr.writeLine "Error: file does not exist:\n" & configFile
