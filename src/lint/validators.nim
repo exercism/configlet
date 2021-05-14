@@ -474,15 +474,13 @@ proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
         if line.scanf(&"""$s"{key}"$s:$s$*.$*$.""",
                       digitsBeforeDecimalPoint,
                       digitsAfterDecimalPoint):
-          if digitsAfterDecimalPoint.len == decimalPlaces:
-            return # Not `return true`. Must still return `false` if negative.
-          else:
+          if digitsAfterDecimalPoint.len != decimalPlaces:
             let s = &"{digitsBeforeDecimalPoint}.{digitsAfterDecimalPoint}"
             let wording = if decimalPlaces == 1: "digit" else: "digits"
             let msg = &"The value of {format(context, key)} is {s}, but it " &
                       &"must have only {decimalPlaces} {wording} after the decimal point"
             result.setFalseAndPrint(msg, path)
-            return false
+          return
       let msg = &"The value of {format(context, key)} doesn't look like a float"
       result.setFalseAndPrint(msg, path)
   of JNull:
