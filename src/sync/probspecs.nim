@@ -5,8 +5,7 @@ type
   ProbSpecsRepoExercise = object
     dir: string
 
-  ProbSpecsRepo = object
-    dir: string
+  ProbSpecsDir = distinct string
 
   ProbSpecsTestCase* = object
     json*: JsonNode
@@ -15,6 +14,10 @@ type
     slug*: string
     testCases*: seq[ProbSpecsTestCase]
 
+proc `$`(p: ProbSpecsDir): string {.borrow.}
+proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
+proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
+
 proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
     quit(message)
@@ -22,25 +25,25 @@ proc execCmdException*(cmd: string, message: string) =
 proc probSpecsDir: string =
   getCurrentDir() / ".problem-specifications"
 
-proc initProbSpecsRepo: ProbSpecsRepo =
-  ProbSpecsRepo(dir: probSpecsDir())
+proc initProbSpecsDir: ProbSpecsDir =
+  ProbSpecsDir(probSpecsDir())
 
-proc clone(repo: ProbSpecsRepo) =
-  let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
-  logNormal(&"Cloning the problem-specifications repo into {repo.dir}...")
+proc clone(probSpecsDir: ProbSpecsDir) =
+  let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
+  logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
-proc remove(repo: ProbSpecsRepo) =
-  removeDir(repo.dir)
+proc remove(probSpecsDir: ProbSpecsDir) =
+  removeDir(probSpecsDir.string)
 
 func initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
   ProbSpecsRepoExercise(dir: dir)
 
-func exercisesDir(repo: ProbSpecsRepo): string =
-  repo.dir / "exercises"
+func exercisesDir(probSpecsDir: ProbSpecsDir): string =
+  probSpecsDir / "exercises"
 
-proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
-  for exerciseDir in walkDirs(repo.exercisesDir / "*"):
+proc exercises(probSpecsDir: ProbSpecsDir): seq[ProbSpecsRepoExercise] =
+  for exerciseDir in walkDirs(probSpecsDir.exercisesDir / "*"):
     result.add(initProbSpecsRepoExercise(exerciseDir))
 
 func canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
@@ -49,8 +52,8 @@ func canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
 proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
   fileExists(repoExercise.canonicalDataFile())
 
-proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
-  for repoExercise in repo.exercises().filter(hasCanonicalDataFile):
+proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsRepoExercise] =
+  for repoExercise in probSpecsDir.exercises().filter(hasCanonicalDataFile):
     result.add(repoExercise)
 
 func slug(repoExercise: ProbSpecsRepoExercise): string =
@@ -99,12 +102,12 @@ proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExerci
     testCases: parseProbSpecsTestCases(repoExercise),
   )
 
-proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
-  for repoExercise in repo.exercisesWithCanonicalData():
+proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): seq[ProbSpecsExercise] =
+  for repoExercise in probSpecsDir.exercisesWithCanonicalData():
     if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
       result.add(initProbSpecsExercise(repoExercise))
 
-proc getNameOfRemote(probSpecsDir, host, location: string): string =
+proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
   ## at `host`.
   ##
@@ -122,12 +125,11 @@ proc getNameOfRemote(probSpecsDir, host, location: string): string =
   showError(&"there is no remote that points to '{location}' at '{host}' in " &
             &"the given problem-specifications directory: '{probSpecsDir}'")
 
-proc validate(probSpecsRepo: ProbSpecsRepo) =
+proc validate(probSpecsDir: ProbSpecsDir) =
   ## Raises an error if the given `probSpecsRepo` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
-  let probSpecsDir = probSpecsRepo.dir
   logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
 
   # Exit if the given directory does not exist.
@@ -135,7 +137,7 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
     showError("the given problem-specifications directory does not exist: " &
               &"'{probSpecsDir}'")
 
-  withDir probSpecsDir:
+  withDir probSpecsDir.string:
     # Exit if the given directory is not a git repo.
     if execCmd("git rev-parse") != 0:
       showError("the given problem-specifications directory is not a git " &
@@ -169,15 +171,15 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
 
 proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   if conf.action.probSpecsDir.len > 0:
-    let probSpecsRepo = ProbSpecsRepo(dir: conf.action.probSpecsDir)
+    let probSpecsDir = ProbSpecsDir(conf.action.probSpecsDir)
     if not conf.action.offline:
-      probSpecsRepo.validate()
-    result = probSpecsRepo.findProbSpecsExercises(conf)
+      probSpecsDir.validate()
+    result = probSpecsDir.findProbSpecsExercises(conf)
   else:
-    let probSpecsRepo = initProbSpecsRepo()
+    let probSpecsDir = initProbSpecsDir()
     try:
-      probSpecsRepo.remove()
-      probSpecsRepo.clone()
-      result = probSpecsRepo.findProbSpecsExercises(conf)
+      probSpecsDir.remove()
+      probSpecsDir.clone()
+      result = probSpecsDir.findProbSpecsExercises(conf)
     finally:
-      probSpecsRepo.remove()
+      probSpecsDir.remove()
