@@ -478,7 +478,8 @@ proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
             let s = &"{digitsBeforeDecimalPoint}.{digitsAfterDecimalPoint}"
             let wording = if decimalPlaces == 1: "digit" else: "digits"
             let msg = &"The value of {format(context, key)} is {s}, but it " &
-                      &"must have only {decimalPlaces} {wording} after the decimal point"
+                      &"must have exactly {decimalPlaces} {wording} after " &
+                       "the decimal point"
             result.setFalseAndPrint(msg, path)
           return
       let msg = &"The value of {format(context, key)} doesn't look like a float"
