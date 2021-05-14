@@ -79,15 +79,13 @@ proc initPracticeExercise(exercisePath: PracticeExercisePath): PracticeExercise 
     tests: initPracticeExerciseTests(exercisePath),
   )
 
-proc findPracticeExercises(trackDir: TrackDir,
-                        userExercise: string): seq[PracticeExercise] =
+proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
+  let trackDir = TrackDir(conf.trackDir)
+  let userExercise = conf.action.exercise
+
   let practiceExercisePaths = getPracticeExercisePaths(trackDir)
   result = newSeqOfCap[PracticeExercise](practiceExercisePaths.len)
 
   for practiceExercisePath in practiceExercisePaths:
     if userExercise.len == 0 or userExercise == slug(practiceExercisePath):
       result.add initPracticeExercise(practiceExercisePath)
-
-proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
-  let trackDir = TrackDir(conf.trackDir)
-  result = findPracticeExercises(trackDir, conf.action.exercise)
