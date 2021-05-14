@@ -474,7 +474,7 @@ proc isFloat*(data: JsonNode; key: static string; path: Path; context: string;
         if line.scanf(&"""$s"{key}"$s:$s$*.$*$.""",
                       digitsBeforeDecimalPoint,
                       digitsAfterDecimalPoint):
-          if digitsAfterDecimalPoint.`$`.len == decimalPlaces:
+          if digitsAfterDecimalPoint.len == decimalPlaces:
             return # Not `return true`. Must still return `false` if negative.
           else:
             let s = &"{digitsBeforeDecimalPoint}.{digitsAfterDecimalPoint}"
