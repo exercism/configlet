@@ -2,6 +2,7 @@ import std/[json, options, os, sequtils, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
+export tracks.`$`
 
 type
   ExerciseTestCase* = ref object
@@ -19,7 +20,7 @@ type
     exOutOfSync, exInSync, exNoCanonicalData
 
   Exercise* = object
-    slug*: string
+    slug*: PracticeExerciseSlug
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
@@ -68,7 +69,7 @@ proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
 
   for practiceExercise in findPracticeExercises(conf):
-    result.add(initExercise(practiceExercise, probSpecsExercises.getOrDefault(practiceExercise.slug)))
+    result.add(initExercise(practiceExercise, probSpecsExercises.getOrDefault(practiceExercise.slug.string)))
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
@@ -140,7 +141,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
   result.setLen(result.len - 1)
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
-  let testsPath = initPracticeExercisePath(TrackDir(trackDir), exercise.slug).testsFile()
+  let testsPath = testsPath(TrackDir(trackDir), exercise.slug)
   createDir(testsPath.parentDir())
 
   let contents = toToml(exercise, testsPath)

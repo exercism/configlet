@@ -29,7 +29,7 @@ proc main =
     test "returns the expected object for `hello-world`":
       const expectedHelloWorld =
         PracticeExercise(
-          slug: "hello-world",
+          slug: PracticeExerciseSlug("hello-world"),
           tests: PracticeExerciseTests(
             included: ["af9ffe10-dc13-42d8-a742-e7bdafac449d"].toHashSet(),
             excluded: initHashSet[string](0)
@@ -42,7 +42,7 @@ proc main =
     test "returns the expected object for `two-fer`":
       const expectedTwoFer =
         PracticeExercise(
-          slug: "two-fer",
+          slug: PracticeExerciseSlug("two-fer"),
           tests: PracticeExerciseTests(
             included: ["1cf3e15a-a3d7-4a87-aeb3-ba1b43bc8dce",
                        "3549048d-1a6e-4653-9a79-b0bda163e8d5",

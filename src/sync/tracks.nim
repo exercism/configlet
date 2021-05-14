@@ -5,33 +5,26 @@ import ".."/cli
 type
   TrackDir* {.requiresInit.} = distinct string
 
-  PracticeExercisePath {.requiresInit.} = distinct string
+  PracticeExerciseSlug* {.requiresInit.} = distinct string
 
   PracticeExerciseTests* = object
     included*: HashSet[string]
     excluded*: HashSet[string]
 
   PracticeExercise* = object
-    slug*: string
+    slug*: PracticeExerciseSlug
     tests*: PracticeExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: PracticeExercisePath, tail: string): string {.borrow.}
-proc extractFilename(exercisePath: PracticeExercisePath): string {.borrow.}
-proc `==`(x, y: PracticeExercisePath): bool {.borrow.}
-proc `<`(x, y: PracticeExercisePath): bool {.borrow.}
+proc `/`(head: string, tail: PracticeExerciseSlug): string {.borrow.}
+proc `==`*(x, y: PracticeExerciseSlug): bool {.borrow.}
+proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
+proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
 
-func slug(exercisePath: PracticeExercisePath): string =
-  extractFilename(exercisePath)
+func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
+  trackDir / "exercises" / "practice" / slug / ".meta" / "tests.toml"
 
-func testsFile*(exercisePath: PracticeExercisePath): string =
-  exercisePath / ".meta" / "tests.toml"
-
-func initPracticeExercisePath*(trackDir: TrackDir,
-                               slug: string): PracticeExercisePath =
-  PracticeExercisePath(trackDir / "exercises" / "practice" / slug)
-
-proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
+proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
   let configFile = trackDir / "config.json"
   if fileExists(configFile):
     let config = json.parseFile(configFile)
@@ -39,13 +32,13 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
       let exercises = config["exercises"]
       if exercises.hasKey("practice"):
         let practiceExercises = exercises["practice"]
-        result = newSeqOfCap[PracticeExercisePath](practiceExercises.len)
+        result = newSeqOfCap[PracticeExerciseSlug](practiceExercises.len)
 
         for exercise in practiceExercises:
           if exercise.hasKey("slug"):
             if exercise["slug"].kind == JString:
               let slug = exercise["slug"].getStr()
-              result.add initPracticeExercisePath(trackDir, slug)
+              result.add PracticeExerciseSlug(slug)
     else:
       stderr.writeLine "Error: file does not have an `exercises` key:\n" &
                        configFile
@@ -56,10 +49,9 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
 
   sort result
 
-proc initPracticeExerciseTests(exercisePath: PracticeExercisePath): PracticeExerciseTests =
-  let testsFile = testsFile(exercisePath)
-  if fileExists(testsFile):
-    let tests = parsetoml.parseFile(testsFile)
+proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
+  if fileExists(testsPath):
+    let tests = parsetoml.parseFile(testsPath)
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):
@@ -72,24 +64,23 @@ proc initPracticeExerciseTests(exercisePath: PracticeExercisePath): PracticeExer
         else:
           let msg = "Error: the value of an `include` key is `" &
                     val["include"].toTomlString() & "`, but it must be a " &
-                    "bool:\n" & exercisePath.testsFile()
+                    "bool:\n" & testsPath
           stderr.writeLine(msg)
       else:
         result.included.incl(uuid)
-
-proc initPracticeExercise(exercisePath: PracticeExercisePath): PracticeExercise =
-  PracticeExercise(
-    slug: slug(exercisePath),
-    tests: initPracticeExerciseTests(exercisePath),
-  )
 
 proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
   let trackDir = TrackDir(conf.trackDir)
   let userExercise = conf.action.exercise
 
-  let practiceExercisePaths = getPracticeExercisePaths(trackDir)
-  result = newSeqOfCap[PracticeExercise](practiceExercisePaths.len)
+  let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
+  result = newSeqOfCap[PracticeExercise](practiceExerciseSlugs.len)
 
-  for practiceExercisePath in practiceExercisePaths:
-    if userExercise.len == 0 or userExercise == slug(practiceExercisePath):
-      result.add initPracticeExercise(practiceExercisePath)
+  for slug in practiceExerciseSlugs:
+    if userExercise.len == 0 or userExercise == slug.string:
+      let testsPath = testsPath(trackDir, slug)
+      let p = PracticeExercise(
+        slug: slug,
+        tests: initPracticeExerciseTests(testsPath),
+      )
+      result.add p
