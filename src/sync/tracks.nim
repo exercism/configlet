@@ -22,9 +22,13 @@ proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
 
 func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
+  ## Returns the path to the `tests.toml` file for a given `slug` in a
+  ## `trackDir`.
   trackDir / "exercises" / "practice" / slug / ".meta" / "tests.toml"
 
 proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
+  ## Parses the root `config.json` file in `trackDir` and returns a seq of its
+  ## Practice Exercise slugs, in alphabetical order.
   let configFile = trackDir / "config.json"
   if fileExists(configFile):
     let config = json.parseFile(configFile)
@@ -50,6 +54,8 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
   sort result
 
 proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
+  ## Parses the `tests.toml` file at `testsPath` and returns HashSets of the
+  ## included and excluded test case UUIDs.
   if fileExists(testsPath):
     let tests = parsetoml.parseFile(testsPath)
 
