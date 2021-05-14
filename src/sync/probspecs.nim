@@ -29,15 +29,12 @@ proc clone(probSpecsDir: ProbSpecsDir) =
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
   execCmdException(cmd, "Could not clone problem-specifications repo")
 
-func initProbSpecsExerciseDir(dir: string): ProbSpecsExerciseDir =
-  ProbSpecsExerciseDir(dir)
-
 func exercisesDir(probSpecsDir: ProbSpecsDir): string =
   probSpecsDir / "exercises"
 
 proc exercises(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
   for exerciseDir in walkDirs(probSpecsDir.exercisesDir / "*"):
-    result.add(initProbSpecsExerciseDir(exerciseDir))
+    result.add ProbSpecsExerciseDir(exerciseDir)
 
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
