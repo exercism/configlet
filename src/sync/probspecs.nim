@@ -36,12 +36,9 @@ proc exercises(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
 
-proc hasCanonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): bool =
-  fileExists(probSpecsExerciseDir.canonicalDataFile())
-
 proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
   for probSpecsExerciseDir in probSpecsDir.exercises():
-    if hasCanonicalDataFile(probSpecsExerciseDir):
+    if fileExists(probSpecsExerciseDir.canonicalDataFile()):
       result.add(probSpecsExerciseDir)
 
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
