@@ -31,7 +31,8 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
     missing: missing,
   )
 
-proc initExerciseTests(practiceExercise: PracticeExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
+proc initExerciseTests(practiceExercise: PracticeExercise,
+                       probSpecsExercise: ProbSpecsExercise): ExerciseTests =
   for testCase in probSpecsExercise.testCases:
     if practiceExercise.tests.included.contains(testCase.uuid):
       result.included.incl(testCase.uuid)
@@ -58,7 +59,8 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
     if testCase.uuid in reimplementations:
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
-proc initExercise(practiceExercise: PracticeExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
+proc initExercise(practiceExercise: PracticeExercise,
+                  probSpecsExercise: ProbSpecsExercise): Exercise =
   Exercise(
     slug: practiceExercise.slug,
     tests: initExerciseTests(practiceExercise, probSpecsExercise),
@@ -69,7 +71,11 @@ proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
 
   for practiceExercise in findPracticeExercises(conf):
-    result.add(initExercise(practiceExercise, probSpecsExercises.getOrDefault(practiceExercise.slug.string)))
+    let exercise = initExercise(
+      practiceExercise,
+      probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    )
+    result.add exercise
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
