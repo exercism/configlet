@@ -169,13 +169,13 @@ proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   if conf.action.probSpecsDir.len > 0:
     let probSpecsDir = ProbSpecsDir(conf.action.probSpecsDir)
     if not conf.action.offline:
-      probSpecsDir.validate()
-    result = probSpecsDir.findProbSpecsExercises(conf)
+      validate(probSpecsDir)
+    result = findProbSpecsExercises(probSpecsDir, conf)
   else:
     let probSpecsDir = initProbSpecsDir()
     try:
-      probSpecsDir.removeDir()
-      probSpecsDir.clone()
-      result = probSpecsDir.findProbSpecsExercises(conf)
+      removeDir(probSpecsDir)
+      clone(probSpecsDir)
+      result = findProbSpecsExercises(probSpecsDir, conf)
     finally:
-      probSpecsDir.removeDir()
+      removeDir(probSpecsDir)
