@@ -18,6 +18,7 @@ proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc extractFilename(path: ProbSpecsExerciseDir): string {.borrow.}
+proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 
 proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
@@ -30,9 +31,6 @@ proc clone(probSpecsDir: ProbSpecsDir) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
   execCmdException(cmd, "Could not clone problem-specifications repo")
-
-proc remove(probSpecsDir: ProbSpecsDir) =
-  removeDir(probSpecsDir.string)
 
 func initProbSpecsExerciseDir(dir: string): ProbSpecsExerciseDir =
   ProbSpecsExerciseDir(dir)
@@ -176,8 +174,8 @@ proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
   else:
     let probSpecsDir = initProbSpecsDir()
     try:
-      probSpecsDir.remove()
+      probSpecsDir.removeDir()
       probSpecsDir.clone()
       result = probSpecsDir.findProbSpecsExercises(conf)
     finally:
-      probSpecsDir.remove()
+      probSpecsDir.removeDir()
