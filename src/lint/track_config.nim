@@ -81,7 +81,7 @@ proc hasValidTestRunner(data: JsonNode; path: Path): bool =
           result = hasFloat(data[k], "average_run_time", path, k,
                             requirePositive = true, decimalPlaces = 1)
       else:
-        return true
+        result = true
 
 const
   statuses = ["wip", "beta", "active", "deprecated"].toHashSet()
