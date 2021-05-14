@@ -43,7 +43,8 @@ const tags = [
 ].toHashSet()
 
 proc hasValidTags(data: JsonNode; path: Path): bool =
-  result = hasArrayOfStrings(data, "tags", path, allowed = tags)
+  result = hasArrayOfStrings(data, "tags", path, allowed = tags,
+                             uniqueValues = true)
 
 proc hasValidStatus(data: JsonNode; path: Path): bool =
   const k = "status"
@@ -134,7 +135,7 @@ proc hasValidExercises(data: JsonNode; path: Path): bool =
       hasArrayOf(exercises, "practice", path, isValidPracticeExercise, k,
                  allowedLength = 0..int.high),
       hasArrayOfStrings(exercises, "foregone", path, k, isRequired = false,
-                        checkIsKebab = true),
+                        checkIsKebab = true, uniqueValues = true),
     ]
     result = allTrue(checks)
 
