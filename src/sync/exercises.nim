@@ -82,9 +82,6 @@ func status*(exercise: Exercise): ExerciseStatus =
 func hasCanonicalData*(exercise: Exercise): bool =
   exercise.testCases.len > 0
 
-func testsFile(exercise: Exercise, trackDir: string): string =
-  trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
-
 func prettyTomlString(s: string): string =
   ## Returns `s` as a TOML string. This tries to handle multi-line strings,
   ## which `parsetoml.toTomlString` doesn't handle properly.
@@ -144,7 +141,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
   result.setLen(result.len - 1)
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
-  let testsPath = testsFile(exercise, trackDir)
+  let testsPath = initPracticeExercisePath(TrackDir(trackDir), exercise.slug).testsFile()
   createDir(testsPath.parentDir())
 
   let contents = toToml(exercise, testsPath)

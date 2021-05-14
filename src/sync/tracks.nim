@@ -3,7 +3,7 @@ import pkg/parsetoml
 import ".."/cli
 
 type
-  TrackDir {.requiresInit.} = distinct string
+  TrackDir* {.requiresInit.} = distinct string
 
   PracticeExercisePath {.requiresInit.} = distinct string
 
@@ -22,11 +22,12 @@ proc extractFilename(exercisePath: PracticeExercisePath): string {.borrow.}
 func slug(exercisePath: PracticeExercisePath): string =
   extractFilename(exercisePath)
 
-func testsFile(exercisePath: PracticeExercisePath): string =
+func testsFile*(exercisePath: PracticeExercisePath): string =
   exercisePath / ".meta" / "tests.toml"
 
-func testsFile*(exercise: TrackExercise): string =
-  PracticeExercisePath("").testsFile()
+func initPracticeExercisePath*(trackDir: TrackDir,
+                               slug: string): PracticeExercisePath =
+  PracticeExercisePath(trackDir / "exercises" / "practice" / slug)
 
 proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
   let configFile = trackDir / "config.json"
@@ -42,8 +43,7 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
           if exercise.hasKey("slug"):
             if exercise["slug"].kind == JString:
               let slug = exercise["slug"].getStr()
-              let path = trackDir / "exercises" / "practice" / slug
-              result.add PracticeExercisePath(path)
+              result.add initPracticeExercisePath(trackDir, slug)
     else:
       stderr.writeLine "Error: file does not have an `exercises` key:\n" &
                        configFile
