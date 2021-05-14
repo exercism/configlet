@@ -70,6 +70,19 @@ proc hasValidOnlineEditor(data: JsonNode; path: Path): bool =
     ]
     result = allTrue(checks)
 
+proc hasValidTestRunner(data: JsonNode; path: Path): bool =
+  const s = "status"
+  if hasObject(data, s, path):
+    const k = "test_runner"
+    if hasBoolean(data[s], k, path, s):
+      # Only check the `test_runner` object if `status.test_runner` is `true`.
+      if data[s][k].getBool():
+        if hasObject(data, k, path):
+          result = hasFloat(data[k], "average_run_time", path, k,
+                            requirePositive = true, decimalPlaces = 1)
+      else:
+        result = true
+
 const
   statuses = ["wip", "beta", "active", "deprecated"].toHashSet()
 
@@ -166,6 +179,7 @@ proc isValidTrackConfig(data: JsonNode; path: Path): bool =
       hasInteger(data, "version", path, allowed = 3..3),
       hasValidStatus(data, path),
       hasValidOnlineEditor(data, path),
+      hasValidTestRunner(data, path),
       hasValidExercises(data, path),
       hasValidConcepts(data, path),
       hasValidKeyFeatures(data, path),
