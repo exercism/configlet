@@ -17,7 +17,7 @@ proc `$`(p: ProbSpecsDir): string {.borrow.}
 proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
-proc extractFilename(path: ProbSpecsExerciseDir): string {.borrow.}
+proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 
 proc execCmdException*(cmd: string, message: string) =
@@ -39,7 +39,7 @@ iterator exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): ProbSpecsExerci
       yield probSpecsExerciseDir
 
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
-  extractFilename(probSpecsExerciseDir)
+  lastPathPart(probSpecsExerciseDir)
 
 func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   ProbSpecsTestCase(json: node)
