@@ -7,13 +7,13 @@ type
 
   PracticeExercisePath {.requiresInit.} = distinct string
 
-  TrackExerciseTests* = object
+  PracticeExerciseTests* = object
     included*: HashSet[string]
     excluded*: HashSet[string]
 
-  TrackExercise* = object
+  PracticeExercise* = object
     slug*: string
-    tests*: TrackExerciseTests
+    tests*: PracticeExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: PracticeExercisePath, tail: string): string {.borrow.}
@@ -52,7 +52,7 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
     stderr.writeLine "Error: file does not exist:\n" & configFile
     quit(1)
 
-proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTests =
+proc initPracticeExerciseTests(exercisePath: PracticeExercisePath): PracticeExerciseTests =
   let testsFile = testsFile(exercisePath)
   if fileExists(testsFile):
     let tests = parsetoml.parseFile(testsFile)
@@ -73,21 +73,21 @@ proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTe
       else:
         result.included.incl(uuid)
 
-proc initTrackExercise(exercisePath: PracticeExercisePath): TrackExercise =
-  TrackExercise(
+proc initPracticeExercise(exercisePath: PracticeExercisePath): PracticeExercise =
+  PracticeExercise(
     slug: slug(exercisePath),
-    tests: initTrackExerciseTests(exercisePath),
+    tests: initPracticeExerciseTests(exercisePath),
   )
 
-proc findTrackExercises(trackDir: TrackDir,
-                        userExercise: string): seq[TrackExercise] =
+proc findPracticeExercises(trackDir: TrackDir,
+                        userExercise: string): seq[PracticeExercise] =
   let practiceExercisePaths = getPracticeExercisePaths(trackDir)
-  result = newSeqOfCap[TrackExercise](practiceExercisePaths.len)
+  result = newSeqOfCap[PracticeExercise](practiceExercisePaths.len)
 
   for practiceExercisePath in practiceExercisePaths:
     if userExercise.len == 0 or userExercise == slug(practiceExercisePath):
-      result.add initTrackExercise(practiceExercisePath)
+      result.add initPracticeExercise(practiceExercisePath)
 
-proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
+proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
   let trackDir = TrackDir(conf.trackDir)
-  result = findTrackExercises(trackDir, conf.action.exercise)
+  result = findPracticeExercises(trackDir, conf.action.exercise)

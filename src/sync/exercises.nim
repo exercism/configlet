@@ -31,11 +31,11 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
     missing: missing,
   )
 
-proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
+proc initExerciseTests(practiceExercise: PracticeExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
   for testCase in probSpecsExercise.testCases:
-    if trackExercise.tests.included.contains(testCase.uuid):
+    if practiceExercise.tests.included.contains(testCase.uuid):
       result.included.incl(testCase.uuid)
-    elif trackExercise.tests.excluded.contains(testCase.uuid):
+    elif practiceExercise.tests.excluded.contains(testCase.uuid):
       result.excluded.incl(testCase.uuid)
     else:
       result.missing.incl(testCase.uuid)
@@ -58,18 +58,18 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
     if testCase.uuid in reimplementations:
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
-proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
+proc initExercise(practiceExercise: PracticeExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
   Exercise(
-    slug: trackExercise.slug,
-    tests: initExerciseTests(trackExercise, probSpecsExercise),
+    slug: practiceExercise.slug,
+    tests: initExerciseTests(practiceExercise, probSpecsExercise),
     testCases: initExerciseTestCases(probSpecsExercise.testCases),
   )
 
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
 
-  for trackExercise in findTrackExercises(conf).sortedByIt(it.slug):
-    result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
+  for practiceExercise in findPracticeExercises(conf).sortedByIt(it.slug):
+    result.add(initExercise(practiceExercise, probSpecsExercises.getOrDefault(practiceExercise.slug)))
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
