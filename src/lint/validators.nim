@@ -466,6 +466,8 @@ proc isFloat*(data: JsonNode; key: static string; path: Path; context: string;
                    "must be greater than 0"
         result.setFalseAndPrint(msg, path)
     if decimalPlaces >= 0:
+      # To check the number of digits after the decimal place, we must parse
+      # the value as a string.
       var digitsBeforeDecimalPoint = ""
       var digitsAfterDecimalPoint = "" # An int would fail for e.g. 1.01
       for line in path.string.lines:
