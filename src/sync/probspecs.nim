@@ -24,9 +24,6 @@ proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
     quit(message)
 
-proc initProbSpecsDir: ProbSpecsDir =
-  ProbSpecsDir(getCurrentDir() / ".problem-specifications")
-
 proc clone(probSpecsDir: ProbSpecsDir) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
@@ -172,7 +169,7 @@ proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
       validate(probSpecsDir)
     result = findProbSpecsExercises(probSpecsDir, conf)
   else:
-    let probSpecsDir = initProbSpecsDir()
+    let probSpecsDir = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
     try:
       removeDir(probSpecsDir)
       clone(probSpecsDir)
