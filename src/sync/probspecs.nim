@@ -2,8 +2,7 @@ import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
 import ".."/[cli, helpers, logger]
 
 type
-  ProbSpecsRepoExercise = object
-    dir: string
+  ProbSpecsExerciseDir = distinct string
 
   ProbSpecsDir = distinct string
 
@@ -16,7 +15,9 @@ type
 
 proc `$`(p: ProbSpecsDir): string {.borrow.}
 proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
+proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
+proc extractFilename(path: ProbSpecsExerciseDir): string {.borrow.}
 
 proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
@@ -36,28 +37,28 @@ proc clone(probSpecsDir: ProbSpecsDir) =
 proc remove(probSpecsDir: ProbSpecsDir) =
   removeDir(probSpecsDir.string)
 
-func initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
-  ProbSpecsRepoExercise(dir: dir)
+func initProbSpecsExerciseDir(dir: string): ProbSpecsExerciseDir =
+  ProbSpecsExerciseDir(dir)
 
 func exercisesDir(probSpecsDir: ProbSpecsDir): string =
   probSpecsDir / "exercises"
 
-proc exercises(probSpecsDir: ProbSpecsDir): seq[ProbSpecsRepoExercise] =
+proc exercises(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
   for exerciseDir in walkDirs(probSpecsDir.exercisesDir / "*"):
-    result.add(initProbSpecsRepoExercise(exerciseDir))
+    result.add(initProbSpecsExerciseDir(exerciseDir))
 
-func canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
-  repoExercise.dir / "canonical-data.json"
+func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
+  probSpecsExerciseDir / "canonical-data.json"
 
-proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
-  fileExists(repoExercise.canonicalDataFile())
+proc hasCanonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): bool =
+  fileExists(probSpecsExerciseDir.canonicalDataFile())
 
-proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsRepoExercise] =
-  for repoExercise in probSpecsDir.exercises().filter(hasCanonicalDataFile):
-    result.add(repoExercise)
+proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
+  for probSpecsExerciseDir in probSpecsDir.exercises().filter(hasCanonicalDataFile):
+    result.add(probSpecsExerciseDir)
 
-func slug(repoExercise: ProbSpecsRepoExercise): string =
-  extractFilename(repoExercise.dir)
+func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
+  extractFilename(probSpecsExerciseDir)
 
 func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
   ProbSpecsTestCase(json: node)
@@ -90,22 +91,22 @@ proc grainsWorkaround(grainsPath: string): JsonNode =
     ("184467440737095516", "184467440737095516.0"))
   result = parseJson(sanitised)
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
-  if repoExercise.slug == "grains":
-    repoExercise.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
+proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[ProbSpecsTestCase] =
+  if probSpecsExerciseDir.slug == "grains":
+    probSpecsExerciseDir.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
   else:
-    repoExercise.canonicalDataFile().parseFile().initProbSpecsTestCases()
+    probSpecsExerciseDir.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
-proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
+proc initProbSpecsExercise(probSpecsExerciseDir: ProbSpecsExerciseDir): ProbSpecsExercise =
   ProbSpecsExercise(
-    slug: repoExercise.slug,
-    testCases: parseProbSpecsTestCases(repoExercise),
+    slug: probSpecsExerciseDir.slug,
+    testCases: parseProbSpecsTestCases(probSpecsExerciseDir),
   )
 
 proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): seq[ProbSpecsExercise] =
-  for repoExercise in probSpecsDir.exercisesWithCanonicalData():
-    if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
-      result.add(initProbSpecsExercise(repoExercise))
+  for probSpecsExerciseDir in probSpecsDir.exercisesWithCanonicalData():
+    if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
+      result.add(initProbSpecsExercise(probSpecsExerciseDir))
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
