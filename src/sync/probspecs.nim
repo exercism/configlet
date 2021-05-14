@@ -32,11 +32,11 @@ proc clone(probSpecsDir: ProbSpecsDir) =
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
 
-proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
+iterator exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): ProbSpecsExerciseDir =
   for dir in walkDirs(probSpecsDir / "exercises" / "*"):
     let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
     if fileExists(probSpecsExerciseDir.canonicalDataFile()):
-      result.add(probSpecsExerciseDir)
+      yield probSpecsExerciseDir
 
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   extractFilename(probSpecsExerciseDir)
