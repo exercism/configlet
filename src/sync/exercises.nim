@@ -85,9 +85,6 @@ func status*(exercise: Exercise): ExerciseStatus =
   else:
     exInSync
 
-func hasCanonicalData*(exercise: Exercise): bool =
-  exercise.testCases.len > 0
-
 func prettyTomlString(s: string): string =
   ## Returns `s` as a TOML string. This tries to handle multi-line strings,
   ## which `parsetoml.toTomlString` doesn't handle properly.
