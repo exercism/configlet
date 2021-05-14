@@ -453,9 +453,9 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
   elif not isRequired:
     result = true
 
-proc isFloat*(data: JsonNode; key: static string; path: Path; context: string;
-              isRequired = true; requirePositive: bool;
-              decimalPlaces: int): bool =
+proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
+             isRequired = true; requirePositive: bool;
+             decimalPlaces: int): bool =
   result = true
   case data.kind
   of JFloat:
