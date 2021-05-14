@@ -23,11 +23,8 @@ proc execCmdException*(cmd: string, message: string) =
   if execCmd(cmd) != 0:
     quit(message)
 
-proc probSpecsDir: string =
-  getCurrentDir() / ".problem-specifications"
-
 proc initProbSpecsDir: ProbSpecsDir =
-  ProbSpecsDir(probSpecsDir())
+  ProbSpecsDir(getCurrentDir() / ".problem-specifications")
 
 proc clone(probSpecsDir: ProbSpecsDir) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
