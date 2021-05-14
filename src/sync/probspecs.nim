@@ -58,10 +58,10 @@ proc reimplements*(testCase: ProbSpecsTestCase): string =
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
-    result.add(initProbSpecsTestCase(node))
+    result.add initProbSpecsTestCase(node)
   elif node.hasKey("cases"):
     for childNode in node["cases"].getElems():
-      result.add(initProbSpecsTestCases(childNode))
+      result.add initProbSpecsTestCases(childNode)
 
 proc grainsWorkaround(grainsPath: string): JsonNode =
   ## Parses the canonical data file for `grains`, replacing the too-large
@@ -87,7 +87,7 @@ proc initProbSpecsExercise(probSpecsExerciseDir: ProbSpecsExerciseDir): ProbSpec
 proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): seq[ProbSpecsExercise] =
   for probSpecsExerciseDir in probSpecsDir.exercisesWithCanonicalData():
     if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
-      result.add(initProbSpecsExercise(probSpecsExerciseDir))
+      result.add initProbSpecsExercise(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
