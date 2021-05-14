@@ -1,5 +1,4 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, strutils,
-            tables]
+import std/[json, options, os, sequtils, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
@@ -68,7 +67,7 @@ proc initExercise(practiceExercise: PracticeExercise, probSpecsExercise: ProbSpe
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
 
-  for practiceExercise in findPracticeExercises(conf).sortedByIt(it.slug):
+  for practiceExercise in findPracticeExercises(conf):
     result.add(initExercise(practiceExercise, probSpecsExercises.getOrDefault(practiceExercise.slug)))
 
 func status*(exercise: Exercise): ExerciseStatus =

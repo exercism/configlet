@@ -37,7 +37,7 @@ proc main =
         )
 
       check:
-        trackExercises[0] == expectedHelloWorld
+        trackExercises[20] == expectedHelloWorld
 
     test "returns the expected object for `two-fer`":
       const expectedTwoFer =
@@ -52,7 +52,7 @@ proc main =
         )
 
       check:
-        trackExercises[1] == expectedTwoFer
+        trackExercises[65] == expectedTwoFer
 
     # Try to remove the track directory, but allow the tests to pass if there
     # was an error removing it.

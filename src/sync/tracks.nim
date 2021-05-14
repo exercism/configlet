@@ -1,4 +1,4 @@
-import std/[json, os, sets]
+import std/[algorithm, json, os, sets]
 import pkg/parsetoml
 import ".."/cli
 
@@ -18,6 +18,8 @@ type
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: PracticeExercisePath, tail: string): string {.borrow.}
 proc extractFilename(exercisePath: PracticeExercisePath): string {.borrow.}
+proc `==`(x, y: PracticeExercisePath): bool {.borrow.}
+proc `<`(x, y: PracticeExercisePath): bool {.borrow.}
 
 func slug(exercisePath: PracticeExercisePath): string =
   extractFilename(exercisePath)
@@ -51,6 +53,8 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
   else:
     stderr.writeLine "Error: file does not exist:\n" & configFile
     quit(1)
+
+  sort result
 
 proc initPracticeExerciseTests(exercisePath: PracticeExercisePath): PracticeExerciseTests =
   let testsFile = testsFile(exercisePath)
