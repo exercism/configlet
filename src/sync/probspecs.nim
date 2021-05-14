@@ -1,4 +1,4 @@
-import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
+import std/[json, os, osproc, strformat, strscans, strutils]
 import ".."/[cli, helpers, logger]
 
 type
@@ -40,8 +40,9 @@ proc hasCanonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): bool =
   fileExists(probSpecsExerciseDir.canonicalDataFile())
 
 proc exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): seq[ProbSpecsExerciseDir] =
-  for probSpecsExerciseDir in probSpecsDir.exercises().filter(hasCanonicalDataFile):
-    result.add(probSpecsExerciseDir)
+  for probSpecsExerciseDir in probSpecsDir.exercises():
+    if hasCanonicalDataFile(probSpecsExerciseDir):
+      result.add(probSpecsExerciseDir)
 
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   extractFilename(probSpecsExerciseDir)
