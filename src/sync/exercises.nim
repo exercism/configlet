@@ -1,4 +1,4 @@
-import std/[json, options, os, sequtils, sets, strformat, strutils, tables]
+import std/[json, options, os, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
@@ -73,8 +73,12 @@ proc initExercise(practiceExercise: PracticeExercise,
     testCases: initExerciseTestCases(probSpecsExercise.testCases),
   )
 
+proc probSpecsTable(conf: Conf): Table[string, ProbSpecsExercise] =
+  for exercise in findProbSpecsExercises(conf):
+    result[exercise.slug] = exercise
+
 proc findExercises*(conf: Conf): seq[Exercise] =
-  let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
+  let probSpecsExercises = probSpecsTable(conf)
 
   for practiceExercise in findPracticeExercises(conf):
     let exercise = initExercise(
