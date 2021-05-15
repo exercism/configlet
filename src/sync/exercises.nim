@@ -48,11 +48,16 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
     json: testCase.json,
   )
 
+proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
+  for testCase in testCases:
+    if testCase.isReimplementation():
+      result[testCase.uuid] = testCase.reimplements()
+
 proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   for testCase in testCases:
     result.add(newExerciseTestCase(testCase))
 
-  let reimplementations = testCases.filterIt(it.isReimplementation).mapIt((it.uuid, it.reimplements)).toTable()
+  let reimplementations = getReimplementations(testCases)
   let testCasesByUuids = result.newTableFrom(proc (testCase: ExerciseTestCase): string = testCase.uuid)
 
   for testCase in result:
