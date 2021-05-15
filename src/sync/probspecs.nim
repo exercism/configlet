@@ -20,7 +20,7 @@ proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 
-proc execCmdException*(cmd: string, message: string) =
+proc execCmdException(cmd: string, message: string) =
   if execCmd(cmd) != 0:
     quit(message)
 
