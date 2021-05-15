@@ -101,10 +101,9 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string
   ##
   ## Exits with an error if there is no such remote.
   # There's probably a better way to do this than parsing `git remote -v`.
-  let (remotes, errRemotes) = execCmdEx("git remote -v")
-  if errRemotes != 0:
-    showError("could not run `git remote -v` in the given " &
-              &"problem-specifications directory: '{probSpecsDir}'")
+  let msg = "could not run `git remote -v` in the given " &
+            &"problem-specifications directory: '{probSpecsDir}'"
+  let remotes = execSuccessElseQuit("git remote -v", msg)
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
@@ -151,8 +150,9 @@ proc validate(probSpecsDir: ProbSpecsDir) =
 
     # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
     # with `upstream/main`.
-    let (revHead, _) = execCmdEx("git rev-parse HEAD")
-    let (revUpstream, _) = execCmdEx(&"git rev-parse {remoteName}/{mainBranchName}")
+    let revHead = execSuccessElseQuit("git rev-parse HEAD", "")
+    let revUpstream = execSuccessElseQuit(&"git rev-parse {remoteName}/" &
+                                          &"{mainBranchName}", "")
     if revHead != revUpstream:
       showError("the given problem-specifications directory is not " &
                 &"up-to-date: '{probSpecsDir}'")
