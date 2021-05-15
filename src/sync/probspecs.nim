@@ -27,7 +27,10 @@ proc execSuccessElseQuit(cmd: string, message: string): string =
   (result, errC) = execCmdEx(cmd)
   if errC != 0:
     stderr.writeLine result
-    stderr.writeLine message
+    if message.len > 0:
+      stderr.writeLine message
+    else:
+      stderr.writeLine &"Error when running '{cmd}'"
     quit(1)
 
 proc clone(probSpecsDir: ProbSpecsDir) =
