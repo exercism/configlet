@@ -54,8 +54,9 @@ proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, stri
       result[testCase.uuid] = testCase.reimplements()
 
 proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
-  for testCase in testCases:
-    result.add(newExerciseTestCase(testCase))
+  result = newSeq[ExerciseTestCase](testCases.len)
+  for i, testCase in testCases:
+    result[i] = newExerciseTestCase(testCase)
 
   let reimplementations = getReimplementations(testCases)
   let testCasesByUuids = result.newTableFrom(proc (testCase: ExerciseTestCase): string = testCase.uuid)
