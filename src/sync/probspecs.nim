@@ -21,8 +21,11 @@ proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 
 proc execCmdException(cmd: string, message: string) =
-  if execCmd(cmd) != 0:
-    quit(message)
+  let (outp, errC) = execCmdEx(cmd)
+  if errC != 0:
+    stderr.writeLine outp
+    stderr.writeLine message
+    quit(1)
 
 proc clone(probSpecsDir: ProbSpecsDir) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
