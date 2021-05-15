@@ -32,8 +32,8 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
   )
 
 proc initExerciseTests(practiceExercise: PracticeExercise,
-                       probSpecsExercise: ProbSpecsExercise): ExerciseTests =
-  for testCase in probSpecsExercise.testCases:
+                       probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
+  for testCase in probSpecsTestCases:
     if practiceExercise.tests.included.contains(testCase.uuid):
       result.included.incl(testCase.uuid)
     elif practiceExercise.tests.excluded.contains(testCase.uuid):
@@ -66,16 +66,16 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
 proc initExercise(practiceExercise: PracticeExercise,
-                  probSpecsExercise: ProbSpecsExercise): Exercise =
+                  probSpecsTestCases: seq[ProbSpecsTestCase]): Exercise =
   Exercise(
     slug: practiceExercise.slug,
-    tests: initExerciseTests(practiceExercise, probSpecsExercise),
-    testCases: initExerciseTestCases(probSpecsExercise.testCases),
+    tests: initExerciseTests(practiceExercise, probSpecsTestCases),
+    testCases: initExerciseTestCases(probSpecsTestCases),
   )
 
-proc probSpecsTable(conf: Conf): Table[string, ProbSpecsExercise] =
+proc probSpecsTable(conf: Conf): Table[string, seq[ProbSpecsTestCase]] =
   for exercise in findProbSpecsExercises(conf):
-    result[exercise.slug] = exercise
+    result[exercise.slug] = exercise.testCases
 
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = probSpecsTable(conf)
