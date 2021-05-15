@@ -20,7 +20,7 @@ proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 
-proc execCmdException(cmd: string, message: string) =
+proc execSuccessElseQuit(cmd: string, message: string) =
   let (outp, errC) = execCmdEx(cmd)
   if errC != 0:
     stderr.writeLine outp
@@ -30,7 +30,7 @@ proc execCmdException(cmd: string, message: string) =
 proc clone(probSpecsDir: ProbSpecsDir) =
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
-  execCmdException(cmd, "Could not clone problem-specifications repo")
+  execSuccessElseQuit(cmd, "Could not clone problem-specifications repo")
 
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
