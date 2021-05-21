@@ -2,7 +2,7 @@ import std/[options, os, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
-export tracks.`$`, probspecs.ProbSpecsTestCase
+export tracks.`$`, probspecs.pretty
 
 type
   ExerciseTestCase* = ref object

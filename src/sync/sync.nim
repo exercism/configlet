@@ -1,12 +1,10 @@
-import std/[json, options, sequtils, sets, strformat, strutils]
+import std/[options, sequtils, sets, strformat, strutils]
 import ".."/[cli, logger]
 import "."/exercises
 
 type
   SyncDecision = enum
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
-
-proc pretty(testcase: ProbSpecsTestCase, indent = 2): string {.borrow.}
 
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   doAssert(testCase.reimplements.isNone)

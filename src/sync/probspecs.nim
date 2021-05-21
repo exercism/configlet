@@ -16,6 +16,7 @@ proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc pretty*(testcase: ProbSpecsTestCase, indent = 2): string {.borrow.}
 
 proc execSuccessElseQuit(cmd: string, message: string): string =
   ## Runs `cmd` and returns its output. If the command exits with a non-zero
