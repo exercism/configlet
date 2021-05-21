@@ -86,11 +86,11 @@ proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsEx
   ## Returns a Table containing the slug and corresponding canonical tests for
   ## each exercise in `probSpecsDir`. If `conf` specifies a single exercise,
   ## returns only the tests for that exercise.
-  for dir in walkDirs(probSpecsDir / "exercises" / "*"):
+  let pattern = if conf.action.exercise.len > 0: conf.action.exercise else: "*"
+  for dir in walkDirs(probSpecsDir / "exercises" / pattern):
     let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
     if fileExists(probSpecsExerciseDir.canonicalDataFile()):
-      if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
-        result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
+      result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
