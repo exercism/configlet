@@ -78,7 +78,7 @@ proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[Pr
   ## Parses the `canonical-data.json` file for the given exercise, and returns
   ## a seq of, essentially, the JsonNode for each test.
   let canonicalJsonPath = canonicalDataFile(probSpecsExerciseDir)
-  if probSpecsExerciseDir.slug == "grains":
+  if slug(probSpecsExerciseDir) == "grains":
     canonicalJsonPath.grainsWorkaround().initProbSpecsTestCases()
   else:
     canonicalJsonPath.parseFile().initProbSpecsTestCases()
@@ -91,7 +91,8 @@ proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsEx
   for dir in walkDirs(probSpecsDir / "exercises" / pattern):
     let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
     if fileExists(probSpecsExerciseDir.canonicalDataFile()):
-      result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
+      let slug = slug(probSpecsExerciseDir)
+      result[slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
