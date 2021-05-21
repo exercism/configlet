@@ -90,8 +90,8 @@ const
 proc isValidConceptExercise(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path, context, checkIsKebab = true),
-      hasString(data, "name", path, context),
+      hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
+      hasString(data, "name", path, context, maxLen = 255),
       hasString(data, "uuid", path, context, checkIsUuid = true),
       hasBoolean(data, "deprecated", path, context, isRequired = false),
       hasArrayOfStrings(data, "concepts", path, context,
@@ -109,8 +109,8 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
                              path: Path): bool =
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "slug", path, context, checkIsKebab = true),
-      hasString(data, "name", path, context),
+      hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
+      hasString(data, "name", path, context, maxLen = 255),
       hasString(data, "uuid", path, context, checkIsUuid = true),
       hasBoolean(data, "deprecated", path, context, isRequired = false),
       hasInteger(data, "difficulty", path, context, allowed = 0..10),
@@ -143,8 +143,8 @@ proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "uuid", path, context, checkIsUuid = true),
-      hasString(data, "slug", path, context, checkIsKebab = true),
-      hasString(data, "name", path, context),
+      hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
+      hasString(data, "name", path, context, maxLen = 255),
     ]
     result = allTrue(checks)
 
@@ -173,8 +173,8 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, "", path):
     let checks = [
-      hasString(data, "language", path),
-      hasString(data, "slug", path, checkIsKebab = true),
+      hasString(data, "language", path, maxLen = 255),
+      hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
       hasBoolean(data, "active", path),
       hasString(data, "blurb", path, maxLen = 400),
       hasInteger(data, "version", path, allowed = 3..3),
