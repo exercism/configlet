@@ -2,9 +2,9 @@ import std/[json, os, osproc, strformat, strscans, strutils, tables]
 import ".."/[cli, helpers, logger]
 
 type
-  ProbSpecsExerciseDir = distinct string
+  ProbSpecsExerciseDir {.requiresInit.} = distinct string
 
-  ProbSpecsDir = distinct string
+  ProbSpecsDir {.requiresInit.} = distinct string
 
   ProbSpecsTestCase* = distinct JsonNode
 
