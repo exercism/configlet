@@ -1,14 +1,14 @@
-import std/[json, options, os, sets, strformat, strutils, tables]
+import std/[options, os, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
-export tracks.`$`
+export tracks.`$`, probspecs.ProbSpecsTestCase
 
 type
   ExerciseTestCase* = ref object
     uuid*: string
     description*: string
-    json*: JsonNode
+    json*: ProbSpecsTestCase
     reimplements*: Option[ExerciseTestCase]
 
   ExerciseTests* = object
@@ -45,7 +45,7 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
     uuid: testCase.uuid,
     description: testCase.description,
-    json: testCase.json,
+    json: testCase,
   )
 
 proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =

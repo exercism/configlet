@@ -6,8 +6,7 @@ type
 
   ProbSpecsDir = distinct string
 
-  ProbSpecsTestCase* = object
-    json*: JsonNode
+  ProbSpecsTestCase* = distinct JsonNode
 
   ProbSpecsExercise* = object
     slug*: string
@@ -51,19 +50,22 @@ func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   lastPathPart(probSpecsExerciseDir)
 
 func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  ProbSpecsTestCase(json: node)
+  ProbSpecsTestCase(node)
+
+proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
+proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 
 proc uuid*(testCase: ProbSpecsTestCase): string =
-  testCase.json["uuid"].getStr()
+  testCase["uuid"].getStr()
 
 proc description*(testCase: ProbSpecsTestCase): string =
-  testCase.json["description"].getStr()
+  testCase["description"].getStr()
 
 func isReimplementation*(testCase: ProbSpecsTestCase): bool =
-  testCase.json.hasKey("reimplements")
+  testCase.hasKey("reimplements")
 
 proc reimplements*(testCase: ProbSpecsTestCase): string =
-  testCase.json["reimplements"].getStr()
+  testCase["reimplements"].getStr()
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):

@@ -6,6 +6,8 @@ type
   SyncDecision = enum
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
+proc pretty(testcase: ProbSpecsTestCase, indent = 2): string {.borrow.}
+
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   doAssert(testCase.reimplements.isNone)
 
