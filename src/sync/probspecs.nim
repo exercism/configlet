@@ -38,12 +38,6 @@ proc clone(probSpecsDir: ProbSpecsDir) =
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
 
-iterator exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): ProbSpecsExerciseDir =
-  for dir in walkDirs(probSpecsDir / "exercises" / "*"):
-    let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
-    if fileExists(probSpecsExerciseDir.canonicalDataFile()):
-      yield probSpecsExerciseDir
-
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   lastPathPart(probSpecsExerciseDir)
 
@@ -85,9 +79,11 @@ proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[Pr
     probSpecsExerciseDir.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
 proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsExercises =
-  for probSpecsExerciseDir in probSpecsDir.exercisesWithCanonicalData():
-    if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
-      result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
+  for dir in walkDirs(probSpecsDir / "exercises" / "*"):
+    let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
+    if fileExists(probSpecsExerciseDir.canonicalDataFile()):
+      if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
+        result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
