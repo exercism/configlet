@@ -47,9 +47,6 @@ iterator exercisesWithCanonicalData(probSpecsDir: ProbSpecsDir): ProbSpecsExerci
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   lastPathPart(probSpecsExerciseDir)
 
-func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  ProbSpecsTestCase(node)
-
 proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
 proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 
@@ -67,7 +64,7 @@ proc reimplements*(testCase: ProbSpecsTestCase): string =
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
   if node.hasKey("uuid"):
-    result.add initProbSpecsTestCase(node)
+    result.add ProbSpecsTestCase(node)
   elif node.hasKey("cases"):
     for childNode in node["cases"].getElems():
       result.add initProbSpecsTestCases(childNode)
