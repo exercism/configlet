@@ -2,20 +2,22 @@ import std/[json, os, osproc, strformat, strscans, strutils, tables]
 import ".."/[cli, helpers, logger]
 
 type
-  ProbSpecsExerciseDir {.requiresInit.} = distinct string
-
   ProbSpecsDir {.requiresInit.} = distinct string
+
+  ProbSpecsExerciseDir {.requiresInit.} = distinct string
 
   ProbSpecsTestCase* = distinct JsonNode
 
   ProbSpecsExercises* = Table[string, seq[ProbSpecsTestCase]]
 
 proc `$`(p: ProbSpecsDir): string {.borrow.}
+proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
+proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
-proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
-proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
+proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 proc pretty*(testcase: ProbSpecsTestCase, indent = 2): string {.borrow.}
 
 proc execSuccessElseQuit(cmd: string, message: string): string =
@@ -41,9 +43,6 @@ func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
 
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   lastPathPart(probSpecsExerciseDir)
-
-proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
-proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 
 func uuid*(testCase: ProbSpecsTestCase): string =
   testCase["uuid"].getStr()
