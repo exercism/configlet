@@ -1,4 +1,4 @@
-import std/[json, os, osproc, strformat, strscans, strutils]
+import std/[json, os, osproc, strformat, strscans, strutils, tables]
 import ".."/[cli, helpers, logger]
 
 type
@@ -8,9 +8,7 @@ type
 
   ProbSpecsTestCase* = distinct JsonNode
 
-  ProbSpecsExercise* = object
-    slug*: string
-    testCases*: seq[ProbSpecsTestCase]
+  ProbSpecsExercises* = Table[string, seq[ProbSpecsTestCase]]
 
 proc `$`(p: ProbSpecsDir): string {.borrow.}
 proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
@@ -89,16 +87,10 @@ proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[Pr
   else:
     probSpecsExerciseDir.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
-proc initProbSpecsExercise(probSpecsExerciseDir: ProbSpecsExerciseDir): ProbSpecsExercise =
-  ProbSpecsExercise(
-    slug: probSpecsExerciseDir.slug,
-    testCases: parseProbSpecsTestCases(probSpecsExerciseDir),
-  )
-
-proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsExercises =
   for probSpecsExerciseDir in probSpecsDir.exercisesWithCanonicalData():
     if conf.action.exercise.len == 0 or conf.action.exercise == probSpecsExerciseDir.slug:
-      result.add initProbSpecsExercise(probSpecsExerciseDir)
+      result[probSpecsExerciseDir.slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
@@ -162,7 +154,7 @@ proc validate(probSpecsDir: ProbSpecsDir) =
       showError("the given problem-specifications directory is not " &
                 &"up-to-date: '{probSpecsDir}'")
 
-proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises*(conf: Conf): ProbSpecsExercises =
   if conf.action.probSpecsDir.len > 0:
     let probSpecsDir = ProbSpecsDir(conf.action.probSpecsDir)
     if not conf.action.offline:

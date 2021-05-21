@@ -1,5 +1,5 @@
 # This module contains tests for `src/probspecs.nim`
-import std/[json, os, osproc, strformat, unittest]
+import std/[json, os, osproc, strformat, tables, unittest]
 import "."/[cli, sync/probspecs]
 
 type
@@ -34,15 +34,14 @@ proc main =
         check:
           probSpecsExercises.len >= 116
 
-      test "the first exercise is as expected":
-        let exercise = probSpecsExercises[0]
+      test "the first exercise with canonical data is as expected":
+        let exercise = probSpecsExercises["accumulate"]
 
         check:
-          exercise.slug == "accumulate" # The first exercise with canonical data.
-          exercise.testCases.len >= 5 # Tests are never removed.
+          exercise.len >= 5 # Tests are never removed.
 
       test "the first test case of first exercise is as expected":
-        let firstTestCase = probSpecsExercises[0].testCases[0].JsonNode
+        let firstTestCase = probSpecsExercises["accumulate"][0].JsonNode
         let firstTestCaseExpected = """{
       "uuid": "64d97c14-36dd-44a8-9621-2cecebd6ed23",
       "description": "accumulate empty",
@@ -57,15 +56,14 @@ proc main =
         check:
           firstTestCase == firstTestCaseExpected
 
-      test "the second exercise is as expected":
-        let exercise = probSpecsExercises[1]
+      test "the second exercise with canonical data is as expected":
+        let exercise = probSpecsExercises["acronym"]
 
         check:
-          exercise.slug == "acronym" # The second exercise with canonical data.
-          exercise.testCases.len >= 9 # Tests are never removed.
+          exercise.len >= 9 # Tests are never removed.
 
       test "the first test case of second exercise is as expected":
-        let firstTestCase = probSpecsExercises[1].testCases[0].JsonNode
+        let firstTestCase = probSpecsExercises["acronym"][0].JsonNode
         let firstTestCaseExpected = """{
           "uuid": "1e22cceb-c5e4-4562-9afe-aef07ad1eaf4",
           "description": "basic",

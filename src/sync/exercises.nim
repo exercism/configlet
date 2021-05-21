@@ -77,12 +77,8 @@ proc initExercise(practiceExercise: PracticeExercise,
     testCases: initExerciseTestCases(probSpecsTestCases),
   )
 
-proc probSpecsTable(conf: Conf): Table[string, seq[ProbSpecsTestCase]] =
-  for exercise in findProbSpecsExercises(conf):
-    result[exercise.slug] = exercise.testCases
-
 proc findExercises*(conf: Conf): seq[Exercise] =
-  let probSpecsExercises = probSpecsTable(conf)
+  let probSpecsExercises = findProbSpecsExercises(conf)
 
   for practiceExercise in findPracticeExercises(conf):
     let exercise = initExercise(
