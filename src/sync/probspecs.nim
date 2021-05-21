@@ -34,6 +34,7 @@ proc execSuccessElseQuit(cmd: string, message: string): string =
     quit(1)
 
 proc clone(probSpecsDir: ProbSpecsDir) =
+  ## Downloads the `exercism/problem-specifications` repo to `probSpecsDir`.
   let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
   discard execSuccessElseQuit(cmd, "Could not clone problem-specifications repo")
@@ -57,6 +58,7 @@ func reimplements*(testCase: ProbSpecsTestCase): string =
   testCase["reimplements"].getStr()
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
+  ## Returns a seq of every individual test case in `node` (flattening).
   if node.hasKey("uuid"):
     result.add ProbSpecsTestCase(node)
   elif node.hasKey("cases"):
@@ -73,12 +75,17 @@ proc grainsWorkaround(grainsPath: string): JsonNode =
   result = parseJson(sanitised)
 
 proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[ProbSpecsTestCase] =
+  ## Parses the `canonical-data.json` file for the given exercise, and returns
+  ## a seq of, essentially, the JsonNode for each test.
   if probSpecsExerciseDir.slug == "grains":
     probSpecsExerciseDir.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
   else:
     probSpecsExerciseDir.canonicalDataFile().parseFile().initProbSpecsTestCases()
 
 proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsExercises =
+  ## Returns a Table containing the slug and corresponding canonical tests for
+  ## each exercise in `probSpecsDir`. If `conf` specifies a single exercise,
+  ## returns only the tests for that exercise.
   for dir in walkDirs(probSpecsDir / "exercises" / "*"):
     let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
     if fileExists(probSpecsExerciseDir.canonicalDataFile()):
