@@ -50,16 +50,16 @@ func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
 proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
 proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 
-proc uuid*(testCase: ProbSpecsTestCase): string =
+func uuid*(testCase: ProbSpecsTestCase): string =
   testCase["uuid"].getStr()
 
-proc description*(testCase: ProbSpecsTestCase): string =
+func description*(testCase: ProbSpecsTestCase): string =
   testCase["description"].getStr()
 
 func isReimplementation*(testCase: ProbSpecsTestCase): bool =
   testCase.hasKey("reimplements")
 
-proc reimplements*(testCase: ProbSpecsTestCase): string =
+func reimplements*(testCase: ProbSpecsTestCase): string =
   testCase["reimplements"].getStr()
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
