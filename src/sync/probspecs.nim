@@ -85,7 +85,8 @@ proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[Pr
   else:
     canonicalJsonPath.parseFile().initProbSpecsTestCases()
 
-proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsExercises =
+proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir,
+                            conf: Conf): ProbSpecsExercises =
   ## Returns a Table containing the slug and corresponding canonical tests for
   ## each exercise in `probSpecsDir`. If `conf` specifies a single exercise,
   ## returns only the tests for that exercise.
@@ -96,7 +97,8 @@ proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsEx
       let slug = slug(probSpecsExerciseDir)
       result[slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
-proc getNameOfRemote(probSpecsDir: ProbSpecsDir; host, location: string): string =
+proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
+                     host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
   ## at `host`.
   ##
