@@ -77,10 +77,11 @@ proc grainsWorkaround(grainsPath: string): JsonNode =
 proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[ProbSpecsTestCase] =
   ## Parses the `canonical-data.json` file for the given exercise, and returns
   ## a seq of, essentially, the JsonNode for each test.
+  let canonicalJsonPath = canonicalDataFile(probSpecsExerciseDir)
   if probSpecsExerciseDir.slug == "grains":
-    probSpecsExerciseDir.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
+    canonicalJsonPath.grainsWorkaround().initProbSpecsTestCases()
   else:
-    probSpecsExerciseDir.canonicalDataFile().parseFile().initProbSpecsTestCases()
+    canonicalJsonPath.parseFile().initProbSpecsTestCases()
 
 proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir, conf: Conf): ProbSpecsExercises =
   ## Returns a Table containing the slug and corresponding canonical tests for
