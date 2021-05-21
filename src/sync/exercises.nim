@@ -1,8 +1,8 @@
-import std/[algorithm, json, options, os, sequtils, sets, strformat, strutils,
-            tables]
+import std/[json, options, os, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
+export tracks.`$`
 
 type
   ExerciseTestCase* = ref object
@@ -20,7 +20,7 @@ type
     exOutOfSync, exInSync, exNoCanonicalData
 
   Exercise* = object
-    slug*: string
+    slug*: PracticeExerciseSlug
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
@@ -31,11 +31,12 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
     missing: missing,
   )
 
-proc initExerciseTests(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): ExerciseTests =
-  for testCase in probSpecsExercise.testCases:
-    if trackExercise.tests.included.contains(testCase.uuid):
+proc initExerciseTests(practiceExercise: PracticeExercise,
+                       probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
+  for testCase in probSpecsTestCases:
+    if practiceExercise.tests.included.contains(testCase.uuid):
       result.included.incl(testCase.uuid)
-    elif trackExercise.tests.excluded.contains(testCase.uuid):
+    elif practiceExercise.tests.excluded.contains(testCase.uuid):
       result.excluded.incl(testCase.uuid)
     else:
       result.missing.incl(testCase.uuid)
@@ -47,29 +48,48 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
     json: testCase.json,
   )
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
   for testCase in testCases:
-    result.add(newExerciseTestCase(testCase))
+    if testCase.isReimplementation():
+      result[testCase.uuid] = testCase.reimplements()
 
-  let reimplementations = testCases.filterIt(it.isReimplementation).mapIt((it.uuid, it.reimplements)).toTable()
-  let testCasesByUuids = result.newTableFrom(proc (testCase: ExerciseTestCase): string = testCase.uuid)
+proc uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
+  for testCase in testCases:
+    result[testCase.uuid] = testCase
+
+proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+  result = newSeq[ExerciseTestCase](testCases.len)
+  for i, testCase in testCases:
+    result[i] = newExerciseTestCase(testCase)
+
+  let reimplementations = getReimplementations(testCases)
+  let testCasesByUuids = uuidToTestCase(result)
 
   for testCase in result:
     if testCase.uuid in reimplementations:
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
-proc initExercise(trackExercise: TrackExercise, probSpecsExercise: ProbSpecsExercise): Exercise =
+proc initExercise(practiceExercise: PracticeExercise,
+                  probSpecsTestCases: seq[ProbSpecsTestCase]): Exercise =
   Exercise(
-    slug: trackExercise.slug,
-    tests: initExerciseTests(trackExercise, probSpecsExercise),
-    testCases: initExerciseTestCases(probSpecsExercise.testCases),
+    slug: practiceExercise.slug,
+    tests: initExerciseTests(practiceExercise, probSpecsTestCases),
+    testCases: initExerciseTestCases(probSpecsTestCases),
   )
 
-proc findExercises*(conf: Conf): seq[Exercise] =
-  let probSpecsExercises = findProbSpecsExercises(conf).mapIt((it.slug, it)).toTable
+proc probSpecsTable(conf: Conf): Table[string, seq[ProbSpecsTestCase]] =
+  for exercise in findProbSpecsExercises(conf):
+    result[exercise.slug] = exercise.testCases
 
-  for trackExercise in findTrackExercises(conf).sortedByIt(it.slug):
-    result.add(initExercise(trackExercise, probSpecsExercises.getOrDefault(trackExercise.slug)))
+proc findExercises*(conf: Conf): seq[Exercise] =
+  let probSpecsExercises = probSpecsTable(conf)
+
+  for practiceExercise in findPracticeExercises(conf):
+    let exercise = initExercise(
+      practiceExercise,
+      probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    )
+    result.add exercise
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
@@ -78,12 +98,6 @@ func status*(exercise: Exercise): ExerciseStatus =
     exOutOfSync
   else:
     exInSync
-
-func hasCanonicalData*(exercise: Exercise): bool =
-  exercise.testCases.len > 0
-
-func testsFile(exercise: Exercise, trackDir: string): string =
-  trackDir / "exercises" / "practice" / exercise.slug / ".meta" / "tests.toml"
 
 func prettyTomlString(s: string): string =
   ## Returns `s` as a TOML string. This tries to handle multi-line strings,
@@ -144,7 +158,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
   result.setLen(result.len - 1)
 
 proc writeTestsToml*(exercise: Exercise, trackDir: string) =
-  let testsPath = testsFile(exercise, trackDir)
+  let testsPath = testsPath(TrackDir(trackDir), exercise.slug)
   createDir(testsPath.parentDir())
 
   let contents = toToml(exercise, testsPath)

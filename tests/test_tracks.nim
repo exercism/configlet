@@ -3,7 +3,7 @@ import std/[os, osproc, sets, strformat, unittest]
 import "."/[cli, sync/tracks]
 
 proc main =
-  suite "findTrackExercises":
+  suite "findPracticeExercises":
     const trackDir = ".test_tracks_nim_track_repo"
     removeDir(trackDir)
     let cmd = &"git clone --quiet https://github.com/exercism/nim.git {trackDir}"
@@ -20,7 +20,7 @@ proc main =
       action: initAction(actSync),
       trackDir: trackDir,
     )
-    let trackExercises = findTrackExercises(conf)
+    let trackExercises = findPracticeExercises(conf)
 
     test "returns the expected number of exercises":
       check:
@@ -28,22 +28,22 @@ proc main =
 
     test "returns the expected object for `hello-world`":
       const expectedHelloWorld =
-        TrackExercise(
-          slug: "hello-world",
-          tests: TrackExerciseTests(
+        PracticeExercise(
+          slug: PracticeExerciseSlug("hello-world"),
+          tests: PracticeExerciseTests(
             included: ["af9ffe10-dc13-42d8-a742-e7bdafac449d"].toHashSet(),
             excluded: initHashSet[string](0)
           )
         )
 
       check:
-        trackExercises[0] == expectedHelloWorld
+        trackExercises[20] == expectedHelloWorld
 
     test "returns the expected object for `two-fer`":
       const expectedTwoFer =
-        TrackExercise(
-          slug: "two-fer",
-          tests: TrackExerciseTests(
+        PracticeExercise(
+          slug: PracticeExerciseSlug("two-fer"),
+          tests: PracticeExerciseTests(
             included: ["1cf3e15a-a3d7-4a87-aeb3-ba1b43bc8dce",
                        "3549048d-1a6e-4653-9a79-b0bda163e8d5",
                        "b4c6dbb8-b4fb-42c2-bafd-10785abe7709"].toHashSet(),
@@ -52,7 +52,7 @@ proc main =
         )
 
       check:
-        trackExercises[1] == expectedTwoFer
+        trackExercises[65] == expectedTwoFer
 
     # Try to remove the track directory, but allow the tests to pass if there
     # was an error removing it.

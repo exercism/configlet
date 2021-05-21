@@ -1,34 +1,34 @@
-import std/[json, os, sets]
+import std/[algorithm, json, os, sets]
 import pkg/parsetoml
 import ".."/cli
 
 type
-  TrackDir {.requiresInit.} = distinct string
+  TrackDir* {.requiresInit.} = distinct string
 
-  PracticeExercisePath {.requiresInit.} = distinct string
+  PracticeExerciseSlug* {.requiresInit.} = distinct string
 
-  TrackExerciseTests* = object
+  PracticeExerciseTests* = object
     included*: HashSet[string]
     excluded*: HashSet[string]
 
-  TrackExercise* = object
-    slug*: string
-    tests*: TrackExerciseTests
+  PracticeExercise* = object
+    slug*: PracticeExerciseSlug
+    tests*: PracticeExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: PracticeExercisePath, tail: string): string {.borrow.}
-proc extractFilename(exercisePath: PracticeExercisePath): string {.borrow.}
+proc `/`(head: string, tail: PracticeExerciseSlug): string {.borrow.}
+proc `==`*(x, y: PracticeExerciseSlug): bool {.borrow.}
+proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
+proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
 
-func slug(exercisePath: PracticeExercisePath): string =
-  extractFilename(exercisePath)
+func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
+  ## Returns the path to the `tests.toml` file for a given `slug` in a
+  ## `trackDir`.
+  trackDir / "exercises" / "practice" / slug / ".meta" / "tests.toml"
 
-func testsFile(exercisePath: PracticeExercisePath): string =
-  exercisePath / ".meta" / "tests.toml"
-
-func testsFile*(exercise: TrackExercise): string =
-  PracticeExercisePath("").testsFile()
-
-proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
+proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
+  ## Parses the root `config.json` file in `trackDir` and returns a seq of its
+  ## Practice Exercise slugs, in alphabetical order.
   let configFile = trackDir / "config.json"
   if fileExists(configFile):
     let config = json.parseFile(configFile)
@@ -36,14 +36,13 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
       let exercises = config["exercises"]
       if exercises.hasKey("practice"):
         let practiceExercises = exercises["practice"]
-        result = newSeqOfCap[PracticeExercisePath](practiceExercises.len)
+        result = newSeqOfCap[PracticeExerciseSlug](practiceExercises.len)
 
         for exercise in practiceExercises:
           if exercise.hasKey("slug"):
             if exercise["slug"].kind == JString:
               let slug = exercise["slug"].getStr()
-              let path = trackDir / "exercises" / "practice" / slug
-              result.add PracticeExercisePath(path)
+              result.add PracticeExerciseSlug(slug)
     else:
       stderr.writeLine "Error: file does not have an `exercises` key:\n" &
                        configFile
@@ -52,10 +51,13 @@ proc getPracticeExercisePaths(trackDir: TrackDir): seq[PracticeExercisePath] =
     stderr.writeLine "Error: file does not exist:\n" & configFile
     quit(1)
 
-proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTests =
-  let testsFile = testsFile(exercisePath)
-  if fileExists(testsFile):
-    let tests = parsetoml.parseFile(testsFile)
+  sort result
+
+proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
+  ## Parses the `tests.toml` file at `testsPath` and returns HashSets of the
+  ## included and excluded test case UUIDs.
+  if fileExists(testsPath):
+    let tests = parsetoml.parseFile(testsPath)
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):
@@ -68,26 +70,23 @@ proc initTrackExerciseTests(exercisePath: PracticeExercisePath): TrackExerciseTe
         else:
           let msg = "Error: the value of an `include` key is `" &
                     val["include"].toTomlString() & "`, but it must be a " &
-                    "bool:\n" & exercisePath.testsFile()
+                    "bool:\n" & testsPath
           stderr.writeLine(msg)
       else:
         result.included.incl(uuid)
 
-proc initTrackExercise(exercisePath: PracticeExercisePath): TrackExercise =
-  TrackExercise(
-    slug: slug(exercisePath),
-    tests: initTrackExerciseTests(exercisePath),
-  )
-
-proc findTrackExercises(trackDir: TrackDir,
-                        userExercise: string): seq[TrackExercise] =
-  let practiceExercisePaths = getPracticeExercisePaths(trackDir)
-  result = newSeqOfCap[TrackExercise](practiceExercisePaths.len)
-
-  for practiceExercisePath in practiceExercisePaths:
-    if userExercise.len == 0 or userExercise == slug(practiceExercisePath):
-      result.add initTrackExercise(practiceExercisePath)
-
-proc findTrackExercises*(conf: Conf): seq[TrackExercise] =
+proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
   let trackDir = TrackDir(conf.trackDir)
-  result = findTrackExercises(trackDir, conf.action.exercise)
+  let userExercise = conf.action.exercise
+
+  let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
+  result = newSeqOfCap[PracticeExercise](practiceExerciseSlugs.len)
+
+  for slug in practiceExerciseSlugs:
+    if userExercise.len == 0 or userExercise == slug.string:
+      let testsPath = testsPath(trackDir, slug)
+      let p = PracticeExercise(
+        slug: slug,
+        tests: initPracticeExerciseTests(testsPath),
+      )
+      result.add p
