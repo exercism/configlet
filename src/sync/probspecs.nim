@@ -35,7 +35,9 @@ proc execSuccessElseQuit(cmd: string, message: string): string =
 
 proc clone(probSpecsDir: ProbSpecsDir) =
   ## Downloads the `exercism/problem-specifications` repo to `probSpecsDir`.
-  let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {probSpecsDir}"
+  const cmdBase = "git clone --quiet --depth 1"
+  const url = "https://github.com/exercism/problem-specifications.git"
+  let cmd = &"{cmdBase} {url} {probSpecsDir}"
   logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
   discard execSuccessElseQuit(cmd, "Could not clone problem-specifications repo")
 
