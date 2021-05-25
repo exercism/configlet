@@ -1,4 +1,4 @@
-import std/[options, sequtils, sets, strformat, strutils]
+import std/[options, sets, strformat, strutils]
 import ".."/[cli, logger]
 import "."/exercises
 
@@ -102,11 +102,16 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
 
   writeTestsToml(result, conf.trackDir)
 
-proc sync(exercises: seq[Exercise], conf: Conf): seq[Exercise] =
+proc sync(exercises: seq[Exercise], conf: Conf): bool =
+  ## Syncs the given `exercises` and returns `true` if every exercise is now
+  ## up-to-date.
+  result = true
   for exercise in exercises:
     case exercise.status
     of exOutOfSync:
-      result.add(sync(exercise, conf))
+      let syncedExercise = sync(exercise, conf)
+      if syncedExercise.status == exOutOfSync:
+        result = false
     of exInSync:
       logDetailed(&"[skip] {exercise.slug} is up-to-date")
     of exNoCanonicalData:
@@ -116,11 +121,11 @@ proc sync*(conf: Conf) =
   logNormal("Syncing exercises...")
 
   let exercises = findExercises(conf)
-  let syncedExercises = sync(exercises, conf)
+  let everyExerciseIsSynced = sync(exercises, conf)
 
-  if syncedExercises.anyIt(it.status == exOutOfSync):
-    logNormal("[warn] some exercises are still missing test cases")
-    quit(QuitFailure)
-  else:
+  if everyExerciseIsSynced:
     logNormal("All exercises are synced!")
     quit(QuitSuccess)
+  else:
+    logNormal("[warn] some exercises are still missing test cases")
+    quit(QuitFailure)
