@@ -1,14 +1,14 @@
-import std/[json, options, os, sets, strformat, strutils, tables]
+import std/[options, os, sets, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/cli
 import "."/[probspecs, tracks]
-export tracks.`$`
+export tracks.`$`, probspecs.pretty
 
 type
   ExerciseTestCase* = ref object
     uuid*: string
     description*: string
-    json*: JsonNode
+    json*: ProbSpecsTestCase
     reimplements*: Option[ExerciseTestCase]
 
   ExerciseTests* = object
@@ -45,7 +45,7 @@ proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
     uuid: testCase.uuid,
     description: testCase.description,
-    json: testCase.json,
+    json: testCase,
   )
 
 proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
@@ -77,12 +77,8 @@ proc initExercise(practiceExercise: PracticeExercise,
     testCases: initExerciseTestCases(probSpecsTestCases),
   )
 
-proc probSpecsTable(conf: Conf): Table[string, seq[ProbSpecsTestCase]] =
-  for exercise in findProbSpecsExercises(conf):
-    result[exercise.slug] = exercise.testCases
-
 proc findExercises*(conf: Conf): seq[Exercise] =
-  let probSpecsExercises = probSpecsTable(conf)
+  let probSpecsExercises = findProbSpecsExercises(conf)
 
   for practiceExercise in findPracticeExercises(conf):
     let exercise = initExercise(

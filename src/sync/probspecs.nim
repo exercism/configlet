@@ -1,82 +1,71 @@
-import std/[json, os, osproc, sequtils, strformat, strscans, strutils]
+import std/[json, os, osproc, strformat, strscans, strutils, tables]
 import ".."/[cli, helpers, logger]
 
 type
-  ProbSpecsRepoExercise = object
-    dir: string
+  ProbSpecsDir {.requiresInit.} = distinct string
 
-  ProbSpecsRepo = object
-    dir: string
+  ProbSpecsExerciseDir {.requiresInit.} = distinct string
 
-  ProbSpecsTestCase* = object
-    json*: JsonNode
+  ProbSpecsTestCase* = distinct JsonNode
 
-  ProbSpecsExercise* = object
-    slug*: string
-    testCases*: seq[ProbSpecsTestCase]
+  ProbSpecsExercises* = Table[string, seq[ProbSpecsTestCase]]
 
-proc execCmdException*(cmd: string, message: string) =
-  if execCmd(cmd) != 0:
-    quit(message)
+proc `$`(dir: ProbSpecsDir): string {.borrow.}
+proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
+proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
+proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
+proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
+proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
+proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
+proc pretty*(testCase: ProbSpecsTestCase, indent = 2): string {.borrow.}
 
-proc probSpecsDir: string =
-  getCurrentDir() / ".problem-specifications"
+proc execSuccessElseQuit(cmd: string, message: string): string =
+  ## Runs `cmd` and returns its output. If the command exits with a non-zero
+  ## exit code, prints the output and the given `message`, then quits.
+  var errC = -1
+  (result, errC) = execCmdEx(cmd)
+  if errC != 0:
+    stderr.writeLine result
+    if message.len > 0:
+      stderr.writeLine message
+    else:
+      stderr.writeLine &"Error when running '{cmd}'"
+    quit(1)
 
-proc initProbSpecsRepo: ProbSpecsRepo =
-  ProbSpecsRepo(dir: probSpecsDir())
+proc clone(probSpecsDir: ProbSpecsDir) =
+  ## Downloads the `exercism/problem-specifications` repo to `probSpecsDir`.
+  const cmdBase = "git clone --quiet --depth 1"
+  const url = "https://github.com/exercism/problem-specifications.git"
+  let cmd = &"{cmdBase} {url} {probSpecsDir}"
+  logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
+  discard execSuccessElseQuit(cmd, "Could not clone problem-specifications repo")
 
-proc clone(repo: ProbSpecsRepo) =
-  let cmd = &"git clone --quiet --depth 1 https://github.com/exercism/problem-specifications.git {repo.dir}"
-  logNormal(&"Cloning the problem-specifications repo into {repo.dir}...")
-  execCmdException(cmd, "Could not clone problem-specifications repo")
+func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
+  probSpecsExerciseDir / "canonical-data.json"
 
-proc remove(repo: ProbSpecsRepo) =
-  removeDir(repo.dir)
+func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
+  lastPathPart(probSpecsExerciseDir)
 
-func initProbSpecsRepoExercise(dir: string): ProbSpecsRepoExercise =
-  ProbSpecsRepoExercise(dir: dir)
+func uuid*(testCase: ProbSpecsTestCase): string =
+  testCase["uuid"].getStr()
 
-func exercisesDir(repo: ProbSpecsRepo): string =
-  repo.dir / "exercises"
-
-proc exercises(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
-  for exerciseDir in walkDirs(repo.exercisesDir / "*"):
-    result.add(initProbSpecsRepoExercise(exerciseDir))
-
-func canonicalDataFile(repoExercise: ProbSpecsRepoExercise): string =
-  repoExercise.dir / "canonical-data.json"
-
-proc hasCanonicalDataFile(repoExercise: ProbSpecsRepoExercise): bool =
-  fileExists(repoExercise.canonicalDataFile())
-
-proc exercisesWithCanonicalData(repo: ProbSpecsRepo): seq[ProbSpecsRepoExercise] =
-  for repoExercise in repo.exercises().filter(hasCanonicalDataFile):
-    result.add(repoExercise)
-
-func slug(repoExercise: ProbSpecsRepoExercise): string =
-  extractFilename(repoExercise.dir)
-
-func initProbSpecsTestCase(node: JsonNode): ProbSpecsTestCase =
-  ProbSpecsTestCase(json: node)
-
-proc uuid*(testCase: ProbSpecsTestCase): string =
-  testCase.json["uuid"].getStr()
-
-proc description*(testCase: ProbSpecsTestCase): string =
-  testCase.json["description"].getStr()
+func description*(testCase: ProbSpecsTestCase): string =
+  testCase["description"].getStr()
 
 func isReimplementation*(testCase: ProbSpecsTestCase): bool =
-  testCase.json.hasKey("reimplements")
+  testCase.hasKey("reimplements")
 
-proc reimplements*(testCase: ProbSpecsTestCase): string =
-  testCase.json["reimplements"].getStr()
+func reimplements*(testCase: ProbSpecsTestCase): string =
+  testCase["reimplements"].getStr()
 
 proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
+  ## Returns a seq of every individual test case in `node` (flattening).
   if node.hasKey("uuid"):
-    result.add(initProbSpecsTestCase(node))
+    result.add ProbSpecsTestCase(node)
   elif node.hasKey("cases"):
     for childNode in node["cases"].getElems():
-      result.add(initProbSpecsTestCases(childNode))
+      result.add initProbSpecsTestCases(childNode)
 
 proc grainsWorkaround(grainsPath: string): JsonNode =
   ## Parses the canonical data file for `grains`, replacing the too-large
@@ -87,33 +76,37 @@ proc grainsWorkaround(grainsPath: string): JsonNode =
     ("184467440737095516", "184467440737095516.0"))
   result = parseJson(sanitised)
 
-proc parseProbSpecsTestCases(repoExercise: ProbSpecsRepoExercise): seq[ProbSpecsTestCase] =
-  if repoExercise.slug == "grains":
-    repoExercise.canonicalDataFile().grainsWorkaround().initProbSpecsTestCases()
+proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[ProbSpecsTestCase] =
+  ## Parses the `canonical-data.json` file for the given exercise, and returns
+  ## a seq of, essentially, the JsonNode for each test.
+  let canonicalJsonPath = canonicalDataFile(probSpecsExerciseDir)
+  if slug(probSpecsExerciseDir) == "grains":
+    canonicalJsonPath.grainsWorkaround().initProbSpecsTestCases()
   else:
-    repoExercise.canonicalDataFile().parseFile().initProbSpecsTestCases()
+    canonicalJsonPath.parseFile().initProbSpecsTestCases()
 
-proc initProbSpecsExercise(repoExercise: ProbSpecsRepoExercise): ProbSpecsExercise =
-  ProbSpecsExercise(
-    slug: repoExercise.slug,
-    testCases: parseProbSpecsTestCases(repoExercise),
-  )
+proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir,
+                            conf: Conf): ProbSpecsExercises =
+  ## Returns a Table containing the slug and corresponding canonical tests for
+  ## each exercise in `probSpecsDir`. If `conf` specifies a single exercise,
+  ## returns only the tests for that exercise.
+  let pattern = if conf.action.exercise.len > 0: conf.action.exercise else: "*"
+  for dir in walkDirs(probSpecsDir / "exercises" / pattern):
+    let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
+    if fileExists(probSpecsExerciseDir.canonicalDataFile()):
+      let slug = slug(probSpecsExerciseDir)
+      result[slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
 
-proc findProbSpecsExercises(repo: ProbSpecsRepo, conf: Conf): seq[ProbSpecsExercise] =
-  for repoExercise in repo.exercisesWithCanonicalData():
-    if conf.action.exercise.len == 0 or conf.action.exercise == repoExercise.slug:
-      result.add(initProbSpecsExercise(repoExercise))
-
-proc getNameOfRemote(probSpecsDir, host, location: string): string =
+proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
+                     host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
   ## at `host`.
   ##
   ## Exits with an error if there is no such remote.
   # There's probably a better way to do this than parsing `git remote -v`.
-  let (remotes, errRemotes) = execCmdEx("git remote -v")
-  if errRemotes != 0:
-    showError("could not run `git remote -v` in the given " &
-              &"problem-specifications directory: '{probSpecsDir}'")
+  let msg = "could not run `git remote -v` in the given " &
+            &"problem-specifications directory: '{probSpecsDir}'"
+  let remotes = execSuccessElseQuit("git remote -v", msg)
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
@@ -122,12 +115,11 @@ proc getNameOfRemote(probSpecsDir, host, location: string): string =
   showError(&"there is no remote that points to '{location}' at '{host}' in " &
             &"the given problem-specifications directory: '{probSpecsDir}'")
 
-proc validate(probSpecsRepo: ProbSpecsRepo) =
+proc validate(probSpecsDir: ProbSpecsDir) =
   ## Raises an error if the given `probSpecsRepo` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
-  let probSpecsDir = probSpecsRepo.dir
   logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
 
   # Exit if the given directory does not exist.
@@ -135,7 +127,7 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
     showError("the given problem-specifications directory does not exist: " &
               &"'{probSpecsDir}'")
 
-  withDir probSpecsDir:
+  withDir probSpecsDir.string:
     # Exit if the given directory is not a git repo.
     if execCmd("git rev-parse") != 0:
       showError("the given problem-specifications directory is not a git " &
@@ -161,23 +153,24 @@ proc validate(probSpecsRepo: ProbSpecsRepo) =
 
     # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
     # with `upstream/main`.
-    let (revHead, _) = execCmdEx("git rev-parse HEAD")
-    let (revUpstream, _) = execCmdEx(&"git rev-parse {remoteName}/{mainBranchName}")
+    let revHead = execSuccessElseQuit("git rev-parse HEAD", "")
+    let revUpstream = execSuccessElseQuit(&"git rev-parse {remoteName}/" &
+                                          &"{mainBranchName}", "")
     if revHead != revUpstream:
       showError("the given problem-specifications directory is not " &
                 &"up-to-date: '{probSpecsDir}'")
 
-proc findProbSpecsExercises*(conf: Conf): seq[ProbSpecsExercise] =
+proc findProbSpecsExercises*(conf: Conf): ProbSpecsExercises =
   if conf.action.probSpecsDir.len > 0:
-    let probSpecsRepo = ProbSpecsRepo(dir: conf.action.probSpecsDir)
+    let probSpecsDir = ProbSpecsDir(conf.action.probSpecsDir)
     if not conf.action.offline:
-      probSpecsRepo.validate()
-    result = probSpecsRepo.findProbSpecsExercises(conf)
+      validate(probSpecsDir)
+    result = findProbSpecsExercises(probSpecsDir, conf)
   else:
-    let probSpecsRepo = initProbSpecsRepo()
+    let probSpecsDir = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
     try:
-      probSpecsRepo.remove()
-      probSpecsRepo.clone()
-      result = probSpecsRepo.findProbSpecsExercises(conf)
+      removeDir(probSpecsDir)
+      clone(probSpecsDir)
+      result = findProbSpecsExercises(probSpecsDir, conf)
     finally:
-      probSpecsRepo.remove()
+      removeDir(probSpecsDir)
