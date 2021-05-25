@@ -7,7 +7,7 @@ type
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  doAssert(testCase.reimplements.isNone)
+  doAssert testCase.reimplements.isNone
 
   echo &"""The following test case is missing:"
 {testCase.json.pretty}:
@@ -27,7 +27,7 @@ Do you want to include the test case ([y]es/[n]o/[s]kip)?:
     sdSkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  doAssert(testCase.reimplements.isSome)
+  doAssert testCase.reimplements.isSome
 
   echo &"""The following test case is missing:"
 {testCase.json.pretty}:
