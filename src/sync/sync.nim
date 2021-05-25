@@ -65,8 +65,6 @@ proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
     chooseSyncDecision(testCase)
 
 proc sync(exercise: Exercise, conf: Conf): Exercise =
-  result = exercise
-
   let mode = conf.action.mode
   case mode
   of modeInclude:
@@ -76,29 +74,25 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   of modeChoose:
     logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
 
-  var included = result.tests.included
-  var excluded = result.tests.excluded
-  var missing = result.tests.missing
+  result = exercise
 
   for testCase in exercise.testCases:
     let uuid = testCase.uuid
     if uuid in exercise.tests.missing:
       case syncDecision(testCase, mode)
       of sdIncludeTest:
-        included.incl uuid
-        missing.excl uuid
+        result.tests.included.incl uuid
+        result.tests.missing.excl uuid
       of sdReplaceTest:
-        included.incl uuid
-        missing.excl uuid
-        included.excl testCase.reimplements.get.uuid
-        excluded.incl testCase.reimplements.get.uuid
+        result.tests.included.incl uuid
+        result.tests.missing.excl uuid
+        result.tests.included.excl testCase.reimplements.get.uuid
+        result.tests.excluded.incl testCase.reimplements.get.uuid
       of sdExcludeTest:
-        excluded.incl uuid
-        missing.excl uuid
+        result.tests.excluded.incl uuid
+        result.tests.missing.excl uuid
       of sdSkipTest:
         discard
-
-  result.tests = initExerciseTests(included, excluded, missing)
 
   writeTestsToml(result, conf.trackDir)
 

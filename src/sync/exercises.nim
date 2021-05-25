@@ -24,13 +24,6 @@ type
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
-func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
-  ExerciseTests(
-    included: included,
-    excluded: excluded,
-    missing: missing,
-  )
-
 func initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
   result = ExerciseTests(
