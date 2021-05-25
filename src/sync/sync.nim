@@ -49,12 +49,6 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
     echo "Unknown response. Skipping test case..."
     sdSkipTest
 
-proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  if testCase.reimplements.isNone():
-    chooseRegularSyncDecision(testCase)
-  else:
-    chooseReimplementsSyncDecision(testCase)
-
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   case mode
   of modeInclude:
@@ -62,7 +56,10 @@ proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
   of modeExclude:
     sdExcludeTest
   of modeChoose:
-    chooseSyncDecision(testCase)
+    if testCase.reimplements.isNone():
+      chooseRegularSyncDecision(testCase)
+    else:
+      chooseReimplementsSyncDecision(testCase)
 
 proc sync(exercise: Exercise, conf: Conf): Exercise =
   let mode = conf.action.mode
