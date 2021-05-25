@@ -126,7 +126,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       result.add &"description = \"{testCase.description}\"\n"
 
       # Omit `include = true`
-      if uuid notin exercise.tests.included:
+      if uuid in exercise.tests.excluded:
         result.add "include = false\n"
 
       if fileExists(testsPath):
