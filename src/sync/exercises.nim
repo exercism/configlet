@@ -31,7 +31,7 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
     missing: missing,
   )
 
-proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
+func initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
   result = ExerciseTests(
     included: initHashSet[string](),
@@ -47,23 +47,23 @@ proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
     else:
       result.missing.incl uuid
 
-proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
+func newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
     uuid: uuid(testCase),
     description: description(testCase),
     json: testCase,
   )
 
-proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
+func getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
   for testCase in testCases:
     if testCase.isReimplementation():
       result[testCase.uuid()] = testCase.reimplements()
 
-proc uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
+func uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
   for testCase in testCases:
     result[testCase.uuid] = testCase
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+func initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   result = newSeq[ExerciseTestCase](testCases.len)
   for i, testCase in testCases:
     result[i] = newExerciseTestCase(testCase)
