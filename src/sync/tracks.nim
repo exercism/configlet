@@ -17,6 +17,7 @@ type
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
 proc `/`(head: string, tail: PracticeExerciseSlug): string {.borrow.}
+proc len(x: PracticeExerciseSlug): int {.borrow.}
 proc `==`*(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
@@ -81,13 +82,13 @@ proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
 
 proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
   let trackDir = TrackDir(conf.trackDir)
-  let userExercise = conf.action.exercise
+  let userExercise = PracticeExerciseSlug(conf.action.exercise)
 
   let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
   result = newSeqOfCap[PracticeExercise](practiceExerciseSlugs.len)
 
   for slug in practiceExerciseSlugs:
-    if userExercise.len == 0 or userExercise == slug.string:
+    if userExercise.len == 0 or userExercise == slug:
       let testsPath = testsPath(trackDir, slug)
       let p = PracticeExercise(
         slug: slug,
