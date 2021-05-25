@@ -8,7 +8,7 @@ proc check*(conf: Conf) =
   var hasOutOfSync = false
 
   for exercise in findExercises(conf):
-    case exercise.status
+    case exercise.status()
     of exOutOfSync:
       hasOutOfSync = true
       logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")

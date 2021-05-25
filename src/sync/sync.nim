@@ -7,15 +7,15 @@ type
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  doAssert testCase.reimplements.isNone
+  doAssert testCase.reimplements.isNone()
 
   echo &"""The following test case is missing:"
-{testCase.json.pretty}:
+{testCase.json.pretty()}:
 
 Do you want to include the test case ([y]es/[n]o/[s]kip)?:
 """
 
-  case stdin.readLine().toLowerAscii
+  case stdin.readLine().toLowerAscii()
   of "y", "yes":
     sdIncludeTest
   of "n", "no":
@@ -27,18 +27,18 @@ Do you want to include the test case ([y]es/[n]o/[s]kip)?:
     sdSkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  doAssert testCase.reimplements.isSome
+  doAssert testCase.reimplements.isSome()
 
   echo &"""The following test case is missing:"
-{testCase.json.pretty}:
+{testCase.json.pretty()}:
 
 It reimplements this test case:
-{testCase.reimplements.get.json.pretty}:
+{testCase.reimplements.get().json.pretty()}:
 
 Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
 """
 
-  case stdin.readLine().toLowerAscii
+  case stdin.readLine().toLowerAscii()
   of "y", "yes":
     sdReplaceTest
   of "n", "no":
@@ -50,7 +50,7 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
     sdSkipTest
 
 proc chooseSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  if testCase.reimplements.isNone:
+  if testCase.reimplements.isNone():
     chooseRegularSyncDecision(testCase)
   else:
     chooseReimplementsSyncDecision(testCase)
@@ -86,8 +86,8 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
       of sdReplaceTest:
         result.tests.included.incl uuid
         result.tests.missing.excl uuid
-        result.tests.included.excl testCase.reimplements.get.uuid
-        result.tests.excluded.incl testCase.reimplements.get.uuid
+        result.tests.included.excl testCase.reimplements.get().uuid
+        result.tests.excluded.incl testCase.reimplements.get().uuid
       of sdExcludeTest:
         result.tests.excluded.incl uuid
         result.tests.missing.excl uuid
@@ -99,10 +99,10 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
 proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
   ## Syncs the given `exercises` if it has missing tests, and returns `true` if
   ## it is up-to-date afterwards.
-  case exercise.status
+  case exercise.status()
   of exOutOfSync:
     let syncedExercise = sync(exercise, conf)
-    syncedExercise.status == exInSync
+    syncedExercise.status() == exInSync
   of exInSync:
     logDetailed(&"[skip] {exercise.slug} is up-to-date")
     true
