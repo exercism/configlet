@@ -69,21 +69,15 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
     if testCase.uuid in reimplementations:
       testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
 
-proc initExercise(practiceExercise: PracticeExercise,
-                  probSpecsTestCases: seq[ProbSpecsTestCase]): Exercise =
-  Exercise(
-    slug: practiceExercise.slug,
-    tests: initExerciseTests(practiceExercise, probSpecsTestCases),
-    testCases: initExerciseTestCases(probSpecsTestCases),
-  )
-
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf)
 
   for practiceExercise in findPracticeExercises(conf):
-    let exercise = initExercise(
-      practiceExercise,
-      probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    let testCases = probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    let exercise = Exercise(
+      slug: practiceExercise.slug,
+      tests: initExerciseTests(practiceExercise, testCases),
+      testCases: initExerciseTestCases(testCases),
     )
     result.add exercise
 
