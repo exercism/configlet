@@ -35,9 +35,9 @@ proc initExerciseTests(practiceExercise: PracticeExercise,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
-    if practiceExercise.tests.included.contains(uuid):
+    if uuid in practiceExercise.tests.included:
       result.included.incl(uuid)
-    elif practiceExercise.tests.excluded.contains(uuid):
+    elif uuid in practiceExercise.tests.excluded:
       result.excluded.incl(uuid)
     else:
       result.missing.incl(uuid)
