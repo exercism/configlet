@@ -85,16 +85,16 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
     if uuid in exercise.tests.missing:
       case syncDecision(testCase, mode)
       of sdIncludeTest:
-        included.incl(uuid)
-        missing.excl(uuid)
+        included.incl uuid
+        missing.excl uuid
       of sdReplaceTest:
-        included.incl(uuid)
-        missing.excl(uuid)
-        included.excl(testCase.reimplements.get.uuid)
-        excluded.incl(testCase.reimplements.get.uuid)
+        included.incl uuid
+        missing.excl uuid
+        included.excl testCase.reimplements.get.uuid
+        excluded.incl testCase.reimplements.get.uuid
       of sdExcludeTest:
-        excluded.incl(uuid)
-        missing.excl(uuid)
+        excluded.incl uuid
+        missing.excl uuid
       of sdSkipTest:
         discard
 

@@ -64,16 +64,16 @@ proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
         if val["include"].kind == Bool:
           let isIncluded = val["include"].getBool()
           if isIncluded:
-            result.included.incl(uuid)
+            result.included.incl uuid
           else:
-            result.excluded.incl(uuid)
+            result.excluded.incl uuid
         else:
           let msg = "Error: the value of an `include` key is `" &
                     val["include"].toTomlString() & "`, but it must be a " &
                     "bool:\n" & testsPath
           stderr.writeLine(msg)
       else:
-        result.included.incl(uuid)
+        result.included.incl uuid
 
 proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
   let trackDir = TrackDir(conf.trackDir)

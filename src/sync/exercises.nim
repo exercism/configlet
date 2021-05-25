@@ -36,11 +36,11 @@ proc initExerciseTests(practiceExercise: PracticeExercise,
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
     if uuid in practiceExercise.tests.included:
-      result.included.incl(uuid)
+      result.included.incl uuid
     elif uuid in practiceExercise.tests.excluded:
-      result.excluded.incl(uuid)
+      result.excluded.incl uuid
     else:
-      result.missing.incl(uuid)
+      result.missing.incl uuid
 
 proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
