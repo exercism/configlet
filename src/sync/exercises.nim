@@ -5,13 +5,13 @@ import "."/[probspecs, tracks]
 export tracks.`$`, probspecs.pretty
 
 type
-  ExerciseTestCase* = ref object
+  ExerciseTestCase* {.requiresInit.} = ref object
     uuid*: string
     description*: string
     json*: ProbSpecsTestCase
     reimplements*: Option[ExerciseTestCase]
 
-  ExerciseTests* = object
+  ExerciseTests* {.requiresInit.} = object
     included*: HashSet[string]
     excluded*: HashSet[string]
     missing*: HashSet[string]
@@ -19,7 +19,7 @@ type
   ExerciseStatus* = enum
     exOutOfSync, exInSync, exNoCanonicalData
 
-  Exercise* = object
+  Exercise* {.requiresInit.} = object
     slug*: PracticeExerciseSlug
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
@@ -33,6 +33,11 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
 
 proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
+  result = ExerciseTests(
+    included: initHashSet[string](),
+    excluded: initHashSet[string](),
+    missing: initHashSet[string](),
+  )
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
     if uuid in practiceExerciseTests.included:
