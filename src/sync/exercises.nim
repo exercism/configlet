@@ -77,17 +77,16 @@ func initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
       let uuidOfReimplementation = reimplementations[uuid]
       testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
-proc findExercises*(conf: Conf): seq[Exercise] =
+iterator findExercises*(conf: Conf): Exercise {.inline.} =
   let probSpecsExercises = findProbSpecsExercises(conf)
 
   for practiceExercise in findPracticeExercises(conf):
     let testCases = probSpecsExercises.getOrDefault(practiceExercise.slug.string)
-    let exercise = Exercise(
+    yield Exercise(
       slug: practiceExercise.slug,
       tests: initExerciseTests(practiceExercise.tests, testCases),
       testCases: initExerciseTestCases(testCases),
     )
-    result.add exercise
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:

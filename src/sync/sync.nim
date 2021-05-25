@@ -102,26 +102,28 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
 
   writeTestsToml(result, conf.trackDir)
 
-proc sync(exercises: seq[Exercise], conf: Conf): bool =
-  ## Syncs the given `exercises` and returns `true` if every exercise is now
-  ## up-to-date.
-  result = true
-  for exercise in exercises:
-    case exercise.status
-    of exOutOfSync:
-      let syncedExercise = sync(exercise, conf)
-      if syncedExercise.status == exOutOfSync:
-        result = false
-    of exInSync:
-      logDetailed(&"[skip] {exercise.slug} is up-to-date")
-    of exNoCanonicalData:
-      logDetailed(&"[skip] {exercise.slug} does not have canonical data")
+proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
+  ## Syncs the given `exercises` if it has missing tests, and returns `true` if
+  ## it is up-to-date afterwards.
+  case exercise.status
+  of exOutOfSync:
+    let syncedExercise = sync(exercise, conf)
+    syncedExercise.status == exInSync
+  of exInSync:
+    logDetailed(&"[skip] {exercise.slug} is up-to-date")
+    true
+  of exNoCanonicalData:
+    logDetailed(&"[skip] {exercise.slug} does not have canonical data")
+    true
 
 proc sync*(conf: Conf) =
   logNormal("Syncing exercises...")
 
-  let exercises = findExercises(conf)
-  let everyExerciseIsSynced = sync(exercises, conf)
+  var everyExerciseIsSynced = true
+  for exercise in findExercises(conf):
+    let isExerciseSynced = syncIfNeeded(exercise, conf)
+    if not isExerciseSynced:
+      everyExerciseIsSynced = false
 
   if everyExerciseIsSynced:
     logNormal("All exercises are synced!")
