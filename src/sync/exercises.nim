@@ -34,24 +34,25 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
 proc initExerciseTests(practiceExercise: PracticeExercise,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
   for testCase in probSpecsTestCases:
-    if practiceExercise.tests.included.contains(testCase.uuid):
-      result.included.incl(testCase.uuid)
-    elif practiceExercise.tests.excluded.contains(testCase.uuid):
-      result.excluded.incl(testCase.uuid)
+    let uuid = uuid(testCase)
+    if practiceExercise.tests.included.contains(uuid):
+      result.included.incl(uuid)
+    elif practiceExercise.tests.excluded.contains(uuid):
+      result.excluded.incl(uuid)
     else:
-      result.missing.incl(testCase.uuid)
+      result.missing.incl(uuid)
 
 proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
-    uuid: testCase.uuid,
-    description: testCase.description,
+    uuid: uuid(testCase),
+    description: description(testCase),
     json: testCase,
   )
 
 proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
   for testCase in testCases:
     if testCase.isReimplementation():
-      result[testCase.uuid] = testCase.reimplements()
+      result[testCase.uuid()] = testCase.reimplements()
 
 proc uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
   for testCase in testCases:
@@ -121,20 +122,21 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 """
 
   for testCase in exercise.testCases:
-    if testCase.uuid notin exercise.tests.missing:
-      result.add &"[{testCase.uuid}]\n"
+    let uuid = testCase.uuid
+    if uuid notin exercise.tests.missing:
+      result.add &"[{uuid}]\n"
       # Always use the latest `description` value
       result.add &"description = \"{testCase.description}\"\n"
 
       # Omit `include = true`
-      if testCase.uuid notin exercise.tests.included:
+      if uuid notin exercise.tests.included:
         result.add "include = false\n"
 
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
-        if currContents.hasKey(testCase.uuid):
+        if currContents.hasKey(uuid):
           # Preserve custom properties
-          for k, v in currContents[testCase.uuid].getTable():
+          for k, v in currContents[uuid].getTable():
             if k notin ["description", "include"].toHashSet():
               let vTomlString =
                 if v.kind == String:
