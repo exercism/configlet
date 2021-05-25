@@ -31,13 +31,13 @@ func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseT
     missing: missing,
   )
 
-proc initExerciseTests(practiceExercise: PracticeExercise,
+proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
-    if uuid in practiceExercise.tests.included:
+    if uuid in practiceExerciseTests.included:
       result.included.incl uuid
-    elif uuid in practiceExercise.tests.excluded:
+    elif uuid in practiceExerciseTests.excluded:
       result.excluded.incl uuid
     else:
       result.missing.incl uuid
@@ -79,7 +79,7 @@ proc findExercises*(conf: Conf): seq[Exercise] =
     let testCases = probSpecsExercises.getOrDefault(practiceExercise.slug.string)
     let exercise = Exercise(
       slug: practiceExercise.slug,
-      tests: initExerciseTests(practiceExercise, testCases),
+      tests: initExerciseTests(practiceExercise.tests, testCases),
       testCases: initExerciseTestCases(testCases),
     )
     result.add exercise
