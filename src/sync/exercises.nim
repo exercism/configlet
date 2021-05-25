@@ -66,8 +66,10 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
   let testCasesByUuids = uuidToTestCase(result)
 
   for testCase in result:
-    if testCase.uuid in reimplementations:
-      testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
+    let uuid = testCase.uuid
+    if uuid in reimplementations:
+      let uuidOfReimplementation = reimplementations[uuid]
+      testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
 proc findExercises*(conf: Conf): seq[Exercise] =
   let probSpecsExercises = findProbSpecsExercises(conf)
