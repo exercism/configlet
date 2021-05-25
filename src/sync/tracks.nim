@@ -7,11 +7,11 @@ type
 
   PracticeExerciseSlug* {.requiresInit.} = distinct string
 
-  PracticeExerciseTests* = object
+  PracticeExerciseTests* {.requiresInit.} = object
     included*: HashSet[string]
     excluded*: HashSet[string]
 
-  PracticeExercise* = object
+  PracticeExercise* {.requiresInit.} = object
     slug*: PracticeExerciseSlug
     tests*: PracticeExerciseTests
 
@@ -56,6 +56,10 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
 proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
   ## Parses the `tests.toml` file at `testsPath` and returns HashSets of the
   ## included and excluded test case UUIDs.
+  result = PracticeExerciseTests(
+    included: initHashSet[string](),
+    excluded: initHashSet[string](),
+  )
   if fileExists(testsPath):
     let tests = parsetoml.parseFile(testsPath)
 
