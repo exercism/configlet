@@ -80,18 +80,16 @@ proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
       else:
         result.included.incl uuid
 
-proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
+iterator findPracticeExercises*(conf: Conf): PracticeExercise {.inline.} =
   let trackDir = TrackDir(conf.trackDir)
   let userExercise = PracticeExerciseSlug(conf.action.exercise)
 
   let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
-  result = newSeqOfCap[PracticeExercise](practiceExerciseSlugs.len)
 
   for slug in practiceExerciseSlugs:
     if userExercise.len == 0 or userExercise == slug:
       let testsPath = testsPath(trackDir, slug)
-      let p = PracticeExercise(
+      yield PracticeExercise(
         slug: slug,
         tests: initPracticeExerciseTests(testsPath),
       )
-      result.add p

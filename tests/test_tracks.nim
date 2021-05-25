@@ -1,5 +1,5 @@
 # This file implements tests for `src/tracks.nim`
-import std/[os, osproc, sets, strformat, unittest]
+import std/[os, osproc, sequtils, sets, strformat, unittest]
 import "."/[cli, sync/tracks]
 
 proc main =
@@ -20,7 +20,7 @@ proc main =
       action: initAction(actSync),
       trackDir: trackDir,
     )
-    let trackExercises = findPracticeExercises(conf)
+    let trackExercises = findPracticeExercises(conf).toSeq()
 
     test "returns the expected number of exercises":
       check:
