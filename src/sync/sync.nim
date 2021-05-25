@@ -81,19 +81,20 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   var missing = result.tests.missing
 
   for testCase in exercise.testCases:
-    if testCase.uuid in exercise.tests.missing:
+    let uuid = testCase.uuid
+    if uuid in exercise.tests.missing:
       case syncDecision(testCase, mode)
       of sdIncludeTest:
-        included.incl(testCase.uuid)
-        missing.excl(testCase.uuid)
+        included.incl(uuid)
+        missing.excl(uuid)
       of sdReplaceTest:
-        included.incl(testCase.uuid)
-        missing.excl(testCase.uuid)
+        included.incl(uuid)
+        missing.excl(uuid)
         included.excl(testCase.reimplements.get.uuid)
         excluded.incl(testCase.reimplements.get.uuid)
       of sdExcludeTest:
-        excluded.incl(testCase.uuid)
-        missing.excl(testCase.uuid)
+        excluded.incl(uuid)
+        missing.excl(uuid)
       of sdSkipTest:
         discard
 
