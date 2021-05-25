@@ -20,7 +20,7 @@ proc main =
       action: initAction(actSync),
       trackDir: trackDir,
     )
-    let practiceExercises = findPracticeExercises(conf).toSeq()
+    let practiceExercises = toSeq findPracticeExercises(conf)
 
     test "returns the expected number of exercises":
       check:
