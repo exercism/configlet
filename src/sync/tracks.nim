@@ -16,7 +16,6 @@ type
     tests*: PracticeExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: string, tail: PracticeExerciseSlug): string {.borrow.}
 proc len(x: PracticeExerciseSlug): int {.borrow.}
 proc `==`*(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
@@ -25,7 +24,8 @@ proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
 func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
   ## Returns the path to the `tests.toml` file for a given `slug` in a
   ## `trackDir`.
-  trackDir / "exercises" / "practice" / slug / ".meta" / "tests.toml"
+  joinPath(trackDir.string, "exercises", "practice", slug.string, ".meta",
+           "tests.toml")
 
 proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
   ## Parses the root `config.json` file in `trackDir` and returns a seq of its
