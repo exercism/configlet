@@ -58,17 +58,22 @@ func uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTes
 
 func initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   result = newSeq[ExerciseTestCase](testCases.len)
+  var hasReimplementation = false
+
   for i, testCase in testCases:
     result[i] = newExerciseTestCase(testCase)
+    if testCase.isReimplementation():
+      hasReimplementation = true
 
-  let reimplementations = getReimplementations(testCases)
-  let testCasesByUuids = uuidToTestCase(result)
+  if hasReimplementation:
+    let reimplementations = getReimplementations(testCases)
+    let testCasesByUuids = uuidToTestCase(result)
 
-  for testCase in result:
-    let uuid = testCase.uuid
-    if uuid in reimplementations:
-      let uuidOfReimplementation = reimplementations[uuid]
-      testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
+    for testCase in result:
+      let uuid = testCase.uuid
+      if uuid in reimplementations:
+        let uuidOfReimplementation = reimplementations[uuid]
+        testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
 iterator findExercises*(conf: Conf): Exercise {.inline.} =
   let probSpecsExercises = findProbSpecsExercises(conf)
