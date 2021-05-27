@@ -76,15 +76,18 @@ func initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
         testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
 iterator findExercises*(conf: Conf): Exercise {.inline.} =
-  let probSpecsExercises = findProbSpecsExercises(conf)
-
-  for practiceExercise in findPracticeExercises(conf):
-    let testCases = probSpecsExercises.getOrDefault(practiceExercise.slug.string)
-    yield Exercise(
-      slug: practiceExercise.slug,
-      tests: initExerciseTests(practiceExercise.tests, testCases),
-      testCases: initExerciseTestCases(testCases),
-    )
+  let probSpecsDir = initProbSpecsDir(conf)
+  try:
+    for practiceExercise in findPracticeExercises(conf):
+      let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
+      yield Exercise(
+        slug: practiceExercise.slug,
+        tests: initExerciseTests(practiceExercise.tests, testCases),
+        testCases: initExerciseTestCases(testCases),
+      )
+  finally:
+    if conf.action.probSpecsDir.len == 0:
+      removeDir(probSpecsDir)
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:

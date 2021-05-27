@@ -1,19 +1,16 @@
-import std/[json, os, osproc, strformat, strscans, strutils, tables]
+import std/[json, os, osproc, strformat, strscans, strutils]
 import ".."/[cli, helpers, logger]
 
 type
-  ProbSpecsDir {.requiresInit.} = distinct string
+  ProbSpecsDir* {.requiresInit.} = distinct string
 
   ProbSpecsExerciseDir {.requiresInit.} = distinct string
 
   ProbSpecsTestCase* = distinct JsonNode
 
-  ProbSpecsExercises* = Table[string, seq[ProbSpecsTestCase]]
-
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
-proc removeDir(dir: ProbSpecsDir, checkDir = false) {.borrow.}
-proc `/`(head: ProbSpecsDir, tail: string): string {.borrow.}
+proc removeDir*(dir: ProbSpecsDir, checkDir = false) {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
@@ -85,17 +82,14 @@ proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[Pr
   else:
     canonicalJsonPath.parseFile().initProbSpecsTestCases()
 
-proc findProbSpecsExercises(probSpecsDir: ProbSpecsDir,
-                            conf: Conf): ProbSpecsExercises =
-  ## Returns a Table containing the slug and corresponding canonical tests for
-  ## each exercise in `probSpecsDir`. If `conf` specifies a single exercise,
-  ## returns only the tests for that exercise.
-  let pattern = if conf.action.exercise.len > 0: conf.action.exercise else: "*"
-  for dir in walkDirs(probSpecsDir / "exercises" / pattern):
-    let probSpecsExerciseDir = ProbSpecsExerciseDir(dir)
-    if fileExists(probSpecsExerciseDir.canonicalDataFile()):
-      let slug = slug(probSpecsExerciseDir)
-      result[slug] = parseProbSpecsTestCases(probSpecsExerciseDir)
+proc getCanonicalTests*(probSpecsDir: ProbSpecsDir,
+                        slug: string): seq[ProbSpecsTestCase] =
+  ## Returns a seq of the canonical tests for the exercise `slug` in
+  ## `probSpecsDir`.
+  let probSpecsExerciseDir = joinPath(probSpecsDir.string, "exercises",
+                                      slug).ProbSpecsExerciseDir
+  if fileExists(probSpecsExerciseDir.canonicalDataFile()):
+    result = parseProbSpecsTestCases(probSpecsExerciseDir)
 
 proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
                      host, location: string): string =
@@ -160,17 +154,12 @@ proc validate(probSpecsDir: ProbSpecsDir) =
       showError("the given problem-specifications directory is not " &
                 &"up-to-date: '{probSpecsDir}'")
 
-proc findProbSpecsExercises*(conf: Conf): ProbSpecsExercises =
+proc initProbSpecsDir*(conf: Conf): ProbSpecsDir =
   if conf.action.probSpecsDir.len > 0:
-    let probSpecsDir = ProbSpecsDir(conf.action.probSpecsDir)
+    result = ProbSpecsDir(conf.action.probSpecsDir)
     if not conf.action.offline:
-      validate(probSpecsDir)
-    result = findProbSpecsExercises(probSpecsDir, conf)
+      validate(result)
   else:
-    let probSpecsDir = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
-    try:
-      removeDir(probSpecsDir)
-      clone(probSpecsDir)
-      result = findProbSpecsExercises(probSpecsDir, conf)
-    finally:
-      removeDir(probSpecsDir)
+    result = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
+    removeDir(result)
+    clone(result)
