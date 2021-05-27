@@ -1,5 +1,5 @@
 # This file implements tests for `src/tracks.nim`
-import std/[os, osproc, sets, strformat, unittest]
+import std/[os, osproc, sequtils, sets, strformat, unittest]
 import "."/[cli, sync/tracks]
 
 proc main =
@@ -20,11 +20,11 @@ proc main =
       action: initAction(actSync),
       trackDir: trackDir,
     )
-    let trackExercises = findPracticeExercises(conf)
+    let practiceExercises = toSeq findPracticeExercises(conf)
 
     test "returns the expected number of exercises":
       check:
-        trackExercises.len == 68
+        practiceExercises.len == 68
 
     test "returns the expected object for `hello-world`":
       const expectedHelloWorld =
@@ -37,7 +37,7 @@ proc main =
         )
 
       check:
-        trackExercises[20] == expectedHelloWorld
+        practiceExercises[20] == expectedHelloWorld
 
     test "returns the expected object for `two-fer`":
       const expectedTwoFer =
@@ -52,7 +52,7 @@ proc main =
         )
 
       check:
-        trackExercises[65] == expectedTwoFer
+        practiceExercises[65] == expectedTwoFer
 
     # Try to remove the track directory, but allow the tests to pass if there
     # was an error removing it.

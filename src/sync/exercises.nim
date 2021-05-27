@@ -5,13 +5,13 @@ import "."/[probspecs, tracks]
 export tracks.`$`, probspecs.pretty
 
 type
-  ExerciseTestCase* = ref object
+  ExerciseTestCase* {.requiresInit.} = ref object
     uuid*: string
     description*: string
     json*: ProbSpecsTestCase
     reimplements*: Option[ExerciseTestCase]
 
-  ExerciseTests* = object
+  ExerciseTests* {.requiresInit.} = object
     included*: HashSet[string]
     excluded*: HashSet[string]
     missing*: HashSet[string]
@@ -19,73 +19,72 @@ type
   ExerciseStatus* = enum
     exOutOfSync, exInSync, exNoCanonicalData
 
-  Exercise* = object
+  Exercise* {.requiresInit.} = object
     slug*: PracticeExerciseSlug
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
-func initExerciseTests*(included, excluded, missing: HashSet[string]): ExerciseTests =
-  ExerciseTests(
-    included: included,
-    excluded: excluded,
-    missing: missing,
-  )
-
-proc initExerciseTests(practiceExercise: PracticeExercise,
+func initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
                        probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
+  result = ExerciseTests(
+    included: initHashSet[string](),
+    excluded: initHashSet[string](),
+    missing: initHashSet[string](),
+  )
   for testCase in probSpecsTestCases:
-    if practiceExercise.tests.included.contains(testCase.uuid):
-      result.included.incl(testCase.uuid)
-    elif practiceExercise.tests.excluded.contains(testCase.uuid):
-      result.excluded.incl(testCase.uuid)
+    let uuid = uuid(testCase)
+    if uuid in practiceExerciseTests.included:
+      result.included.incl uuid
+    elif uuid in practiceExerciseTests.excluded:
+      result.excluded.incl uuid
     else:
-      result.missing.incl(testCase.uuid)
+      result.missing.incl uuid
 
-proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
+func newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
   ExerciseTestCase(
-    uuid: testCase.uuid,
-    description: testCase.description,
+    uuid: uuid(testCase),
+    description: description(testCase),
     json: testCase,
   )
 
-proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
+func getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
   for testCase in testCases:
     if testCase.isReimplementation():
-      result[testCase.uuid] = testCase.reimplements()
+      result[testCase.uuid()] = testCase.reimplements()
 
-proc uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
+func uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
   for testCase in testCases:
     result[testCase.uuid] = testCase
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+func initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
   result = newSeq[ExerciseTestCase](testCases.len)
+  var hasReimplementation = false
+
   for i, testCase in testCases:
     result[i] = newExerciseTestCase(testCase)
+    if testCase.isReimplementation():
+      hasReimplementation = true
 
-  let reimplementations = getReimplementations(testCases)
-  let testCasesByUuids = uuidToTestCase(result)
+  if hasReimplementation:
+    let reimplementations = getReimplementations(testCases)
+    let testCasesByUuids = uuidToTestCase(result)
 
-  for testCase in result:
-    if testCase.uuid in reimplementations:
-      testCase.reimplements = some(testCasesByUuids[reimplementations[testCase.uuid]])
+    for testCase in result:
+      let uuid = testCase.uuid
+      if uuid in reimplementations:
+        let uuidOfReimplementation = reimplementations[uuid]
+        testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
-proc initExercise(practiceExercise: PracticeExercise,
-                  probSpecsTestCases: seq[ProbSpecsTestCase]): Exercise =
-  Exercise(
-    slug: practiceExercise.slug,
-    tests: initExerciseTests(practiceExercise, probSpecsTestCases),
-    testCases: initExerciseTestCases(probSpecsTestCases),
-  )
-
-proc findExercises*(conf: Conf): seq[Exercise] =
+iterator findExercises*(conf: Conf): Exercise {.inline.} =
   let probSpecsExercises = findProbSpecsExercises(conf)
 
   for practiceExercise in findPracticeExercises(conf):
-    let exercise = initExercise(
-      practiceExercise,
-      probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    let testCases = probSpecsExercises.getOrDefault(practiceExercise.slug.string)
+    yield Exercise(
+      slug: practiceExercise.slug,
+      tests: initExerciseTests(practiceExercise.tests, testCases),
+      testCases: initExerciseTestCases(testCases),
     )
-    result.add exercise
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:
@@ -125,20 +124,21 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 """
 
   for testCase in exercise.testCases:
-    if testCase.uuid notin exercise.tests.missing:
-      result.add &"[{testCase.uuid}]\n"
+    let uuid = testCase.uuid
+    if uuid notin exercise.tests.missing:
+      result.add &"[{uuid}]\n"
       # Always use the latest `description` value
       result.add &"description = \"{testCase.description}\"\n"
 
       # Omit `include = true`
-      if testCase.uuid notin exercise.tests.included:
+      if uuid in exercise.tests.excluded:
         result.add "include = false\n"
 
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
-        if currContents.hasKey(testCase.uuid):
+        if currContents.hasKey(uuid):
           # Preserve custom properties
-          for k, v in currContents[testCase.uuid].getTable():
+          for k, v in currContents[uuid].getTable():
             if k notin ["description", "include"].toHashSet():
               let vTomlString =
                 if v.kind == String:

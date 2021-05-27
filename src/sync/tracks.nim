@@ -7,16 +7,16 @@ type
 
   PracticeExerciseSlug* {.requiresInit.} = distinct string
 
-  PracticeExerciseTests* = object
+  PracticeExerciseTests* {.requiresInit.} = object
     included*: HashSet[string]
     excluded*: HashSet[string]
 
-  PracticeExercise* = object
+  PracticeExercise* {.requiresInit.} = object
     slug*: PracticeExerciseSlug
     tests*: PracticeExerciseTests
 
 proc `/`(head: TrackDir, tail: string): string {.borrow.}
-proc `/`(head: string, tail: PracticeExerciseSlug): string {.borrow.}
+proc len(x: PracticeExerciseSlug): int {.borrow.}
 proc `==`*(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `<`(x, y: PracticeExerciseSlug): bool {.borrow.}
 proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
@@ -24,7 +24,8 @@ proc `$`*(p: PracticeExerciseSlug): string {.borrow.}
 func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
   ## Returns the path to the `tests.toml` file for a given `slug` in a
   ## `trackDir`.
-  trackDir / "exercises" / "practice" / slug / ".meta" / "tests.toml"
+  joinPath(trackDir.string, "exercises", "practice", slug.string, ".meta",
+           "tests.toml")
 
 proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
   ## Parses the root `config.json` file in `trackDir` and returns a seq of its
@@ -56,6 +57,10 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
 proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
   ## Parses the `tests.toml` file at `testsPath` and returns HashSets of the
   ## included and excluded test case UUIDs.
+  result = PracticeExerciseTests(
+    included: initHashSet[string](),
+    excluded: initHashSet[string](),
+  )
   if fileExists(testsPath):
     let tests = parsetoml.parseFile(testsPath)
 
@@ -64,29 +69,27 @@ proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
         if val["include"].kind == Bool:
           let isIncluded = val["include"].getBool()
           if isIncluded:
-            result.included.incl(uuid)
+            result.included.incl uuid
           else:
-            result.excluded.incl(uuid)
+            result.excluded.incl uuid
         else:
           let msg = "Error: the value of an `include` key is `" &
                     val["include"].toTomlString() & "`, but it must be a " &
                     "bool:\n" & testsPath
           stderr.writeLine(msg)
       else:
-        result.included.incl(uuid)
+        result.included.incl uuid
 
-proc findPracticeExercises*(conf: Conf): seq[PracticeExercise] =
+iterator findPracticeExercises*(conf: Conf): PracticeExercise {.inline.} =
   let trackDir = TrackDir(conf.trackDir)
-  let userExercise = conf.action.exercise
+  let userExercise = PracticeExerciseSlug(conf.action.exercise)
 
   let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
-  result = newSeqOfCap[PracticeExercise](practiceExerciseSlugs.len)
 
   for slug in practiceExerciseSlugs:
-    if userExercise.len == 0 or userExercise == slug.string:
+    if userExercise.len == 0 or userExercise == slug:
       let testsPath = testsPath(trackDir, slug)
-      let p = PracticeExercise(
+      yield PracticeExercise(
         slug: slug,
         tests: initPracticeExerciseTests(testsPath),
       )
-      result.add p

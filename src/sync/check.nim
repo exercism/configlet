@@ -5,11 +5,10 @@ import "."/exercises
 proc check*(conf: Conf) =
   logNormal("Checking exercises...")
 
-  let exercises = findExercises(conf)
   var hasOutOfSync = false
 
-  for exercise in exercises:
-    case exercise.status
+  for exercise in findExercises(conf):
+    case exercise.status()
     of exOutOfSync:
       hasOutOfSync = true
       logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
