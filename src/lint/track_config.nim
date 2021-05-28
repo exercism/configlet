@@ -66,7 +66,6 @@ proc hasValidOnlineEditor(data: JsonNode; path: Path): bool =
     let checks = [
       hasString(d, "indent_style", path, k, allowed = indentStyles),
       hasInteger(d, "indent_size", path, k, allowed = 0..8),
-      hasString(d, "ace_editor_language", path, k),
       hasString(d, "highlightjs_language", path, k),
     ]
     result = allTrue(checks)
