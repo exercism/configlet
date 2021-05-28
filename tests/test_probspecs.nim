@@ -7,12 +7,21 @@ type
     psFresh = "fresh clone"
     psExisting = "existing dir (simulate the `--prob-specs-dir` option)"
 
+proc getProbSpecsExercises(probSpecsDir: ProbSpecsDir): Table[string,
+    seq[ProbSpecsTestCase]] =
+  ## Returns a Table containing the slug and corresponding canonical tests for
+  ## each exercise in `probSpecsDir`.
+  let pattern = joinPath(probSpecsDir.string, "exercises", "*")
+  for dir in walkDirs(pattern):
+    let slug = lastPathPart(dir)
+    result[slug] = getCanonicalTests(probSpecsDir, slug)
+
 proc main =
   let existingDir = getTempDir() / "test_probspecs_problem-specifications"
   removeDir(existingDir)
 
   for ps in ProblemSpecsDir:
-    suite &"findProbSpecsExercises: {ps}":
+    suite &"getCanonicalTests: {ps}":
       if ps == psExisting:
         let cmd = "git clone --depth 1 --quiet " &
                   "https://github.com/exercism/problem-specifications/ " &
@@ -21,14 +30,15 @@ proc main =
           check:
             execCmd(cmd) == 0
 
-      let probSpecsDir =
+      let probSpecsPath =
         case ps
         of psFresh: ""
         of psExisting: existingDir
 
-      let action = initAction(actSync, probSpecsDir)
+      let action = initAction(actSync, probSpecsPath)
       let conf = initConf(action)
-      let probSpecsExercises = findProbSpecsExercises(conf)
+      let probSpecsDir = initProbSpecsDir(conf)
+      let probSpecsExercises = getProbSpecsExercises(probSpecsDir)
 
       test "can return the exercises":
         check:
@@ -78,6 +88,7 @@ proc main =
           firstTestCase == firstTestCaseExpected
 
   removeDir(existingDir)
+  removeDir(".problem-specifications")
 
 main()
 {.used.}
