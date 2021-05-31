@@ -118,12 +118,19 @@ proc prettyTomlString(a: openArray[TomlValueRef]): string =
 proc toToml(exercise: Exercise, testsPath: string): string =
   ## Returns the new contents of a `tests.toml` file that corresponds to an
   ## `exercise`. This proc reads the previous contents at `testsPath` and
-  ## preserves every property apart from `description` and `include = true`.
+  ## updates the `description` and `reimplements` properties, removes any
+  ## `include = true` properties and preserves any other property.
   result = """
-# This is an auto-generated file. Regular comments will be removed when this
-# file is regenerated. Regenerating will not touch any manually added keys,
-# so comments can be added in a "comment" key.
-
+# This is an auto-generated file.
+#
+# Regenerating this file will:
+# - Update the `description` property
+# - Update the `reimplements` property
+# - Remove `include = true` properties
+# - Preserve any other properties
+#
+# As regular comments will be removed when this file is regenerated, comments
+# can be added in a "comment" key.
 """
 
   for testCase in exercise.testCases:
@@ -137,12 +144,16 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       if uuid in exercise.tests.excluded:
         result.add "include = false\n"
 
+      # Always add the `reimplements` property, if present
+      if testCase.reimplements.isSome():
+        result.add &"reimplements = \"{testCase.reimplements.get().uuid}\"\n"
+
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
         if currContents.hasKey(uuid):
           # Preserve custom properties
           for k, v in currContents[uuid].getTable():
-            if k notin ["description", "include"].toHashSet():
+            if k notin ["description", "include", "reimplements"].toHashSet():
               let vTomlString =
                 if v.kind == String:
                   prettyTomlString(v.stringVal)

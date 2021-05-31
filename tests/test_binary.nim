@@ -127,24 +127,82 @@ All exercises are synced!
     const expectedDiffOutput = """
 --- exercises/practice/diffie-hellman/.meta/tests.toml
 +++ exercises/practice/diffie-hellman/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +[0d25f8d7-4897-4338-a033-2d3d7a9af688]
 +description = "can calculate public key when given a different private key"
 +
 --- exercises/practice/grade-school/.meta/tests.toml
 +++ exercises/practice/grade-school/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +[c125dab7-2a53-492f-a99a-56ad511940d8]
 +description = "A student can't be in two different grades"
 +
 --- exercises/practice/hamming/.meta/tests.toml
 +++ exercises/practice/hamming/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +[db92e77e-7c72-499d-8fe6-9354d2bfd504]
 +description = "disallow left empty strand"
++reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
 +
 +
 +[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
 +description = "disallow right empty strand"
++reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
 --- exercises/practice/high-scores/.meta/tests.toml
 +++ exercises/practice/high-scores/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +
 +[2df075f9-fec9-4756-8f40-98c52a11504f]
 +description = "Latest score after personal top scores"
@@ -153,6 +211,20 @@ All exercises are synced!
 +description = "Scores after personal top scores"
 --- exercises/practice/kindergarten-garden/.meta/tests.toml
 +++ exercises/practice/kindergarten-garden/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 -description = "first student's garden"
 +description = "for Alice, first student's garden"
 -description = "second student's garden"
@@ -187,6 +259,20 @@ All exercises are synced!
 +description = "for Larry, last student's garden"
 --- exercises/practice/prime-factors/.meta/tests.toml
 +++ exercises/practice/prime-factors/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +[238d57c8-4c12-42ef-af34-ae4929f94789]
 +description = "another prime number"
 +
@@ -204,7 +290,19 @@ All exercises are synced!
 +
 --- exercises/practice/react/.meta/tests.toml
 +++ exercises/practice/react/.meta/tests.toml
-+
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
 +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
 +description = "input cells have a value"
 +

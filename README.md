@@ -44,9 +44,16 @@ If a track implements an exercise for which test data exists in the [problem-spe
 A `tests.toml` file has this format:
 
 ```toml
-# This is an auto-generated file. Regular comments will be removed when this
-# file is regenerated. Regenerating will not touch any manually added keys,
-# so comments can be added in a "comment" key.
+# This is an auto-generated file.
+#
+# Regenerating this file will:
+# - Update the `description` property
+# - Update the `reimplements` property
+# - Remove `include = true` properties
+# - Preserve any other properties
+#
+# As regular comments will be removed when this file is regenerated, comments
+# can be added in a "comment" key
 
 [1e22cceb-c5e4-4562-9afe-aef07ad1eaf4]
 description = "basic"
