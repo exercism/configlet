@@ -52,7 +52,7 @@ proc testsForSync(binaryPath: string) =
     # Setup: set the problem-specifications repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {psDir} checkout ef9e1e17c84721ee6e9d5a65c8dd3ba2122eac91")
+        execCmdEx(&"git -C {psDir} checkout f17f457fdc0673369047250f652e93c7901755e1")
 
     # Setup: set the track repo to a known state
     block:
@@ -65,16 +65,24 @@ proc testsForSync(binaryPath: string) =
 
       check outp == """
 Checking exercises...
+[warn] anagram: missing 1 test cases
+       - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
 [warn] diffie-hellman: missing 1 test cases
        - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
 [warn] grade-school: missing 1 test cases
        - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
-[warn] hamming: missing 2 test cases
+[warn] hamming: missing 6 test cases
+       - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
+       - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
        - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
+       - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
        - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
+       - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
 [warn] high-scores: missing 2 test cases
        - Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
        - Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
+[warn] isogram: missing 1 test cases
+       - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
 [warn] kindergarten-garden: missing 8 test cases
        - for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
        - for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
@@ -84,6 +92,8 @@ Checking exercises...
        - for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
        - for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
        - for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
+[warn] luhn: missing 1 test cases
+       - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
 [warn] prime-factors: missing 5 test cases
        - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
        - product of first prime (756949d3-3158-4e3d-91f2-c4f9f043ee70)
@@ -114,17 +124,40 @@ Checking exercises...
 
       check outp == """
 Syncing exercises...
+[info] anagram: included 1 missing test cases
 [info] diffie-hellman: included 1 missing test cases
 [info] grade-school: included 1 missing test cases
-[info] hamming: included 2 missing test cases
+[info] hamming: included 6 missing test cases
 [info] high-scores: included 2 missing test cases
+[info] isogram: included 1 missing test cases
 [info] kindergarten-garden: included 8 missing test cases
+[info] luhn: included 1 missing test cases
 [info] prime-factors: included 5 missing test cases
 [info] react: included 14 missing test cases
 All exercises are synced!
 """
 
     const expectedDiffOutput = """
+--- exercises/practice/anagram/.meta/tests.toml
++++ exercises/practice/anagram/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
++[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
++description = "detects two anagrams"
++reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
++
 --- exercises/practice/diffie-hellman/.meta/tests.toml
 +++ exercises/practice/diffie-hellman/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
@@ -179,14 +212,30 @@ All exercises are synced!
 +#
 +# As regular comments will be removed when this file is regenerated, comments
 +# can be added in a "comment" key.
++[b9228bb1-465f-4141-b40f-1f99812de5a8]
++description = "disallow first strand longer"
++reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
++
++[dab38838-26bb-4fff-acbe-3b0a9bfeba2d]
++description = "disallow second strand longer"
++reimplements = "8a2d4ed0-ead5-4fdd-924d-27c4cf56e60e"
++
 +[db92e77e-7c72-499d-8fe6-9354d2bfd504]
 +description = "disallow left empty strand"
 +reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
++
++[b764d47c-83ff-4de2-ab10-6cfe4b15c0f3]
++description = "disallow empty first strand"
++reimplements = "db92e77e-7c72-499d-8fe6-9354d2bfd504"
 +
 +
 +[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
 +description = "disallow right empty strand"
 +reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
++
++[9ab9262f-3521-4191-81f5-0ed184a5aa89]
++description = "disallow empty second strand"
++reimplements = "920cd6e3-18f4-4143-b6b8-74270bb8f8a3"
 --- exercises/practice/high-scores/.meta/tests.toml
 +++ exercises/practice/high-scores/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
@@ -209,6 +258,25 @@ All exercises are synced!
 +
 +[809c4058-7eb1-4206-b01e-79238b9b71bc]
 +description = "Scores after personal top scores"
+--- exercises/practice/isogram/.meta/tests.toml
++++ exercises/practice/isogram/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
++
++[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
++description = "word with duplicated character and with two hyphens"
 --- exercises/practice/kindergarten-garden/.meta/tests.toml
 +++ exercises/practice/kindergarten-garden/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
@@ -257,6 +325,25 @@ All exercises are synced!
 +description = "for Kincaid, second to last student's garden"
 -description = "last student's garden"
 +description = "for Larry, last student's garden"
+--- exercises/practice/luhn/.meta/tests.toml
++++ exercises/practice/luhn/.meta/tests.toml
+-# This is an auto-generated file. Regular comments will be removed when this
+-# file is regenerated. Regenerating will not touch any manually added keys,
+-# so comments can be added in a "comment" key.
+-
++# This is an auto-generated file.
++#
++# Regenerating this file will:
++# - Update the `description` property
++# - Update the `reimplements` property
++# - Remove `include = true` properties
++# - Preserve any other properties
++#
++# As regular comments will be removed when this file is regenerated, comments
++# can be added in a "comment" key.
++
++[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
++description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
 --- exercises/practice/prime-factors/.meta/tests.toml
 +++ exercises/practice/prime-factors/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
