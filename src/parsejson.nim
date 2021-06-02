@@ -71,7 +71,6 @@ type
     errBracketRiExpected, ## ``]`` expected
     errCurlyRiExpected,   ## ``}`` expected
     errQuoteExpected,     ## ``"`` or ``'`` expected
-    errEOC_Expected,      ## ``*/`` expected
     errEofExpected,       ## EOF expected
     errExprExpected       ## expr expected
 
@@ -102,7 +101,6 @@ const
     "']' expected",
     "'}' expected",
     "'\"' or \"'\" expected",
-    "'*/' expected",
     "EOF expected",
     "expression expected"
   ]
@@ -287,43 +285,6 @@ proc skip(my: var JsonParser) =
   var pos = my.bufpos
   while true:
     case my.buf[pos]
-    of '/':
-      if my.buf[pos+1] == '/':
-        # skip line comment:
-        inc(pos, 2)
-        while true:
-          case my.buf[pos]
-          of '\0':
-            break
-          of '\c':
-            pos = lexbase.handleCR(my, pos)
-            break
-          of '\L':
-            pos = lexbase.handleLF(my, pos)
-            break
-          else:
-            inc(pos)
-      elif my.buf[pos+1] == '*':
-        # skip long comment:
-        inc(pos, 2)
-        while true:
-          case my.buf[pos]
-          of '\0':
-            my.err = errEOC_Expected
-            break
-          of '\c':
-            pos = lexbase.handleCR(my, pos)
-          of '\L':
-            pos = lexbase.handleLF(my, pos)
-          of '*':
-            inc(pos)
-            if my.buf[pos] == '/':
-              inc(pos)
-              break
-          else:
-            inc(pos)
-      else:
-        break
     of ' ', '\t':
       inc(pos)
     of '\c':
@@ -374,7 +335,7 @@ proc parseName(my: var JsonParser) =
 
 proc getTok*(my: var JsonParser): TokKind =
   setLen(my.a, 0)
-  skip(my) # skip whitespace, comments
+  skip(my) # skip whitespace
   case my.buf[my.bufpos]
   of '-', '.', '0'..'9':
     parseNumber(my)
