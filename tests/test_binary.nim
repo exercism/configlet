@@ -570,7 +570,8 @@ proc main =
   let binaryPath = repoRootDir / binaryName
   const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
-  const cmd = "nimble --verbose build -d:release"
+  const cmdBase = "nimble --verbose build"
+  let cmd = if existsEnv("CI"): &"{cmdBase} -d:release" else: cmdBase
   stderr.write(&"Running `{cmd}`... ")
   let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
   if buildExitCode == 0:
