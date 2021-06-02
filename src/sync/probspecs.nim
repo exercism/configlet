@@ -56,13 +56,23 @@ func isReimplementation*(testCase: ProbSpecsTestCase): bool =
 func reimplements*(testCase: ProbSpecsTestCase): string =
   testCase["reimplements"].getStr()
 
-proc initProbSpecsTestCases(node: JsonNode): seq[ProbSpecsTestCase] =
-  ## Returns a seq of every individual test case in `node` (flattening).
+proc initProbSpecsTestCases(node: JsonNode, prefix = ""): seq[ProbSpecsTestCase] =
+  ## Returns a seq of every individual test case in `node` (flattening). We
+  ## alter each `description` value to indicate any nesting, which is OK because
+  ## we only use the `description` for writing `tests.toml`.
   if node.hasKey("uuid"):
+    if node.hasKey("description"):
+      if node["description"].kind == JString:
+        node["description"].str = &"""{prefix}{node["description"].getStr()}"""
     result.add ProbSpecsTestCase(node)
   elif node.hasKey("cases"):
+    let prefix =
+      if node.hasKey("description"):
+        &"""{prefix}{node["description"].getStr()} → """
+      else:
+        prefix
     for childNode in node["cases"].getElems():
-      result.add initProbSpecsTestCases(childNode)
+      result.add initProbSpecsTestCases(childNode, prefix)
 
 proc grainsWorkaround(grainsPath: string): JsonNode =
   ## Parses the canonical data file for `grains`, replacing the too-large
