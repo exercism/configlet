@@ -38,6 +38,11 @@ proc testJsonParser =
       checkEachLineIsInvalidJson ""
 
     test "invalid JSON: fragments of valid JSON":
+      # This is one case where `jq` is bad as a JSON validator. `jq` is
+      # stream-oriented, so it exits with an exit code of 0 for e.g.
+      #   `echo '[][]' | jq .`
+      # and even
+      #   `echo '' | jq .`
       checkEachLineIsInvalidJson """
         [][]
         {}{}
