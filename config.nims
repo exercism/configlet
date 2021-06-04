@@ -1,8 +1,8 @@
 switch("styleCheck", "hint")
 hint("Name", on)
 switch("experimental", "strictFuncs")
-patchFile("stdlib", "parsejson", "src/parsejson")
 patchFile("stdlib", "json", "src/json")
+patchFile("stdlib", "parsejson", "src/parsejson")
 
 if defined(release):
   switch("opt", "size")
