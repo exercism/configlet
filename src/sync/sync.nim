@@ -7,12 +7,11 @@ type
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  echo &"""
+  stderr.write &"""
 The following test case is missing:
 {testCase.json.pretty()}
 
-Do you want to include the test case ([y]es/[n]o/[s]kip)?
-"""
+Do you want to include the test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
@@ -22,19 +21,18 @@ Do you want to include the test case ([y]es/[n]o/[s]kip)?
   of "s", "skip":
     sdSkipTest
   else:
-    echo "Unknown response. Skipping test case..."
+    stderr.writeLine "Unknown response. Skipping test case..."
     sdSkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  echo &"""
+  stderr.write &"""
 The following test case is missing:
 {testCase.json.pretty()}
 
 It reimplements this test case:
 {testCase.reimplements.get().json.pretty()}
 
-Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?
-"""
+Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
@@ -44,7 +42,7 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?
   of "s", "skip":
     sdSkipTest
   else:
-    echo "Unknown response. Skipping test case..."
+    stderr.writeLine "Unknown response. Skipping test case..."
     sdSkipTest
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
