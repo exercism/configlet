@@ -870,6 +870,7 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
       result[key] = val
       if p.tok != tkComma: break
       discard getTok(p)
+      # Raise `JsonParsingError` for a trailing comma, unlike `std/json`
       if p.tok == tkCurlyRi:
         raiseParseErr(p, "found trailing comma. } or key/value pair")
     eat(p, tkCurlyRi)
@@ -880,6 +881,7 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
       result.add(parseJson(p, rawIntegers, rawFloats))
       if p.tok != tkComma: break
       discard getTok(p)
+      # Raise `JsonParsingError` for a trailing comma, unlike `std/json`
       if p.tok == tkBracketRi:
         raiseParseErr(p, "found trailing comma. ] or array item")
     eat(p, tkBracketRi)

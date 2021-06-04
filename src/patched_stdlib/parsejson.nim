@@ -285,6 +285,8 @@ proc skip(my: var JsonParser) =
   var pos = my.bufpos
   while true:
     case my.buf[pos]
+    # Raise `JsonParsingError` for comments with `//` or `/* */`,
+    # unlike `std/parsejson`
     of ' ', '\t':
       inc(pos)
     of '\c':
