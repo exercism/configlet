@@ -79,19 +79,19 @@ Checking exercises...
        - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
        - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
 [warn] high-scores: missing 2 test cases
-       - Top 3 scores → Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
-       - Top 3 scores → Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
+       - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
+       - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
 [warn] isogram: missing 1 test cases
        - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
 [warn] kindergarten-garden: missing 8 test cases
-       - full garden → for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
-       - full garden → for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
-       - full garden → for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
-       - full garden → for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
-       - full garden → for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
-       - full garden → for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
-       - full garden → for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
-       - full garden → for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
+       - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
+       - full garden -> for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
+       - full garden -> for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
+       - full garden -> for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
+       - full garden -> for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
+       - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
+       - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
+       - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
 [warn] luhn: missing 1 test cases
        - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
 [warn] prime-factors: missing 5 test cases
@@ -253,21 +253,21 @@ All exercises are synced!
 +# As regular comments will be removed when this file is regenerated, comments
 +# can be added in a "comment" key.
 -description = "Personal top three from a list of scores"
-+description = "Top 3 scores → Personal top three from a list of scores"
++description = "Top 3 scores -> Personal top three from a list of scores"
 -description = "Personal top highest to lowest"
-+description = "Top 3 scores → Personal top highest to lowest"
++description = "Top 3 scores -> Personal top highest to lowest"
 -description = "Personal top when there is a tie"
-+description = "Top 3 scores → Personal top when there is a tie"
++description = "Top 3 scores -> Personal top when there is a tie"
 -description = "Personal top when there are less than 3"
-+description = "Top 3 scores → Personal top when there are less than 3"
++description = "Top 3 scores -> Personal top when there are less than 3"
 -description = "Personal top when there is only one"
-+description = "Top 3 scores → Personal top when there is only one"
++description = "Top 3 scores -> Personal top when there is only one"
 +
 +[2df075f9-fec9-4756-8f40-98c52a11504f]
-+description = "Top 3 scores → Latest score after personal top scores"
++description = "Top 3 scores -> Latest score after personal top scores"
 +
 +[809c4058-7eb1-4206-b01e-79238b9b71bc]
-+description = "Top 3 scores → Scores after personal top scores"
++description = "Top 3 scores -> Scores after personal top scores"
 --- exercises/practice/isogram/.meta/tests.toml
 +++ exercises/practice/isogram/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
@@ -304,47 +304,47 @@ All exercises are synced!
 +# As regular comments will be removed when this file is regenerated, comments
 +# can be added in a "comment" key.
 -description = "garden with single student"
-+description = "partial garden → garden with single student"
++description = "partial garden -> garden with single student"
 -description = "different garden with single student"
-+description = "partial garden → different garden with single student"
++description = "partial garden -> different garden with single student"
 -description = "garden with two students"
-+description = "partial garden → garden with two students"
++description = "partial garden -> garden with two students"
 -description = "second student's garden"
-+description = "partial garden → multiple students for the same garden with three students → second student's garden"
++description = "partial garden -> multiple students for the same garden with three students -> second student's garden"
 -description = "third student's garden"
-+description = "partial garden → multiple students for the same garden with three students → third student's garden"
++description = "partial garden -> multiple students for the same garden with three students -> third student's garden"
 -description = "first student's garden"
-+description = "full garden → for Alice, first student's garden"
++description = "full garden -> for Alice, first student's garden"
 -description = "second student's garden"
-+description = "full garden → for Bob, second student's garden"
++description = "full garden -> for Bob, second student's garden"
 +
 +[566b621b-f18e-4c5f-873e-be30544b838c]
-+description = "full garden → for Charlie"
++description = "full garden -> for Charlie"
 +
 +[3ad3df57-dd98-46fc-9269-1877abf612aa]
-+description = "full garden → for David"
++description = "full garden -> for David"
 +
 +[0f0a55d1-9710-46ed-a0eb-399ba8c72db2]
-+description = "full garden → for Eve"
++description = "full garden -> for Eve"
 +
 +[a7e80c90-b140-4ea1-aee3-f4625365c9a4]
-+description = "full garden → for Fred"
++description = "full garden -> for Fred"
 +
 +[9d94b273-2933-471b-86e8-dba68694c615]
-+description = "full garden → for Ginny"
++description = "full garden -> for Ginny"
 +
 +[f55bc6c2-ade8-4844-87c4-87196f1b7258]
-+description = "full garden → for Harriet"
++description = "full garden -> for Harriet"
 +
 +[759070a3-1bb1-4dd4-be2c-7cce1d7679ae]
-+description = "full garden → for Ileana"
++description = "full garden -> for Ileana"
 +
 +[78578123-2755-4d4a-9c7d-e985b8dda1c6]
-+description = "full garden → for Joseph"
++description = "full garden -> for Joseph"
 -description = "second to last student's garden"
-+description = "full garden → for Kincaid, second to last student's garden"
++description = "full garden -> for Kincaid, second to last student's garden"
 -description = "last student's garden"
-+description = "full garden → for Larry, last student's garden"
++description = "full garden -> for Larry, last student's garden"
 --- exercises/practice/luhn/.meta/tests.toml
 +++ exercises/practice/luhn/.meta/tests.toml
 -# This is an auto-generated file. Regular comments will be removed when this
