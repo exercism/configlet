@@ -6,6 +6,9 @@ type
   SyncDecision = enum
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
+proc writeBlankLines =
+  stderr.write "\n\n"
+
 proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
   stderr.write &"""
 The following test case is missing:
@@ -15,13 +18,17 @@ Do you want to include the test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
+    writeBlankLines()
     sdIncludeTest
   of "n", "no":
+    writeBlankLines()
     sdExcludeTest
   of "s", "skip":
+    writeBlankLines()
     sdSkipTest
   else:
     stderr.writeLine "Unknown response. Skipping test case..."
+    writeBlankLines()
     sdSkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
@@ -36,13 +43,17 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
+    writeBlankLines()
     sdReplaceTest
   of "n", "no":
+    writeBlankLines()
     sdExcludeTest
   of "s", "skip":
+    writeBlankLines()
     sdSkipTest
   else:
     stderr.writeLine "Unknown response. Skipping test case..."
+    writeBlankLines()
     sdSkipTest
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
