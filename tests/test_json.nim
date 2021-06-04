@@ -49,9 +49,9 @@ proc testJsonParser =
         {}[]
         []{}
         [] []
-        {} {}
-        []\n[]
-        {}\n{}"""
+        {} {}"""
+      expect JsonParsingError:
+        discard parseJson("[]\n{}")
 
     test "invalid JSON: single comma":
       checkEachLineIsInvalidJson ","
@@ -60,7 +60,6 @@ proc testJsonParser =
       checkEachLineIsInvalidJson """
         [,
         [ ,
-        [ ,\s
         {,
         { ,
         {",}
