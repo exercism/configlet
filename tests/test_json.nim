@@ -9,8 +9,8 @@ import std/[json, strutils, unittest]
 
 template checkEachLineIsInvalidJson(s: string) =
   # This must be a template, rather than a proc. With the latter, a failing test
-  # would produce a non-zero exit code and an error message, but incorrectly
-  # print [OK] rather than [FAILED].
+  # would correctly produce a non-zero exit code and an error message, but
+  # incorrectly print [OK] rather than [FAILED].
   for line in s.unindent().splitLines():
     expect JsonParsingError:
       discard parseJson(line)
@@ -25,7 +25,7 @@ proc testJsonParser =
       check:
         parseJson("{}") == newJObject()
 
-    test "valid JSON: empty object preceded by whitespace":
+    test "valid JSON: empty object surrounded by extra whitespace":
       const s = """
 
            {}
