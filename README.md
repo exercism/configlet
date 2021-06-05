@@ -90,6 +90,11 @@ c12309a2-8bd6-4b9c-a511-e1ee4083f492
 5df11ac0-e612-4223-b0f8-f6cd2cb15cb1
 e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
 ```
+
+## `configlet generate`
+
+TODO.
+
 ## Use in your track
 
 Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too. The first is a bash script, and the second is a PowerShell script.
