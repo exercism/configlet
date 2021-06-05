@@ -72,6 +72,24 @@ The `configlet sync` command allows tracks to keep `tests.toml` files up to date
 
 The `configlet sync` command replaces the functionality of the older `canonical_data_syncer` application.
 
+## `configlet uuid`
+
+Each exercise and concept has a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), which must only appear once across all of Exercism. It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must satisfy the below regular expression:
+
+```
+^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+```
+
+You can run `configlet uuid` to output a new, appropriate UUID. There is also the `-n, --num` option for outputting multiple new UUIDs:
+
+```
+$ configlet uuid --num 5
+3823f890-be49-4700-baac-e19de8fda76f
+c12309a2-8bd6-4b9c-a511-e1ee4083f492
+26167ad5-fe20-43d4-8b1f-3bbb9618c36e
+5df11ac0-e612-4223-b0f8-f6cd2cb15cb1
+e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
+```
 ## Use in your track
 
 Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too. The first is a bash script, and the second is a PowerShell script.
