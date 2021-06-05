@@ -59,9 +59,9 @@ proc testsForSync(binaryPath: string) =
       execAndCheck(0):
         execCmdEx(&"git -C {trackDir} checkout 6e909c9e5338cd567c20224069df00e031fb2efa")
 
-    test "`sync --check` exits with 1 and prints the expected output":
+    test "a `sync` without `--update` exits with 1 and prints the expected output":
       execAndCheck(1):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -co -p {psDir}")
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
 
       check outp == """
 Checking exercises...
@@ -118,9 +118,9 @@ Checking exercises...
 [warn] some exercises are missing test cases
 """
 
-    test "`sync --mode=include` exits with 0 and includes the expected test cases":
+    test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
       execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -mi -o -p {psDir}")
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
       check outp == """
 Syncing exercises...
@@ -461,18 +461,18 @@ All exercises are synced!
 
       check outp.conciseDiff() == expectedDiffOutput
 
-    test "after syncing, another `sync --mode=include` performs no changes":
+    test "after syncing, another `sync --update --mode=include` performs no changes":
       execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -mi -o -p {psDir}")
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
       check outp == """
 Syncing exercises...
 All exercises are synced!
 """
 
-    test "after syncing, `sync --check` shows that exercises are up to date":
+    test "after syncing, a `sync` without `--update` shows that exercises are up to date":
       execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -c -o -p {psDir}")
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
       check outp == """
 Checking exercises...
 All exercises are up-to-date!
@@ -604,7 +604,7 @@ proc main =
           exitCode == 0
 
   suite "help is always printed if present":
-    for goodHelp in ["--help --check", "sync -ch", "-hc", "-ho", "sync -oh"]:
+    for goodHelp in ["--help --update", "sync -uh", "-hu", "-ho", "sync -oh"]:
       test goodHelp:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
@@ -630,7 +630,7 @@ proc main =
           exitCode == 1
 
   suite "invalid option: global":
-    for badOption in ["--halp", "--checkk"]:
+    for badOption in ["--halp", "--updatee"]:
       test badOption:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {badOption}")
         check:
@@ -638,7 +638,7 @@ proc main =
           exitCode == 1
 
   suite "invalid option: sync":
-    for badOption in ["--halp", "--checkk"]:
+    for badOption in ["--halp", "--updatee"]:
       test badOption:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} sync {badOption}")
         check:
@@ -648,7 +648,7 @@ proc main =
   suite "invalid value":
     for (option, badValue) in [("--mode", "foo"), ("--mode", "f"),
                                ("-m", "foo"), ("-m", "f"),
-                               ("-m", "--check"), ("-m", "-c"),
+                               ("-m", "--update"), ("-m", "-u"),
                                ("-m", "-mc"), ("-m", "--mode")]:
       for sep in [" ", "=", ":"]:
         test &"{option}{sep}{badValue}":
@@ -658,7 +658,7 @@ proc main =
             exitCode == 1
 
   suite "valid option given to wrong command":
-    for (command, opt, val) in [("uuid", "-c", ""),
+    for (command, opt, val) in [("uuid", "-u", ""),
                                 ("uuid", "--mode", "choose"),
                                 ("sync", "-n", "10")]:
       test &"{command} {opt} {val}":
@@ -676,9 +676,9 @@ proc main =
           outp.contains(&"invalid argument for command '{command}': '{badArg}'")
           exitCode == 1
     for cmd in ["uuid -n5 sync",
-                "uuid -n5 sync -c",
-                "sync -c uuid",
-                "sync -c -mc -o uuid -n5"]:
+                "uuid -n5 sync -u",
+                "sync -u uuid",
+                "sync -u -mc -o uuid -n5"]:
       test &"{cmd}":
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {cmd}")
         check:

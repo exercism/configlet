@@ -1,5 +1,5 @@
 import std/posix
-import "."/[cli, generate/generate, lint/lint, logger, sync/check, sync/sync, uuid/uuid]
+import "."/[cli, generate/generate, lint/lint, logger, sync/check, sync/update, uuid/uuid]
 
 proc main =
   onSignal(SIGTERM):
@@ -15,10 +15,10 @@ proc main =
   of actLint:
     lint(conf)
   of actSync:
-    if conf.action.check:
-      check(conf)
+    if conf.action.update:
+      update(conf)
     else:
-      sync(conf)
+      check(conf)
   of actUuid:
     uuid(conf.action.num)
   of actGenerate:

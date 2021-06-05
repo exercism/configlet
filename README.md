@@ -15,10 +15,10 @@ Commands:
 
 Options for sync:
   -e, --exercise <slug>        Only sync this exercise
-  -c, --check                  Terminates with a non-zero exit code if one or more tests are missing. Doesn't update the tests
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
+  -u, --update                 Prompt the user to include, exclude, or skip any missing tests
 
 Options for uuid:
   -n, --num <int>              Number of UUIDs to generate
