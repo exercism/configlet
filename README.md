@@ -30,14 +30,13 @@ Global options:
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
 ```
 
-## Linting
+## `configlet lint`
 
 The primary function of configlet is to do _linting_: checking if a track's configuration files are properly structured - both syntactically and semantically. Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development. The list of currently implemented checks can be found [here](https://github.com/exercism/configlet/issues/249).
 
-
-## Sync
+## `configlet sync`
 
 If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file. The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise. Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
 
