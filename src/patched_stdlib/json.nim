@@ -1,4 +1,4 @@
-# This file is minimally adapted from the Nim standard library:
+# This file is minimally adapted from this version in the Nim standard library:
 # https://github.com/nim-lang/Nim/blob/82561f31eb8e/lib/pure/json.nim
 # The standard library version is lenient: it silently allows a trailing comma.
 # The below version is stricter: it raises a `JsonParsingError` for a trailing

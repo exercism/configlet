@@ -1,4 +1,4 @@
-# This file is minimally adapted from the Nim standard library:
+# This file is minimally adapted from this version in the Nim standard library:
 # https://github.com/nim-lang/Nim/blob/8e3a349561fb/lib/pure/parsejson.nim
 # The standard library version is lenient: it silently allows line comments
 # with `//`, and long comments with `/* */`.
