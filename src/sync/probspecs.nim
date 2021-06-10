@@ -68,7 +68,7 @@ proc initProbSpecsTestCases(node: JsonNode, prefix = ""): seq[ProbSpecsTestCase]
   elif node.hasKey("cases"):
     let prefix =
       if node.hasKey("description"):
-        &"""{prefix}{node["description"].getStr()} → """
+        &"""{prefix}{node["description"].getStr()} -> """
       else:
         prefix
     for childNode in node["cases"].getElems():
