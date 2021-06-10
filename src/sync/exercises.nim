@@ -129,7 +129,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 # - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
 # - Preserve any other key/value pair
 #
-# As other TOML comments (using the # character) will be removed when this file
+# As user-added comments (using the # character) will be removed when this file
 # is regenerated, comments can be added via a `comment` key.
 """
 
