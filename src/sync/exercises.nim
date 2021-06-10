@@ -126,7 +126,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 # Regenerating this file via `configlet sync` will:
 # - Recreate every `description` key/value pair
 # - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-# - Remove any `include = true` (an omitted `include` key implies inclusion)
+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
 # - Preserve any other key/value pair
 #
 # As other TOML comments (using the # character) will be removed when this file
