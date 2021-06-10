@@ -6,43 +6,54 @@ type
   SyncDecision = enum
     sdIncludeTest, sdExcludeTest, sdSkipTest, sdReplaceTest
 
-proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  echo &"""The following test case is missing:"
-{testCase.json.pretty()}:
+proc writeBlankLines =
+  stderr.write "\n\n"
 
-Do you want to include the test case ([y]es/[n]o/[s]kip)?:
-"""
+proc chooseRegularSyncDecision(testCase: ExerciseTestCase): SyncDecision =
+  stderr.write &"""
+The following test case is missing:
+{testCase.json.pretty()}
+
+Do you want to include the test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
+    writeBlankLines()
     sdIncludeTest
   of "n", "no":
+    writeBlankLines()
     sdExcludeTest
   of "s", "skip":
+    writeBlankLines()
     sdSkipTest
   else:
-    echo "Unknown response. Skipping test case..."
+    stderr.writeLine "Unknown response. Skipping test case..."
+    writeBlankLines()
     sdSkipTest
 
 proc chooseReimplementsSyncDecision(testCase: ExerciseTestCase): SyncDecision =
-  echo &"""The following test case is missing:"
-{testCase.json.pretty()}:
+  stderr.write &"""
+The following test case is missing:
+{testCase.json.pretty()}
 
 It reimplements this test case:
-{testCase.reimplements.get().json.pretty()}:
+{testCase.reimplements.get().json.pretty()}
 
-Do you want to replace the existing test case ([y]es/[n]o/[s]kip)?:
-"""
+Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
 
   case stdin.readLine().toLowerAscii()
   of "y", "yes":
+    writeBlankLines()
     sdReplaceTest
   of "n", "no":
+    writeBlankLines()
     sdExcludeTest
   of "s", "skip":
+    writeBlankLines()
     sdSkipTest
   else:
-    echo "Unknown response. Skipping test case..."
+    stderr.writeLine "Unknown response. Skipping test case..."
+    writeBlankLines()
     sdSkipTest
 
 proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
