@@ -118,19 +118,19 @@ proc prettyTomlString(a: openArray[TomlValueRef]): string =
 proc toToml(exercise: Exercise, testsPath: string): string =
   ## Returns the new contents of a `tests.toml` file that corresponds to an
   ## `exercise`. This proc reads the previous contents at `testsPath` and
-  ## updates the `description` and `reimplements` properties, removes any
-  ## `include = true` properties and preserves any other property.
+  ## generates the up-to-date `description` and `reimplements` key/value pairs,
+  ## removes any `include = true`, and preserves any other key/value pair.
   result = """
 # This is an auto-generated file.
 #
-# Regenerating this file will:
-# - Update the `description` property
-# - Update the `reimplements` property
-# - Remove `include = true` properties
-# - Preserve any other properties
+# Regenerating this file via `configlet sync` will:
+# - Recreate every `description` key/value pair
+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+# - Preserve any other key/value pair
 #
-# As regular comments will be removed when this file is regenerated, comments
-# can be added in a "comment" key.
+# As user-added comments (using the # character) will be removed when this file
+# is regenerated, comments can be added via a `comment` key.
 """
 
   for testCase in exercise.testCases:
@@ -144,14 +144,14 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       if uuid in exercise.tests.excluded:
         result.add "include = false\n"
 
-      # Always add the `reimplements` property, if present
+      # Always add the `reimplements` key/value pair, if present
       if testCase.reimplements.isSome():
         result.add &"reimplements = \"{testCase.reimplements.get().uuid}\"\n"
 
       if fileExists(testsPath):
         let currContents = parsetoml.parseFile(testsPath)
         if currContents.hasKey(uuid):
-          # Preserve custom properties
+          # Preserve any other key/value pair
           for k, v in currContents[uuid].getTable():
             if k notin ["description", "include", "reimplements"].toHashSet():
               let vTomlString =

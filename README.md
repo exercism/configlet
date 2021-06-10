@@ -46,14 +46,14 @@ A `tests.toml` file has this format:
 ```toml
 # This is an auto-generated file.
 #
-# Regenerating this file will:
-# - Update the `description` property
-# - Update the `reimplements` property
-# - Remove `include = true` properties
-# - Preserve any other properties
+# Regenerating this file via `configlet sync` will:
+# - Recreate every `description` key/value pair
+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+# - Preserve any other key/value pair
 #
-# As regular comments will be removed when this file is regenerated, comments
-# can be added in a "comment" key
+# As user-added comments (using the # character) will be removed when this file
+# is regenerated, comments can be added via a `comment` key.
 
 [1e22cceb-c5e4-4562-9afe-aef07ad1eaf4]
 description = "basic"

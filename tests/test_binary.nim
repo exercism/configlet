@@ -146,14 +146,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
 +description = "detects two anagrams"
 +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
@@ -166,14 +166,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[0d25f8d7-4897-4338-a033-2d3d7a9af688]
 +description = "can calculate public key when given a different private key"
 +
@@ -185,14 +185,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[c125dab7-2a53-492f-a99a-56ad511940d8]
 +description = "A student can't be in two different grades"
 +
@@ -204,14 +204,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[b9228bb1-465f-4141-b40f-1f99812de5a8]
 +description = "disallow first strand longer"
 +reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
@@ -244,14 +244,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 -description = "Personal top three from a list of scores"
 +description = "Top 3 scores -> Personal top three from a list of scores"
 -description = "Personal top highest to lowest"
@@ -276,14 +276,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +
 +[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
 +description = "word with duplicated character and with two hyphens"
@@ -295,14 +295,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 -description = "garden with single student"
 +description = "partial garden -> garden with single student"
 -description = "different garden with single student"
@@ -353,14 +353,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +
 +[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
 +description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
@@ -372,14 +372,14 @@ All exercises are synced!
 -
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[238d57c8-4c12-42ef-af34-ae4929f94789]
 +description = "another prime number"
 +
@@ -402,14 +402,14 @@ All exercises are synced!
 -# so comments can be added in a "comment" key.
 +# This is an auto-generated file.
 +#
-+# Regenerating this file will:
-+# - Update the `description` property
-+# - Update the `reimplements` property
-+# - Remove `include = true` properties
-+# - Preserve any other properties
++# Regenerating this file via `configlet sync` will:
++# - Recreate every `description` key/value pair
++# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
++# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
++# - Preserve any other key/value pair
 +#
-+# As regular comments will be removed when this file is regenerated, comments
-+# can be added in a "comment" key.
++# As user-added comments (using the # character) will be removed when this file
++# is regenerated, comments can be added via a `comment` key.
 +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
 +description = "input cells have a value"
 +
