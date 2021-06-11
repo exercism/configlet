@@ -65,11 +65,11 @@ proc testsForSync(binaryPath: string) =
 
       check outp == """
 Checking exercises...
-[warn] anagram: missing 1 test cases
+[warn] anagram: missing 1 test case
        - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-[warn] diffie-hellman: missing 1 test cases
+[warn] diffie-hellman: missing 1 test case
        - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
-[warn] grade-school: missing 1 test cases
+[warn] grade-school: missing 1 test case
        - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
 [warn] hamming: missing 6 test cases
        - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
@@ -81,7 +81,7 @@ Checking exercises...
 [warn] high-scores: missing 2 test cases
        - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
        - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
-[warn] isogram: missing 1 test cases
+[warn] isogram: missing 1 test case
        - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
 [warn] kindergarten-garden: missing 8 test cases
        - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
@@ -92,7 +92,7 @@ Checking exercises...
        - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
        - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
        - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
-[warn] luhn: missing 1 test cases
+[warn] luhn: missing 1 test case
        - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
 [warn] prime-factors: missing 5 test cases
        - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
@@ -124,14 +124,14 @@ Checking exercises...
 
       check outp == """
 Syncing exercises...
-[info] anagram: included 1 missing test cases
-[info] diffie-hellman: included 1 missing test cases
-[info] grade-school: included 1 missing test cases
+[info] anagram: included 1 missing test case
+[info] diffie-hellman: included 1 missing test case
+[info] grade-school: included 1 missing test case
 [info] hamming: included 6 missing test cases
 [info] high-scores: included 2 missing test cases
-[info] isogram: included 1 missing test cases
+[info] isogram: included 1 missing test case
 [info] kindergarten-garden: included 8 missing test cases
-[info] luhn: included 1 missing test cases
+[info] luhn: included 1 missing test case
 [info] prime-factors: included 5 missing test cases
 [info] react: included 14 missing test cases
 All exercises are synced!

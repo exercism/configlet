@@ -8,10 +8,12 @@ proc check*(conf: Conf) =
   var hasOutOfSync = false
 
   for exercise in findExercises(conf):
+    let numMissing = exercise.tests.missing.len
+    let wording = if numMissing == 1: "test case" else: "test cases"
     case exercise.status()
     of exOutOfSync:
       hasOutOfSync = true
-      logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
+      logNormal(&"[warn] {exercise.slug}: missing {numMissing} {wording}")
       for testCase in exercise.testCases:
         if testCase.uuid in exercise.tests.missing:
           logNormal(&"       - {testCase.description} ({testCase.uuid})")

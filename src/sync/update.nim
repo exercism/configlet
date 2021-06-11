@@ -70,13 +70,15 @@ proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
 
 proc sync(exercise: Exercise, conf: Conf): Exercise =
   let mode = conf.action.mode
+  let numMissing = exercise.tests.missing.len
+  let wording = if numMissing == 1: "test case" else: "test cases"
   case mode
   of modeInclude:
-    logNormal(&"[info] {exercise.slug}: included {exercise.tests.missing.len} missing test cases")
+    logNormal(&"[info] {exercise.slug}: included {numMissing} missing {wording}")
   of modeExclude:
-    logNormal(&"[info] {exercise.slug}: excluded {exercise.tests.missing.len} missing test cases")
+    logNormal(&"[info] {exercise.slug}: excluded {numMissing} missing {wording}")
   of modeChoose:
-    logNormal(&"[warn] {exercise.slug}: missing {exercise.tests.missing.len} test cases")
+    logNormal(&"[warn] {exercise.slug}: missing {numMissing} {wording}")
 
   result = exercise
 
