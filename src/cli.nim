@@ -27,10 +27,10 @@ type
       discard
     of actSync:
       exercise*: string
-      check*: bool
       mode*: Mode
       probSpecsDir*: string
       offline*: bool
+      update*: bool
     of actUuid:
       num*: int
     of actGenerate:
@@ -47,10 +47,10 @@ type
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
     optSyncExercise = "exercise"
-    optSyncCheck = "check"
     optSyncMode = "mode"
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
+    optSyncUpdate = "update"
     optUuidNum = "num"
 
 func genShortKeys: array[Opt, char] =
@@ -65,7 +65,7 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optSyncCheck, optSyncOffline}
+  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -137,13 +137,12 @@ func genHelpText: string =
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
     optSyncExercise: "Only sync this exercise",
-    optSyncCheck: "Terminates with a non-zero exit code if one or more tests " &
-                  "are missing. Doesn't update the tests",
     optSyncMode: &"What to do with missing test cases. {allowedValues(Mode)}",
     optSyncProbSpecsDir: "Use this `problem-specifications` directory, " &
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
+    optSyncUpdate: "Prompt the user to include, exclude, or skip any missing tests",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
@@ -356,14 +355,14 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       case opt
       of optSyncExercise:
         setActionOpt(exercise, val)
-      of optSyncCheck:
-        setActionOpt(check, true)
       of optSyncMode:
         setActionOpt(mode, parseVal[Mode](kind, key, val))
       of optSyncProbSpecsDir:
         setActionOpt(probSpecsDir, val)
       of optSyncOffline:
         setActionOpt(offline, true)
+      of optSyncUpdate:
+        setActionOpt(update, true)
       else:
         discard
     of actUuid:

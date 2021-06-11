@@ -114,7 +114,7 @@ proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
     logDetailed(&"[skip] {exercise.slug} does not have canonical data")
     true
 
-proc sync*(conf: Conf) =
+proc update*(conf: Conf) =
   logNormal("Syncing exercises...")
 
   var everyExerciseIsSynced = true
