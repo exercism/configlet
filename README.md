@@ -95,7 +95,7 @@ e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
 
 Each concept exercise and concept have an `introduction.md` file. If the exercise's introduction can include the concept's introduction verbatim, instead of duplicating the information across these two files an exercise can create an `introduction.md.tpl` file that uses placeholders to refer to the concept's introduction.
 
-Concept placeholders must use the following format: 
+Concept placeholders must use the following format:
 
 ```
 %{concept:<slug>}
