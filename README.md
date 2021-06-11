@@ -93,7 +93,15 @@ e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
 
 ## `configlet generate`
 
-TODO.
+Each concept exercise and concept have an `introduction.md` file. If the exercise's introduction can include the concept's introduction verbatim, instead of duplicating the information across these two files an exercise can create an `introduction.md.tpl` file that uses placeholders to refer to the concept's introduction.
+
+Concept placeholders must use the following format: 
+
+```
+%{concept:<slug>}
+```
+
+You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file. The generated `introduction.md` file will be identical to the `introduction.md.tpl` file, expect for concept placeholders, which will be replaced with the concept's `introduction.md` file's contents (minus its top-level heading and with its other headings' level incremented by one).
 
 ## Use in your track
 
