@@ -38,6 +38,7 @@ type
       probSpecsDir*: string
       offline*: bool
       update*: bool
+      yes*: bool
       scope*: set[SyncKind]
     of actUuid:
       num*: int
@@ -64,6 +65,7 @@ type
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     optSyncUpdate = "update"
+    optSyncYes = "yes"
     # Scope to sync
     optSyncDocs = "docs"
     optSyncFilepaths = "filepaths"
@@ -86,8 +88,8 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate, optSyncDocs,
-               optSyncFilepaths, optSyncMetadata, optSyncTests}
+  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate, optSyncYes,
+               optSyncDocs, optSyncFilepaths, optSyncMetadata, optSyncTests}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -165,6 +167,7 @@ func genHelpText: string =
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
     optSyncUpdate: "Prompt the user to include, exclude, or skip any missing tests",
+    optSyncYes: "Auto-confirm every prompt",
     optSyncDocs: "Sync `.docs/introduction.md` and `.docs/instructions.md`",
     optSyncFilepaths: "Sync filepaths",
     optSyncMetadata: "Sync metadata",
@@ -397,6 +400,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(offline, true)
       of optSyncUpdate:
         setActionOpt(update, true)
+      of optSyncYes:
+        setActionOpt(yes, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths, optSyncTests:
         conf.action.scope.incl parseEnum[SyncKind]($opt)
         isActionOpt = true

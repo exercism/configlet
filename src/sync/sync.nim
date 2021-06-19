@@ -1,4 +1,4 @@
-import std/[os, sequtils, sets, strformat]
+import std/[os, sequtils, sets, strformat, strutils]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, update_tests]
 
@@ -15,20 +15,30 @@ proc contentsAfterFirstHeader(path: string): string =
       result.add line
       result.add '\n'
 
-proc checkFilesIdentical(a, b, slug, filename: string,
-                         seenUnsynced: var set[SyncKind]) =
-  ## Prints a message that describes whether the files at `a` and `b` have
-  ## identical contents.
-  if contentsAfterFirstHeader(a) == contentsAfterFirstHeader(b):
+type
+  SourceDestPair = object
+    source: string
+    dest: string
+
+proc checkFilesIdentical(source, dest, slug, filename: string;
+                         seenUnsynced: var set[SyncKind];
+                         conf: Conf;
+                         sdPairs: var seq[SourceDestPair]) =
+  ## Prints a message that describes whether the files at `source` and `dest`
+  ## have identical contents.
+  if contentsAfterFirstHeader(source) == contentsAfterFirstHeader(dest):
     logDetailed(&"[skip] {slug}: {filename} is up-to-date")
   else:
     logNormal(&"[warn] {slug}: {filename} is unsynced")
     seenUnsynced.incl skDocs
+    if conf.action.update:
+      sdPairs.add SourceDestPair(source: source, dest: dest)
 
 proc checkDocs(exercises: seq[Exercise],
                psExercisesDir: string,
                trackPracticeExercisesDir: string,
-               seenUnsynced: var set[SyncKind]) =
+               seenUnsynced: var set[SyncKind],
+               conf: Conf): seq[SourceDestPair] =
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
@@ -44,8 +54,8 @@ proc checkDocs(exercises: seq[Exercise],
         if fileExists(psIntroPath):
           let trackIntroPath = trackDocsDir / introFilename
           if fileExists(trackIntroPath):
-            checkFilesIdentical(trackIntroPath, psIntroPath, slug,
-                                introFilename, seenUnsynced)
+            checkFilesIdentical(psIntroPath, trackIntroPath, slug,
+                               introFilename, seenUnsynced, conf, result)
           else:
             logNormal(&"[error] {slug}: {introFilename} is missing")
             seenUnsynced.incl skDocs
@@ -61,11 +71,11 @@ proc checkDocs(exercises: seq[Exercise],
           let psInstrPath = psExerciseDir / instrFilename
           let psDescPath = psExerciseDir / descFilename
           if fileExists(psInstrPath):
-            checkFilesIdentical(trackInstrPath, psInstrPath, slug,
-                                instrFilename, seenUnsynced)
+            checkFilesIdentical(psInstrPath, trackInstrPath, slug,
+                               instrFilename, seenUnsynced, conf, result)
           elif fileExists(psDescPath):
-            checkFilesIdentical(trackInstrPath, psDescPath, slug,
-                                instrFilename, seenUnsynced)
+            checkFilesIdentical(psDescPath, trackInstrPath, slug,
+                                instrFilename, seenUnsynced, conf, result)
           else:
             logNormal(&"[error] {slug}: does not have an upstream " &
                       &"{instrFilename} or {descFilename} file")
@@ -112,6 +122,12 @@ proc explain(syncKind: SyncKind): string =
   of skMetadata: "have unsynced metadata"
   of skTests: "are missing test cases"
 
+proc userSaysYes(noun: string): bool =
+  stderr.write &"sync the above {noun} ([y]es/[n]o)? "
+  let resp = stdin.readLine().toLowerAscii()
+  if resp == "y" or resp == "yes":
+    result = true
+
 proc sync*(conf: Conf) =
   logNormal("Checking exercises...")
 
@@ -124,7 +140,16 @@ proc sync*(conf: Conf) =
     let trackPracticeExercisesDir = joinPath(conf.trackDir, "exercises", "practice")
 
     if skDocs in conf.action.scope:
-      checkDocs(exercises, psExercisesDir, trackPracticeExercisesDir, seenUnsynced)
+      let sdPairs = checkDocs(exercises, psExercisesDir,
+                              trackPracticeExercisesDir, seenUnsynced, conf)
+      if sdPairs.len > 0:
+        if conf.action.update:
+          if conf.action.yes or userSaysYes("docs"):
+            for sdPair in sdPairs:
+              # TODO: don't replace first top-level header?
+              # For example: the below currently writes `# Description`
+              # instead of `# Instructions`
+              copyFile(sdPair.source, sdPair.dest)
 
     if skFilepaths in conf.action.scope:
       checkFilepaths(exercises, seenUnsynced)
