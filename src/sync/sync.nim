@@ -1,4 +1,5 @@
-import std/[os, sequtils, sets, strformat, strutils]
+import std/[json, os, sequtils, sets, strformat, strutils]
+import pkg/parsetoml
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, update_tests]
 
@@ -94,9 +95,48 @@ proc checkFilepaths(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
   if false:
     seenUnsynced.incl skFilepaths
 
-proc checkMetadata(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
-  if false:
-    seenUnsynced.incl skMetadata
+proc checkMetadata(exercises: seq[Exercise],
+                   psExercisesDir: string,
+                   trackPracticeExercisesDir: string,
+                   seenUnsynced: var set[SyncKind]) =
+  for exercise in exercises:
+    let slug = exercise.slug.string
+    let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
+
+    if dirExists(trackMetaDir):
+      let psExerciseDir = psExercisesDir / slug
+      if dirExists(psExerciseDir):
+
+        let metadataFilename = "metadata.toml"
+        let psMetadataTomlPath = psExerciseDir / metadataFilename
+        if fileExists(psMetadataTomlPath):
+          let trackExerciseConfigPath = trackMetaDir / "config.json"
+          if fileExists(trackExerciseConfigPath):
+            let toml = parsetoml.parseFile(psMetadataTomlPath)
+            let j = json.parseFile(trackExerciseConfigPath)
+            const keys = ["blurb", "source", "source_url"]
+            for key in keys:
+              if toml.hasKey(key):
+                let upstreamVal = toml[key]
+                if upstreamVal.kind == TomlValueKind.String:
+                  if j.hasKey(key):
+                    let trackVal = j[key]
+                    if trackVal.kind == JString:
+                      if upstreamVal.stringVal == trackVal.str:
+                        logDetailed(&"[skip] {slug}: metadata is up-to-date")
+                      else:
+                        logNormal(&"[warn] {slug}: metadata is unsynced")
+                        seenUnsynced.incl skMetadata
+                else:
+                  seenUnsynced.incl skMetadata
+          else:
+            logNormal(&"[error] {slug}: {metadataFilename} is missing")
+            seenUnsynced.incl skMetadata
+      else:
+        logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+    else:
+      logNormal(&"[error] {slug}: .meta dir missing")
+      seenUnsynced.incl skMetadata
 
 proc checkTests(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
   for exercise in exercises:
@@ -155,7 +195,8 @@ proc sync*(conf: Conf) =
       checkFilepaths(exercises, seenUnsynced)
 
     if skMetadata in conf.action.scope:
-      checkMetadata(exercises, seenUnsynced)
+      checkMetadata(exercises, psExercisesDir, trackPracticeExercisesDir,
+                    seenUnsynced)
 
     if skTests in conf.action.scope:
       if conf.action.update:
