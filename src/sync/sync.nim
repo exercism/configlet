@@ -95,10 +95,16 @@ proc checkFilepaths(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
   if false:
     seenUnsynced.incl skFilepaths
 
+type
+  MetadataPair = object
+    trackJsonPath: string
+    updatedJson: JsonNode
+
 proc checkMetadata(exercises: seq[Exercise],
                    psExercisesDir: string,
                    trackPracticeExercisesDir: string,
-                   seenUnsynced: var set[SyncKind]) =
+                   seenUnsynced: var set[SyncKind],
+                   conf: Conf): seq[MetadataPair] =
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
@@ -113,7 +119,7 @@ proc checkMetadata(exercises: seq[Exercise],
           let trackExerciseConfigPath = trackMetaDir / "config.json"
           if fileExists(trackExerciseConfigPath):
             let toml = parsetoml.parseFile(psMetadataTomlPath)
-            let j = json.parseFile(trackExerciseConfigPath)
+            var j = json.parseFile(trackExerciseConfigPath)
             const keys = ["blurb", "source", "source_url"]
             for key in keys:
               if toml.hasKey(key):
@@ -127,6 +133,11 @@ proc checkMetadata(exercises: seq[Exercise],
                       else:
                         logNormal(&"[warn] {slug}: metadata is unsynced")
                         seenUnsynced.incl skMetadata
+                        if conf.action.update:
+                          j[key].str = upstreamVal.stringVal
+                          result.add MetadataPair(
+                            trackJsonPath: trackExerciseConfigPath,
+                            updatedJson: j)
                 else:
                   seenUnsynced.incl skMetadata
           else:
@@ -195,8 +206,15 @@ proc sync*(conf: Conf) =
       checkFilepaths(exercises, seenUnsynced)
 
     if skMetadata in conf.action.scope:
-      checkMetadata(exercises, psExercisesDir, trackPracticeExercisesDir,
-                    seenUnsynced)
+      let metadataPairs = checkMetadata(exercises, psExercisesDir,
+                                        trackPracticeExercisesDir, seenUnsynced,
+                                        conf)
+      if metadataPairs.len > 0:
+        if conf.action.update:
+          if conf.action.yes or userSaysYes("metadata"):
+            for metadataPair in metadataPairs:
+              writeFile(metadataPair.trackJsonPath,
+                        metadataPair.updatedJson.pretty() & "\n")
 
     if skTests in conf.action.scope:
       if conf.action.update:
