@@ -47,6 +47,7 @@ proc testsForSync(binaryPath: static string) =
 
   const syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
   const syncOfflineUpdate = &"{syncOffline} --update"
+  const syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
   suite "sync, without --update":
     test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
@@ -131,15 +132,17 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, with --update":
     const
       expectedOutputAnagramInclude = """
-        Syncing exercises...
+        Checking exercises...
+        Updating tests...
         [info] anagram: included 1 missing test case
-        All exercises are synced!
+        All tests are up to date!
       """.unindent()
 
       expectedOutputAnagramExclude = """
-        Syncing exercises...
+        Checking exercises...
+        Updating tests...
         [info] anagram: excluded 1 missing test case
-        All exercises are synced!
+        All tests are up to date!
       """.unindent()
 
       testsTomlHeaderDiff = """
@@ -192,28 +195,29 @@ proc testsForSync(binaryPath: static string) =
                                         ".meta", "tests.toml")
 
     test "-mi: includes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0, &"{syncOfflineUpdate} -e anagram -mi", expectedOutputAnagramInclude)
+      execAndCheck(0, &"{syncOfflineUpdateTests} -e anagram -mi", expectedOutputAnagramInclude)
     testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
 
     test "-me: excludes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0, &"{syncOfflineUpdate} -e anagram -me", expectedOutputAnagramExclude)
+      execAndCheck(0, &"{syncOfflineUpdateTests} -e anagram -me", expectedOutputAnagramExclude)
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "y")
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "y")
     testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
 
     test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "n")
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "n")
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
-      execAndCheckExitCode(1, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "s")
+      execAndCheckExitCode(1, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "s")
     testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
     test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
       const expectedOutput = """
-        Syncing exercises...
+        Checking exercises...
+        Updating tests...
         [info] anagram: included 1 missing test case
         [info] diffie-hellman: included 1 missing test case
         [info] grade-school: included 1 missing test case
@@ -224,9 +228,9 @@ proc testsForSync(binaryPath: static string) =
         [info] luhn: included 1 missing test case
         [info] prime-factors: included 5 missing test cases
         [info] react: included 14 missing test cases
-        All exercises are synced!
+        All tests are up to date!
       """.unindent()
-      execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
+      execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
     const expectedDiffOutput = fmt"""
       --- exercises/practice/anagram/.meta/tests.toml
@@ -420,12 +424,13 @@ proc testsForSync(binaryPath: static string) =
       let diff = gitDiffConcise(trackDir)
       check diff == expectedDiffOutput
 
-    test "after updating, another update using -mi performs no changes, and exits with 0":
+    test "after updating tests, another tests update using -mi performs no changes, and exits with 0":
       const expectedOutput = """
-        Syncing exercises...
-        All exercises are synced!
+        Checking exercises...
+        Updating tests...
+        All tests are up to date!
       """.unindent()
-      execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
+      execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
     test "after updating only tests, a plain `sync` shows that only docs are unsynced, and exits with 1":
       const expectedOutput = """

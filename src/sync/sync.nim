@@ -1,6 +1,6 @@
 import std/[os, sequtils, sets, strformat]
 import ".."/[cli, logger]
-import "."/[exercises, probspecs]
+import "."/[exercises, probspecs, update_tests]
 
 proc contentsAfterFirstHeader(path: string): string =
   result = newStringOfCap(getFileSize(path))
@@ -112,7 +112,7 @@ proc explain(syncKind: SyncKind): string =
   of skMetadata: "have unsynced metadata"
   of skTests: "are missing test cases"
 
-proc check*(conf: Conf) =
+proc sync*(conf: Conf) =
   logNormal("Checking exercises...")
 
   let probSpecsDir = initProbSpecsDir(conf)
@@ -133,7 +133,10 @@ proc check*(conf: Conf) =
       checkMetadata(exercises, seenUnsynced)
 
     if skTests in conf.action.scope:
-      checkTests(exercises, seenUnsynced)
+      if conf.action.update:
+        updateTests(exercises, conf, seenUnsynced)
+      else:
+        checkTests(exercises, seenUnsynced)
   finally:
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
@@ -143,5 +146,9 @@ proc check*(conf: Conf) =
       logNormal(&"[warn] some exercises {explain(syncKind)}")
     quit(QuitFailure)
   else:
-    logNormal("All exercises are up-to-date!")
+    if conf.action.scope == {SyncKind.low .. SyncKind.high}:
+      logNormal("All exercises are up to date!")
+    else:
+      for syncKind in conf.action.scope:
+        logNormal(&"All {syncKind} are up to date!")
     quit(QuitSuccess)

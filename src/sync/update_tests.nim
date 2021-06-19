@@ -116,23 +116,18 @@ proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
     logDetailed(&"[skip] {exercise.slug} does not have canonical data")
     true
 
-proc update*(conf: Conf) =
-  logNormal("Syncing exercises...")
+proc updateTests*(exercises: seq[Exercise], conf: Conf,
+                  seenUnsynced: var set[SyncKind]) =
+  logNormal("Updating tests...")
 
   var everyExerciseIsSynced = true
-  let probSpecsDir = initProbSpecsDir(conf)
-  try:
-    for exercise in findExercises(conf, probSpecsDir):
-      let isExerciseSynced = syncIfNeeded(exercise, conf)
-      if not isExerciseSynced:
-        everyExerciseIsSynced = false
-  finally:
-    if conf.action.probSpecsDir.len == 0:
-      removeDir(probSpecsDir)
+
+  for exercise in exercises:
+    let isExerciseSynced = syncIfNeeded(exercise, conf)
+    if not isExerciseSynced:
+      everyExerciseIsSynced = false
 
   if everyExerciseIsSynced:
-    logNormal("All exercises are synced!")
-    quit(QuitSuccess)
+    seenUnsynced.excl skTests
   else:
-    logNormal("[warn] some exercises are still missing test cases")
-    quit(QuitFailure)
+    seenUnsynced.incl skTests
