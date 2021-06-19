@@ -20,6 +20,12 @@ type
     actGenerate = "generate"
     actInfo = "info"
 
+  SyncKind* = enum
+    skDocs = "docs"
+    skFilepaths = "filepaths"
+    skMetadata = "metadata"
+    skTests = "tests"
+
   Action* = object
     case kind*: ActionKind
     of actNil:
@@ -32,6 +38,7 @@ type
       probSpecsDir*: string
       offline*: bool
       update*: bool
+      scope*: set[SyncKind]
     of actUuid:
       num*: int
     of actGenerate:
@@ -45,22 +52,33 @@ type
     verbosity*: Verbosity
 
   Opt = enum
+    # Global options
     optHelp = "help"
     optVersion = "version"
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
+
+    # Options for `sync`
     optSyncExercise = "exercise"
     optSyncMode = "mode"
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     optSyncUpdate = "update"
+    # Scope to sync
+    optSyncDocs = "docs"
+    optSyncFilepaths = "filepaths"
+    optSyncMetadata = "metadata"
+    optSyncTests = "tests"
+
+    # Options for `uuid`
     optUuidNum = "num"
 
 func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
-    if opt == optVersion:
-      result[opt] = '_' # No short option for `--version`
+    if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
+               optSyncTests}:
+      result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
 
@@ -68,7 +86,8 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate}
+  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate, optSyncDocs,
+               optSyncFilepaths, optSyncMetadata, optSyncTests}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -146,6 +165,10 @@ func genHelpText: string =
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
     optSyncUpdate: "Prompt the user to include, exclude, or skip any missing tests",
+    optSyncDocs: "Sync `.docs/introduction.md` and `.docs/instructions.md`",
+    optSyncFilepaths: "Sync filepaths",
+    optSyncMetadata: "Sync metadata",
+    optSyncTests: "Sync tests",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
@@ -163,7 +186,12 @@ func genHelpText: string =
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
-        if key != "kind":
+        if key == "scope":
+          for syncKind in SyncKind:
+            let opt = parseEnum[Opt]($syncKind)
+            result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            optSeen.incl opt
+        elif key != "kind":
           let opt = parseEnum[Opt](key)
           result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
           optSeen.incl opt
@@ -368,6 +396,9 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(offline, true)
       of optSyncUpdate:
         setActionOpt(update, true)
+      of optSyncDocs, optSyncMetadata, optSyncFilepaths, optSyncTests:
+        conf.action.scope.incl parseEnum[SyncKind]($opt)
+        isActionOpt = true
       else:
         discard
     of actUuid:
@@ -416,6 +447,8 @@ proc processCmdLine*: Conf =
     if result.action.offline and result.action.probSpecsDir.len == 0:
       showError(&"'{list(optSyncOffline)}' was given without passing " &
                 &"'{list(optSyncProbSpecsDir)}'")
+    if result.action.scope.len == 0:
+      result.action.scope = {SyncKind.low .. SyncKind.high}
   of actUuid:
     discard
   of actGenerate:
