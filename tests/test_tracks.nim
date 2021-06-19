@@ -9,7 +9,7 @@ proc main =
                       "6e909c9e5338cd567c20224069df00e031fb2efa")
 
     let conf = Conf(
-      action: initAction(actSync),
+      action: initAction(actSync, scope = {skTests}),
       trackDir: trackDir,
     )
     let practiceExercises = toSeq findPracticeExercises(conf)

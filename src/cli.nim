@@ -256,14 +256,15 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
+func initAction*(actionKind: ActionKind, probSpecsDir = "",
+                 scope: set[SyncKind] = {}): Action =
   case actionKind
   of actNil:
     Action(kind: actionKind)
   of actLint:
     Action(kind: actionKind)
   of actSync:
-    Action(kind: actionKind, probSpecsDir: probSpecsDir)
+    Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
   of actUuid:
     Action(kind: actionKind, num: 1)
   of actGenerate:
