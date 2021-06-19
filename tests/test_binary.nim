@@ -52,6 +52,8 @@ proc testsForSync(binaryPath: static string) =
     test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
       const expectedOutput = """
         Checking exercises...
+        [warn] hamming: instructions.md is unsynced
+        [warn] yacht: instructions.md is unsynced
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
         [warn] diffie-hellman: missing 1 test case
@@ -102,6 +104,7 @@ proc testsForSync(binaryPath: static string) =
                - removing a callback multiple times doesn't interfere with other callbacks (f2a7b445-f783-4e0e-8393-469ab4915f2a)
                - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
                - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
+        [warn] some exercises have unsynced docs
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
       execAndCheck(1, syncOffline, expectedOutput)
@@ -424,12 +427,14 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
 
-    test "after updating, a `sync` without `--update` shows that exercises are up to date, and exits with 0":
+    test "after updating only tests, a plain `sync` shows that only docs are unsynced, and exits with 1":
       const expectedOutput = """
         Checking exercises...
-        All exercises are up-to-date!
+        [warn] hamming: instructions.md is unsynced
+        [warn] yacht: instructions.md is unsynced
+        [warn] some exercises have unsynced docs
       """.unindent()
-      execAndCheck(0, syncOffline, expectedOutput)
+      execAndCheck(1, syncOffline, expectedOutput)
 
     test "the diff is still the same":
       let diff = gitDiffConcise(trackDir)

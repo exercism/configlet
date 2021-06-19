@@ -78,27 +78,22 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
         let uuidOfReimplementation = reimplementations[uuid]
         testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
-iterator findExercises*(conf: Conf): Exercise {.inline.} =
-  let probSpecsDir = initProbSpecsDir(conf)
-  try:
-    for practiceExercise in findPracticeExercises(conf):
-      # Parse `canonical-data.json` only when necessary
-      if skTests in conf.action.scope:
-        let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
-        yield Exercise(
-          slug: practiceExercise.slug,
-          tests: initExerciseTests(practiceExercise.tests, testCases),
-          testCases: initExerciseTestCases(testCases),
-        )
-      else:
-        yield Exercise(
-          slug: practiceExercise.slug,
-          tests: initExerciseTests(),
-          testCases: @[],
-        )
-  finally:
-    if conf.action.probSpecsDir.len == 0:
-      removeDir(probSpecsDir)
+iterator findExercises*(conf: Conf, probSpecsDir: ProbSpecsDir): Exercise {.inline.} =
+  for practiceExercise in findPracticeExercises(conf):
+    # Parse `canonical-data.json` only when necessary
+    if skTests in conf.action.scope:
+      let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
+      yield Exercise(
+        slug: practiceExercise.slug,
+        tests: initExerciseTests(practiceExercise.tests, testCases),
+        testCases: initExerciseTestCases(testCases),
+      )
+    else:
+      yield Exercise(
+        slug: practiceExercise.slug,
+        tests: initExerciseTests(),
+        testCases: @[],
+      )
 
 func status*(exercise: Exercise): ExerciseStatus =
   if exercise.testCases.len == 0:

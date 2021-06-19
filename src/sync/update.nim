@@ -1,6 +1,6 @@
 import std/[options, sets, strformat, strutils]
 import ".."/[cli, logger]
-import "."/exercises
+import "."/[exercises, probspecs]
 
 type
   SyncDecision = enum
@@ -120,10 +120,15 @@ proc update*(conf: Conf) =
   logNormal("Syncing exercises...")
 
   var everyExerciseIsSynced = true
-  for exercise in findExercises(conf):
-    let isExerciseSynced = syncIfNeeded(exercise, conf)
-    if not isExerciseSynced:
-      everyExerciseIsSynced = false
+  let probSpecsDir = initProbSpecsDir(conf)
+  try:
+    for exercise in findExercises(conf, probSpecsDir):
+      let isExerciseSynced = syncIfNeeded(exercise, conf)
+      if not isExerciseSynced:
+        everyExerciseIsSynced = false
+  finally:
+    if conf.action.probSpecsDir.len == 0:
+      removeDir(probSpecsDir)
 
   if everyExerciseIsSynced:
     logNormal("All exercises are synced!")

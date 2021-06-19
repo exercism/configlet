@@ -1,10 +1,84 @@
-import std/[sequtils, sets, strformat]
+import std/[os, sequtils, sets, strformat]
 import ".."/[cli, logger]
-import "."/exercises
+import "."/[exercises, probspecs]
 
-proc checkDocs(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
-  if false:
+proc contentsAfterFirstHeader(path: string): string =
+  result = newStringOfCap(getFileSize(path))
+  var isFirstLine = true
+  for line in path.lines:
+    if isFirstLine:
+      if not (line.len > 2 and line[0] == '#' and line[1] == ' '):
+        result.add line
+        result.add '\n'
+      isFirstLine = false
+    else:
+      result.add line
+      result.add '\n'
+
+proc checkFilesIdentical(a, b, slug, filename: string,
+                         seenUnsynced: var set[SyncKind]) =
+  ## Prints a message that describes whether the files at `a` and `b` have
+  ## identical contents.
+  if contentsAfterFirstHeader(a) == contentsAfterFirstHeader(b):
+    logDetailed(&"[skip] {slug}: {filename} is up-to-date")
+  else:
+    logNormal(&"[warn] {slug}: {filename} is unsynced")
     seenUnsynced.incl skDocs
+
+proc checkDocs(exercises: seq[Exercise],
+               psExercisesDir: string,
+               trackPracticeExercisesDir: string,
+               seenUnsynced: var set[SyncKind]) =
+  for exercise in exercises:
+    let slug = exercise.slug.string
+    let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
+
+    if dirExists(trackDocsDir):
+      let psExerciseDir = psExercisesDir / slug
+      if dirExists(psExerciseDir):
+
+        # If the exercise in problem-specifications has an `introduction.md`
+        # file, the track exercise must have a `.docs/introduction.md` file.
+        let introFilename = "introduction.md"
+        let psIntroPath = psExerciseDir / introFilename
+        if fileExists(psIntroPath):
+          let trackIntroPath = trackDocsDir / introFilename
+          if fileExists(trackIntroPath):
+            checkFilesIdentical(trackIntroPath, psIntroPath, slug,
+                                introFilename, seenUnsynced)
+          else:
+            logNormal(&"[error] {slug}: {introFilename} is missing")
+            seenUnsynced.incl skDocs
+
+        # The track exercise must have a `.docs/instructions.md` file.
+        # Its contents should match those of the corresponding `instructions.md`
+        # file in problem-specifications (or `description.md` if that file
+        # doesn't exist).
+        let instrFilename = "instructions.md"
+        let trackInstrPath = trackDocsDir / instrFilename
+        if fileExists(trackInstrPath):
+          let descFilename = "description.md"
+          let psInstrPath = psExerciseDir / instrFilename
+          let psDescPath = psExerciseDir / descFilename
+          if fileExists(psInstrPath):
+            checkFilesIdentical(trackInstrPath, psInstrPath, slug,
+                                instrFilename, seenUnsynced)
+          elif fileExists(psDescPath):
+            checkFilesIdentical(trackInstrPath, psDescPath, slug,
+                                instrFilename, seenUnsynced)
+          else:
+            logNormal(&"[error] {slug}: does not have an upstream " &
+                      &"{instrFilename} or {descFilename} file")
+            seenUnsynced.incl skDocs
+        else:
+          logNormal(&"[error] {slug}: {instrFilename} is missing")
+          seenUnsynced.incl skDocs
+
+      else:
+        logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+    else:
+      logNormal(&"[error] {slug}: .docs dir missing")
+      seenUnsynced.incl skDocs
 
 proc checkFilepaths(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
   if false:
@@ -41,21 +115,28 @@ proc explain(syncKind: SyncKind): string =
 proc check*(conf: Conf) =
   logNormal("Checking exercises...")
 
+  let probSpecsDir = initProbSpecsDir(conf)
   var seenUnsynced: set[SyncKind]
 
-  let exercises = toSeq(findExercises(conf))
+  try:
+    let exercises = toSeq findExercises(conf, probSpecsDir)
+    let psExercisesDir = probSpecsDir / "exercises"
+    let trackPracticeExercisesDir = joinPath(conf.trackDir, "exercises", "practice")
 
-  if skDocs in conf.action.scope:
-    checkDocs(exercises, seenUnsynced)
+    if skDocs in conf.action.scope:
+      checkDocs(exercises, psExercisesDir, trackPracticeExercisesDir, seenUnsynced)
 
-  if skFilepaths in conf.action.scope:
-    checkFilepaths(exercises, seenUnsynced)
+    if skFilepaths in conf.action.scope:
+      checkFilepaths(exercises, seenUnsynced)
 
-  if skMetadata in conf.action.scope:
-    checkMetadata(exercises, seenUnsynced)
+    if skMetadata in conf.action.scope:
+      checkMetadata(exercises, seenUnsynced)
 
-  if skTests in conf.action.scope:
-    checkTests(exercises, seenUnsynced)
+    if skTests in conf.action.scope:
+      checkTests(exercises, seenUnsynced)
+  finally:
+    if conf.action.probSpecsDir.len == 0:
+      removeDir(probSpecsDir)
 
   if seenUnsynced.len > 0:
     for syncKind in seenUnsynced:

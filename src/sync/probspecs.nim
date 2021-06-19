@@ -11,6 +11,7 @@ type
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc removeDir*(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc `/`*(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
