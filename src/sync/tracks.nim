@@ -91,14 +91,15 @@ iterator findPracticeExercises*(conf: Conf): PracticeExercise {.inline.} =
 
   for slug in practiceExerciseSlugs:
     if userExercise.len == 0 or userExercise == slug:
-      let testsPath = testsPath(trackDir, slug)
       # Parse `tests.toml` only when necessary
-      let tests =
-        if skTests in conf.action.scope:
-          initPracticeExerciseTests(testsPath)
-        else:
-          initPracticeExerciseTests()
-      yield PracticeExercise(
-        slug: slug,
-        tests: tests,
-      )
+      if skTests in conf.action.scope:
+        let testsPath = testsPath(trackDir, slug)
+        yield PracticeExercise(
+          slug: slug,
+          tests: initPracticeExerciseTests(testsPath),
+        )
+      else:
+        yield PracticeExercise(
+          slug: slug,
+          tests: initPracticeExerciseTests(),
+        )

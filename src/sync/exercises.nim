@@ -80,29 +80,22 @@ proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestC
 
 iterator findExercises*(conf: Conf): Exercise {.inline.} =
   let probSpecsDir = initProbSpecsDir(conf)
-  let isTestsSync = skTests in conf.action.scope
   try:
     for practiceExercise in findPracticeExercises(conf):
       # Parse `canonical-data.json` only when necessary
-      let testCases =
-        if isTestsSync:
-          getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
-        else:
-          @[]
-      let tests =
-        if isTestsSync:
-          initExerciseTests(practiceExercise.tests, testCases)
-        else:
-          initExerciseTests()
-      yield Exercise(
-        slug: practiceExercise.slug,
-        tests: tests,
-        testCases:
-          if isTestsSync:
-            initExerciseTestCases(testCases)
-          else:
-            @[]
-      )
+      if skTests in conf.action.scope:
+        let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
+        yield Exercise(
+          slug: practiceExercise.slug,
+          tests: initExerciseTests(practiceExercise.tests, testCases),
+          testCases: initExerciseTestCases(testCases),
+        )
+      else:
+        yield Exercise(
+          slug: practiceExercise.slug,
+          tests: initExerciseTests(),
+          testCases: @[],
+        )
   finally:
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
