@@ -39,7 +39,7 @@ proc testsForSync(binaryPath: static string) =
 
   # Setup: clone the problem-specifications repo, and checkout a known state
   setupExercismRepo("problem-specifications", psDir,
-                    "f17f457fdc0673369047250f652e93c7901755e1")
+                    "daf620d47ed905409564dec5fa9610664e294bde")
 
   # Setup: clone a track repo, and checkout a known state
   setupExercismRepo("nim", trackDir,
@@ -55,6 +55,20 @@ proc testsForSync(binaryPath: static string) =
         Checking exercises...
         [warn] hamming: instructions.md is unsynced
         [warn] yacht: instructions.md is unsynced
+        [warn] acronym: metadata is unsynced
+        [warn] armstrong-numbers: metadata is unsynced
+        [warn] binary: metadata is unsynced
+        [warn] collatz-conjecture: metadata is unsynced
+        [warn] darts: metadata is unsynced
+        [warn] grade-school: metadata is unsynced
+        [warn] hello-world: metadata is unsynced
+        [warn] high-scores: metadata is unsynced
+        [warn] resistor-color: metadata is unsynced
+        [warn] reverse-string: metadata is unsynced
+        [warn] scale-generator: metadata is unsynced
+        [warn] twelve-days: metadata is unsynced
+        [warn] two-fer: metadata is unsynced
+        [warn] yacht: metadata is unsynced
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
         [warn] diffie-hellman: missing 1 test case
@@ -106,6 +120,7 @@ proc testsForSync(binaryPath: static string) =
                - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
                - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
         [warn] some exercises have unsynced docs
+        [warn] some exercises have unsynced metadata
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
       execAndCheck(1, syncOffline, expectedOutput)
@@ -437,7 +452,22 @@ proc testsForSync(binaryPath: static string) =
         Checking exercises...
         [warn] hamming: instructions.md is unsynced
         [warn] yacht: instructions.md is unsynced
+        [warn] acronym: metadata is unsynced
+        [warn] armstrong-numbers: metadata is unsynced
+        [warn] binary: metadata is unsynced
+        [warn] collatz-conjecture: metadata is unsynced
+        [warn] darts: metadata is unsynced
+        [warn] grade-school: metadata is unsynced
+        [warn] hello-world: metadata is unsynced
+        [warn] high-scores: metadata is unsynced
+        [warn] resistor-color: metadata is unsynced
+        [warn] reverse-string: metadata is unsynced
+        [warn] scale-generator: metadata is unsynced
+        [warn] twelve-days: metadata is unsynced
+        [warn] two-fer: metadata is unsynced
+        [warn] yacht: metadata is unsynced
         [warn] some exercises have unsynced docs
+        [warn] some exercises have unsynced metadata
       """.unindent()
       execAndCheck(1, syncOffline, expectedOutput)
 
