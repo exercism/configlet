@@ -1,7 +1,7 @@
 import std/[json, os, sequtils, strformat, strutils]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, sync_docs, sync_filepaths, sync_metadata,
-            sync_tests, update_tests]
+            sync_tests]
 
 proc explain(syncKind: SyncKind): string =
   case syncKind
