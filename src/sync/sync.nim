@@ -29,49 +29,52 @@ proc sync*(conf: Conf) =
     let trackConceptExercisesDir = trackExercisesDir / "concept"
     let trackPracticeExercisesDir = trackExercisesDir / "practice"
 
-    # Check/sync docs
-    if skDocs in conf.action.scope:
-      let sdPairs = checkDocs(exercises, psExercisesDir,
-                              trackPracticeExercisesDir, seenUnsynced, conf)
-      if sdPairs.len > 0:
+    for syncKind in conf.action.scope:
+      case syncKind
+      # Check/sync docs
+      of skDocs:
+        let sdPairs = checkDocs(exercises, psExercisesDir,
+                                trackPracticeExercisesDir, seenUnsynced, conf)
+        if sdPairs.len > 0:
+          if conf.action.update:
+            if conf.action.yes or userSaysYes("docs"):
+              for sdPair in sdPairs:
+                # TODO: don't replace first top-level header?
+                # For example: the below currently writes `# Description`
+                # instead of `# Instructions`
+                copyFile(sdPair.source, sdPair.dest)
+              seenUnsynced.excl skDocs
+
+      # Check/sync filepaths
+      of skFilepaths:
+        let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
+                                         trackPracticeExercisesDir, seenUnsynced)
+        if configPairs.len > 0: # Implies that `--update` was passed.
+          if conf.action.yes or userSaysYes("filepaths"):
+            for configPair in configPairs:
+              writeFile(configPair.path,
+                        configPair.updatedJson.pretty() & "\n")
+            seenUnsynced.excl skFilepaths
+
+      # Check/sync metadata
+      of skMetadata:
+        let configPairs = checkMetadata(exercises, psExercisesDir,
+                                        trackPracticeExercisesDir, seenUnsynced,
+                                        conf)
+        if configPairs.len > 0: # Implies that `--update` was passed.
+          if conf.action.yes or userSaysYes("metadata"):
+            for pathAndUpdatedJson in configPairs:
+              writeFile(pathAndUpdatedJson.path,
+                        pathAndUpdatedJson.updatedJson.pretty() & "\n")
+            seenUnsynced.excl skMetadata
+
+      # Check/sync tests
+      of skTests:
         if conf.action.update:
-          if conf.action.yes or userSaysYes("docs"):
-            for sdPair in sdPairs:
-              # TODO: don't replace first top-level header?
-              # For example: the below currently writes `# Description`
-              # instead of `# Instructions`
-              copyFile(sdPair.source, sdPair.dest)
-          seenUnsynced.excl skDocs
+          updateTests(exercises, conf, seenUnsynced)
+        else:
+          checkTests(exercises, seenUnsynced)
 
-    # Check/sync filepaths
-    if skFilepaths in conf.action.scope:
-      let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
-                                       trackPracticeExercisesDir, seenUnsynced)
-      if configPairs.len > 0: # Implies that `--update` was passed.
-        if conf.action.yes or userSaysYes("filepaths"):
-          for configPair in configPairs:
-            writeFile(configPair.path,
-                      configPair.updatedJson.pretty() & "\n")
-          seenUnsynced.excl skFilepaths
-
-    # Check/sync metadata
-    if skMetadata in conf.action.scope:
-      let configPairs = checkMetadata(exercises, psExercisesDir,
-                                      trackPracticeExercisesDir, seenUnsynced,
-                                      conf)
-      if configPairs.len > 0: # Implies that `--update` was passed.
-        if conf.action.yes or userSaysYes("metadata"):
-          for pathAndUpdatedJson in configPairs:
-            writeFile(pathAndUpdatedJson.path,
-                      pathAndUpdatedJson.updatedJson.pretty() & "\n")
-          seenUnsynced.excl skMetadata
-
-    # Check/sync tests
-    if skTests in conf.action.scope:
-      if conf.action.update:
-        updateTests(exercises, conf, seenUnsynced)
-      else:
-        checkTests(exercises, seenUnsynced)
   finally:
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
