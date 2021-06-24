@@ -168,9 +168,9 @@ proc checkFilepathsForExercise(res: var seq[PathAndUpdatedJson], conf: Conf,
       res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
                                  updatedJson: j)
 
-proc checkFilepaths*(conf: Conf;
-                     trackConceptExercisesDir, trackPracticeExercisesDir: string;
-                     seenUnsynced: var set[SyncKind]): seq[PathAndUpdatedJson] =
+proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
+                     trackPracticeExercisesDir: string,
+                     trackConceptExercisesDir: string): seq[PathAndUpdatedJson] =
   let configFilename = "config.json"
   let trackConfigPath = conf.trackDir / configFilename
 

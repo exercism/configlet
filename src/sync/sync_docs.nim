@@ -34,11 +34,11 @@ proc checkFilesIdentical(source, dest, slug, filename: string;
     if conf.action.update:
       sdPairs.add SourceDestPair(source: source, dest: dest)
 
-proc checkDocs*(exercises: seq[Exercise],
-                psExercisesDir: string,
-                trackPracticeExercisesDir: string,
+proc checkDocs*(conf: Conf,
                 seenUnsynced: var set[SyncKind],
-                conf: Conf): seq[SourceDestPair] =
+                trackPracticeExercisesDir: string,
+                exercises: seq[Exercise],
+                psExercisesDir: string): seq[SourceDestPair] =
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")

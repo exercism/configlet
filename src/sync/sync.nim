@@ -43,8 +43,8 @@ proc sync*(conf: Conf) =
       case syncKind
       # Check/sync docs
       of skDocs:
-        let sdPairs = checkDocs(exercises, psExercisesDir,
-                                trackPracticeExercisesDir, seenUnsynced, conf)
+        let sdPairs = checkDocs(conf, seenUnsynced, trackPracticeExercisesDir,
+                                exercises, psExercisesDir)
         if sdPairs.len > 0: # Implies that `--update` was passed.
           if conf.action.yes or userSaysYes(syncKind):
             for sdPair in sdPairs:
@@ -56,15 +56,14 @@ proc sync*(conf: Conf) =
 
       # Check/sync filepaths
       of skFilepaths:
-        let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
-                                         trackPracticeExercisesDir, seenUnsynced)
+        let configPairs = checkFilepaths(conf, seenUnsynced, trackPracticeExercisesDir,
+                                         trackConceptExercisesDir)
         update(configPairs, conf, syncKind, seenUnsynced)
 
       # Check/sync metadata
       of skMetadata:
-        let configPairs = checkMetadata(exercises, psExercisesDir,
-                                        trackPracticeExercisesDir, seenUnsynced,
-                                        conf)
+        let configPairs = checkMetadata(conf, seenUnsynced, trackPracticeExercisesDir,
+                                        exercises, psExercisesDir)
         update(configPairs, conf, syncKind, seenUnsynced)
 
       # Check/sync tests
