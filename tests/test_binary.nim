@@ -55,20 +55,20 @@ proc testsForSync(binaryPath: static string) =
         Checking exercises...
         [warn] hamming: instructions.md is unsynced
         [warn] yacht: instructions.md is unsynced
-        [warn] acronym: metadata is unsynced
-        [warn] armstrong-numbers: metadata is unsynced
-        [warn] binary: metadata is unsynced
-        [warn] collatz-conjecture: metadata is unsynced
-        [warn] darts: metadata is unsynced
-        [warn] grade-school: metadata is unsynced
-        [warn] hello-world: metadata is unsynced
-        [warn] high-scores: metadata is unsynced
-        [warn] resistor-color: metadata is unsynced
-        [warn] reverse-string: metadata is unsynced
-        [warn] scale-generator: metadata is unsynced
-        [warn] twelve-days: metadata is unsynced
-        [warn] two-fer: metadata is unsynced
-        [warn] yacht: metadata is unsynced
+        [warn] acronym: metadata are unsynced
+        [warn] armstrong-numbers: metadata are unsynced
+        [warn] binary: metadata are unsynced
+        [warn] collatz-conjecture: metadata are unsynced
+        [warn] darts: metadata are unsynced
+        [warn] grade-school: metadata are unsynced
+        [warn] hello-world: metadata are unsynced
+        [warn] high-scores: metadata are unsynced
+        [warn] resistor-color: metadata are unsynced
+        [warn] reverse-string: metadata are unsynced
+        [warn] scale-generator: metadata are unsynced
+        [warn] twelve-days: metadata are unsynced
+        [warn] two-fer: metadata are unsynced
+        [warn] yacht: metadata are unsynced
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
         [warn] diffie-hellman: missing 1 test case
@@ -452,20 +452,20 @@ proc testsForSync(binaryPath: static string) =
         Checking exercises...
         [warn] hamming: instructions.md is unsynced
         [warn] yacht: instructions.md is unsynced
-        [warn] acronym: metadata is unsynced
-        [warn] armstrong-numbers: metadata is unsynced
-        [warn] binary: metadata is unsynced
-        [warn] collatz-conjecture: metadata is unsynced
-        [warn] darts: metadata is unsynced
-        [warn] grade-school: metadata is unsynced
-        [warn] hello-world: metadata is unsynced
-        [warn] high-scores: metadata is unsynced
-        [warn] resistor-color: metadata is unsynced
-        [warn] reverse-string: metadata is unsynced
-        [warn] scale-generator: metadata is unsynced
-        [warn] twelve-days: metadata is unsynced
-        [warn] two-fer: metadata is unsynced
-        [warn] yacht: metadata is unsynced
+        [warn] acronym: metadata are unsynced
+        [warn] armstrong-numbers: metadata are unsynced
+        [warn] binary: metadata are unsynced
+        [warn] collatz-conjecture: metadata are unsynced
+        [warn] darts: metadata are unsynced
+        [warn] grade-school: metadata are unsynced
+        [warn] hello-world: metadata are unsynced
+        [warn] high-scores: metadata are unsynced
+        [warn] resistor-color: metadata are unsynced
+        [warn] reverse-string: metadata are unsynced
+        [warn] scale-generator: metadata are unsynced
+        [warn] twelve-days: metadata are unsynced
+        [warn] two-fer: metadata are unsynced
+        [warn] yacht: metadata are unsynced
         [warn] some exercises have unsynced docs
         [warn] some exercises have unsynced metadata
       """.unindent()
