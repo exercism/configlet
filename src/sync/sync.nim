@@ -16,6 +16,15 @@ proc userSaysYes(syncKind: SyncKind): bool =
   if resp == "y" or resp == "yes":
     result = true
 
+proc update(configPairs: seq[PathAndUpdatedJson], conf: Conf,
+            syncKind: SyncKind, seenUnsynced: var set[SyncKind]) =
+  if configPairs.len > 0: # Implies that `--update` was passed.
+    if conf.action.yes or userSaysYes(syncKind):
+      for configPair in configPairs:
+        writeFile(configPair.path,
+                  configPair.updatedJson.pretty() & "\n")
+      seenUnsynced.excl syncKind
+
 proc sync*(conf: Conf) =
   logNormal("Checking exercises...")
 
@@ -48,12 +57,7 @@ proc sync*(conf: Conf) =
       of skFilepaths:
         let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
                                          trackPracticeExercisesDir, seenUnsynced)
-        if configPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes(syncKind):
-            for configPair in configPairs:
-              writeFile(configPair.path,
-                        configPair.updatedJson.pretty() & "\n")
-            seenUnsynced.excl syncKind
+        update(configPairs, conf, syncKind, seenUnsynced)
 
       # Check/sync metadata
       of skMetadata:
