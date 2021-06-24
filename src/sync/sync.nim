@@ -35,15 +35,14 @@ proc sync*(conf: Conf) =
       of skDocs:
         let sdPairs = checkDocs(exercises, psExercisesDir,
                                 trackPracticeExercisesDir, seenUnsynced, conf)
-        if sdPairs.len > 0:
-          if conf.action.update:
-            if conf.action.yes or userSaysYes("docs"):
-              for sdPair in sdPairs:
-                # TODO: don't replace first top-level header?
-                # For example: the below currently writes `# Description`
-                # instead of `# Instructions`
-                copyFile(sdPair.source, sdPair.dest)
-              seenUnsynced.excl skDocs
+        if sdPairs.len > 0: # Implies that `--update` was passed.
+          if conf.action.yes or userSaysYes("docs"):
+            for sdPair in sdPairs:
+              # TODO: don't replace first top-level header?
+              # For example: the below currently writes `# Description`
+              # instead of `# Instructions`
+              copyFile(sdPair.source, sdPair.dest)
+            seenUnsynced.excl skDocs
 
       # Check/sync filepaths
       of skFilepaths:
