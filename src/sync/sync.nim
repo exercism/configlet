@@ -10,8 +10,8 @@ proc explain(syncKind: SyncKind): string =
   of skMetadata: "have unsynced metadata"
   of skTests: "are missing test cases"
 
-proc userSaysYes(noun: string): bool =
-  stderr.write &"sync the above {noun} ([y]es/[n]o)? "
+proc userSaysYes(syncKind: SyncKind): bool =
+  stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
   let resp = stdin.readLine().toLowerAscii()
   if resp == "y" or resp == "yes":
     result = true
@@ -36,7 +36,7 @@ proc sync*(conf: Conf) =
         let sdPairs = checkDocs(exercises, psExercisesDir,
                                 trackPracticeExercisesDir, seenUnsynced, conf)
         if sdPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes("docs"):
+          if conf.action.yes or userSaysYes(syncKind):
             for sdPair in sdPairs:
               # TODO: don't replace first top-level header?
               # For example: the below currently writes `# Description`
@@ -49,7 +49,7 @@ proc sync*(conf: Conf) =
         let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
                                          trackPracticeExercisesDir, seenUnsynced)
         if configPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes("filepaths"):
+          if conf.action.yes or userSaysYes(syncKind):
             for configPair in configPairs:
               writeFile(configPair.path,
                         configPair.updatedJson.pretty() & "\n")
@@ -61,7 +61,7 @@ proc sync*(conf: Conf) =
                                         trackPracticeExercisesDir, seenUnsynced,
                                         conf)
         if configPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes("metadata"):
+          if conf.action.yes or userSaysYes(syncKind):
             for pathAndUpdatedJson in configPairs:
               writeFile(pathAndUpdatedJson.path,
                         pathAndUpdatedJson.updatedJson.pretty() & "\n")
