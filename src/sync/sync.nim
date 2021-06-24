@@ -42,7 +42,7 @@ proc sync*(conf: Conf) =
               # For example: the below currently writes `# Description`
               # instead of `# Instructions`
               copyFile(sdPair.source, sdPair.dest)
-            seenUnsynced.excl skDocs
+            seenUnsynced.excl syncKind
 
       # Check/sync filepaths
       of skFilepaths:
@@ -53,7 +53,7 @@ proc sync*(conf: Conf) =
             for configPair in configPairs:
               writeFile(configPair.path,
                         configPair.updatedJson.pretty() & "\n")
-            seenUnsynced.excl skFilepaths
+            seenUnsynced.excl syncKind
 
       # Check/sync metadata
       of skMetadata:
@@ -65,7 +65,7 @@ proc sync*(conf: Conf) =
             for pathAndUpdatedJson in configPairs:
               writeFile(pathAndUpdatedJson.path,
                         pathAndUpdatedJson.updatedJson.pretty() & "\n")
-            seenUnsynced.excl skMetadata
+            seenUnsynced.excl syncKind
 
       # Check/sync tests
       of skTests:
