@@ -41,6 +41,7 @@ proc sync*(conf: Conf) =
               # For example: the below currently writes `# Description`
               # instead of `# Instructions`
               copyFile(sdPair.source, sdPair.dest)
+          seenUnsynced.excl skDocs
 
     # Check/sync filepaths
     if skFilepaths in conf.action.scope:
