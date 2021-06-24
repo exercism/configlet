@@ -1,7 +1,7 @@
 import std/[json, os, sequtils, sets, strformat, strutils]
 import pkg/parsetoml
 import ".."/[cli, logger]
-import "."/[exercises, probspecs, update_tests]
+import "."/[exercises, probspecs, sync_filepaths, update_tests]
 
 proc contentsAfterFirstHeader(path: string): string =
   result = newStringOfCap(getFileSize(path))
@@ -91,16 +91,7 @@ proc checkDocs(exercises: seq[Exercise],
       logNormal(&"[error] {slug}: .docs dir missing")
       seenUnsynced.incl skDocs
 
-proc checkFilepaths(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
-  if false:
-    seenUnsynced.incl skFilepaths
-
-type
-  MetadataPair = object
-    trackJsonPath: string
-    updatedJson: JsonNode
-
-proc isThisMetadataSynced(res: var seq[MetadataPair]; conf: Conf; slug: string;
+proc isThisMetadataSynced(res: var seq[PathAndUpdatedJson]; conf: Conf; slug: string;
                           psMetadataTomlPath, trackExerciseConfigPath: string): bool =
   ## Returns `true` if the values of any `blurb`, `source` and `source_url` keys
   ## in `psMetadataTomlPath` are the same as those in `trackExerciseConfigPath`.
@@ -135,8 +126,8 @@ proc isThisMetadataSynced(res: var seq[MetadataPair]; conf: Conf; slug: string;
       else:
         logNormal(&"[warn] {slug}: metadata are unsynced")
         if conf.action.update:
-          res.add MetadataPair(trackJsonPath: trackExerciseConfigPath,
-                               updatedJson: j)
+          res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                     updatedJson: j)
 
     else:
       logNormal(&"[warn] {slug}: {trackExerciseConfigPath} is missing")
@@ -148,8 +139,8 @@ proc isThisMetadataSynced(res: var seq[MetadataPair]; conf: Conf; slug: string;
             let upstreamVal = toml[key]
             if upstreamVal.kind == TomlValueKind.String:
               j[key] = newJString(upstreamVal.stringVal)
-              res.add MetadataPair(trackJsonPath: trackExerciseConfigPath,
-                                   updatedJson: j)
+              res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                         updatedJson: j)
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
@@ -157,7 +148,7 @@ proc checkMetadata(exercises: seq[Exercise],
                    psExercisesDir: string,
                    trackPracticeExercisesDir: string,
                    seenUnsynced: var set[SyncKind],
-                   conf: Conf): seq[MetadataPair] =
+                   conf: Conf): seq[PathAndUpdatedJson] =
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
@@ -217,8 +208,11 @@ proc sync*(conf: Conf) =
   try:
     let exercises = toSeq findExercises(conf, probSpecsDir)
     let psExercisesDir = probSpecsDir / "exercises"
-    let trackPracticeExercisesDir = joinPath(conf.trackDir, "exercises", "practice")
+    let trackExercisesDir = conf.trackDir / "exercises"
+    let trackConceptExercisesDir = trackExercisesDir / "concept"
+    let trackPracticeExercisesDir = trackExercisesDir / "practice"
 
+    # Check/sync docs
     if skDocs in conf.action.scope:
       let sdPairs = checkDocs(exercises, psExercisesDir,
                               trackPracticeExercisesDir, seenUnsynced, conf)
@@ -231,20 +225,30 @@ proc sync*(conf: Conf) =
               # instead of `# Instructions`
               copyFile(sdPair.source, sdPair.dest)
 
+    # Check/sync filepaths
     if skFilepaths in conf.action.scope:
-      checkFilepaths(exercises, seenUnsynced)
+      let configPairs = checkFilepaths(conf, trackConceptExercisesDir,
+                                       trackPracticeExercisesDir, seenUnsynced)
+      if configPairs.len > 0: # Implies that `--update` was passed.
+        if conf.action.yes or userSaysYes("filepaths"):
+          for configPair in configPairs:
+            writeFile(configPair.path,
+                      configPair.updatedJson.pretty() & "\n")
+          seenUnsynced.excl skFilepaths
 
+    # Check/sync metadata
     if skMetadata in conf.action.scope:
-      let metadataPairs = checkMetadata(exercises, psExercisesDir,
-                                        trackPracticeExercisesDir, seenUnsynced,
-                                        conf)
-      if metadataPairs.len > 0: # Implies that `--update` was passed.
+      let configPairs = checkMetadata(exercises, psExercisesDir,
+                                      trackPracticeExercisesDir, seenUnsynced,
+                                      conf)
+      if configPairs.len > 0: # Implies that `--update` was passed.
         if conf.action.yes or userSaysYes("metadata"):
-          for metadataPair in metadataPairs:
-            writeFile(metadataPair.trackJsonPath,
-                      metadataPair.updatedJson.pretty() & "\n")
-        seenUnsynced.excl skMetadata
+          for pathAndUpdatedJson in configPairs:
+            writeFile(pathAndUpdatedJson.path,
+                      pathAndUpdatedJson.updatedJson.pretty() & "\n")
+          seenUnsynced.excl skMetadata
 
+    # Check/sync tests
     if skTests in conf.action.scope:
       if conf.action.update:
         updateTests(exercises, conf, seenUnsynced)
