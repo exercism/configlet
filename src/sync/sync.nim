@@ -64,12 +64,7 @@ proc sync*(conf: Conf) =
         let configPairs = checkMetadata(exercises, psExercisesDir,
                                         trackPracticeExercisesDir, seenUnsynced,
                                         conf)
-        if configPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes(syncKind):
-            for pathAndUpdatedJson in configPairs:
-              writeFile(pathAndUpdatedJson.path,
-                        pathAndUpdatedJson.updatedJson.pretty() & "\n")
-            seenUnsynced.excl syncKind
+        update(configPairs, conf, syncKind, seenUnsynced)
 
       # Check/sync tests
       of skTests:
