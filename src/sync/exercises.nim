@@ -131,6 +131,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 #
 # As user-added comments (using the # character) will be removed when this file
 # is regenerated, comments can be added via a `comment` key.
+
 """
 
   for testCase in exercise.testCases:
