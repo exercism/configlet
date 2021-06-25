@@ -143,7 +143,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -163,7 +162,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -182,7 +180,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -201,7 +198,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -241,7 +237,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -273,7 +268,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -292,7 +286,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -350,7 +343,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -369,7 +361,6 @@ All exercises are synced!
 -# This is an auto-generated file. Regular comments will be removed when this
 -# file is regenerated. Regenerating will not touch any manually added keys,
 -# so comments can be added in a "comment" key.
--
 +# This is an auto-generated file.
 +#
 +# Regenerating this file via `configlet sync` will:
@@ -410,6 +401,7 @@ All exercises are synced!
 +#
 +# As user-added comments (using the # character) will be removed when this file
 +# is regenerated, comments can be added via a `comment` key.
++
 +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
 +description = "input cells have a value"
 +
