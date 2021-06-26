@@ -101,7 +101,7 @@ Concept placeholders must use the following format:
 %{concept:<slug>}
 ```
 
-You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file. The generated `introduction.md` file is identical to the `introduction.md.tpl` file, except for concept placeholders, which are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading). In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
+You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file. The generated `introduction.md` is identical to the `introduction.md.tpl`, except that concept placeholders are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading). In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
 
 ## Use in your track
 
