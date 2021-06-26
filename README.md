@@ -101,6 +101,12 @@ Concept placeholders must use the following format:
 %{concept:<slug>}
 ```
 
+For example, if the track has a concept named `floating-point-numbers` then an `introduction.md.tpl` file can contain:
+
+```
+%{concept:floating-point-numbers}
+```
+
 You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file. The generated `introduction.md` is identical to the `introduction.md.tpl`, except that concept placeholders are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading). In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
 
 ## Use in your track
