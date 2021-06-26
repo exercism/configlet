@@ -11,7 +11,7 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  lint, sync, uuid
+  lint, sync, uuid, generate
 
 Options for sync:
   -e, --exercise <slug>        Only sync this exercise
@@ -30,14 +30,13 @@ Global options:
   -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
 ```
 
-## Linting
+## `configlet lint`
 
 The primary function of configlet is to do _linting_: checking if a track's configuration files are properly structured - both syntactically and semantically. Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development. The list of currently implemented checks can be found [here](https://github.com/exercism/configlet/issues/249).
 
-
-## Sync
+## `configlet sync`
 
 If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file. The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise. Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
 
@@ -74,6 +73,43 @@ The `sync` command allows tracks to keep `tests.toml` files up to date. A plain 
 To interactively update the `tests.toml` files, use `configlet sync --update`. For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
 
 The `configlet sync` command replaces the functionality of the older `canonical_data_syncer` application.
+
+## `configlet uuid`
+
+Each exercise and concept has a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), which must only appear once across all of Exercism. It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must match the below regular expression:
+
+```
+^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+```
+
+You can run `configlet uuid` to output a new, appropriate UUID. There is also the `-n, --num` option for outputting multiple new UUIDs:
+
+```
+$ configlet uuid --num 5
+3823f890-be49-4700-baac-e19de8fda76f
+c12309a2-8bd6-4b9c-a511-e1ee4083f492
+26167ad5-fe20-43d4-8b1f-3bbb9618c36e
+5df11ac0-e612-4223-b0f8-f6cd2cb15cb1
+e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
+```
+
+## `configlet generate`
+
+Each concept exercise and concept have an `introduction.md` file. If you want the exercise's introduction to include the concept's introduction verbatim, you can create a `introduction.md.tpl` file to achieve this. This file may use a placeholder to refer to the concept's introduction, so that the information is not duplicated.
+
+Concept placeholders must use the following format:
+
+```
+%{concept:<slug>}
+```
+
+For example, if the track has a concept named `floating-point-numbers` then an `introduction.md.tpl` file can contain:
+
+```
+%{concept:floating-point-numbers}
+```
+
+You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file. The generated `introduction.md` is identical to the `introduction.md.tpl`, except that concept placeholders are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading). In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
 
 ## Use in your track
 
