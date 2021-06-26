@@ -134,6 +134,12 @@ proc toToml(exercise: Exercise, testsPath: string): string =
 
 """
 
+  let currContents =
+    if fileExists(testsPath):
+      parsetoml.parseFile(testsPath)
+    else:
+      nil
+
   for testCase in exercise.testCases:
     let uuid = testCase.uuid
     if uuid notin exercise.tests.missing:
@@ -149,8 +155,7 @@ proc toToml(exercise: Exercise, testsPath: string): string =
       if testCase.reimplements.isSome():
         result.add &"reimplements = \"{testCase.reimplements.get().uuid}\"\n"
 
-      if fileExists(testsPath):
-        let currContents = parsetoml.parseFile(testsPath)
+      if not currContents.isNil():
         if currContents.hasKey(uuid):
           # Preserve any other key/value pair
           for k, v in currContents[uuid].getTable():
