@@ -93,7 +93,7 @@ e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
 
 ## `configlet generate`
 
-Each concept exercise and concept have an `introduction.md` file. If the exercise's introduction can include the concept's introduction verbatim, you can create a `introduction.md.tpl` file to do so. This file may use a placeholder to refer to the concept's introduction, so that the information is not duplicated.
+Each concept exercise and concept have an `introduction.md` file. If you want the exercise's introduction to include the concept's introduction verbatim, you can create a `introduction.md.tpl` file to achieve this. This file may use a placeholder to refer to the concept's introduction, so that the information is not duplicated.
 
 Concept placeholders must use the following format:
 
