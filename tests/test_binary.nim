@@ -7,13 +7,17 @@ const
     else: ""
   binaryName = "configlet" & binaryExt
 
-proc cloneExercismRepo(repoName, dest: string; isShallow = false): tuple[
-    output: string; exitCode: int] =
-  # Clones the Exercism repo named `repoName` to the location `dest`.
+proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
+  ## Clones the Exercism repo named `repoName` to the location `dest`.
+  ##
+  ## Quits if unsuccessful.
   let opts = if isShallow: "--depth 1" else: ""
   let url = &"https://github.com/exercism/{repoName}/"
   let cmd = &"git clone {opts} {url} {dest}"
-  result = execCmdEx(cmd)
+  let (outp, exitCode) = execCmdEx(cmd)
+  if exitCode != 0:
+    stderr.writeLine outp
+    quit 1
 
 template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
   ## Runs `body`, and prints the output if the exit code is non-zero.
@@ -39,15 +43,11 @@ proc testsForSync(binaryPath: string) =
 
     # Setup: clone the problem-specifications repo
     if not dirExists(psDir):
-      block:
-        execAndCheck(0):
-          cloneExercismRepo("problem-specifications", psDir)
+      cloneExercismRepo("problem-specifications", psDir)
 
     # Setup: clone a track repo
     if not dirExists(trackDir):
-      block:
-        execAndCheck(0):
-          cloneExercismRepo("nim", trackDir)
+      cloneExercismRepo("nim", trackDir)
 
     # Setup: set the problem-specifications repo to a known state
     block:
@@ -502,9 +502,7 @@ proc testsForGenerate(binaryPath: string) =
 
     # Setup: clone a track repo
     if not dirExists(trackDir):
-      block:
-        execAndCheck(0):
-          cloneExercismRepo("elixir", trackDir)
+      cloneExercismRepo("elixir", trackDir)
 
     # Setup: set the track repo to a known state
     block:
