@@ -36,28 +36,28 @@ proc testsForSync(binaryPath: string) =
   suite "sync":
     const psDir = ".test_binary_problem_specifications"
     const trackDir = ".test_binary_nim_track_repo"
-    removeDir(psDir)
-    removeDir(trackDir)
 
     # Setup: clone the problem-specifications repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("problem-specifications", psDir)
+    if not dirExists(psDir):
+      block:
+        execAndCheck(0):
+          cloneExercismRepo("problem-specifications", psDir)
 
     # Setup: clone a track repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("nim", trackDir)
+    if not dirExists(trackDir):
+      block:
+        execAndCheck(0):
+          cloneExercismRepo("nim", trackDir)
 
     # Setup: set the problem-specifications repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {psDir} checkout f17f457fdc0673369047250f652e93c7901755e1")
+        execCmdEx(&"git -C {psDir} checkout --force f17f457fdc0673369047250f652e93c7901755e1")
 
     # Setup: set the track repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout 6e909c9e5338cd567c20224069df00e031fb2efa")
+        execCmdEx(&"git -C {trackDir} checkout --force 6e909c9e5338cd567c20224069df00e031fb2efa")
 
     test "a `sync` without `--update` exits with 1 and prints the expected output":
       execAndCheck(1):
@@ -500,17 +500,16 @@ proc testsForGenerate(binaryPath: string) =
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
-    removeDir(trackDir)
-
     # Setup: clone a track repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("elixir", trackDir)
+    if not dirExists(trackDir):
+      block:
+        execAndCheck(0):
+          cloneExercismRepo("elixir", trackDir)
 
     # Setup: set the track repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout f3974abf6e0d4a434dfe3494d58581d399c18edb")
+        execCmdEx(&"git -C {trackDir} checkout --force f3974abf6e0d4a434dfe3494d58581d399c18edb")
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0):
