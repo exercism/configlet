@@ -14,8 +14,12 @@ proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
   let opts = if isShallow: "--depth 1" else: ""
   let url = &"https://github.com/exercism/{repoName}/"
   let cmd = &"git clone {opts} {url} {dest}"
+  stderr.write &"Running `{cmd}`... "
   let (outp, exitCode) = execCmdEx(cmd)
-  if exitCode != 0:
+  if exitCode == 0:
+    stderr.writeLine "success"
+  else:
+    stderr.writeLine "failure"
     stderr.writeLine outp
     quit 1
 
