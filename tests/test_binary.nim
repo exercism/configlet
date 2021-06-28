@@ -2,10 +2,8 @@ import std/[os, osproc, strformat, strscans, strutils, unittest]
 import "."/lint/validators
 
 const
-  binaryExt =
-    when defined(windows): ".exe"
-    else: ""
-  binaryName = "configlet" & binaryExt
+  testsDir = currentSourcePath().parentDir()
+  repoRootDir = testsDir.parentDir()
 
 proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
   ## Clones the Exercism repo named `repoName` to the location `dest`.
@@ -42,8 +40,8 @@ func conciseDiff(s: string): string =
 
 proc testsForSync(binaryPath: string) =
   suite "sync":
-    const psDir = ".test_binary_problem_specifications"
-    const trackDir = ".test_binary_nim_track_repo"
+    const psDir = testsDir / ".test_binary_problem_specifications"
+    const trackDir = testsDir / ".test_binary_nim_track_repo"
 
     # Setup: clone the problem-specifications repo
     if not dirExists(psDir):
@@ -500,7 +498,7 @@ proc prepareIntroductionFiles(trackDir, header, placeholder: string;
 
 proc testsForGenerate(binaryPath: string) =
   suite "generate":
-    const trackDir = ".test_binary_elixir_track_repo"
+    const trackDir = testsDir / ".test_binary_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
@@ -560,7 +558,10 @@ proc testsForGenerate(binaryPath: string) =
 
 proc main =
   const
-    repoRootDir = currentSourcePath.parentDir().parentDir()
+    binaryExt =
+      when defined(windows): ".exe"
+      else: ""
+    binaryName = &"configlet{binaryExt}"
     binaryPath = repoRootDir / binaryName
     helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
     cmdBase = "nimble --verbose build"
