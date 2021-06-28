@@ -559,11 +559,12 @@ proc testsForGenerate(binaryPath: string) =
         execCmdEx(diffCmd)
 
 proc main =
-  const repoRootDir = currentSourcePath.parentDir().parentDir()
-  let binaryPath = repoRootDir / binaryName
-  const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+  const
+    repoRootDir = currentSourcePath.parentDir().parentDir()
+    binaryPath = repoRootDir / binaryName
+    helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+    cmdBase = "nimble --verbose build"
 
-  const cmdBase = "nimble --verbose build"
   let cmd = if existsEnv("CI"): &"{cmdBase} -d:release" else: cmdBase
   stderr.write(&"Running `{cmd}`... ")
   let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
