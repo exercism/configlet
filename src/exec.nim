@@ -42,7 +42,8 @@ proc git*(args: openArray[string]): ProcessResult =
   result = myExecCmdEx("git", args = args)
 
 proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
-  ## Clones the Exercism repo named `repoName` to the location `dest`.
+  ## Clones the Exercism repo named `repoName` to the location `dest`. Performs
+  ## a shallow clone if `isShallow` is `true`.
   ##
   ## Quits if unsuccessful.
   let url = &"https://github.com/exercism/{repoName}/"
