@@ -1,5 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/lint/validators
+import "."/[exec, lint/validators]
 
 const
   testsDir = currentSourcePath().parentDir()
@@ -9,11 +9,14 @@ proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
   ## Clones the Exercism repo named `repoName` to the location `dest`.
   ##
   ## Quits if unsuccessful.
-  let opts = if isShallow: "--depth 1" else: ""
   let url = &"https://github.com/exercism/{repoName}/"
-  let cmd = &"git clone {opts} {url} {dest}"
-  stderr.write &"Running `{cmd}`... "
-  let (outp, exitCode) = execCmdEx(cmd)
+  let args =
+    if isShallow:
+      @["clone", "--depth", "1", "--", url, dest]
+    else:
+      @["clone", "--", url, dest]
+  stderr.write &"Cloning {url}... "
+  let (outp, exitCode) = git(args)
   if exitCode == 0:
     stderr.writeLine "success"
   else:
