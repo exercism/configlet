@@ -73,3 +73,11 @@ proc gitCheckout*(dir, hash: string) =
   if exitCode != 0:
     stderr.writeLine output
     quit 1
+
+proc setupExercismRepo*(repoName, dest, hash: string; isShallow = false) =
+  ## If there is no directory at `dest`, clones the Exercism repo named
+  ## `repoName` to `dest`.
+  ##
+  ## Then checkout the given `hash` in `dest`.
+  cloneExercismRepo(repoName, dest, isShallow)
+  gitCheckout(dest, hash)

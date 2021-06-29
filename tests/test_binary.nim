@@ -27,17 +27,13 @@ proc testsForSync(binaryPath: string) =
     const psDir = testsDir / ".test_binary_problem_specifications"
     const trackDir = testsDir / ".test_binary_nim_track_repo"
 
-    # Setup: clone the problem-specifications repo
-    cloneExercismRepo("problem-specifications", psDir)
+    # Setup: clone the problem-specifications repo, and checkout a known state
+    setupExercismRepo("problem-specifications", psDir,
+                      "f17f457fdc0673369047250f652e93c7901755e1")
 
-    # Setup: clone a track repo
-    cloneExercismRepo("nim", trackDir)
-
-    # Setup: set the problem-specifications repo to a known state
-    gitCheckout(psDir, "f17f457fdc0673369047250f652e93c7901755e1")
-
-    # Setup: set the track repo to a known state
-    gitCheckout(trackDir, "6e909c9e5338cd567c20224069df00e031fb2efa")
+    # Setup: clone a track repo, and checkout a known state
+    setupExercismRepo("nim", trackDir,
+                      "6e909c9e5338cd567c20224069df00e031fb2efa")
 
     test "a `sync` without `--update` exits with 1 and prints the expected output":
       execAndCheck(1):
@@ -480,11 +476,9 @@ proc testsForGenerate(binaryPath: string) =
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
-    # Setup: clone a track repo
-    cloneExercismRepo("elixir", trackDir)
-
-    # Setup: set the track repo to a known state
-    gitCheckout(trackDir, "f3974abf6e0d4a434dfe3494d58581d399c18edb")
+    # Setup: clone a track repo, and checkout a known state
+    setupExercismRepo("elixir", trackDir,
+                      "f3974abf6e0d4a434dfe3494d58581d399c18edb")
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0):
