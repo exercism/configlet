@@ -2,18 +2,24 @@ import std/[os, osproc, strformat, strscans, strutils, unittest]
 import "."/lint/validators
 
 const
-  binaryExt =
-    when defined(windows): ".exe"
-    else: ""
-  binaryName = "configlet" & binaryExt
+  testsDir = currentSourcePath().parentDir()
+  repoRootDir = testsDir.parentDir()
 
-proc cloneExercismRepo(repoName, dest: string; isShallow = false): tuple[
-    output: string; exitCode: int] =
-  # Clones the Exercism repo named `repoName` to the location `dest`.
+proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
+  ## Clones the Exercism repo named `repoName` to the location `dest`.
+  ##
+  ## Quits if unsuccessful.
   let opts = if isShallow: "--depth 1" else: ""
   let url = &"https://github.com/exercism/{repoName}/"
   let cmd = &"git clone {opts} {url} {dest}"
-  result = execCmdEx(cmd)
+  stderr.write &"Running `{cmd}`... "
+  let (outp, exitCode) = execCmdEx(cmd)
+  if exitCode == 0:
+    stderr.writeLine "success"
+  else:
+    stderr.writeLine "failure"
+    stderr.writeLine outp
+    quit 1
 
 template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
   ## Runs `body`, and prints the output if the exit code is non-zero.
@@ -34,30 +40,26 @@ func conciseDiff(s: string): string =
 
 proc testsForSync(binaryPath: string) =
   suite "sync":
-    const psDir = ".test_binary_problem_specifications"
-    const trackDir = ".test_binary_nim_track_repo"
-    removeDir(psDir)
-    removeDir(trackDir)
+    const psDir = testsDir / ".test_binary_problem_specifications"
+    const trackDir = testsDir / ".test_binary_nim_track_repo"
 
     # Setup: clone the problem-specifications repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("problem-specifications", psDir)
+    if not dirExists(psDir):
+      cloneExercismRepo("problem-specifications", psDir)
 
     # Setup: clone a track repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("nim", trackDir)
+    if not dirExists(trackDir):
+      cloneExercismRepo("nim", trackDir)
 
     # Setup: set the problem-specifications repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {psDir} checkout f17f457fdc0673369047250f652e93c7901755e1")
+        execCmdEx(&"git -C {psDir} checkout --force f17f457fdc0673369047250f652e93c7901755e1")
 
     # Setup: set the track repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout 6e909c9e5338cd567c20224069df00e031fb2efa")
+        execCmdEx(&"git -C {trackDir} checkout --force 6e909c9e5338cd567c20224069df00e031fb2efa")
 
     test "a `sync` without `--update` exits with 1 and prints the expected output":
       execAndCheck(1):
@@ -496,21 +498,18 @@ proc prepareIntroductionFiles(trackDir, header, placeholder: string;
 
 proc testsForGenerate(binaryPath: string) =
   suite "generate":
-    const trackDir = ".test_binary_elixir_track_repo"
+    const trackDir = testsDir / ".test_binary_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
-    removeDir(trackDir)
-
     # Setup: clone a track repo
-    block:
-      execAndCheck(0):
-        cloneExercismRepo("elixir", trackDir)
+    if not dirExists(trackDir):
+      cloneExercismRepo("elixir", trackDir)
 
     # Setup: set the track repo to a known state
     block:
       execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout f3974abf6e0d4a434dfe3494d58581d399c18edb")
+        execCmdEx(&"git -C {trackDir} checkout --force f3974abf6e0d4a434dfe3494d58581d399c18edb")
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0):
@@ -558,11 +557,15 @@ proc testsForGenerate(binaryPath: string) =
         execCmdEx(diffCmd)
 
 proc main =
-  const repoRootDir = currentSourcePath.parentDir().parentDir()
-  let binaryPath = repoRootDir / binaryName
-  const helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+  const
+    binaryExt =
+      when defined(windows): ".exe"
+      else: ""
+    binaryName = &"configlet{binaryExt}"
+    binaryPath = repoRootDir / binaryName
+    helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+    cmdBase = "nimble --verbose build"
 
-  const cmdBase = "nimble --verbose build"
   let cmd = if existsEnv("CI"): &"{cmdBase} -d:release" else: cmdBase
   stderr.write(&"Running `{cmd}`... ")
   let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)

@@ -21,5 +21,6 @@
 
 # Ignore temporary repos
 .problem-specifications/
-.test_binary_problem_specifications/
-.test_binary_nim_track_repo/
+tests/.test_binary_elixir_track_repo/
+tests/.test_binary_nim_track_repo/
+tests/.test_binary_problem_specifications/
