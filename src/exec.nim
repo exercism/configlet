@@ -1,4 +1,4 @@
-import std/[osproc, streams, strtabs]
+import std/[osproc, streams, strformat, strtabs]
 
 type
   ProcessResult* = tuple
@@ -40,3 +40,22 @@ proc myExecCmdEx*(command: string; args: openArray[string] = [];
 proc git*(args: openArray[string]): ProcessResult =
   ## Runs `git` with `args`. Returns the output and exit code.
   result = myExecCmdEx("git", args = args)
+
+proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
+  ## Clones the Exercism repo named `repoName` to the location `dest`.
+  ##
+  ## Quits if unsuccessful.
+  let url = &"https://github.com/exercism/{repoName}/"
+  let args =
+    if isShallow:
+      @["clone", "--depth", "1", "--", url, dest]
+    else:
+      @["clone", "--", url, dest]
+  stderr.write &"Cloning {url}... "
+  let (outp, exitCode) = git(args)
+  if exitCode == 0:
+    stderr.writeLine "success"
+  else:
+    stderr.writeLine "failure"
+    stderr.writeLine outp
+    quit 1

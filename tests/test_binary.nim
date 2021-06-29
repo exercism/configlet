@@ -5,25 +5,6 @@ const
   testsDir = currentSourcePath().parentDir()
   repoRootDir = testsDir.parentDir()
 
-proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
-  ## Clones the Exercism repo named `repoName` to the location `dest`.
-  ##
-  ## Quits if unsuccessful.
-  let url = &"https://github.com/exercism/{repoName}/"
-  let args =
-    if isShallow:
-      @["clone", "--depth", "1", "--", url, dest]
-    else:
-      @["clone", "--", url, dest]
-  stderr.write &"Cloning {url}... "
-  let (outp, exitCode) = git(args)
-  if exitCode == 0:
-    stderr.writeLine "success"
-  else:
-    stderr.writeLine "failure"
-    stderr.writeLine outp
-    quit 1
-
 template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
   ## Runs `body`, and prints the output if the exit code is non-zero.
   ## `body` must have the same return type as `execCmdEx`.
