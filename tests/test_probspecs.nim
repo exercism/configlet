@@ -1,6 +1,6 @@
 # This module contains tests for `src/probspecs.nim`
-import std/[json, os, osproc, strformat, tables, unittest]
-import "."/[cli, sync/probspecs]
+import std/[json, os, strformat, tables, unittest]
+import "."/[cli, exec, sync/probspecs]
 
 type
   ProblemSpecsDir = enum
@@ -23,12 +23,7 @@ proc main =
   for ps in ProblemSpecsDir:
     suite &"getCanonicalTests: {ps}":
       if ps == psExisting:
-        let cmd = "git clone --depth 1 --quiet " &
-                  "https://github.com/exercism/problem-specifications/ " &
-                  existingDir
-        test "can make our own clone for later use as an \"existing dir\"":
-          check:
-            execCmd(cmd) == 0
+        cloneExercismRepo("problem-specifications", existingDir, isShallow = true)
 
       let probSpecsPath =
         case ps
