@@ -5,7 +5,7 @@ type
     output: string
     exitCode: int
 
-proc myExecCmdEx*(command: string; args: openArray[string] = [];
+proc exec*(command: string; args: openArray[string] = [];
     options: set[ProcessOption] = {poStdErrToStdOut, poUsePath};
     env: StringTableRef = nil; workingDir = ""; input = ""): ProcessResult {.
     gcsafe, tags: [ExecIOEffect, ReadIOEffect, RootEffect].} =
@@ -39,7 +39,7 @@ proc myExecCmdEx*(command: string; args: openArray[string] = [];
 
 proc git*(args: openArray[string]): ProcessResult =
   ## Runs `git` with `args`. Returns the output and exit code.
-  result = myExecCmdEx("git", args = args)
+  result = exec("git", args = args)
 
 proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
