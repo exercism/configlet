@@ -16,7 +16,7 @@ proc myExecCmdEx*(command: string; args: openArray[string] = [];
   ## This is a convenience wrapper around `startProcess`, and is minimally
   ## adapted from `osproc.execCmdEx` to use `args` (and avoid `poEvalCommand`).
   ##
-  ## Raises `OSError` if we cannot execute a file at `path`.
+  ## Raises `OSError` if the `command` is not found.
   var p = startProcess(command, args = args, options = options, env = env,
                        workingDir = workingDir)
   var outp = outputStream(p)
