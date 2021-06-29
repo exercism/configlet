@@ -28,12 +28,10 @@ proc testsForSync(binaryPath: string) =
     const trackDir = testsDir / ".test_binary_nim_track_repo"
 
     # Setup: clone the problem-specifications repo
-    if not dirExists(psDir):
-      cloneExercismRepo("problem-specifications", psDir)
+    cloneExercismRepo("problem-specifications", psDir)
 
     # Setup: clone a track repo
-    if not dirExists(trackDir):
-      cloneExercismRepo("nim", trackDir)
+    cloneExercismRepo("nim", trackDir)
 
     # Setup: set the problem-specifications repo to a known state
     block:
@@ -487,8 +485,7 @@ proc testsForGenerate(binaryPath: string) =
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
     # Setup: clone a track repo
-    if not dirExists(trackDir):
-      cloneExercismRepo("elixir", trackDir)
+    cloneExercismRepo("elixir", trackDir)
 
     # Setup: set the track repo to a known state
     block:

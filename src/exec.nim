@@ -1,4 +1,4 @@
-import std/[osproc, streams, strformat, strtabs]
+import std/[os, osproc, streams, strformat, strtabs]
 
 type
   ProcessResult* = tuple
@@ -42,21 +42,23 @@ proc git*(args: openArray[string]): ProcessResult =
   result = myExecCmdEx("git", args = args)
 
 proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
-  ## Clones the Exercism repo named `repoName` to the location `dest`. Performs
-  ## a shallow clone if `isShallow` is `true`.
+  ## If there is no directory at `dest`, clones the Exercism repo named
+  ## `repoName` to `dest`. Performs a shallow clone if `isShallow` is `true`.
   ##
-  ## Quits if unsuccessful.
-  let url = &"https://github.com/exercism/{repoName}/"
-  let args =
-    if isShallow:
-      @["clone", "--depth", "1", "--", url, dest]
+  ## Quits if the directory does not already exist and the clone is
+  ## unsuccessful.
+  if not dirExists(dest):
+    let url = &"https://github.com/exercism/{repoName}/"
+    let args =
+      if isShallow:
+        @["clone", "--depth", "1", "--", url, dest]
+      else:
+        @["clone", "--", url, dest]
+    stderr.write &"Cloning {url}... "
+    let (outp, exitCode) = git(args)
+    if exitCode == 0:
+      stderr.writeLine "success"
     else:
-      @["clone", "--", url, dest]
-  stderr.write &"Cloning {url}... "
-  let (outp, exitCode) = git(args)
-  if exitCode == 0:
-    stderr.writeLine "success"
-  else:
-    stderr.writeLine "failure"
-    stderr.writeLine outp
-    quit 1
+      stderr.writeLine "failure"
+      stderr.writeLine outp
+      quit 1
