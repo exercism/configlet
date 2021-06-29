@@ -62,3 +62,14 @@ proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
       stderr.writeLine "failure"
       stderr.writeLine outp
       quit 1
+
+proc gitCheckout*(dir, hash: string) =
+  ## Checkout `hash` in the git repo at `dir`, discarding changes to the working
+  ## directory in `dir`.
+  ##
+  ## Quits if unsucessful.
+  let args = ["-C", dir, "checkout", "--force", hash]
+  let (output, exitCode) = git(args)
+  if exitCode != 0:
+    stderr.writeLine output
+    quit 1
