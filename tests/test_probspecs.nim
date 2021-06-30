@@ -23,7 +23,7 @@ proc main =
   for ps in ProblemSpecsDir:
     suite &"getCanonicalTests: {ps}":
       if ps == psExisting:
-        cloneExercismRepo("problem-specifications", existingDir, isShallow = true)
+        cloneExercismRepo("problem-specifications", existingDir, shallow = true)
 
       let probSpecsPath =
         case ps

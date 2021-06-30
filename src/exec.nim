@@ -41,16 +41,16 @@ proc git(args: openArray[string]): ProcessResult =
   ## Runs `git` with `args`. Returns the output and exit code.
   result = exec("git", args = args)
 
-proc cloneExercismRepo*(repoName, dest: string; isShallow = false) =
+proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
-  ## `repoName` to `dest`. Performs a shallow clone if `isShallow` is `true`.
+  ## `repoName` to `dest`. Performs a shallow clone if `shallow` is `true`.
   ##
   ## Quits if the directory does not already exist and the clone is
   ## unsuccessful.
   if not dirExists(dest):
     let url = &"https://github.com/exercism/{repoName}/"
     let args =
-      if isShallow:
+      if shallow:
         @["clone", "--depth", "1", "--", url, dest]
       else:
         @["clone", "--", url, dest]
@@ -74,10 +74,10 @@ proc gitCheckout(dir, hash: string) =
     stderr.writeLine output
     quit 1
 
-proc setupExercismRepo*(repoName, dest, hash: string; isShallow = false) =
+proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
   ## `repoName` to `dest`.
   ##
   ## Then checkout the given `hash` in `dest`.
-  cloneExercismRepo(repoName, dest, isShallow)
+  cloneExercismRepo(repoName, dest, shallow)
   gitCheckout(dest, hash)
