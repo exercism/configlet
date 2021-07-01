@@ -533,16 +533,14 @@ proc main =
     binaryName = &"configlet{binaryExt}"
     binaryPath = repoRootDir / binaryName
     helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
-    cmdBase = "nimble --verbose build"
 
-  let cmd = if existsEnv("CI"): &"{cmdBase} -d:release" else: cmdBase
-  stderr.write(&"Running `{cmd}`... ")
-  let (buildOutput, buildExitCode) = execCmdEx(cmd, workingDir = repoRootDir)
-  if buildExitCode == 0:
-    stderr.writeLine "success"
-  else:
-    stderr.writeLine "failure"
-    raise newException(OSError, buildOutput)
+  let args =
+    if existsEnv("CI"):
+      @["--verbose", "build", "-d:release"]
+    else:
+      @["--verbose", "build"]
+  discard execAndCheck(0, "nimble", args, workingDir = repoRootDir,
+                       verbose = true)
 
   suite "help as an argument":
     test "help":

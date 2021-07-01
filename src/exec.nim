@@ -1,4 +1,4 @@
-import std/[os, osproc, streams, strformat, strtabs]
+import std/[os, osproc, streams, strformat, strtabs, strutils]
 
 type
   ProcessResult* = tuple
@@ -41,6 +41,39 @@ proc git(args: openArray[string]): ProcessResult =
   ## Runs `git` with `args`. Returns the output and exit code.
   result = exec("git", args = args)
 
+proc execAndCheck*(expectedExitCode: int; command: string;
+                   args: openArray[string] = [];
+                   options: set[ProcessOption] = {poStdErrToStdOut, poUsePath};
+                   env: StringTableRef = nil; workingDir = ""; input = "";
+                   msg = ""; verbose = false): string =
+  ## Runs `command` with `args`, and if the exit code is `expectedExitCode`,
+  ## returns the output.
+  ##
+  ## Otherwise, prints the output and `msg`, and raises `OSError`.
+  if verbose:
+    let argsString = args.join(" ")
+    stderr.write &"Running `{command} {argsString}`... "
+  var exitCode = int.high
+  (result, exitCode) = exec(command, args, options, env, workingDir, input)
+  if verbose:
+    let statusMsg = if exitCode == 0: "success" else: "failure"
+    stderr.writeLine statusMsg
+  if exitCode != expectedExitCode:
+    stderr.writeLine result
+    if msg.len > 0:
+      stderr.writeLine msg
+    else:
+      stderr.writeLine &"Error when running '{command}'"
+    raise newException(OSError, "")
+
+proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
+               msg = ""): string =
+  ## Runs `git` with `args`, and if the exit code is `expectedExitCode`,
+  ## returns the output.
+  ##
+  ## Otherwise, prints the output and `msg`, then quits.
+  result = execAndCheck(expectedExitCode, "git", args, msg = msg)
+
 proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
   ## `repoName` to `dest`. Performs a shallow clone if `shallow` is `true`.
@@ -69,10 +102,7 @@ proc gitCheckout(dir, hash: string) =
   ##
   ## Quits if unsucessful.
   let args = ["-C", dir, "checkout", "--force", hash]
-  let (output, exitCode) = git(args)
-  if exitCode != 0:
-    stderr.writeLine output
-    quit 1
+  discard gitCheck(0, args)
 
 proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
