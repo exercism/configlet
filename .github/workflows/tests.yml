@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # 2.3.4
 
       - name: Install Nim
-        uses: jiro4989/setup-nim-action@1a0fabc57c99653558fdc4332b1b0e0c57094e10 # 1.3.3
+        uses: jiro4989/setup-nim-action@81da772ddbd19e2991eb103889043d027d2c8a54 # 1.3.4
         with:
           nim-version: "1.4.8"
 
