@@ -1,5 +1,5 @@
-import std/[json, os, osproc, strformat, strscans, strutils]
-import ".."/[cli, helpers, logger]
+import std/[json, os, strformat, strscans, strutils]
+import ".."/[cli, exec, helpers, logger]
 
 type
   ProbSpecsDir* {.requiresInit.} = distinct string
@@ -16,27 +16,6 @@ proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
 proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
 proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 proc pretty*(testCase: ProbSpecsTestCase, indent = 2): string {.borrow.}
-
-proc execSuccessElseQuit(cmd: string, message: string): string =
-  ## Runs `cmd` and returns its output. If the command exits with a non-zero
-  ## exit code, prints the output and the given `message`, then quits.
-  var errC = -1
-  (result, errC) = execCmdEx(cmd)
-  if errC != 0:
-    stderr.writeLine result
-    if message.len > 0:
-      stderr.writeLine message
-    else:
-      stderr.writeLine &"Error when running '{cmd}'"
-    quit(1)
-
-proc clone(probSpecsDir: ProbSpecsDir) =
-  ## Downloads the `exercism/problem-specifications` repo to `probSpecsDir`.
-  const cmdBase = "git clone --quiet --depth 1"
-  const url = "https://github.com/exercism/problem-specifications.git"
-  let cmd = &"{cmdBase} {url} {probSpecsDir}"
-  logNormal(&"Cloning the problem-specifications repo into {probSpecsDir}...")
-  discard execSuccessElseQuit(cmd, "Could not clone problem-specifications repo")
 
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
@@ -110,7 +89,7 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
   # There's probably a better way to do this than parsing `git remote -v`.
   let msg = "could not run `git remote -v` in the given " &
             &"problem-specifications directory: '{probSpecsDir}'"
-  let remotes = execSuccessElseQuit("git remote -v", msg)
+  let remotes = gitCheck(0, ["remote", "-v"], msg)
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
@@ -133,14 +112,13 @@ proc validate(probSpecsDir: ProbSpecsDir) =
 
   withDir probSpecsDir.string:
     # Exit if the given directory is not a git repo.
-    if execCmd("git rev-parse") != 0:
-      showError("the given problem-specifications directory is not a git " &
-                &"repository: '{probSpecsDir}'")
+    discard gitCheck(0, ["rev-parse"], "the given problem-specifications " &
+                     &"directory is not a git repository: '{probSpecsDir}'")
 
-    # Exit if the working directory is not clean.
-    if execCmd("git diff-index --quiet HEAD") != 0: # Ignores untracked files.
-      showError("the given problem-specifications working directory is not " &
-                &"clean: '{probSpecsDir}'")
+    # Exit if the working directory is not clean (allowing untracked files).
+    discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the given " &
+                     "problem-specifications working directory is not clean: " &
+                     &"'{probSpecsDir}'")
 
     # Find the name of the remote that points to upstream. Don't assume the
     # remote is called 'upstream'.
@@ -151,15 +129,15 @@ proc validate(probSpecsDir: ProbSpecsDir) =
 
     # For now, just exit with an error if the HEAD is not up-to-date with
     # upstream, even if it's possible to do a fast-forward merge.
-    if execCmd(&"git fetch --quiet {remoteName} {mainBranchName}") != 0:
-      showError(&"failed to fetch `{mainBranchName}` in " &
-                &"problem-specifications directory: '{probSpecsDir}'")
+
+    discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
+                     &"failed to fetch `{mainBranchName}` in " &
+                     &"problem-specifications directory: '{probSpecsDir}'")
 
     # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
     # with `upstream/main`.
-    let revHead = execSuccessElseQuit("git rev-parse HEAD", "")
-    let revUpstream = execSuccessElseQuit(&"git rev-parse {remoteName}/" &
-                                          &"{mainBranchName}", "")
+    let revHead = gitCheck(0, ["rev-parse", "HEAD"])
+    let revUpstream = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
     if revHead != revUpstream:
       showError("the given problem-specifications directory is not " &
                 &"up-to-date: '{probSpecsDir}'")
@@ -172,4 +150,4 @@ proc initProbSpecsDir*(conf: Conf): ProbSpecsDir =
   else:
     result = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
     removeDir(result)
-    clone(result)
+    cloneExercismRepo("problem-specifications", result.string, shallow = true)
