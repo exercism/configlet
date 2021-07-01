@@ -1,25 +1,9 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/lint/validators
+import "."/[exec, lint/validators]
 
 const
   testsDir = currentSourcePath().parentDir()
   repoRootDir = testsDir.parentDir()
-
-proc cloneExercismRepo(repoName, dest: string; isShallow = false) =
-  ## Clones the Exercism repo named `repoName` to the location `dest`.
-  ##
-  ## Quits if unsuccessful.
-  let opts = if isShallow: "--depth 1" else: ""
-  let url = &"https://github.com/exercism/{repoName}/"
-  let cmd = &"git clone {opts} {url} {dest}"
-  stderr.write &"Running `{cmd}`... "
-  let (outp, exitCode) = execCmdEx(cmd)
-  if exitCode == 0:
-    stderr.writeLine "success"
-  else:
-    stderr.writeLine "failure"
-    stderr.writeLine outp
-    quit 1
 
 template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
   ## Runs `body`, and prints the output if the exit code is non-zero.
@@ -43,23 +27,13 @@ proc testsForSync(binaryPath: string) =
     const psDir = testsDir / ".test_binary_problem_specifications"
     const trackDir = testsDir / ".test_binary_nim_track_repo"
 
-    # Setup: clone the problem-specifications repo
-    if not dirExists(psDir):
-      cloneExercismRepo("problem-specifications", psDir)
+    # Setup: clone the problem-specifications repo, and checkout a known state
+    setupExercismRepo("problem-specifications", psDir,
+                      "f17f457fdc0673369047250f652e93c7901755e1")
 
-    # Setup: clone a track repo
-    if not dirExists(trackDir):
-      cloneExercismRepo("nim", trackDir)
-
-    # Setup: set the problem-specifications repo to a known state
-    block:
-      execAndCheck(0):
-        execCmdEx(&"git -C {psDir} checkout --force f17f457fdc0673369047250f652e93c7901755e1")
-
-    # Setup: set the track repo to a known state
-    block:
-      execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout --force 6e909c9e5338cd567c20224069df00e031fb2efa")
+    # Setup: clone a track repo, and checkout a known state
+    setupExercismRepo("nim", trackDir,
+                      "6e909c9e5338cd567c20224069df00e031fb2efa")
 
     test "a `sync` without `--update` exits with 1 and prints the expected output":
       execAndCheck(1):
@@ -502,14 +476,9 @@ proc testsForGenerate(binaryPath: string) =
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
     let diffCmd = &"git -C {trackDir} diff --exit-code"
 
-    # Setup: clone a track repo
-    if not dirExists(trackDir):
-      cloneExercismRepo("elixir", trackDir)
-
-    # Setup: set the track repo to a known state
-    block:
-      execAndCheck(0):
-        execCmdEx(&"git -C {trackDir} checkout --force f3974abf6e0d4a434dfe3494d58581d399c18edb")
+    # Setup: clone a track repo, and checkout a known state
+    setupExercismRepo("elixir", trackDir,
+                      "f3974abf6e0d4a434dfe3494d58581d399c18edb")
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0):

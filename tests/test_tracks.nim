@@ -1,20 +1,12 @@
 # This file implements tests for `src/tracks.nim`
-import std/[os, osproc, sequtils, sets, strformat, unittest]
-import "."/[cli, sync/tracks]
+import std/[os, sequtils, sets, strformat, unittest]
+import "."/[cli, exec, sync/tracks]
 
 proc main =
   suite "findPracticeExercises":
     const trackDir = ".test_tracks_nim_track_repo"
-    removeDir(trackDir)
-    let cmd = &"git clone --quiet https://github.com/exercism/nim.git {trackDir}"
-    if execCmd(cmd) != 0:
-      stderr.writeLine "Error: failed to clone the track repo"
-      quit(1)
-
-    const gitHash = "6e909c9e5338cd567c20224069df00e031fb2efa"
-    if execCmd(&"git -C {trackDir} checkout --quiet {gitHash}") != 0:
-      stderr.writeLine "Error: could not checkout a specific commit"
-      quit(1)
+    setupExercismRepo("nim", trackDir,
+                      "6e909c9e5338cd567c20224069df00e031fb2efa")
 
     let conf = Conf(
       action: initAction(actSync),
