@@ -71,7 +71,7 @@ proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
   ## Runs `git` with `args`, and if the exit code is `expectedExitCode`,
   ## returns the output.
   ##
-  ## Otherwise, prints the output and `msg`, then quits.
+  ## Otherwise, prints the output and `msg`, then raises `OSError`.
   result = execAndCheck(expectedExitCode, "git", args, msg = msg)
 
 proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
