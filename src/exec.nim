@@ -62,7 +62,7 @@ proc execAndCheck*(expectedExitCode: int; command: string;
     stderr.writeLine result
     if msg.len > 0:
       stderr.writeLine msg
-    else:
+    elif not verbose:
       let argsString = args.join(" ")
       stderr.writeLine &"Error when running `{command} {argsString}`"
     raise newException(OSError, "")
