@@ -63,7 +63,8 @@ proc execAndCheck*(expectedExitCode: int; command: string;
     if msg.len > 0:
       stderr.writeLine msg
     else:
-      stderr.writeLine &"Error when running '{command}'"
+      let argsString = args.join(" ")
+      stderr.writeLine &"Error when running `{command} {argsString}`"
     raise newException(OSError, "")
 
 proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
