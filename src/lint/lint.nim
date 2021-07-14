@@ -1,6 +1,6 @@
 import ".."/[cli, helpers]
-import "."/[concept_exercises, concepts, practice_exercises, track_config,
-            validators]
+import "."/[concept_exercises, concepts, docs, practice_exercises,
+            track_config, validators]
 
 proc allChecksPass(trackDir: Path): bool =
   ## Returns true if all the linting checks pass for the track at `trackDir`.
@@ -15,6 +15,7 @@ proc allChecksPass(trackDir: Path): bool =
     isEveryConceptConfigValid(trackDir),
     isEveryConceptExerciseConfigValid(trackDir),
     isEveryPracticeExerciseConfigValid(trackDir),
+    sharedExerciseDocsExist(trackDir),
   ]
   result = allTrue(checks)
 
@@ -37,7 +38,8 @@ Basic linting finished successfully:
 - Every concept exercise has the required .md files
 - Every concept exercise has a valid .meta/config.json file
 - Every practice exercise has the required .md files
-- Every practice exercise has a valid .meta/config.json file"""
+- Every practice exercise has a valid .meta/config.json file
+- The required shared exercise docs are present"""
   else:
     echo """
 Configlet detected at least one problem.
