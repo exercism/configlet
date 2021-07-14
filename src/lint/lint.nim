@@ -16,6 +16,7 @@ proc allChecksPass(trackDir: Path): bool =
     isEveryConceptExerciseConfigValid(trackDir),
     isEveryPracticeExerciseConfigValid(trackDir),
     sharedExerciseDocsExist(trackDir),
+    trackDocsExist(trackDir),
   ]
   result = allTrue(checks)
 
@@ -39,7 +40,8 @@ Basic linting finished successfully:
 - Every concept exercise has a valid .meta/config.json file
 - Every practice exercise has the required .md files
 - Every practice exercise has a valid .meta/config.json file
-- The required shared exercise docs are present"""
+- Required track docs are present
+- Required shared exercise docs are present"""
   else:
     echo """
 Configlet detected at least one problem.

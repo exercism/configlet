@@ -521,7 +521,7 @@ proc subdirContains*(dir: Path; files: openArray[string]): bool =
       if not fileExists(path):
         result.setFalseAndPrint("Missing file", path)
   else:
-    result = false
+    result.setFalseAndPrint("Missing directory", dir)
 
 proc subdirsContain*(dir: Path; files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
