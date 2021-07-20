@@ -11,7 +11,7 @@ proc sharedExerciseDocsExist*(trackDir: Path): bool =
     ]
 
   let sharedExerciseDocsDir = trackDir / "exercises" / "shared" / ".docs"
-  result = subdirContains(sharedExerciseDocsDir, requiredSharedExerciseDocs)
+  result = dirContains(sharedExerciseDocsDir, requiredSharedExerciseDocs)
 
 proc trackDocsExist*(trackDir: Path): bool =
   ## Returns true if the `trackDir/docs` directory has the required files.
@@ -26,4 +26,4 @@ proc trackDocsExist*(trackDir: Path): bool =
     ]
 
   let docsDir = trackDir / "docs"
-  result = subdirContains(docsDir, requiredTrackDocs)
+  result = dirContains(docsDir, requiredTrackDocs)
