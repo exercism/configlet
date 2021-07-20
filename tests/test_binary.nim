@@ -534,13 +534,14 @@ proc main =
     binaryPath = repoRootDir / binaryName
     helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
-  let args =
-    if existsEnv("CI"):
-      @["--verbose", "build", "-d:release"]
-    else:
-      @["--verbose", "build"]
-  discard execAndCheck(0, "nimble", args, workingDir = repoRootDir,
-                       verbose = true)
+  if not defined(skipBuild):
+    let args =
+      if existsEnv("CI"):
+        @["--verbose", "build", "-d:release"]
+      else:
+        @["--verbose", "build"]
+    discard execAndCheck(0, "nimble", args, workingDir = repoRootDir,
+                         verbose = true)
 
   suite "help as an argument":
     test "help":
