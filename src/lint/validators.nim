@@ -511,6 +511,18 @@ proc hasFloat*(data: JsonNode; key: static string; path: Path; context = "";
 proc parseJson(s: Stream; filename: Path; rawIntegers = false;
                rawFloats = false): JsonNode {.borrow.}
 
+proc dirContains*(dir: Path; files: openArray[string]): bool =
+  ## Returns `true` if every file in `files` exists in `dir`.
+  result = true
+
+  if dirExists(dir):
+    for file in files:
+      let path = dir / file
+      if not fileExists(path):
+        result.setFalseAndPrint("Missing file", path)
+  else:
+    result.setFalseAndPrint("Missing directory", dir)
+
 proc subdirsContain*(dir: Path; files: openArray[string]): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
   ## `dir`.
