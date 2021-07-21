@@ -40,386 +40,386 @@ proc testsForSync(binaryPath: string) =
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
 
       check outp == """
-Checking exercises...
-[warn] anagram: missing 1 test case
-       - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-[warn] diffie-hellman: missing 1 test case
-       - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
-[warn] grade-school: missing 1 test case
-       - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
-[warn] hamming: missing 6 test cases
-       - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
-       - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
-       - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
-       - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
-       - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
-       - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
-[warn] high-scores: missing 2 test cases
-       - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
-       - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
-[warn] isogram: missing 1 test case
-       - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
-[warn] kindergarten-garden: missing 8 test cases
-       - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
-       - full garden -> for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
-       - full garden -> for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
-       - full garden -> for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
-       - full garden -> for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
-       - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
-       - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
-       - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
-[warn] luhn: missing 1 test case
-       - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
-[warn] prime-factors: missing 5 test cases
-       - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
-       - product of first prime (756949d3-3158-4e3d-91f2-c4f9f043ee70)
-       - product of second prime (7d6a3300-a4cb-4065-bd33-0ced1de6cb44)
-       - product of third prime (073ac0b2-c915-4362-929d-fc45f7b9a9e4)
-       - product of first and second prime (6e0e4912-7fb6-47f3-a9ad-dbcd79340c75)
-[warn] react: missing 14 test cases
-       - input cells have a value (c51ee736-d001-4f30-88d1-0c8e8b43cd07)
-       - an input cell's value can be set (dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851)
-       - compute cells calculate initial value (5854b975-f545-4f93-8968-cc324cde746e)
-       - compute cells take inputs in the right order (25795a3d-b86c-4e91-abe7-1c340e71560c)
-       - compute cells update value when dependencies are changed (c62689bf-7be5-41bb-b9f8-65178ef3e8ba)
-       - compute cells can depend on other compute cells (5ff36b09-0a88-48d4-b7f8-69dcf3feea40)
-       - compute cells fire callbacks (abe33eaf-68ad-42a5-b728-05519ca88d2d)
-       - callback cells only fire on change (9e5cb3a4-78e5-4290-80f8-a78612c52db2)
-       - callbacks do not report already reported values (ada17cb6-7332-448a-b934-e3d7495c13d3)
-       - callbacks can fire from multiple cells (ac271900-ea5c-461c-9add-eeebcb8c03e5)
-       - callbacks can be added and removed (95a82dcc-8280-4de3-a4cd-4f19a84e3d6f)
-       - removing a callback multiple times doesn't interfere with other callbacks (f2a7b445-f783-4e0e-8393-469ab4915f2a)
-       - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
-       - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
-[warn] some exercises are missing test cases
-"""
+        Checking exercises...
+        [warn] anagram: missing 1 test case
+               - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
+        [warn] diffie-hellman: missing 1 test case
+               - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
+        [warn] grade-school: missing 1 test case
+               - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
+        [warn] hamming: missing 6 test cases
+               - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
+               - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
+               - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
+               - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
+               - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
+               - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
+        [warn] high-scores: missing 2 test cases
+               - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
+               - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        [warn] kindergarten-garden: missing 8 test cases
+               - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
+               - full garden -> for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
+               - full garden -> for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
+               - full garden -> for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
+               - full garden -> for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
+               - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
+               - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
+               - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
+        [warn] luhn: missing 1 test case
+               - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
+        [warn] prime-factors: missing 5 test cases
+               - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
+               - product of first prime (756949d3-3158-4e3d-91f2-c4f9f043ee70)
+               - product of second prime (7d6a3300-a4cb-4065-bd33-0ced1de6cb44)
+               - product of third prime (073ac0b2-c915-4362-929d-fc45f7b9a9e4)
+               - product of first and second prime (6e0e4912-7fb6-47f3-a9ad-dbcd79340c75)
+        [warn] react: missing 14 test cases
+               - input cells have a value (c51ee736-d001-4f30-88d1-0c8e8b43cd07)
+               - an input cell's value can be set (dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851)
+               - compute cells calculate initial value (5854b975-f545-4f93-8968-cc324cde746e)
+               - compute cells take inputs in the right order (25795a3d-b86c-4e91-abe7-1c340e71560c)
+               - compute cells update value when dependencies are changed (c62689bf-7be5-41bb-b9f8-65178ef3e8ba)
+               - compute cells can depend on other compute cells (5ff36b09-0a88-48d4-b7f8-69dcf3feea40)
+               - compute cells fire callbacks (abe33eaf-68ad-42a5-b728-05519ca88d2d)
+               - callback cells only fire on change (9e5cb3a4-78e5-4290-80f8-a78612c52db2)
+               - callbacks do not report already reported values (ada17cb6-7332-448a-b934-e3d7495c13d3)
+               - callbacks can fire from multiple cells (ac271900-ea5c-461c-9add-eeebcb8c03e5)
+               - callbacks can be added and removed (95a82dcc-8280-4de3-a4cd-4f19a84e3d6f)
+               - removing a callback multiple times doesn't interfere with other callbacks (f2a7b445-f783-4e0e-8393-469ab4915f2a)
+               - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
+               - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
+        [warn] some exercises are missing test cases
+      """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
 
     test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
       check outp == """
-Syncing exercises...
-[info] anagram: included 1 missing test case
-[info] diffie-hellman: included 1 missing test case
-[info] grade-school: included 1 missing test case
-[info] hamming: included 6 missing test cases
-[info] high-scores: included 2 missing test cases
-[info] isogram: included 1 missing test case
-[info] kindergarten-garden: included 8 missing test cases
-[info] luhn: included 1 missing test case
-[info] prime-factors: included 5 missing test cases
-[info] react: included 14 missing test cases
-All exercises are synced!
-"""
+        Syncing exercises...
+        [info] anagram: included 1 missing test case
+        [info] diffie-hellman: included 1 missing test case
+        [info] grade-school: included 1 missing test case
+        [info] hamming: included 6 missing test cases
+        [info] high-scores: included 2 missing test cases
+        [info] isogram: included 1 missing test case
+        [info] kindergarten-garden: included 8 missing test cases
+        [info] luhn: included 1 missing test case
+        [info] prime-factors: included 5 missing test cases
+        [info] react: included 14 missing test cases
+        All exercises are synced!
+      """.unindent()
 
     const expectedDiffOutput = """
---- exercises/practice/anagram/.meta/tests.toml
-+++ exercises/practice/anagram/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-+description = "detects two anagrams"
-+reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-+
---- exercises/practice/diffie-hellman/.meta/tests.toml
-+++ exercises/practice/diffie-hellman/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+[0d25f8d7-4897-4338-a033-2d3d7a9af688]
-+description = "can calculate public key when given a different private key"
-+
---- exercises/practice/grade-school/.meta/tests.toml
-+++ exercises/practice/grade-school/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+[c125dab7-2a53-492f-a99a-56ad511940d8]
-+description = "A student can't be in two different grades"
-+
---- exercises/practice/hamming/.meta/tests.toml
-+++ exercises/practice/hamming/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+[b9228bb1-465f-4141-b40f-1f99812de5a8]
-+description = "disallow first strand longer"
-+reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
-+
-+[dab38838-26bb-4fff-acbe-3b0a9bfeba2d]
-+description = "disallow second strand longer"
-+reimplements = "8a2d4ed0-ead5-4fdd-924d-27c4cf56e60e"
-+
-+[db92e77e-7c72-499d-8fe6-9354d2bfd504]
-+description = "disallow left empty strand"
-+reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
-+
-+[b764d47c-83ff-4de2-ab10-6cfe4b15c0f3]
-+description = "disallow empty first strand"
-+reimplements = "db92e77e-7c72-499d-8fe6-9354d2bfd504"
-+
-+
-+[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
-+description = "disallow right empty strand"
-+reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
-+
-+[9ab9262f-3521-4191-81f5-0ed184a5aa89]
-+description = "disallow empty second strand"
-+reimplements = "920cd6e3-18f4-4143-b6b8-74270bb8f8a3"
---- exercises/practice/high-scores/.meta/tests.toml
-+++ exercises/practice/high-scores/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
--description = "Personal top three from a list of scores"
-+description = "Top 3 scores -> Personal top three from a list of scores"
--description = "Personal top highest to lowest"
-+description = "Top 3 scores -> Personal top highest to lowest"
--description = "Personal top when there is a tie"
-+description = "Top 3 scores -> Personal top when there is a tie"
--description = "Personal top when there are less than 3"
-+description = "Top 3 scores -> Personal top when there are less than 3"
--description = "Personal top when there is only one"
-+description = "Top 3 scores -> Personal top when there is only one"
-+
-+[2df075f9-fec9-4756-8f40-98c52a11504f]
-+description = "Top 3 scores -> Latest score after personal top scores"
-+
-+[809c4058-7eb1-4206-b01e-79238b9b71bc]
-+description = "Top 3 scores -> Scores after personal top scores"
---- exercises/practice/isogram/.meta/tests.toml
-+++ exercises/practice/isogram/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+
-+[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
-+description = "word with duplicated character and with two hyphens"
---- exercises/practice/kindergarten-garden/.meta/tests.toml
-+++ exercises/practice/kindergarten-garden/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
--description = "garden with single student"
-+description = "partial garden -> garden with single student"
--description = "different garden with single student"
-+description = "partial garden -> different garden with single student"
--description = "garden with two students"
-+description = "partial garden -> garden with two students"
--description = "second student's garden"
-+description = "partial garden -> multiple students for the same garden with three students -> second student's garden"
--description = "third student's garden"
-+description = "partial garden -> multiple students for the same garden with three students -> third student's garden"
--description = "first student's garden"
-+description = "full garden -> for Alice, first student's garden"
--description = "second student's garden"
-+description = "full garden -> for Bob, second student's garden"
-+
-+[566b621b-f18e-4c5f-873e-be30544b838c]
-+description = "full garden -> for Charlie"
-+
-+[3ad3df57-dd98-46fc-9269-1877abf612aa]
-+description = "full garden -> for David"
-+
-+[0f0a55d1-9710-46ed-a0eb-399ba8c72db2]
-+description = "full garden -> for Eve"
-+
-+[a7e80c90-b140-4ea1-aee3-f4625365c9a4]
-+description = "full garden -> for Fred"
-+
-+[9d94b273-2933-471b-86e8-dba68694c615]
-+description = "full garden -> for Ginny"
-+
-+[f55bc6c2-ade8-4844-87c4-87196f1b7258]
-+description = "full garden -> for Harriet"
-+
-+[759070a3-1bb1-4dd4-be2c-7cce1d7679ae]
-+description = "full garden -> for Ileana"
-+
-+[78578123-2755-4d4a-9c7d-e985b8dda1c6]
-+description = "full garden -> for Joseph"
--description = "second to last student's garden"
-+description = "full garden -> for Kincaid, second to last student's garden"
--description = "last student's garden"
-+description = "full garden -> for Larry, last student's garden"
---- exercises/practice/luhn/.meta/tests.toml
-+++ exercises/practice/luhn/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+
-+[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
-+description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
---- exercises/practice/prime-factors/.meta/tests.toml
-+++ exercises/practice/prime-factors/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+[238d57c8-4c12-42ef-af34-ae4929f94789]
-+description = "another prime number"
-+
-+[756949d3-3158-4e3d-91f2-c4f9f043ee70]
-+description = "product of first prime"
-+
-+[7d6a3300-a4cb-4065-bd33-0ced1de6cb44]
-+description = "product of second prime"
-+
-+[073ac0b2-c915-4362-929d-fc45f7b9a9e4]
-+description = "product of third prime"
-+
-+[6e0e4912-7fb6-47f3-a9ad-dbcd79340c75]
-+description = "product of first and second prime"
-+
---- exercises/practice/react/.meta/tests.toml
-+++ exercises/practice/react/.meta/tests.toml
--# This is an auto-generated file. Regular comments will be removed when this
--# file is regenerated. Regenerating will not touch any manually added keys,
--# so comments can be added in a "comment" key.
-+# This is an auto-generated file.
-+#
-+# Regenerating this file via `configlet sync` will:
-+# - Recreate every `description` key/value pair
-+# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-+# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-+# - Preserve any other key/value pair
-+#
-+# As user-added comments (using the # character) will be removed when this file
-+# is regenerated, comments can be added via a `comment` key.
-+
-+[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
-+description = "input cells have a value"
-+
-+[dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851]
-+description = "an input cell's value can be set"
-+
-+[5854b975-f545-4f93-8968-cc324cde746e]
-+description = "compute cells calculate initial value"
-+
-+[25795a3d-b86c-4e91-abe7-1c340e71560c]
-+description = "compute cells take inputs in the right order"
-+
-+[c62689bf-7be5-41bb-b9f8-65178ef3e8ba]
-+description = "compute cells update value when dependencies are changed"
-+
-+[5ff36b09-0a88-48d4-b7f8-69dcf3feea40]
-+description = "compute cells can depend on other compute cells"
-+
-+[abe33eaf-68ad-42a5-b728-05519ca88d2d]
-+description = "compute cells fire callbacks"
-+
-+[9e5cb3a4-78e5-4290-80f8-a78612c52db2]
-+description = "callback cells only fire on change"
-+
-+[ada17cb6-7332-448a-b934-e3d7495c13d3]
-+description = "callbacks do not report already reported values"
-+
-+[ac271900-ea5c-461c-9add-eeebcb8c03e5]
-+description = "callbacks can fire from multiple cells"
-+
-+[95a82dcc-8280-4de3-a4cd-4f19a84e3d6f]
-+description = "callbacks can be added and removed"
-+
-+[f2a7b445-f783-4e0e-8393-469ab4915f2a]
-+description = "removing a callback multiple times doesn't interfere with other callbacks"
-+
-+[daf6feca-09e0-4ce5-801d-770ddfe1c268]
-+description = "callbacks should only be called once even if multiple dependencies change"
-+
-+[9a5b159f-b7aa-4729-807e-f1c38a46d377]
-+description = "callbacks should not be called if dependencies change but output value doesn't change"
-"""
+      --- exercises/practice/anagram/.meta/tests.toml
+      +++ exercises/practice/anagram/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      +
+      --- exercises/practice/diffie-hellman/.meta/tests.toml
+      +++ exercises/practice/diffie-hellman/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +[0d25f8d7-4897-4338-a033-2d3d7a9af688]
+      +description = "can calculate public key when given a different private key"
+      +
+      --- exercises/practice/grade-school/.meta/tests.toml
+      +++ exercises/practice/grade-school/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +[c125dab7-2a53-492f-a99a-56ad511940d8]
+      +description = "A student can't be in two different grades"
+      +
+      --- exercises/practice/hamming/.meta/tests.toml
+      +++ exercises/practice/hamming/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +[b9228bb1-465f-4141-b40f-1f99812de5a8]
+      +description = "disallow first strand longer"
+      +reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
+      +
+      +[dab38838-26bb-4fff-acbe-3b0a9bfeba2d]
+      +description = "disallow second strand longer"
+      +reimplements = "8a2d4ed0-ead5-4fdd-924d-27c4cf56e60e"
+      +
+      +[db92e77e-7c72-499d-8fe6-9354d2bfd504]
+      +description = "disallow left empty strand"
+      +reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
+      +
+      +[b764d47c-83ff-4de2-ab10-6cfe4b15c0f3]
+      +description = "disallow empty first strand"
+      +reimplements = "db92e77e-7c72-499d-8fe6-9354d2bfd504"
+      +
+      +
+      +[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
+      +description = "disallow right empty strand"
+      +reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
+      +
+      +[9ab9262f-3521-4191-81f5-0ed184a5aa89]
+      +description = "disallow empty second strand"
+      +reimplements = "920cd6e3-18f4-4143-b6b8-74270bb8f8a3"
+      --- exercises/practice/high-scores/.meta/tests.toml
+      +++ exercises/practice/high-scores/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      -description = "Personal top three from a list of scores"
+      +description = "Top 3 scores -> Personal top three from a list of scores"
+      -description = "Personal top highest to lowest"
+      +description = "Top 3 scores -> Personal top highest to lowest"
+      -description = "Personal top when there is a tie"
+      +description = "Top 3 scores -> Personal top when there is a tie"
+      -description = "Personal top when there are less than 3"
+      +description = "Top 3 scores -> Personal top when there are less than 3"
+      -description = "Personal top when there is only one"
+      +description = "Top 3 scores -> Personal top when there is only one"
+      +
+      +[2df075f9-fec9-4756-8f40-98c52a11504f]
+      +description = "Top 3 scores -> Latest score after personal top scores"
+      +
+      +[809c4058-7eb1-4206-b01e-79238b9b71bc]
+      +description = "Top 3 scores -> Scores after personal top scores"
+      --- exercises/practice/isogram/.meta/tests.toml
+      +++ exercises/practice/isogram/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +
+      +[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
+      +description = "word with duplicated character and with two hyphens"
+      --- exercises/practice/kindergarten-garden/.meta/tests.toml
+      +++ exercises/practice/kindergarten-garden/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      -description = "garden with single student"
+      +description = "partial garden -> garden with single student"
+      -description = "different garden with single student"
+      +description = "partial garden -> different garden with single student"
+      -description = "garden with two students"
+      +description = "partial garden -> garden with two students"
+      -description = "second student's garden"
+      +description = "partial garden -> multiple students for the same garden with three students -> second student's garden"
+      -description = "third student's garden"
+      +description = "partial garden -> multiple students for the same garden with three students -> third student's garden"
+      -description = "first student's garden"
+      +description = "full garden -> for Alice, first student's garden"
+      -description = "second student's garden"
+      +description = "full garden -> for Bob, second student's garden"
+      +
+      +[566b621b-f18e-4c5f-873e-be30544b838c]
+      +description = "full garden -> for Charlie"
+      +
+      +[3ad3df57-dd98-46fc-9269-1877abf612aa]
+      +description = "full garden -> for David"
+      +
+      +[0f0a55d1-9710-46ed-a0eb-399ba8c72db2]
+      +description = "full garden -> for Eve"
+      +
+      +[a7e80c90-b140-4ea1-aee3-f4625365c9a4]
+      +description = "full garden -> for Fred"
+      +
+      +[9d94b273-2933-471b-86e8-dba68694c615]
+      +description = "full garden -> for Ginny"
+      +
+      +[f55bc6c2-ade8-4844-87c4-87196f1b7258]
+      +description = "full garden -> for Harriet"
+      +
+      +[759070a3-1bb1-4dd4-be2c-7cce1d7679ae]
+      +description = "full garden -> for Ileana"
+      +
+      +[78578123-2755-4d4a-9c7d-e985b8dda1c6]
+      +description = "full garden -> for Joseph"
+      -description = "second to last student's garden"
+      +description = "full garden -> for Kincaid, second to last student's garden"
+      -description = "last student's garden"
+      +description = "full garden -> for Larry, last student's garden"
+      --- exercises/practice/luhn/.meta/tests.toml
+      +++ exercises/practice/luhn/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +
+      +[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
+      +description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
+      --- exercises/practice/prime-factors/.meta/tests.toml
+      +++ exercises/practice/prime-factors/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +[238d57c8-4c12-42ef-af34-ae4929f94789]
+      +description = "another prime number"
+      +
+      +[756949d3-3158-4e3d-91f2-c4f9f043ee70]
+      +description = "product of first prime"
+      +
+      +[7d6a3300-a4cb-4065-bd33-0ced1de6cb44]
+      +description = "product of second prime"
+      +
+      +[073ac0b2-c915-4362-929d-fc45f7b9a9e4]
+      +description = "product of third prime"
+      +
+      +[6e0e4912-7fb6-47f3-a9ad-dbcd79340c75]
+      +description = "product of first and second prime"
+      +
+      --- exercises/practice/react/.meta/tests.toml
+      +++ exercises/practice/react/.meta/tests.toml
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.
+      +
+      +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
+      +description = "input cells have a value"
+      +
+      +[dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851]
+      +description = "an input cell's value can be set"
+      +
+      +[5854b975-f545-4f93-8968-cc324cde746e]
+      +description = "compute cells calculate initial value"
+      +
+      +[25795a3d-b86c-4e91-abe7-1c340e71560c]
+      +description = "compute cells take inputs in the right order"
+      +
+      +[c62689bf-7be5-41bb-b9f8-65178ef3e8ba]
+      +description = "compute cells update value when dependencies are changed"
+      +
+      +[5ff36b09-0a88-48d4-b7f8-69dcf3feea40]
+      +description = "compute cells can depend on other compute cells"
+      +
+      +[abe33eaf-68ad-42a5-b728-05519ca88d2d]
+      +description = "compute cells fire callbacks"
+      +
+      +[9e5cb3a4-78e5-4290-80f8-a78612c52db2]
+      +description = "callback cells only fire on change"
+      +
+      +[ada17cb6-7332-448a-b934-e3d7495c13d3]
+      +description = "callbacks do not report already reported values"
+      +
+      +[ac271900-ea5c-461c-9add-eeebcb8c03e5]
+      +description = "callbacks can fire from multiple cells"
+      +
+      +[95a82dcc-8280-4de3-a4cd-4f19a84e3d6f]
+      +description = "callbacks can be added and removed"
+      +
+      +[f2a7b445-f783-4e0e-8393-469ab4915f2a]
+      +description = "removing a callback multiple times doesn't interfere with other callbacks"
+      +
+      +[daf6feca-09e0-4ce5-801d-770ddfe1c268]
+      +description = "callbacks should only be called once even if multiple dependencies change"
+      +
+      +[9a5b159f-b7aa-4729-807e-f1c38a46d377]
+      +description = "callbacks should not be called if dependencies change but output value doesn't change"
+    """.unindent()
 
     const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
     const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
@@ -434,17 +434,17 @@ All exercises are synced!
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
       check outp == """
-Syncing exercises...
-All exercises are synced!
-"""
+        Syncing exercises...
+        All exercises are synced!
+      """.unindent()
 
     test "after syncing, a `sync` without `--update` shows that exercises are up to date":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
       check outp == """
-Checking exercises...
-All exercises are up-to-date!
-"""
+        Checking exercises...
+        All exercises are up-to-date!
+      """.unindent()
 
     test "the `git diff` output is still the same":
       execAndCheck(0):
@@ -465,7 +465,7 @@ proc prepareIntroductionFiles(trackDir, header, placeholder: string;
       # {header}
 
       {placeholder}
-    """.dedent()
+    """.unindent()
   writeFile(templatePath, templateContents)
   if removeIntro:
     removeFile(introPath)
