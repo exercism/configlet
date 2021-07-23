@@ -159,6 +159,7 @@ const keyFeatureIcons = [
   "dynamically-typed",
   "easy",
   "embeddable",
+  "evolving",
   "expressive",
   "extensible",
   "fast",
@@ -167,6 +168,7 @@ const keyFeatureIcons = [
   "garbage-collected",
   "general-purpose",
   "homoiconic",
+  "immutable",
   "interactive",
   "interop",
   "multi-paradigm",
@@ -176,8 +178,10 @@ const keyFeatureIcons = [
   "safe",
   "scientific",
   "small",
+  "stable",
   "statically-typed",
   "tooling",
+  "web",
   "widely-used",
 ].toHashSet()
 
