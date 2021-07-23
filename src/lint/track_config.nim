@@ -151,15 +151,40 @@ proc hasValidConcepts(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "concepts", path, isValidConcept,
                       allowedLength = 0..int.high)
 
+const keyFeatureIcons = [
+  "community",
+  "concurrency",
+  "cross-platform",
+  "documentation",
+  "dynamically-typed",
+  "easy",
+  "embeddable",
+  "expressive",
+  "extensible",
+  "fast",
+  "fun",
+  "functional",
+  "garbage-collected",
+  "general-purpose",
+  "homoiconic",
+  "interactive",
+  "interop",
+  "multi-paradigm",
+  "portable",
+  "powerful",
+  "productive",
+  "safe",
+  "scientific",
+  "small",
+  "statically-typed",
+  "tooling",
+  "widely-used",
+].toHashSet()
+
 proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
   if isObject(data, context, path):
-    const icons = [
-      "todo",
-    ].toHashSet()
-    # TODO: Enable the `icon` checks when we have a list of valid icons.
     let checks = [
-      if false: hasString(data, "icon", path, context,
-                          allowed = icons) else: true,
+      hasString(data, "icon", path, context, allowed = keyFeatureIcons),
       hasString(data, "title", path, context, maxLen = 25),
       hasString(data, "content", path, context, maxLen = 100),
     ]
