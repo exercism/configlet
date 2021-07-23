@@ -13,7 +13,7 @@ func q*(s: string): string =
   if s.len > 0:
     &"`{s}`"
   else:
-    "root"
+    "the empty string"
 
 func joinWithDot(context, key: string): string =
   if context.len > 0:
