@@ -199,7 +199,7 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
                       isRequired = false, allowedLength = 6..6)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
-  if isObject(data, "", path):
+  if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "language", path, maxLen = 255),
       hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
