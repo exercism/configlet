@@ -21,8 +21,8 @@ proc isValidLinkObject(data: JsonNode, context: string, path: Path): bool =
                             "not an object: " & $data, path)
 
 proc isValidLinksFile(data: JsonNode, path: Path): bool =
-  result = isArrayOf(data, "", path, isValidLinkObject, isRequired = false,
-                     allowedLength = 0..int.high)
+  result = isArrayOf(data, jsonRoot, path, isValidLinkObject,
+                     isRequired = false, allowedLength = 0..int.high)
 
 proc isEveryConceptLinksFileValid*(trackDir: Path): bool =
   let conceptsDir = trackDir / "concepts"
@@ -37,7 +37,7 @@ proc isEveryConceptLinksFileValid*(trackDir: Path): bool =
           result = false
 
 proc isValidConceptConfig(data: JsonNode, path: Path): bool =
-  if isObject(data, "", path):
+  if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "authors", path, uniqueValues = true),

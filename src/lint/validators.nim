@@ -9,9 +9,15 @@ func allTrue*(bools: openArray[bool]): bool =
     if not b:
       return false
 
+const
+  jsonRoot* = "the top-level JSON element"
+
 func q*(s: string): string =
   if s.len > 0:
-    &"`{s}`"
+    if s == jsonRoot:
+      s
+    else:
+      &"`{s}`"
   else:
     "the empty string"
 

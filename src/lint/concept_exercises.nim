@@ -15,7 +15,7 @@ proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
 
 proc isValidConceptExerciseConfig(data: JsonNode;
                                   path, exerciseDir: Path): bool =
-  if isObject(data, "", path):
+  if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
       hasArrayOfStrings(data, "authors", path, uniqueValues = true),
