@@ -199,7 +199,8 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
         result.setFalseAndPrint(msgStart & msgEnd, path)
     elif checkIsUrlLike:
       if not isUrlLike(s):
-        result.setFalseAndPrint(&"Not a valid URL: {q s}", path)
+        let msg = &"The {q key} value is {q s}, but it must be a valid URL"
+        result.setFalseAndPrint(msg, path)
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
         if checkIsKebab:
