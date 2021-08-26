@@ -24,6 +24,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode;
                         uniqueValues = true),
       hasValidFiles(data, path, exerciseDir),
       hasString(data, "language_versions", path, isRequired = false),
+      hasBoolean(data, "test_runner", path, isRequired = false),
     ]
     result = allTrue(checks)
 
