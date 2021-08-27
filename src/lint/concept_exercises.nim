@@ -18,6 +18,9 @@ proc isValidConceptExerciseConfig(data: JsonNode;
   if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "blurb", path, maxLen = 350),
+      hasString(data, "source", path, isRequired = false),
+      hasString(data, "source_url", path, isRequired = false,
+                checkIsUrlLike = true),
       hasArrayOfStrings(data, "authors", path, uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, isRequired = false,
                         uniqueValues = true),
