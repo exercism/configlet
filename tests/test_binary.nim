@@ -142,17 +142,25 @@ proc testsForSync(binaryPath: string) =
       +# - Preserve any other key/value pair
       +#
       +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key."""
+      +# is regenerated, comments can be added via a `comment` key.""".unindent()
     const expectedAnagramDiffStart = fmt"""
       --- exercises/practice/anagram/.meta/tests.toml
       +++ exercises/practice/anagram/.meta/tests.toml
-      {testsTomlHeaderDiff}"""
+      {testsTomlHeaderDiff}""".unindent()
     const expectedAnagramDiffInclude = fmt"""
       {expectedAnagramDiffStart}
       +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
       +description = "detects two anagrams"
       +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
       +
+    """.unindent()
+    const expectedAnagramDiffChooseInclude = fmt"""
+      {expectedAnagramDiffStart}
+      +include = false
+      +
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
     """.unindent()
     const expectedAnagramDiffExclude = fmt"""
       {expectedAnagramDiffStart}
@@ -185,6 +193,39 @@ proc testsForSync(binaryPath: string) =
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == expectedAnagramDiffExclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "single-exercise `sync --update` with input of 'y' includes as expected":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
+
+    test "`git diff` shows the expected diff":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffChooseInclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "single-exercise `sync --update` with input of 'n' excludes as expected":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
+
+    test "`git diff` shows the expected diff":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffExclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "single-exercise `sync --update` with input of 's' exits with 1":
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
+
+    test "`git diff` shows the expected diff":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == &"{expectedAnagramDiffStart}\n"
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
