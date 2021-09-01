@@ -94,6 +94,29 @@ proc testsForSync(binaryPath: string) =
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
 
+    test "a single-exercise `sync` without `--update` exits with 1 and prints the expected output":
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e anagram")
+
+      check outp == """
+        Checking exercises...
+        [warn] anagram: missing 1 test case
+               - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
+        [warn] some exercises are missing test cases
+      """.dedent(8)
+
+    test "when passing multiple exercises, only the final exercise is acted upon":
+      # TODO: We should instead support multiple exercises being passed.
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e grade-school -e isogram")
+
+      check outp == """
+        Checking exercises...
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        [warn] some exercises are missing test cases
+      """.dedent(8)
+
     test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
