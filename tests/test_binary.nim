@@ -129,33 +129,43 @@ proc testsForSync(binaryPath: string) =
 
     const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
     const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
+    const testsTomlHeaderDiff = """
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key."""
+    const expectedAnagramDiffStart = fmt"""
+      --- exercises/practice/anagram/.meta/tests.toml
+      +++ exercises/practice/anagram/.meta/tests.toml
+      {testsTomlHeaderDiff}"""
+    const expectedAnagramDiffInclude = fmt"""
+      {expectedAnagramDiffStart}
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      +
+    """.unindent()
+    const expectedAnagramDiffExclude = fmt"""
+      {expectedAnagramDiffStart}
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +include = false
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      +
+    """.unindent()
 
     test "`git diff` shows the expected diff":
       execAndCheck(0):
         execCmdEx(diffCmd)
-
-      const expectedAnagramDiffInclude = """
-        --- exercises/practice/anagram/.meta/tests.toml
-        +++ exercises/practice/anagram/.meta/tests.toml
-        -# This is an auto-generated file. Regular comments will be removed when this
-        -# file is regenerated. Regenerating will not touch any manually added keys,
-        -# so comments can be added in a "comment" key.
-        +# This is an auto-generated file.
-        +#
-        +# Regenerating this file via `configlet sync` will:
-        +# - Recreate every `description` key/value pair
-        +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-        +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-        +# - Preserve any other key/value pair
-        +#
-        +# As user-added comments (using the # character) will be removed when this file
-        +# is regenerated, comments can be added via a `comment` key.
-        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-        +description = "detects two anagrams"
-        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-        +
-      """.unindent()
-
       check outp.conciseDiff() == expectedAnagramDiffInclude
 
     let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
@@ -174,30 +184,6 @@ proc testsForSync(binaryPath: string) =
     test "`git diff` shows the expected diff":
       execAndCheck(0):
         execCmdEx(diffCmd)
-
-      const expectedAnagramDiffExclude = """
-        --- exercises/practice/anagram/.meta/tests.toml
-        +++ exercises/practice/anagram/.meta/tests.toml
-        -# This is an auto-generated file. Regular comments will be removed when this
-        -# file is regenerated. Regenerating will not touch any manually added keys,
-        -# so comments can be added in a "comment" key.
-        +# This is an auto-generated file.
-        +#
-        +# Regenerating this file via `configlet sync` will:
-        +# - Recreate every `description` key/value pair
-        +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-        +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-        +# - Preserve any other key/value pair
-        +#
-        +# As user-added comments (using the # character) will be removed when this file
-        +# is regenerated, comments can be added via a `comment` key.
-        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-        +description = "detects two anagrams"
-        +include = false
-        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-        +
-      """.unindent()
-
       check outp.conciseDiff() == expectedAnagramDiffExclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
