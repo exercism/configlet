@@ -117,6 +117,50 @@ proc testsForSync(binaryPath: string) =
         [warn] some exercises are missing test cases
       """.dedent(8)
 
+    test "single-exercise `sync --update --mode=include` exits with 0 and includes the expected test cases":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir} -e anagram")
+
+      check outp == """
+        Syncing exercises...
+        [info] anagram: included 1 missing test case
+        All exercises are synced!
+      """.unindent()
+
+    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
+    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
+
+    test "`git diff` shows the expected diff":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+
+      const expectedAnagramDiffInclude = """
+        --- exercises/practice/anagram/.meta/tests.toml
+        +++ exercises/practice/anagram/.meta/tests.toml
+        -# This is an auto-generated file. Regular comments will be removed when this
+        -# file is regenerated. Regenerating will not touch any manually added keys,
+        -# so comments can be added in a "comment" key.
+        +# This is an auto-generated file.
+        +#
+        +# Regenerating this file via `configlet sync` will:
+        +# - Recreate every `description` key/value pair
+        +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+        +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+        +# - Preserve any other key/value pair
+        +#
+        +# As user-added comments (using the # character) will be removed when this file
+        +# is regenerated, comments can be added via a `comment` key.
+        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+        +description = "detects two anagrams"
+        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+        +
+      """.unindent()
+
+      check outp.conciseDiff() == expectedAnagramDiffInclude
+
+    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
     test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
@@ -444,8 +488,6 @@ proc testsForSync(binaryPath: string) =
       +description = "callbacks should not be called if dependencies change but output value doesn't change"
     """.unindent()
 
-    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
-    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
     test "`git diff` shows the expected diff":
       execAndCheck(0):
         execCmdEx(diffCmd)
