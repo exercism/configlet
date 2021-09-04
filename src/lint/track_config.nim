@@ -1,4 +1,5 @@
-import std/[json, sets]
+import std/[json, sets, strformat]
+import pkg/jsony
 import ".."/helpers
 import "."/validators
 
@@ -196,6 +197,53 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
                       isRequired = false, allowedLength = 6..6)
 
+type
+  Status = enum
+    sWip = "wip"
+    sBeta = "beta"
+    sActive = "active"
+    sDeprecated = "deprecated"
+
+  ConceptExercise = object
+    slug: string
+    # name: string
+    # uuid: string
+    concepts: HashSet[string]
+    prerequisites: HashSet[string]
+    status: Status
+
+  Exercises = object
+    `concept`: seq[ConceptExercise]
+
+  TrackConfig = object
+    exercises: Exercises
+
+proc hasValidPrerequisites(s: string; path: Path): bool =
+  # TODO: Add the missing checks to this proc.
+  let trackConfig = fromJson(s, TrackConfig)
+  result = true
+
+  # Find the concepts that are taught by a user-facing Concept Exercise
+  var conceptsTaught = initHashSet[string]()
+  for conceptExercise in trackConfig.exercises.`concept`:
+    if conceptExercise.status in [sBeta, sActive]:
+      for conceptTaught in conceptExercise.concepts:
+        conceptsTaught.incl conceptTaught
+
+  # Require that every prerequisite is taught by different Concept Exercise
+  for conceptExercise in trackConfig.exercises.`concept`:
+    if conceptExercise.status in [sBeta, sActive]:
+      for prereq in conceptExercise.prerequisites:
+        if prereq in conceptExercise.concepts:
+          let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+                    &"{q preReq} in both its `prerequisites` and its `concepts`"
+          result.setFalseAndPrint(msg, path)
+        elif prereq notin conceptsTaught:
+          let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+                    &"{q preReq} in its `prerequisites`, which is not in the " &
+                    "`concepts` array of any other user-facing Concept Exercise"
+          result.setFalseAndPrint(msg, path)
+
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
     let checks = [
@@ -221,3 +269,7 @@ proc isTrackConfigValid*(trackDir: Path): bool =
   if j != nil:
     if not isValidTrackConfig(j, trackConfigPath):
       result = false
+
+  if result:
+    let trackConfigContents = readFile(trackConfigPath)
+    result = hasValidPrerequisites(trackConfigContents, trackConfigPath)
