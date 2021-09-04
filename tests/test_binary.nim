@@ -106,7 +106,7 @@ proc testsForSync(binaryPath: string) =
       """.dedent(8)
 
     test "when passing multiple exercises, only the final exercise is acted upon":
-      # TODO: We should instead support multiple exercises being passed.
+      # TODO: configlet should either print a warning here, or support multiple exercises being passed.
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e grade-school -e isogram")
 
