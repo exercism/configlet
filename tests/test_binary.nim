@@ -23,19 +23,19 @@ func conciseDiff(s: string): string =
         result.add '\n'
 
 proc testsForSync(binaryPath: string) =
-  suite "sync":
-    const psDir = testsDir / ".test_binary_problem_specifications"
-    const trackDir = testsDir / ".test_binary_nim_track_repo"
+  const psDir = testsDir / ".test_binary_problem_specifications"
+  const trackDir = testsDir / ".test_binary_nim_track_repo"
 
-    # Setup: clone the problem-specifications repo, and checkout a known state
-    setupExercismRepo("problem-specifications", psDir,
-                      "f17f457fdc0673369047250f652e93c7901755e1")
+  # Setup: clone the problem-specifications repo, and checkout a known state
+  setupExercismRepo("problem-specifications", psDir,
+                    "f17f457fdc0673369047250f652e93c7901755e1")
 
-    # Setup: clone a track repo, and checkout a known state
-    setupExercismRepo("nim", trackDir,
-                      "6e909c9e5338cd567c20224069df00e031fb2efa")
+  # Setup: clone a track repo, and checkout a known state
+  setupExercismRepo("nim", trackDir,
+                    "6e909c9e5338cd567c20224069df00e031fb2efa")
 
-    test "a `sync` without `--update` exits with 1 and prints the expected output":
+  suite "sync, without --update":
+    test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
 
@@ -94,7 +94,7 @@ proc testsForSync(binaryPath: string) =
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
 
-    test "a single-exercise `sync` without `--update` exits with 1 and prints the expected output":
+    test "a given exercise with a missing test case: prints the expected output, and exits with 1":
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e anagram")
 
@@ -117,7 +117,8 @@ proc testsForSync(binaryPath: string) =
         [warn] some exercises are missing test cases
       """.dedent(8)
 
-    test "single-exercise `sync --update --mode=include` exits with 0 and includes the expected test cases":
+  suite "sync, with --update":
+    test "-mi: includes a missing test case for a given exercise, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir} -e anagram")
 
@@ -171,7 +172,7 @@ proc testsForSync(binaryPath: string) =
       +
     """.unindent()
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == expectedAnagramDiffInclude
@@ -179,7 +180,7 @@ proc testsForSync(binaryPath: string) =
     let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
-    test "single-exercise `sync --update --mode=exclude` exits with 0 and excludes the expected test cases":
+    test "-me: excludes a missing test case for a given exercise, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -me -o -p {psDir} -e anagram")
 
@@ -189,47 +190,47 @@ proc testsForSync(binaryPath: string) =
         All exercises are synced!
       """.unindent()
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == expectedAnagramDiffExclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
-    test "single-exercise `sync --update` with input of 'y' includes as expected":
+    test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == expectedAnagramDiffChooseInclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
-    test "single-exercise `sync --update` with input of 'n' excludes as expected":
+    test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == expectedAnagramDiffExclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
-    test "single-exercise `sync --update` with input of 's' exits with 1":
+    test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
       check outp.conciseDiff() == &"{expectedAnagramDiffStart}\n"
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
-    test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
+    test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
@@ -556,13 +557,13 @@ proc testsForSync(binaryPath: string) =
       +description = "callbacks should not be called if dependencies change but output value doesn't change"
     """.unindent()
 
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
 
       check outp.conciseDiff() == expectedDiffOutput
 
-    test "after syncing, another `sync --update --mode=include` performs no changes":
+    test "after updating, another update using -mi performs no changes, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
@@ -571,7 +572,7 @@ proc testsForSync(binaryPath: string) =
         All exercises are synced!
       """.unindent()
 
-    test "after syncing, a `sync` without `--update` shows that exercises are up to date":
+    test "after updating, a `sync` without `--update` shows that exercises are up to date, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
       check outp == """
@@ -579,7 +580,7 @@ proc testsForSync(binaryPath: string) =
         All exercises are up-to-date!
       """.unindent()
 
-    test "the `git diff` output is still the same":
+    test "the diff is still the same":
       execAndCheck(0):
         execCmdEx(diffCmd)
 
