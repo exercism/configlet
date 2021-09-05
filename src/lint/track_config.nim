@@ -240,46 +240,58 @@ iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
     if conceptExercise.status in [sBeta, sActive]:
       yield conceptExercise
 
-proc satisfiesSecondPass(s: string; path: Path): bool =
-  let trackConfig = fromJson(s, TrackConfig)
-  result = true
-
-  let conceptSlugs = getConceptSlugs(trackConfig)
-
-  # Check the `concepts` array of each user-facing Concept Exercise
-  var conceptsTaught = initHashSet[string]()
+proc checkExerciseConcepts(trackConfig: TrackConfig;
+                           conceptSlugs: HashSet[string]; b: var bool;
+                           path: Path): HashSet[string] =
+  ## Checks the `concepts` array of each user-facing Concept Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  result = initHashSet[string]()
   for conceptExercise in visibleConceptExercises(trackConfig):
     for conceptTaught in conceptExercise.concepts:
       # Build a set of every concept taught by a user-facing Concept Exercise
-      if conceptsTaught.containsOrIncl(conceptTaught):
+      if result.containsOrIncl(conceptTaught):
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q conceptTaught} in its `concepts`, but that concept " &
                    "appears in the `concepts` of another Concept Exercise"
-        result.setFalseAndPrint(msg, path)
+        b.setFalseAndPrint(msg, path)
       if conceptTaught notin conceptSlugs:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q conceptTaught} in its `concepts`, which is not a " &
                    "`slug` in the top-level `concepts` array"
-        result.setFalseAndPrint(msg, path)
+        b.setFalseAndPrint(msg, path)
 
-  # Check the `prerequisites` array of each user-facing Concept Exercise
+proc checkExercisePrerequisites(trackConfig: TrackConfig;
+                                conceptSlugs, conceptsTaught: HashSet[string];
+                                b: var bool; path: Path) =
+  ## Checks the `prerequisites` array of each user-facing Concept Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
   for conceptExercise in visibleConceptExercises(trackConfig):
     for prereq in conceptExercise.prerequisites:
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q preReq} in both its `prerequisites` and its `concepts`"
-        result.setFalseAndPrint(msg, path)
+        b.setFalseAndPrint(msg, path)
       elif prereq notin conceptsTaught:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q preReq} in its `prerequisites`, which is not in the " &
                    "`concepts` array of any other user-facing Concept Exercise"
-        result.setFalseAndPrint(msg, path)
+        b.setFalseAndPrint(msg, path)
 
       if prereq notin conceptSlugs:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q preReq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
-        result.setFalseAndPrint(msg, path)
+        b.setFalseAndPrint(msg, path)
+
+proc satisfiesSecondPass(s: string; path: Path): bool =
+  let trackConfig = fromJson(s, TrackConfig)
+  result = true
+
+  let conceptSlugs = getConceptSlugs(trackConfig)
+  let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
+                                             path)
+  checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
+                             path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
