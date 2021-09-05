@@ -215,13 +215,30 @@ type
   Exercises = object
     `concept`: seq[ConceptExercise]
 
+  Concept = object
+    name: string
+    slug: string
+    uuid: string
+
+  Concepts = seq[Concept]
+
   TrackConfig = object
     exercises: Exercises
+    concepts: Concepts
+
+func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
+  ## Returns a set of every `slug` in the top-level `concepts` array of a track
+  ## `config.json` file.
+  result = initHashSet[string]()
+  for con in trackConfig.concepts:
+    result.incl con.slug
 
 proc hasValidPrerequisites(s: string; path: Path): bool =
   # TODO: Add the missing checks to this proc.
   let trackConfig = fromJson(s, TrackConfig)
   result = true
+
+  let conceptSlugs = getConceptSlugs(trackConfig)
 
   # Find the concepts that are taught by a user-facing Concept Exercise
   var conceptsTaught = initHashSet[string]()
@@ -246,6 +263,12 @@ proc hasValidPrerequisites(s: string; path: Path): bool =
           let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                     &"{q preReq} in its `prerequisites`, which is not in the " &
                     "`concepts` array of any other user-facing Concept Exercise"
+          result.setFalseAndPrint(msg, path)
+
+        if prereq notin conceptSlugs:
+          let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+                    &"{q preReq} in its `prerequisites`, which is not a " &
+                     "`slug` in the top-level `concepts` array"
           result.setFalseAndPrint(msg, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
