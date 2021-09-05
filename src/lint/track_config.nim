@@ -250,6 +250,11 @@ proc hasValidPrerequisites(s: string; path: Path): bool =
                     &"{q conceptTaught} in its `concepts`, but that concept " &
                      "appears in the `concepts` of another Concept Exercise"
           result.setFalseAndPrint(msg, path)
+        if conceptTaught notin conceptSlugs:
+          let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+                    &"{q conceptTaught} in its `concepts`, which is not a " &
+                     "`slug` in the top-level `concepts` array"
+          result.setFalseAndPrint(msg, path)
 
   # Require that every prerequisite is taught by different Concept Exercise
   for conceptExercise in trackConfig.exercises.`concept`:
