@@ -240,11 +240,12 @@ proc hasValidPrerequisites(s: string; path: Path): bool =
 
   let conceptSlugs = getConceptSlugs(trackConfig)
 
-  # Find the concepts that are taught by a user-facing Concept Exercise
+  # Check the `concepts` array of each user-facing Concept Exercise
   var conceptsTaught = initHashSet[string]()
   for conceptExercise in trackConfig.exercises.`concept`:
     if conceptExercise.status in [sBeta, sActive]:
       for conceptTaught in conceptExercise.concepts:
+        # Build a set of every concept taught by a user-facing Concept Exercise
         if conceptsTaught.containsOrIncl(conceptTaught):
           let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                     &"{q conceptTaught} in its `concepts`, but that concept " &
@@ -256,7 +257,7 @@ proc hasValidPrerequisites(s: string; path: Path): bool =
                      "`slug` in the top-level `concepts` array"
           result.setFalseAndPrint(msg, path)
 
-  # Require that every prerequisite is taught by different Concept Exercise
+  # Check the `prerequisites` array of each user-facing Concept Exercise
   for conceptExercise in trackConfig.exercises.`concept`:
     if conceptExercise.status in [sBeta, sActive]:
       for prereq in conceptExercise.prerequisites:
