@@ -233,8 +233,7 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   for con in trackConfig.concepts:
     result.incl con.slug
 
-proc hasValidPrerequisites(s: string; path: Path): bool =
-  # TODO: Add the missing checks to this proc.
+proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
 
@@ -305,4 +304,4 @@ proc isTrackConfigValid*(trackDir: Path): bool =
 
   if result:
     let trackConfigContents = readFile(trackConfigPath)
-    result = hasValidPrerequisites(trackConfigContents, trackConfigPath)
+    result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
