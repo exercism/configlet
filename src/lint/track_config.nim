@@ -228,7 +228,11 @@ proc hasValidPrerequisites(s: string; path: Path): bool =
   for conceptExercise in trackConfig.exercises.`concept`:
     if conceptExercise.status in [sBeta, sActive]:
       for conceptTaught in conceptExercise.concepts:
-        conceptsTaught.incl conceptTaught
+        if conceptsTaught.containsOrIncl(conceptTaught):
+          let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+                    &"{q conceptTaught} in its `concepts`, but that concept " &
+                     "appears in the `concepts` of another Concept Exercise"
+          result.setFalseAndPrint(msg, path)
 
   # Require that every prerequisite is taught by different Concept Exercise
   for conceptExercise in trackConfig.exercises.`concept`:
