@@ -199,6 +199,7 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
 
 type
   Status = enum
+    sMissing = "missing"
     sWip = "wip"
     sBeta = "beta"
     sActive = "active"
@@ -237,7 +238,7 @@ iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
   ## Yields every concept exercise in `trackConfig` that has a `status` of
   ## "beta" or "active".
   for conceptExercise in trackConfig.exercises.`concept`:
-    if conceptExercise.status in [sBeta, sActive]:
+    if conceptExercise.status in [sMissing, sBeta, sActive]:
       yield conceptExercise
 
 proc checkExerciseConcepts(trackConfig: TrackConfig;
