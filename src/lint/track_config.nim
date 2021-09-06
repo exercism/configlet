@@ -306,50 +306,51 @@ proc statusMsg(exercise: ConceptExercise | PracticeExercise;
   result = &"The {exerciseKind} {q exercise.slug} has a `status` " &
            &"of {q $exercise.status}, but has {problem}"
 
-proc checkConceptExercises(conceptExercises: seq[ConceptExercise];
-                           b: var bool; path: Path) =
-  ## Checks the `concepts` and `prerequisites` array of each exercise in
-  ## `conceptExercises`, and sets `b` to `false` if a check fails.
-  for conceptExercise in conceptExercises:
-    let status = conceptExercise.status
-    case status
-    of sMissing, sBeta, sActive:
-      if conceptExercise.concepts.len == 0:
-        let msg = statusMsg(conceptExercise, "an empty array of `concepts`")
-        b.setFalseAndPrint(msg, path)
-    of sDeprecated:
-      if conceptExercise.concepts.len > 0:
-        let msg = statusMsg(conceptExercise, "a non-empty array of `concepts`")
-        b.setFalseAndPrint(msg, path)
-      if conceptExercise.prerequisites.len > 0:
-        let msg = statusMsg(conceptExercise, "a non-empty array of `prerequisites`")
-        b.setFalseAndPrint(msg, path)
-    of sWip:
-      discard
+proc checkExercisePCP(exercise: ConceptExercise | PracticeExercise;
+                      b: var bool; path: Path) =
+  ## Checks the `prerequisites` array and either the `concepts` or `practices`
+  ## array of `exercise`, and sets `b` to `false` if a check fails.
+  let status = exercise.status
 
-proc checkPracticeExercises(practiceExercises: seq[PracticeExercise];
-                            b: var bool; path: Path) =
-  ## Checks the `practices` and `prerequisites` array of each exercise in
-  ## `practiceExercises`, and sets `b` to `false` if a check fails.
-  for practiceExercise in practiceExercises:
-    let status = practiceExercise.status
-    case status
-    of sMissing, sBeta, sActive:
-      if practiceExercise.practices.len == 0:
-        let msg = statusMsg(practiceExercise, "an empty array of `practices`")
+  case status
+  of sMissing, sBeta, sActive:
+    # Check either `concepts` or `practices`
+    when exercise is ConceptExercise:
+      if exercise.concepts.len == 0:
+        let msg = statusMsg(exercise, "an empty array of `concepts`")
         b.setFalseAndPrint(msg, path)
-      if practiceExercise.prerequisites.len == 0:
-        let msg = statusMsg(practiceExercise, "an empty array of `prerequisites`")
+    else:
+      if exercise.practices.len == 0:
+        let msg = statusMsg(exercise, "an empty array of `practices`")
         b.setFalseAndPrint(msg, path)
-    of sDeprecated:
-      if practiceExercise.practices.len > 0:
-        let msg = statusMsg(practiceExercise, "a non-empty array of `practices`")
+    # Check `prerequisites`
+    when exercise is PracticeExercise:
+      if exercise.prerequisites.len == 0:
+        let msg = statusMsg(exercise, "an empty array of `prerequisites`")
         b.setFalseAndPrint(msg, path)
-      if practiceExercise.prerequisites.len > 0:
-        let msg = statusMsg(practiceExercise, "a non-empty array of `prerequisites`")
+
+  of sDeprecated:
+    # Check either `concepts` or `practices`
+    when exercise is ConceptExercise:
+      if exercise.concepts.len > 0:
+        let msg = statusMsg(exercise, "a non-empty array of `concepts`")
         b.setFalseAndPrint(msg, path)
-    of sWip:
-      discard
+    else:
+      if exercise.practices.len > 0:
+        let msg = statusMsg(exercise, "a non-empty array of `practices`")
+        b.setFalseAndPrint(msg, path)
+    # Check `prerequisites`
+    if exercise.prerequisites.len > 0:
+      let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
+      b.setFalseAndPrint(msg, path)
+
+  of sWip:
+    discard
+
+proc checkExercisesPCP(exercises: Exercises; b: var bool; path: Path) =
+  for exerciseKind in exercises.fields:
+    for exercise in exerciseKind:
+      checkExercisePCP(exercise, b, path)
 
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
@@ -360,8 +361,7 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                                              path)
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
-  checkConceptExercises(trackConfig.exercises.`concept`, result, path)
-  checkPracticeExercises(trackConfig.exercises.practice, result, path)
+  checkExercisesPCP(trackConfig.exercises, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
