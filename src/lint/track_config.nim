@@ -295,11 +295,11 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkExerciseConceptsAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
-                                        path: Path) =
-  ## Checks the `concepts` and `prerequisites` array of each Concept Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
-  for conceptExercise in trackConfig.exercises.`concept`:
+proc checkConceptExercises(conceptExercises: seq[ConceptExercise];
+                           b: var bool; path: Path) =
+  ## Checks the `concepts` and `prerequisites` array of each exercise in
+  ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  for conceptExercise in conceptExercises:
     let status = conceptExercise.status
     case status
     of sMissing, sBeta, sActive:
@@ -319,11 +319,11 @@ proc checkExerciseConceptsAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
     of sWip:
       discard
 
-proc checkExercisePracticesAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
-                                         path: Path) =
-  ## Checks the `practices` and `prerequisites` array of each Practice Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
-  for practiceExercise in trackConfig.exercises.practice:
+proc checkPracticeExercises(practiceExercises: seq[PracticeExercise];
+                            b: var bool; path: Path) =
+  ## Checks the `practices` and `prerequisites` array of each exercise in
+  ## `practiceExercises`, and sets `b` to `false` if a check fails.
+  for practiceExercise in practiceExercises:
     let status = practiceExercise.status
     case status
     of sMissing, sBeta, sActive:
@@ -356,8 +356,8 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                                              path)
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
-  checkExerciseConceptsAndPrereqsLen(trackConfig, result, path)
-  checkExercisePracticesAndPrereqsLen(trackConfig, result, path)
+  checkConceptExercises(trackConfig.exercises.`concept`, result, path)
+  checkPracticeExercises(trackConfig.exercises.practice, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
