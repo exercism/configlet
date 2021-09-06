@@ -303,8 +303,17 @@ proc statusMsg(exercise: ConceptExercise | PracticeExercise;
       "Concept Exercise"
     else:
       "Practice Exercise"
-  result = &"The {exerciseKind} {q exercise.slug} has a `status` " &
-           &"of {q $exercise.status}, but has {problem}"
+  let statusStr =
+    case exercise.status
+    of sMissing:
+      "is user-facing (because a missing `status` key implies `active`)"
+    of sDeprecated:
+      "has a `status` of `deprecated`"
+    else:
+      &"is user-facing (because its `status` key has the value {q $exercise.status})"
+
+  result = &"The {exerciseKind} {q exercise.slug} {statusStr}" &
+           &", but has {problem}"
 
 proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
                       b: var bool; path: Path) =
