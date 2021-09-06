@@ -340,9 +340,11 @@ proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
     case status
     of sMissing, sBeta, sActive:
       # Check either `concepts` or `practices`
-      if conceptsOrPractices.len == 0:
-        let msg = statusMsg(exercise, &"an empty array of `{conceptsOrPracticesStr}`")
-        b.setFalseAndPrint(msg, path)
+      # TODO: enable the `practices` check when more tracks have populated them.
+      when exercise is ConceptExercise:
+        if conceptsOrPractices.len == 0:
+          let msg = statusMsg(exercise, &"an empty array of `{conceptsOrPracticesStr}`")
+          b.setFalseAndPrint(msg, path)
 
       # Check `prerequisites`
       when exercise is ConceptExercise:
@@ -354,9 +356,12 @@ proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
             let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
             b.setFalseAndPrint(msg, path)
         else:
-          if exercise.prerequisites.len == 0:
-            let msg = statusMsg(exercise, "an empty array of `prerequisites`")
-            b.setFalseAndPrint(msg, path)
+          # TODO: enable the Practice Exercise `prerequisites` check when more
+          # tracks have populated them.
+          if false:
+            if exercise.prerequisites.len == 0:
+              let msg = statusMsg(exercise, "an empty array of `prerequisites`")
+              b.setFalseAndPrint(msg, path)
 
     of sDeprecated:
       # Check either `concepts` or `practices`
