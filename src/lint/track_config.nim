@@ -310,19 +310,28 @@ proc checkExercisePCP(exercise: ConceptExercise | PracticeExercise;
                       b: var bool; path: Path) =
   ## Checks the `prerequisites` array and either the `concepts` or `practices`
   ## array of `exercise`, and sets `b` to `false` if a check fails.
+
+  let conceptsOrPractices =
+    when exercise is ConceptExercise:
+      exercise.concepts
+    else:
+      exercise.practices
+
+  const conceptsOrPracticesStr =
+    when exercise is ConceptExercise:
+      "concepts"
+    else:
+      "practices"
+
   let status = exercise.status
 
   case status
   of sMissing, sBeta, sActive:
     # Check either `concepts` or `practices`
-    when exercise is ConceptExercise:
-      if exercise.concepts.len == 0:
-        let msg = statusMsg(exercise, "an empty array of `concepts`")
-        b.setFalseAndPrint(msg, path)
-    else:
-      if exercise.practices.len == 0:
-        let msg = statusMsg(exercise, "an empty array of `practices`")
-        b.setFalseAndPrint(msg, path)
+    if conceptsOrPractices.len == 0:
+      let msg = statusMsg(exercise, &"an empty array of `{conceptsOrPracticesStr}`")
+      b.setFalseAndPrint(msg, path)
+
     # Check `prerequisites`
     when exercise is PracticeExercise:
       if exercise.prerequisites.len == 0:
@@ -331,14 +340,9 @@ proc checkExercisePCP(exercise: ConceptExercise | PracticeExercise;
 
   of sDeprecated:
     # Check either `concepts` or `practices`
-    when exercise is ConceptExercise:
-      if exercise.concepts.len > 0:
-        let msg = statusMsg(exercise, "a non-empty array of `concepts`")
-        b.setFalseAndPrint(msg, path)
-    else:
-      if exercise.practices.len > 0:
-        let msg = statusMsg(exercise, "a non-empty array of `practices`")
-        b.setFalseAndPrint(msg, path)
+    if conceptsOrPractices.len > 0:
+      let msg = statusMsg(exercise, &"a non-empty array of `{conceptsOrPracticesStr}`")
+      b.setFalseAndPrint(msg, path)
     # Check `prerequisites`
     if exercise.prerequisites.len > 0:
       let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
