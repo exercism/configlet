@@ -285,6 +285,30 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
+proc checkExerciseConceptsAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
+                                        path: Path) =
+  ## Checks the `concepts` and `prerequisites` array of each Concept Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  for conceptExercise in trackConfig.exercises.`concept`:
+    let status = conceptExercise.status
+    case status
+    of sMissing, sBeta, sActive:
+      if conceptExercise.concepts.len == 0:
+        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
+                  &"of {q $status}, but has an empty array of `concepts`"
+        b.setFalseAndPrint(msg, path)
+    of sDeprecated:
+      if conceptExercise.concepts.len > 0:
+        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
+                  &"of {q $status}, but has a non-empty array of `concepts`"
+        b.setFalseAndPrint(msg, path)
+      if conceptExercise.prerequisites.len > 0:
+        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
+                  &"of {q $status}, but has a non-empty array of `prerequisites`"
+        b.setFalseAndPrint(msg, path)
+    of sWip:
+      discard
+
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
@@ -294,6 +318,7 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                                              path)
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
+  checkExerciseConceptsAndPrereqsLen(trackConfig, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
