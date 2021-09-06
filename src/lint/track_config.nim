@@ -334,9 +334,14 @@ proc checkExercisePCP(exercise: ConceptExercise | PracticeExercise;
 
     # Check `prerequisites`
     when exercise is PracticeExercise:
-      if exercise.prerequisites.len == 0:
-        let msg = statusMsg(exercise, "an empty array of `prerequisites`")
-        b.setFalseAndPrint(msg, path)
+      if exercise.slug == "hello-world":
+        if exercise.prerequisites.len > 0:
+          let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
+          b.setFalseAndPrint(msg, path)
+      else:
+        if exercise.prerequisites.len == 0:
+          let msg = statusMsg(exercise, "an empty array of `prerequisites`")
+          b.setFalseAndPrint(msg, path)
 
   of sDeprecated:
     # Check either `concepts` or `practices`
