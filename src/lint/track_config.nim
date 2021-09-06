@@ -213,8 +213,18 @@ type
     prerequisites: HashSet[string]
     status: Status
 
+  PracticeExercise = object
+    slug: string
+    # name: string
+    # uuid: string
+    # difficulty: int
+    practices: HashSet[string]
+    prerequisites: HashSet[string]
+    status: Status
+
   Exercises = object
     `concept`: seq[ConceptExercise]
+    practice: seq[PracticeExercise]
 
   Concept = object
     name: string
@@ -309,6 +319,34 @@ proc checkExerciseConceptsAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
     of sWip:
       discard
 
+proc checkExercisePracticesAndPrereqsLen(trackConfig: TrackConfig; b: var bool;
+                                         path: Path) =
+  ## Checks the `practices` and `prerequisites` array of each Practice Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  for practiceExercise in trackConfig.exercises.practice:
+    let status = practiceExercise.status
+    case status
+    of sMissing, sBeta, sActive:
+      if practiceExercise.practices.len == 0:
+        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
+                  &"of {q $status}, but has an empty array of `practices`"
+        b.setFalseAndPrint(msg, path)
+      if practiceExercise.prerequisites.len == 0:
+        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
+                  &"of {q $status}, but has an empty array of `prerequisites`"
+        b.setFalseAndPrint(msg, path)
+    of sDeprecated:
+      if practiceExercise.practices.len > 0:
+        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
+                  &"of {q $status}, but has a non-empty array of `practices`"
+        b.setFalseAndPrint(msg, path)
+      if practiceExercise.prerequisites.len > 0:
+        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
+                  &"of {q $status}, but has a non-empty array of `prerequisites`"
+        b.setFalseAndPrint(msg, path)
+    of sWip:
+      discard
+
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
@@ -319,6 +357,7 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
   checkExerciseConceptsAndPrereqsLen(trackConfig, result, path)
+  checkExercisePracticesAndPrereqsLen(trackConfig, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
