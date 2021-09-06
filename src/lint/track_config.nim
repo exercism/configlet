@@ -295,6 +295,17 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
+proc statusMsg(exercise: ConceptExercise | PracticeExercise;
+               problem: string): string =
+  ## Returns the error text for an `exercise` with the status-related `problem`.
+  const exerciseKind =
+    when exercise is ConceptExercise:
+      "Concept Exercise"
+    else:
+      "Practice Exercise"
+  result = &"The {exerciseKind} {q exercise.slug} has a `status` " &
+           &"of {q $exercise.status}, but has {problem}"
+
 proc checkConceptExercises(conceptExercises: seq[ConceptExercise];
                            b: var bool; path: Path) =
   ## Checks the `concepts` and `prerequisites` array of each exercise in
@@ -304,17 +315,14 @@ proc checkConceptExercises(conceptExercises: seq[ConceptExercise];
     case status
     of sMissing, sBeta, sActive:
       if conceptExercise.concepts.len == 0:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
-                  &"of {q $status}, but has an empty array of `concepts`"
+        let msg = statusMsg(conceptExercise, "an empty array of `concepts`")
         b.setFalseAndPrint(msg, path)
     of sDeprecated:
       if conceptExercise.concepts.len > 0:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
-                  &"of {q $status}, but has a non-empty array of `concepts`"
+        let msg = statusMsg(conceptExercise, "a non-empty array of `concepts`")
         b.setFalseAndPrint(msg, path)
       if conceptExercise.prerequisites.len > 0:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has a `status` " &
-                  &"of {q $status}, but has a non-empty array of `prerequisites`"
+        let msg = statusMsg(conceptExercise, "a non-empty array of `prerequisites`")
         b.setFalseAndPrint(msg, path)
     of sWip:
       discard
@@ -328,21 +336,17 @@ proc checkPracticeExercises(practiceExercises: seq[PracticeExercise];
     case status
     of sMissing, sBeta, sActive:
       if practiceExercise.practices.len == 0:
-        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
-                  &"of {q $status}, but has an empty array of `practices`"
+        let msg = statusMsg(practiceExercise, "an empty array of `practices`")
         b.setFalseAndPrint(msg, path)
       if practiceExercise.prerequisites.len == 0:
-        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
-                  &"of {q $status}, but has an empty array of `prerequisites`"
+        let msg = statusMsg(practiceExercise, "an empty array of `prerequisites`")
         b.setFalseAndPrint(msg, path)
     of sDeprecated:
       if practiceExercise.practices.len > 0:
-        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
-                  &"of {q $status}, but has a non-empty array of `practices`"
+        let msg = statusMsg(practiceExercise, "a non-empty array of `practices`")
         b.setFalseAndPrint(msg, path)
       if practiceExercise.prerequisites.len > 0:
-        let msg = &"The Practice Exercise {q practiceExercise.slug} has a `status` " &
-                  &"of {q $status}, but has a non-empty array of `prerequisites`"
+        let msg = statusMsg(practiceExercise, "a non-empty array of `prerequisites`")
         b.setFalseAndPrint(msg, path)
     of sWip:
       discard
