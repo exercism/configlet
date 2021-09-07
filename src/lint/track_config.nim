@@ -199,6 +199,7 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
 
 type
   Status = enum
+    sMissing = "missing"
     sWip = "wip"
     sBeta = "beta"
     sActive = "active"
@@ -234,10 +235,11 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
     result.incl con.slug
 
 iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
-  ## Yields every concept exercise in `trackConfig` that has a `status` of
-  ## "beta" or "active".
+  ## Yields every Concept Exercise in `trackConfig` that appears on the website.
+  ## That is, every Concept Exercise that has a `status` of `beta` or `active`,
+  ## or that omits the `status` property entirely (which implies `active`).
   for conceptExercise in trackConfig.exercises.`concept`:
-    if conceptExercise.status in [sBeta, sActive]:
+    if conceptExercise.status in [sMissing, sBeta, sActive]:
       yield conceptExercise
 
 proc checkExerciseConcepts(trackConfig: TrackConfig;
