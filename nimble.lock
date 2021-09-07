@@ -1,0 +1,36 @@
+{
+  "version": 2,
+  "packages": {
+    "supersnappy": {
+      "version": "2.1.3",
+      "vcsRevision": "e4df8cb5468dd96fc5a4764028e20c8a3942f16a",
+      "url": "https://github.com/guzba/supersnappy",
+      "downloadMethod": "git",
+      "dependencies": [],
+      "checksums": {
+        "sha1": "36a05ee6befe3764ed8e2a6fb5d0882c2fd090f8"
+      }
+    },
+    "jsony": {
+      "version": "1.1.5",
+      "vcsRevision": "ea811bec7fa50f5abd3088ba94cda74285e93f18",
+      "url": "https://github.com/treeform/jsony",
+      "downloadMethod": "git",
+      "dependencies": [],
+      "checksums": {
+        "sha1": "6aeb83e7481ca8686396a568096054bc668294df"
+      }
+    },
+    "parsetoml": {
+      "version": "0.7.1",
+      "vcsRevision": "6e5e16179fa2db60f2f37d8b1af4128aaa9c8aaf",
+      "url": "https://github.com/NimParsers/parsetoml.git",
+      "downloadMethod": "git",
+      "dependencies": [],
+      "checksums": {
+        "sha1": "586fe63467a674008c4445ed1b8ac882177d7103"
+      }
+    }
+  },
+  "tasks": {}
+}
