@@ -315,8 +315,8 @@ proc statusMsg(exercise: ConceptExercise | PracticeExercise;
   result = &"The {exerciseKind} {q exercise.slug} {statusStr}" &
            &", but has {problem}"
 
-proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
-                      b: var bool; path: Path) =
+proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
+                       b: var bool; path: Path) =
   ## Checks the `prerequisites` array and either the `concepts` or `practices`
   ## array (hence "PCP") of every exercise in `exercises`, and sets `b` to
   ## `false` if a check fails.
@@ -385,10 +385,6 @@ proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
             "Exercise is allowed to have that"
     b.setFalseAndPrint(msg, path)
 
-proc checkExercisesPCP(exercises: Exercises; b: var bool; path: Path) =
-  for exerciseKind in exercises.fields:
-    checkExercisePCP(exerciseKind, b, path)
-
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
@@ -398,7 +394,8 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                                              path)
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
-  checkExercisesPCP(trackConfig.exercises, result, path)
+  checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
+  checkExercisesPCP(trackConfig.exercises.practice, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
