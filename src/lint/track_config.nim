@@ -235,7 +235,7 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
     result.incl con.slug
 
 iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
-  ## Yields every concept exercise in `trackConfig` that has a `status` of
+  ## Yields every Concept Exercise in `trackConfig` that has a `status` of
   ## "beta" or "active".
   for conceptExercise in trackConfig.exercises.`concept`:
     if conceptExercise.status in [sMissing, sBeta, sActive]:
