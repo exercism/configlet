@@ -318,8 +318,8 @@ proc statusMsg(exercise: ConceptExercise | PracticeExercise;
 proc checkExercisePCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
                       b: var bool; path: Path) =
   ## Checks the `prerequisites` array and either the `concepts` or `practices`
-  ## array of every exercise in `exercises`, and sets `b` to `false` if a check
-  ## fails.
+  ## array (hence "PCP") of every exercise in `exercises`, and sets `b` to
+  ## `false` if a check fails.
   const conceptsOrPracticesStr =
     when exercises is seq[ConceptExercise]:
       "concepts"
