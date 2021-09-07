@@ -384,7 +384,7 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
       for slug in conceptExercisesWithEmptyPrereqs:
         msg.add &"{q slug}, "
       msg.setLen(msg.len - 2)
-      msg.add " each have an empty array of `prerequisites`, but only 1 Concept " &
+      msg.add " each have an empty array of `prerequisites`, but only one Concept " &
               "Exercise is allowed to have that"
       b.setFalseAndPrint(msg, path)
 
