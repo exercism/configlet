@@ -213,8 +213,18 @@ type
     prerequisites: HashSet[string]
     status: Status
 
+  PracticeExercise = object
+    slug: string
+    # name: string
+    # uuid: string
+    # difficulty: int
+    practices: HashSet[string]
+    prerequisites: HashSet[string]
+    status: Status
+
   Exercises = object
     `concept`: seq[ConceptExercise]
+    practice: seq[PracticeExercise]
 
   Concept = object
     name: string
@@ -285,6 +295,99 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
+proc statusMsg(exercise: ConceptExercise | PracticeExercise;
+               problem: string): string =
+  ## Returns the error text for an `exercise` with the status-related `problem`.
+  const exerciseKind =
+    when exercise is ConceptExercise:
+      "Concept Exercise"
+    else:
+      "Practice Exercise"
+  let statusStr =
+    case exercise.status
+    of sMissing:
+      "is user-facing (because a missing `status` key implies `active`)"
+    of sDeprecated:
+      "has a `status` of `deprecated`"
+    else:
+      &"is user-facing (because its `status` key has the value {q $exercise.status})"
+
+  result = &"The {exerciseKind} {q exercise.slug} {statusStr}" &
+           &", but has {problem}"
+
+proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
+                       b: var bool; path: Path) =
+  ## Checks the `prerequisites` array and either the `concepts` or `practices`
+  ## array (hence "PCP") of every exercise in `exercises`, and sets `b` to
+  ## `false` if a check fails.
+  const conceptsOrPracticesStr =
+    when exercises is seq[ConceptExercise]:
+      "concepts"
+    else:
+      "practices"
+
+  when exercises is seq[ConceptExercise]:
+    var conceptExercisesWithEmptyPrereqs = newSeq[string]()
+
+  for exercise in exercises:
+    let conceptsOrPractices =
+      when exercises is seq[ConceptExercise]:
+        exercise.concepts
+      else:
+        exercise.practices
+
+    let status = exercise.status
+
+    case status
+    of sMissing, sBeta, sActive:
+      # Check either `concepts` or `practices`
+      # TODO: enable the `practices` check when more tracks have populated them.
+      when exercise is ConceptExercise:
+        if conceptsOrPractices.len == 0:
+          let msg = statusMsg(exercise, &"an empty array of `{conceptsOrPracticesStr}`")
+          b.setFalseAndPrint(msg, path)
+
+      # Check `prerequisites`
+      when exercise is ConceptExercise:
+        if exercise.prerequisites.len == 0:
+          conceptExercisesWithEmptyPrereqs.add exercise.slug
+      else:
+        if exercise.slug == "hello-world":
+          if exercise.prerequisites.len > 0:
+            let msg = "The Practice Exercise `hello-world` must have an " &
+                      "empty array of `prerequisites`"
+            b.setFalseAndPrint(msg, path)
+        else:
+          # TODO: enable the Practice Exercise `prerequisites` check when more
+          # tracks have populated them.
+          if false:
+            if exercise.prerequisites.len == 0:
+              let msg = statusMsg(exercise, "an empty array of `prerequisites`")
+              b.setFalseAndPrint(msg, path)
+
+    of sDeprecated:
+      # Check either `concepts` or `practices`
+      if conceptsOrPractices.len > 0:
+        let msg = statusMsg(exercise, &"a non-empty array of `{conceptsOrPracticesStr}`")
+        b.setFalseAndPrint(msg, path)
+      # Check `prerequisites`
+      if exercise.prerequisites.len > 0:
+        let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
+        b.setFalseAndPrint(msg, path)
+
+    of sWip:
+      discard
+
+  when exercises is seq[ConceptExercise]:
+    if conceptExercisesWithEmptyPrereqs.len >= 2:
+      var msg = "The Concept Exercises "
+      for slug in conceptExercisesWithEmptyPrereqs:
+        msg.add &"{q slug}, "
+      msg.setLen(msg.len - 2)
+      msg.add " each have an empty array of `prerequisites`, but only one Concept " &
+              "Exercise is allowed to have that"
+      b.setFalseAndPrint(msg, path)
+
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
@@ -294,6 +397,8 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                                              path)
   checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
                              path)
+  checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
+  checkExercisesPCP(trackConfig.exercises.practice, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
