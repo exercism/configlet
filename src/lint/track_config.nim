@@ -396,14 +396,14 @@ proc checkExerciseSlugsAndForegone(trackConfig: TrackConfig; b: var bool;
   ##   only exists once on the track.
   ## - There is exactly one Practice Exercise with the slug `hello-world`.
   ## - The `foregone` array does not contain a slug of an implemented exercise.
-  var conceptExerciseSlugs = initHashSet[string](200)
+  var conceptExerciseSlugs = initHashSet[string](trackConfig.exercises.`concept`.len)
   for conceptExercise in trackConfig.exercises.`concept`:
     let slug = conceptExercise.slug
     if conceptExerciseSlugs.containsOrIncl slug:
       let msg = &"There is more than one Concept Exercise with the slug {q slug}"
       b.setFalseAndPrint(msg, path)
 
-  var practiceExerciseSlugs = initHashSet[string](200)
+  var practiceExerciseSlugs = initHashSet[string](trackConfig.exercises.practice.len)
   for practiceExercise in trackConfig.exercises.practice:
     let slug = practiceExercise.slug
     if practiceExerciseSlugs.containsOrIncl slug:
