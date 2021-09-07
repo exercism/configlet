@@ -326,7 +326,8 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
     else:
       "practices"
 
-  var conceptExercisesWithEmptyPrereqs = newSeq[string]()
+  when exercises is seq[ConceptExercise]:
+    var conceptExercisesWithEmptyPrereqs = newSeq[string]()
 
   for exercise in exercises:
     let conceptsOrPractices =
@@ -376,14 +377,15 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
     of sWip:
       discard
 
-  if conceptExercisesWithEmptyPrereqs.len >= 2:
-    var msg = "The Concept Exercises "
-    for slug in conceptExercisesWithEmptyPrereqs:
-      msg.add &"{q slug}, "
-    msg.setLen(msg.len - 2)
-    msg.add " each have an empty array of `prerequisites`, but only 1 Concept " &
-            "Exercise is allowed to have that"
-    b.setFalseAndPrint(msg, path)
+  when exercises is seq[ConceptExercise]:
+    if conceptExercisesWithEmptyPrereqs.len >= 2:
+      var msg = "The Concept Exercises "
+      for slug in conceptExercisesWithEmptyPrereqs:
+        msg.add &"{q slug}, "
+      msg.setLen(msg.len - 2)
+      msg.add " each have an empty array of `prerequisites`, but only 1 Concept " &
+              "Exercise is allowed to have that"
+      b.setFalseAndPrint(msg, path)
 
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
