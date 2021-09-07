@@ -389,22 +389,22 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
               "Exercise is allowed to have that"
       b.setFalseAndPrint(msg, path)
 
-proc checkExerciseSlugsAndForegone(trackConfig: TrackConfig; b: var bool;
+proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                                    path: Path) =
   ## Sets `b` to `false` if the below conditions are not satisfied:
-  ## - Each slug of a Concept Exercise or a Practice Exercise in `trackConfig`
+  ## - Each slug of a Concept Exercise or a Practice Exercise in `exercises`
   ##   only exists once on the track.
   ## - There is exactly one Practice Exercise with the slug `hello-world`.
   ## - The `foregone` array does not contain a slug of an implemented exercise.
-  var conceptExerciseSlugs = initHashSet[string](trackConfig.exercises.`concept`.len)
-  for conceptExercise in trackConfig.exercises.`concept`:
+  var conceptExerciseSlugs = initHashSet[string](exercises.`concept`.len)
+  for conceptExercise in exercises.`concept`:
     let slug = conceptExercise.slug
     if conceptExerciseSlugs.containsOrIncl slug:
       let msg = &"There is more than one Concept Exercise with the slug {q slug}"
       b.setFalseAndPrint(msg, path)
 
-  var practiceExerciseSlugs = initHashSet[string](trackConfig.exercises.practice.len)
-  for practiceExercise in trackConfig.exercises.practice:
+  var practiceExerciseSlugs = initHashSet[string](exercises.practice.len)
+  for practiceExercise in exercises.practice:
     let slug = practiceExercise.slug
     if practiceExerciseSlugs.containsOrIncl slug:
       let msg = &"There is more than one Practice Exercise with the slug {q slug}"
@@ -420,7 +420,7 @@ proc checkExerciseSlugsAndForegone(trackConfig: TrackConfig; b: var bool;
     let msg = &"There must be a Practice Exercise with the slug `hello-world`"
     b.setFalseAndPrint(msg, path)
 
-  for slug in trackConfig.exercises.foregone:
+  for slug in exercises.foregone:
     if slug in conceptExerciseSlugs or slug in practiceExerciseSlugs:
       let msg = &"The `exercises.foregone` array contains the slug {q slug}, " &
                  "but there is an implemented exercise with that slug"
@@ -437,7 +437,7 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                              path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
   checkExercisesPCP(trackConfig.exercises.practice, result, path)
-  checkExerciseSlugsAndForegone(trackConfig, result, path)
+  checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
