@@ -388,6 +388,35 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
               "Exercise is allowed to have that"
       b.setFalseAndPrint(msg, path)
 
+proc checkExerciseSlugs(trackConfig: TrackConfig; b: var bool; path: Path) =
+  ## Sets `b` to `false` if the below conditions are not satisfied:
+  ## - Each slug of a Concept Exercise or a Practice Exercise in `trackConfig`
+  ##   only exists once on the track.
+  ## - There is exactly one Practice Exercise with the slug `hello-world`.
+  var conceptExerciseSlugs = initHashSet[string](200)
+  for conceptExercise in trackConfig.exercises.`concept`:
+    let slug = conceptExercise.slug
+    if conceptExerciseSlugs.containsOrIncl slug:
+      let msg = &"There is more than one Concept Exercise with the slug {q slug}"
+      b.setFalseAndPrint(msg, path)
+
+  var practiceExerciseSlugs = initHashSet[string](200)
+  for practiceExercise in trackConfig.exercises.practice:
+    let slug = practiceExercise.slug
+    if practiceExerciseSlugs.containsOrIncl slug:
+      let msg = &"There is more than one Practice Exercise with the slug {q slug}"
+      b.setFalseAndPrint(msg, path)
+
+  for slug in conceptExerciseSlugs:
+    if slug in practiceExerciseSlugs:
+      let msg = &"The slug {q slug} is used for both a Concept Exercise and " &
+                 "a Practice Exercise, but must only appear once on the track"
+      b.setFalseAndPrint(msg, path)
+
+  if "hello-world" notin practiceExerciseSlugs:
+    let msg = &"There must be a Practice Exercise with the slug `hello-world`"
+    b.setFalseAndPrint(msg, path)
+
 proc satisfiesSecondPass(s: string; path: Path): bool =
   let trackConfig = fromJson(s, TrackConfig)
   result = true
@@ -399,6 +428,7 @@ proc satisfiesSecondPass(s: string; path: Path): bool =
                              path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
   checkExercisesPCP(trackConfig.exercises.practice, result, path)
+  checkExerciseSlugs(trackConfig, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
