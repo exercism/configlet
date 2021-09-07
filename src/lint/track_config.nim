@@ -354,7 +354,8 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
       else:
         if exercise.slug == "hello-world":
           if exercise.prerequisites.len > 0:
-            let msg = statusMsg(exercise, "a non-empty array of `prerequisites`")
+            let msg = "The Practice Exercise `hello-world` must have an " &
+                      "empty array of `prerequisites`"
             b.setFalseAndPrint(msg, path)
         else:
           # TODO: enable the Practice Exercise `prerequisites` check when more
