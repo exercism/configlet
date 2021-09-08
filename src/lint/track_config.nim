@@ -252,7 +252,7 @@ proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
     inc result.col
 
 proc tidyJsonyErrorMsg(trackConfigContents: string): string =
-  result = "JSON parsing error during the second linting pass:\nconfig.json"
+  result = "JSON parsing error:\nconfig.json"
   let jsonyMsg = getCurrentExceptionMsg()
   var jsonyMsgStart = ""
   var offset = -1
