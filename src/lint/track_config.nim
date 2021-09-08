@@ -1,4 +1,4 @@
-import std/[json, sets, strformat, strscans, strutils]
+import std/[json, sets, strformat, strscans, strutils, tables]
 import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
@@ -295,6 +295,29 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   for con in trackConfig.concepts:
     result.incl con.slug
 
+proc checkExercisePractices(trackConfig: TrackConfig;
+                            conceptSlugs: HashSet[string]; b: var bool;
+                            path: Path) =
+  ## Checks the `practices` array of each user-facing Practice Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  var countConceptsPracticed = initCountTable[string]()
+
+  for practiceExercise in trackConfig.exercises.practice:
+    for conceptPracticed in practiceExercise.practices:
+      countConceptsPracticed.inc conceptPracticed
+      if conceptPracticed notin conceptSlugs:
+        let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                  &"{q conceptPracticed} in its `practices` array, which is " &
+                   "not a `slug` in the top-level `concepts` array"
+        b.setFalseAndPrint(msg, path)
+
+  for conceptPracticed, count in countConceptsPracticed.pairs:
+    if count > 10:
+      let msg = &"The Concept {q conceptPracticed} appears {count} times in " &
+                 "the `practices` arrays of user-facing Practice Exercises, " &
+                 "but can only appear at most 10 times"
+      b.setFalseAndPrint(msg, path)
+
 iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
   ## Yields every Concept Exercise in `trackConfig` that appears on the website.
   ## That is, every Concept Exercise that has a `status` of `beta` or `active`,
@@ -513,6 +536,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
+  checkExercisePractices(trackConfig, conceptSlugs, result, path)
   let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
                                              path)
   checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
