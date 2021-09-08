@@ -205,6 +205,8 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
+  # We can use a `HashSet` for `concepts`, `prerequisites` and `practices`
+  # because the first pass has already checked that each has unique values.
   ConceptExercise = object
     slug: string
     # name: string
@@ -427,6 +429,15 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
       b.setFalseAndPrint(msg, path)
 
 proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
+  ## Returns `true` if `trackConfigContents` satisfies some checks.
+  ##
+  ## Each check in this second pass is generally more complex, and typically
+  ## involves determining the validity of values in one key, depending on
+  ## another key.
+  ##
+  ## To make these checks easier, this proc uses `jsony` to deserialize to a
+  ## strongly typed `TrackConfig` object. Note that `jsony` is non-strict in
+  ## several ways, so we do a first pass that verifies the key names and types.
   let trackConfig = fromJson(trackConfigContents, TrackConfig)
   result = true
 
@@ -465,6 +476,7 @@ proc isTrackConfigValid*(trackDir: Path): bool =
     if not isValidTrackConfig(j, trackConfigPath):
       result = false
 
+  # Perform the second pass only if the track passes every previous check.
   if result:
     let trackConfigContents = readFile(trackConfigPath)
     result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
