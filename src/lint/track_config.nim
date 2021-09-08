@@ -1,4 +1,4 @@
-import std/[json, sets, strformat, strscans]
+import std/[json, sets, strformat, strscans, strutils]
 import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
@@ -252,18 +252,33 @@ proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
     inc result.col
 
 proc tidyJsonyErrorMsg(trackConfigContents: string): string =
-  result = "JSON parsing error:\nconfig.json"
   let jsonyMsg = getCurrentExceptionMsg()
   var jsonyMsgStart = ""
   var offset = -1
   # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
-  result.add(
+  let details =
     if jsonyMsg.scanf("$* At offset: $i$.", jsonyMsgStart, offset):
       let (line, col) = toLineAndCol(trackConfigContents, offset)
       &"({line}, {col}): {jsonyMsgStart}"
     else:
       &": {jsonyMsg}"
-  )
+  const bugNotice = """
+    --------------------------------------------------------------------------------
+    THIS IS A CONFIGLET BUG. PLEASE REPORT IT.
+
+    The JSON parsing error above should not occur - it indicates a bug in configlet!
+
+    If you are seeing this, please open an issue in this repo:
+    https://github.com/exercism/configlet
+
+    Please include:
+    - a copy of the error message above
+    - the contents of the track `config.json` file at the time `configlet lint` ran
+
+    Thank you.
+    --------------------------------------------------------------------------------
+  """.unindent()
+  result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
 
 proc toTrackConfig(trackConfigContents: string): TrackConfig =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
