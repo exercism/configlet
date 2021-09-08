@@ -251,23 +251,26 @@ proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
       result.col = 0
     inc result.col
 
+proc tidyJsonyErrorMsg(trackConfigContents: string): string =
+  let jsonyMsg = getCurrentExceptionMsg()
+  result = "JSON parsing error during the second linting pass:\nconfig.json"
+  result.add(
+    block:
+      var offset = -1
+      var jsonyMsgStart = ""
+      if jsonyMsg.scanf("$* At offset: $i", jsonyMsgStart, offset):
+        let (line, col) = toLineAndCol(trackConfigContents, offset)
+        &"({line}, {col}): {jsonyMsgStart}"
+      else:
+        &": {jsonyMsg}"
+  )
+
 proc toTrackConfig(trackConfigContents: string): TrackConfig =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
   try:
     result = fromJson(trackConfigContents, TrackConfig)
   except jsony.JsonError:
-    let jsonyMsg = getCurrentExceptionMsg()
-    var msg = "JSON parsing error during the second linting pass:\nconfig.json"
-    msg.add(
-      block:
-        var offset = -1
-        var jsonyMsgStart = ""
-        if jsonyMsg.scanf("$* At offset: $i", jsonyMsgStart, offset):
-          let (line, col) = toLineAndCol(trackConfigContents, offset)
-          &"({line}, {col}): {jsonyMsgStart}"
-        else:
-          &": {jsonyMsg}"
-    )
+    let msg = tidyJsonyErrorMsg(trackConfigContents)
     showError(msg)
 
 func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
