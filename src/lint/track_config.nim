@@ -258,7 +258,7 @@ proc tidyJsonyErrorMsg(trackConfigContents: string): string =
   var offset = -1
   # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
   result.add(
-    if jsonyMsg.scanf("$* At offset: $i", jsonyMsgStart, offset):
+    if jsonyMsg.scanf("$* At offset: $i$.", jsonyMsgStart, offset):
       let (line, col) = toLineAndCol(trackConfigContents, offset)
       &"({line}, {col}): {jsonyMsgStart}"
     else:
