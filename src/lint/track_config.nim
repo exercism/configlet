@@ -1,6 +1,6 @@
-import std/[json, sets, strformat]
+import std/[json, sets, strformat, strscans]
 import pkg/jsony
-import ".."/helpers
+import ".."/[cli, helpers]
 import "."/validators
 
 const tags = [
@@ -240,6 +240,36 @@ type
     exercises: Exercises
     concepts: Concepts
 
+proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
+  ## Returns the line and column number corresponding to the `offset` in `s`.
+  result = (1, 1)
+  for i, c in s:
+    if i == offset:
+      break
+    elif c == '\n':
+      inc result.line
+      result.col = 0
+    inc result.col
+
+proc toTrackConfig(trackConfigContents: string): TrackConfig =
+  ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
+  try:
+    result = fromJson(trackConfigContents, TrackConfig)
+  except jsony.JsonError:
+    let jsonyMsg = getCurrentExceptionMsg()
+    var msg = "JSON parsing error during the second linting pass:\nconfig.json"
+    msg.add(
+      block:
+        var offset = -1
+        var jsonyMsgStart = ""
+        if jsonyMsg.scanf("$* At offset: $i", jsonyMsgStart, offset):
+          let (line, col) = toLineAndCol(trackConfigContents, offset)
+          &"({line}, {col}): {jsonyMsgStart}"
+        else:
+          &": {jsonyMsg}"
+    )
+    showError(msg)
+
 func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track
   ## `config.json` file.
@@ -438,7 +468,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   ## To make these checks easier, this proc uses `jsony` to deserialize to a
   ## strongly typed `TrackConfig` object. Note that `jsony` is non-strict in
   ## several ways, so we do a first pass that verifies the key names and types.
-  let trackConfig = fromJson(trackConfigContents, TrackConfig)
+  let trackConfig = toTrackConfig(trackConfigContents)
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
