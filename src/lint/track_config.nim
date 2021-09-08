@@ -426,8 +426,8 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                  "but there is an implemented exercise with that slug"
       b.setFalseAndPrint(msg, path)
 
-proc satisfiesSecondPass(s: string; path: Path): bool =
-  let trackConfig = fromJson(s, TrackConfig)
+proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
+  let trackConfig = fromJson(trackConfigContents, TrackConfig)
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
