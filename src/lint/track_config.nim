@@ -323,9 +323,9 @@ proc checkExerciseConcepts(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkExercisePrerequisites(trackConfig: TrackConfig;
-                                conceptSlugs, conceptsTaught: HashSet[string];
-                                b: var bool; path: Path) =
+proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
+                                       conceptSlugs, conceptsTaught: HashSet[string];
+                                       b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
   for conceptExercise in visibleConceptExercises(trackConfig):
@@ -345,6 +345,29 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                   &"{q preReq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
+
+proc checkPracticeExercisePrerequisites(trackConfig: TrackConfig;
+                                        conceptSlugs, conceptsTaught: HashSet[string];
+                                        b: var bool; path: Path) =
+  ## Checks the `prerequisites` array of each user-facing Practice Exercise in
+  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  for practiceExercise in trackConfig.exercises.practice:
+    case practiceExercise.status
+    of sMissing, sBeta, sActive:
+      for prereq in practiceExercise.prerequisites:
+        if prereq notin conceptsTaught:
+          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                    &"{q preReq} in its `prerequisites`, which is not in the " &
+                     "`concepts` array of any user-facing Concept Exercise"
+          b.setFalseAndPrint(msg, path)
+
+        if prereq notin conceptSlugs:
+          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                    &"{q preReq} in its `prerequisites`, which is not a " &
+                     "`slug` in the top-level `concepts` array"
+          b.setFalseAndPrint(msg, path)
+    of sWip, sDeprecated:
+      discard
 
 proc statusMsg(exercise: ConceptExercise | PracticeExercise;
                problem: string): string =
@@ -492,8 +515,10 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   let conceptSlugs = getConceptSlugs(trackConfig)
   let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
                                              path)
-  checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
-                             path)
+  checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
+                                    result, path)
+  checkPracticeExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
+                                     result, path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
   checkExercisesPCP(trackConfig.exercises.practice, result, path)
   checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
