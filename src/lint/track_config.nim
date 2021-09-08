@@ -309,14 +309,22 @@ proc checkExercisePractices(trackConfig: TrackConfig;
         let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
                   &"{q conceptPracticed} in its `practices` array, which is " &
                    "not a `slug` in the top-level `concepts` array"
-        b.setFalseAndPrint(msg, path)
+        # TODO: Eventually make this an error, not a warning.
+        if true:
+          warn(msg, path)
+        else:
+          b.setFalseAndPrint(msg, path)
 
   for conceptPracticed, count in countConceptsPracticed.pairs:
     if count > 10:
       let msg = &"The Concept {q conceptPracticed} appears {count} times in " &
                  "the `practices` arrays of user-facing Practice Exercises, " &
                  "but can only appear at most 10 times"
-      b.setFalseAndPrint(msg, path)
+      # TODO: Eventually make this an error, not a warning.
+      if true:
+        warn(msg, path)
+      else:
+        b.setFalseAndPrint(msg, path)
 
 iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
   ## Yields every Concept Exercise in `trackConfig` that appears on the website.
@@ -382,13 +390,21 @@ proc checkPracticeExercisePrerequisites(trackConfig: TrackConfig;
           let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
                     &"{q preReq} in its `prerequisites`, which is not in the " &
                      "`concepts` array of any user-facing Concept Exercise"
-          b.setFalseAndPrint(msg, path)
+          # TODO: Eventually make this an error, not a warning.
+          if true:
+            warn(msg, path)
+          else:
+            b.setFalseAndPrint(msg, path)
 
         if prereq notin conceptSlugs:
           let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
                     &"{q preReq} in its `prerequisites`, which is not a " &
                      "`slug` in the top-level `concepts` array"
-          b.setFalseAndPrint(msg, path)
+          # TODO: Eventually make this an error, not a warning.
+          if true:
+            warn(msg, path)
+          else:
+            b.setFalseAndPrint(msg, path)
     of sWip, sDeprecated:
       discard
 

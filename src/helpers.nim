@@ -37,6 +37,16 @@ proc setFalseAndPrint*(b: var bool; description: string; path: Path) =
   stdout.writeLine(path.string)
   stdout.write "\n"
 
+proc warn*(description: string; path: Path) =
+  ## Writes a message to stdout containing `description` and `path`.
+  let descriptionPrefix = description & ":"
+  if colorStdout:
+    stdout.styledWriteLine(fgYellow, descriptionPrefix)
+  else:
+    stdout.writeLine(descriptionPrefix)
+  stdout.writeLine(path.string)
+  stdout.write "\n"
+
 proc `$`*(path: Path): string {.borrow.}
 proc `/`*(head: Path; tail: string): Path {.borrow.}
 
