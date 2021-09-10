@@ -369,12 +369,12 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
-                                       conceptSlugs, conceptsTaught: HashSet[string];
-                                       b: var bool; path: Path) =
+proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
+                        conceptSlugs, conceptsTaught: HashSet[string];
+                        b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
-  for conceptExercise in visible(trackConfig.exercises.`concept`):
+  ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  for conceptExercise in visible(conceptExercises):
     for prereq in conceptExercise.prerequisites:
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
@@ -584,8 +584,8 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
   let conceptsTaught = checkExerciseConcepts(trackConfig.exercises.`concept`,
                                              conceptSlugs, result, path)
-  checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
-                                    result, path)
+  checkPrerequisites(trackConfig.exercises.`concept`, conceptSlugs,
+                     conceptsTaught, result, path)
   checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
                      conceptsTaught, result, path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
