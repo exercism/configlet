@@ -324,7 +324,7 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
 
   if practicesNotInTopLevelConcepts.len > 0:
     let msg = "The following concepts exist in the `practices` array " &
-              &"of a Practice Exercise in `{path}`, but do not exist in the " &
+              &"of a Practice Exercise in {q $path}, but do not exist in the " &
                "top-level `concepts` array"
     let slugs = joinWithNewlines(practicesNotInTopLevelConcepts)
     warn(msg, slugs)
@@ -424,14 +424,14 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
 
   if prereqsNotTaught.len > 0:
     let msg = "The following concepts exist in the `prerequisites` array " &
-              &"of a Practice Exercise in `{path}`, but are not in the " &
+              &"of a Practice Exercise in {q $path}, but are not in the " &
                "`concepts` array of any user-facing Concept Exercise"
     let slugs = joinWithNewlines(prereqsNotTaught)
     warn(msg, slugs)
 
   if prereqsNotInTopLevelConcepts.len > 0:
     let msg = "The following concepts exist in the `prerequisites` array " &
-              &"of a Practice Exercise in `{path}`, but do not exist in the " &
+              &"of a Practice Exercise in {q $path}, but do not exist in the " &
                "top-level `concepts` array"
     let slugs = joinWithNewlines(prereqsNotInTopLevelConcepts)
     warn(msg, slugs)
