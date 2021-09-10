@@ -393,31 +393,53 @@ proc checkPracticeExercisePrerequisites(trackConfig: TrackConfig;
                                         b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Practice Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
+  var prereqsNotTaught = initOrderedSet[string]()
+  var prereqsNotInTopLevelConcepts = initOrderedSet[string]()
+
   for practiceExercise in trackConfig.exercises.practice:
     case practiceExercise.status
     of sMissing, sBeta, sActive:
       for prereq in practiceExercise.prerequisites:
         if prereq notin conceptsTaught:
-          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                    &"{q preReq} in its `prerequisites`, which is not in the " &
-                     "`concepts` array of any user-facing Concept Exercise"
+          prereqsNotTaught.incl prereq
           # TODO: Eventually make this an error, not a warning.
-          if true:
-            warn(msg, path)
-          else:
+          if false:
+            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                      &"{q preReq} in its `prerequisites`, which is not in the " &
+                       "`concepts` array of any user-facing Concept Exercise"
             b.setFalseAndPrint(msg, path)
-
         if prereq notin conceptSlugs:
-          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                    &"{q preReq} in its `prerequisites`, which is not a " &
-                     "`slug` in the top-level `concepts` array"
+          prereqsNotInTopLevelConcepts.incl prereq
           # TODO: Eventually make this an error, not a warning.
-          if true:
-            warn(msg, path)
-          else:
+          if false:
+            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                      &"{q preReq} in its `prerequisites`, which is not a " &
+                       "`slug` in the top-level `concepts` array"
             b.setFalseAndPrint(msg, path)
     of sWip, sDeprecated:
       discard
+
+  if prereqsNotTaught.len > 0:
+    let msg = "The following concepts exist in the `prerequisites` array " &
+              &"of a Practice Exercise in `{path}`, but are not in the " &
+               "`concepts` array of any user-facing Concept Exercise"
+    var slugs = ""
+    for slug in prereqsNotTaught:
+      slugs.add slug
+      slugs.add "\n"
+    slugs.setLen(slugs.len - 1)
+    warn(msg, slugs)
+
+  if prereqsNotInTopLevelConcepts.len > 0:
+    let msg = "The following concepts exist in the `prerequisites` array " &
+              &"of a Practice Exercise in `{path}`, but do not exist in the " &
+               "top-level `concepts` array"
+    var slugs = ""
+    for slug in prereqsNotInTopLevelConcepts:
+      slugs.add slug
+      slugs.add "\n"
+    slugs.setLen(slugs.len - 1)
+    warn(msg, slugs)
 
 proc statusMsg(exercise: ConceptExercise | PracticeExercise;
                problem: string): string =
