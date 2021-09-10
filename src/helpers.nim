@@ -1,4 +1,4 @@
-import std/[algorithm, os, terminal]
+import std/[algorithm, os, strformat, terminal]
 import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
@@ -37,15 +37,24 @@ proc setFalseAndPrint*(b: var bool; description: string; path: Path) =
   stdout.writeLine(path.string)
   stdout.write "\n"
 
+var printedWarning* = false
+
+proc warn*(msg: string, extra = "") =
+  ## Writes `msg` to stdout, in color when appropriate. If `extra` is provided,
+  ## it is written on its own line, without color.
+  if colorStdout:
+    stdout.styledWriteLine(fgYellow, msg)
+  else:
+    stdout.writeLine(msg)
+  if extra.len > 0:
+    stdout.writeLine(extra)
+  stdout.write "\n"
+  printedWarning = true
+
 proc warn*(description: string; path: Path) =
   ## Writes a message to stdout containing `description` and `path`.
-  let descriptionPrefix = description & ":"
-  if colorStdout:
-    stdout.styledWriteLine(fgYellow, descriptionPrefix)
-  else:
-    stdout.writeLine(descriptionPrefix)
-  stdout.writeLine(path.string)
-  stdout.write "\n"
+  let msg = &"{description}:"
+  warn(msg, path.string)
 
 proc `$`*(path: Path): string {.borrow.}
 proc `/`*(head: Path; tail: string): Path {.borrow.}
