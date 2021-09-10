@@ -1,3 +1,4 @@
+import std/[strformat, strutils]
 import ".."/[cli, helpers]
 import "."/[concept_exercises, concepts, docs, practice_exercises,
             track_config, validators]
@@ -27,6 +28,8 @@ proc lint*(conf: Conf) =
 
   let trackDir = Path(conf.trackDir)
 
+  const url = "https://github.com/exercism/docs/blob/main/building/configlet/lint.md"
+
   if allChecksPass(trackDir):
     echo """
 Basic linting finished successfully:
@@ -43,8 +46,16 @@ Basic linting finished successfully:
 - Required track docs are present
 - Required shared exercise docs are present"""
   else:
-    echo """
+    echo &"""
 Configlet detected at least one problem.
 For more information on resolving the problems, please see the documentation:
-https://github.com/exercism/docs/blob/main/building/configlet/lint.md"""
+{url}"""
     quit(1)
+
+  if printedWarning:
+    echo ""
+    const msg = """
+      Configlet produced at least one warning.
+      These warnings will become errors in a future configlet release (at the end of October 2021).
+      For more information, please see the documentation:""".unindent()
+    warn(msg, url, doubleFinalNewline = false)

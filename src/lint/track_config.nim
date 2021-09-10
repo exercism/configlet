@@ -1,4 +1,4 @@
-import std/[json, sets, strformat, strscans, strutils]
+import std/[json, sets, strformat, strscans, strutils, tables]
 import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
@@ -295,6 +295,51 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   for con in trackConfig.concepts:
     result.incl con.slug
 
+func joinWithNewlines[A](s: SomeSet[A]): string =
+  result = ""
+  for item in s:
+    result.add item
+    result.add "\n"
+  result.setLen(result.len - 1)
+
+proc checkPractices(practiceExercises: seq[PracticeExercise];
+                    conceptSlugs: HashSet[string]; b: var bool;
+                    path: Path) =
+  ## Checks the `practices` of each user-facing Practice Exercise in
+  ## `practiceExercises`, and sets `b` to `false` if a check fails.
+  var countConceptsPracticed = initCountTable[string]()
+  var practicesNotInTopLevelConcepts = initOrderedSet[string]()
+
+  for practiceExercise in practiceExercises:
+    for conceptPracticed in practiceExercise.practices:
+      countConceptsPracticed.inc conceptPracticed
+      if conceptPracticed notin conceptSlugs:
+        practicesNotInTopLevelConcepts.incl conceptPracticed
+        # TODO: Eventually make this an error, not a warning.
+        if false:
+          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                    &"{q conceptPracticed} in its `practices` array, which " &
+                     "is not a `slug` in the top-level `concepts` array"
+          b.setFalseAndPrint(msg, path)
+
+  if practicesNotInTopLevelConcepts.len > 0:
+    let msg = "The following concepts exist in the `practices` array " &
+              &"of a Practice Exercise in {q $path}, but do not exist in the " &
+               "top-level `concepts` array"
+    let slugs = joinWithNewlines(practicesNotInTopLevelConcepts)
+    warn(msg, slugs)
+
+  for conceptPracticed, count in countConceptsPracticed.pairs:
+    if count > 10:
+      let msg = &"The Concept {q conceptPracticed} appears {count} times in " &
+                 "the `practices` arrays of user-facing Practice Exercises, " &
+                 "but can only appear at most 10 times"
+      # TODO: Eventually make this an error, not a warning.
+      if true:
+        warn(msg, path)
+      else:
+        b.setFalseAndPrint(msg, path)
+
 iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
   ## Yields every Concept Exercise in `trackConfig` that appears on the website.
   ## That is, every Concept Exercise that has a `status` of `beta` or `active`,
@@ -323,9 +368,9 @@ proc checkExerciseConcepts(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkExercisePrerequisites(trackConfig: TrackConfig;
-                                conceptSlugs, conceptsTaught: HashSet[string];
-                                b: var bool; path: Path) =
+proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
+                                       conceptSlugs, conceptsTaught: HashSet[string];
+                                       b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
   for conceptExercise in visibleConceptExercises(trackConfig):
@@ -345,6 +390,51 @@ proc checkExercisePrerequisites(trackConfig: TrackConfig;
                   &"{q preReq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
+
+proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
+                        conceptSlugs, conceptsTaught: HashSet[string];
+                        b: var bool; path: Path) =
+  ## Checks the `prerequisites` of each user-facing Practice Exercise in
+  ## `practiceExercises`, and sets `b` to `false` if a check fails.
+  var prereqsNotTaught = initOrderedSet[string]()
+  var prereqsNotInTopLevelConcepts = initOrderedSet[string]()
+
+  for practiceExercise in practiceExercises:
+    case practiceExercise.status
+    of sMissing, sBeta, sActive:
+      for prereq in practiceExercise.prerequisites:
+        if prereq notin conceptsTaught:
+          prereqsNotTaught.incl prereq
+          # TODO: Eventually make this an error, not a warning.
+          if false:
+            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                      &"{q preReq} in its `prerequisites`, which is not in " &
+                       "the `concepts` array of any user-facing Concept Exercise"
+            b.setFalseAndPrint(msg, path)
+        if prereq notin conceptSlugs:
+          prereqsNotInTopLevelConcepts.incl prereq
+          # TODO: Eventually make this an error, not a warning.
+          if false:
+            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                      &"{q preReq} in its `prerequisites`, which is not a " &
+                       "`slug` in the top-level `concepts` array"
+            b.setFalseAndPrint(msg, path)
+    of sWip, sDeprecated:
+      discard
+
+  if prereqsNotTaught.len > 0:
+    let msg = "The following concepts exist in the `prerequisites` array " &
+              &"of a Practice Exercise in {q $path}, but are not in the " &
+               "`concepts` array of any user-facing Concept Exercise"
+    let slugs = joinWithNewlines(prereqsNotTaught)
+    warn(msg, slugs)
+
+  if prereqsNotInTopLevelConcepts.len > 0:
+    let msg = "The following concepts exist in the `prerequisites` array " &
+              &"of a Practice Exercise in {q $path}, but do not exist in the " &
+               "top-level `concepts` array"
+    let slugs = joinWithNewlines(prereqsNotInTopLevelConcepts)
+    warn(msg, slugs)
 
 proc statusMsg(exercise: ConceptExercise | PracticeExercise;
                problem: string): string =
@@ -490,10 +580,13 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
+  checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
   let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
                                              path)
-  checkExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught, result,
-                             path)
+  checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
+                                    result, path)
+  checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
+                     conceptsTaught, result, path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
   checkExercisesPCP(trackConfig.exercises.practice, result, path)
   checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
