@@ -39,7 +39,7 @@ proc setFalseAndPrint*(b: var bool; description: string; path: Path) =
 
 var printedWarning* = false
 
-proc warn*(msg: string, extra = "") =
+proc warn*(msg: string; extra = ""; doubleFinalNewline = true) =
   ## Writes `msg` to stdout, in color when appropriate. If `extra` is provided,
   ## it is written on its own line, without color.
   if colorStdout:
@@ -49,7 +49,8 @@ proc warn*(msg: string, extra = "") =
     stdout.writeLine(msg)
   if extra.len > 0:
     stdout.writeLine(extra)
-  stdout.write "\n"
+  if doubleFinalNewline:
+    stdout.write "\n"
   printedWarning = true
 
 proc warn*(description: string; path: Path) =

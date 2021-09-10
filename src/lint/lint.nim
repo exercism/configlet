@@ -53,8 +53,8 @@ For more information on resolving the problems, please see the documentation:
     quit(1)
 
   if printedWarning:
+    echo ""
     const msg = """
-
       Configlet produced at least one warning - these will become errors in the future.
       For more information, please see the documentation""".unindent()
-    warn(msg, url)
+    warn(msg, url, doubleFinalNewline = false)
