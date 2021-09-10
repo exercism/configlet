@@ -580,17 +580,22 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   let trackConfig = toTrackConfig(trackConfigContents)
   result = true
 
-  let conceptSlugs = getConceptSlugs(trackConfig.concepts)
-  checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
-  let conceptsTaught = checkExerciseConcepts(trackConfig.exercises.`concept`,
-                                             conceptSlugs, result, path)
-  checkPrerequisites(trackConfig.exercises.`concept`, conceptSlugs,
-                     conceptsTaught, result, path)
-  checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
-                     conceptsTaught, result, path)
-  checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
-  checkExercisesPCP(trackConfig.exercises.practice, result, path)
-  checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
+  let exercises = trackConfig.exercises
+  let conceptExercises = exercises.`concept`
+  let practiceExercises = exercises.practice
+  let concepts = trackConfig.concepts
+
+  let conceptSlugs = getConceptSlugs(concepts)
+  checkPractices(practiceExercises, conceptSlugs, result, path)
+  let conceptsTaught = checkExerciseConcepts(conceptExercises, conceptSlugs,
+                                             result, path)
+  checkPrerequisites(conceptExercises, conceptSlugs, conceptsTaught, result,
+                     path)
+  checkPrerequisites(practiceExercises, conceptSlugs, conceptsTaught, result,
+                     path)
+  checkExercisesPCP(conceptExercises, result, path)
+  checkExercisesPCP(practiceExercises, result, path)
+  checkExerciseSlugsAndForegone(exercises, result, path)
 
 proc isValidTrackConfig(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
