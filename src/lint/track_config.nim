@@ -349,13 +349,13 @@ iterator visible(conceptExercises: seq[ConceptExercise]): ConceptExercise =
     if conceptExercise.status in [sMissing, sBeta, sActive]:
       yield conceptExercise
 
-proc checkExerciseConcepts(trackConfig: TrackConfig;
+proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                            conceptSlugs: HashSet[string]; b: var bool;
                            path: Path): HashSet[string] =
   ## Checks the `concepts` array of each user-facing Concept Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  ## `conceptExercises`, and sets `b` to `false` if a check fails.
   result = initHashSet[string]()
-  for conceptExercise in visible(trackConfig.exercises.`concept`):
+  for conceptExercise in visible(conceptExercises):
     for conceptTaught in conceptExercise.concepts:
       # Build a set of every concept taught by a user-facing Concept Exercise
       if result.containsOrIncl(conceptTaught):
@@ -582,8 +582,8 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
 
   let conceptSlugs = getConceptSlugs(trackConfig.concepts)
   checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
-  let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
-                                             path)
+  let conceptsTaught = checkExerciseConcepts(trackConfig.exercises.`concept`,
+                                             conceptSlugs, result, path)
   checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
                                     result, path)
   checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
