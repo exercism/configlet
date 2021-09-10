@@ -288,11 +288,11 @@ proc toTrackConfig(trackConfigContents: string): TrackConfig =
     let msg = tidyJsonyErrorMsg(trackConfigContents)
     showError(msg)
 
-func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
+func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track
   ## `config.json` file.
   result = initHashSet[string]()
-  for con in trackConfig.concepts:
+  for con in concepts:
     result.incl con.slug
 
 func joinWithNewlines[A](s: SomeSet[A]): string =
@@ -579,7 +579,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   let trackConfig = toTrackConfig(trackConfigContents)
   result = true
 
-  let conceptSlugs = getConceptSlugs(trackConfig)
+  let conceptSlugs = getConceptSlugs(trackConfig.concepts)
   checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
   let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
                                              path)
