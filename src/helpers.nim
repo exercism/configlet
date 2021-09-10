@@ -45,6 +45,7 @@ proc warn*(msg: string, extra = "") =
   if colorStdout:
     stdout.styledWriteLine(fgYellow, msg)
   else:
+    stdout.write "Warning: "
     stdout.writeLine(msg)
   if extra.len > 0:
     stdout.writeLine(extra)
