@@ -318,8 +318,8 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
         # TODO: Eventually make this an error, not a warning.
         if false:
           let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                    &"{q conceptPracticed} in its `practices` array, which is " &
-                     "not a `slug` in the top-level `concepts` array"
+                    &"{q conceptPracticed} in its `practices` array, which " &
+                     "is not a `slug` in the top-level `concepts` array"
           b.setFalseAndPrint(msg, path)
 
   if practicesNotInTopLevelConcepts.len > 0:
@@ -408,8 +408,8 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           # TODO: Eventually make this an error, not a warning.
           if false:
             let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                      &"{q preReq} in its `prerequisites`, which is not in the " &
-                       "`concepts` array of any user-facing Concept Exercise"
+                      &"{q preReq} in its `prerequisites`, which is not in " &
+                       "the `concepts` array of any user-facing Concept Exercise"
             b.setFalseAndPrint(msg, path)
         if prereq notin conceptSlugs:
           prereqsNotInTopLevelConcepts.incl prereq
