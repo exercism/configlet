@@ -1,6 +1,6 @@
-import std/[json, sets, strformat]
+import std/[json, sets, strformat, strscans, strutils]
 import pkg/jsony
-import ".."/helpers
+import ".."/[cli, helpers]
 import "."/validators
 
 const tags = [
@@ -205,6 +205,8 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
+  # We can use a `HashSet` for `concepts`, `prerequisites` and `practices`
+  # because the first pass has already checked that each has unique values.
   ConceptExercise = object
     slug: string
     # name: string
@@ -237,6 +239,54 @@ type
   TrackConfig = object
     exercises: Exercises
     concepts: Concepts
+
+proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
+  ## Returns the line and column number corresponding to the `offset` in `s`.
+  result = (1, 1)
+  for i, c in s:
+    if i == offset:
+      break
+    elif c == '\n':
+      inc result.line
+      result.col = 0
+    inc result.col
+
+proc tidyJsonyErrorMsg(trackConfigContents: string): string =
+  let jsonyMsg = getCurrentExceptionMsg()
+  var jsonyMsgStart = ""
+  var offset = -1
+  # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
+  let details =
+    if jsonyMsg.scanf("$* At offset: $i$.", jsonyMsgStart, offset):
+      let (line, col) = toLineAndCol(trackConfigContents, offset)
+      &"({line}, {col}): {jsonyMsgStart}"
+    else:
+      &": {jsonyMsg}"
+  const bugNotice = """
+    --------------------------------------------------------------------------------
+    THIS IS A CONFIGLET BUG. PLEASE REPORT IT.
+
+    The JSON parsing error above should not occur - it indicates a bug in configlet!
+
+    If you are seeing this, please open an issue in this repo:
+    https://github.com/exercism/configlet
+
+    Please include:
+    - a copy of the error message above
+    - the contents of the track `config.json` file at the time `configlet lint` ran
+
+    Thank you.
+    --------------------------------------------------------------------------------
+  """.unindent()
+  result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
+
+proc toTrackConfig(trackConfigContents: string): TrackConfig =
+  ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
+  try:
+    result = fromJson(trackConfigContents, TrackConfig)
+  except jsony.JsonError:
+    let msg = tidyJsonyErrorMsg(trackConfigContents)
+    showError(msg)
 
 func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track
@@ -426,8 +476,17 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                  "but there is an implemented exercise with that slug"
       b.setFalseAndPrint(msg, path)
 
-proc satisfiesSecondPass(s: string; path: Path): bool =
-  let trackConfig = fromJson(s, TrackConfig)
+proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
+  ## Returns `true` if `trackConfigContents` satisfies some checks.
+  ##
+  ## Each check in this second pass is generally more complex, and typically
+  ## involves determining the validity of values in one key, depending on
+  ## another key.
+  ##
+  ## To make these checks easier, this proc uses `jsony` to deserialize to a
+  ## strongly typed `TrackConfig` object. Note that `jsony` is non-strict in
+  ## several ways, so we do a first pass that verifies the key names and types.
+  let trackConfig = toTrackConfig(trackConfigContents)
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
@@ -465,6 +524,7 @@ proc isTrackConfigValid*(trackDir: Path): bool =
     if not isValidTrackConfig(j, trackConfigPath):
       result = false
 
+  # Perform the second pass only if the track passes every previous check.
   if result:
     let trackConfigContents = readFile(trackConfigPath)
     result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
