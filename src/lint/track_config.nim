@@ -301,19 +301,30 @@ proc checkExercisePractices(trackConfig: TrackConfig;
   ## Checks the `practices` array of each user-facing Practice Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
   var countConceptsPracticed = initCountTable[string]()
+  var practicesNotInTopLevelConcepts = initOrderedSet[string]()
 
   for practiceExercise in trackConfig.exercises.practice:
     for conceptPracticed in practiceExercise.practices:
       countConceptsPracticed.inc conceptPracticed
       if conceptPracticed notin conceptSlugs:
-        let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                  &"{q conceptPracticed} in its `practices` array, which is " &
-                   "not a `slug` in the top-level `concepts` array"
+        practicesNotInTopLevelConcepts.incl conceptPracticed
         # TODO: Eventually make this an error, not a warning.
-        if true:
-          warn(msg, path)
-        else:
+        if false:
+          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+                    &"{q conceptPracticed} in its `practices` array, which is " &
+                     "not a `slug` in the top-level `concepts` array"
           b.setFalseAndPrint(msg, path)
+
+  if practicesNotInTopLevelConcepts.len > 0:
+    let msg = "The following concepts exist in the `practices` array " &
+              &"of a Practice Exercise in `{path}`, but do not exist in the " &
+               "top-level `concepts` array"
+    var slugs = ""
+    for slug in practicesNotInTopLevelConcepts:
+      slugs.add slug
+      slugs.add "\n"
+    slugs.setLen(slugs.len - 1)
+    warn(msg, slugs)
 
   for conceptPracticed, count in countConceptsPracticed.pairs:
     if count > 10:
