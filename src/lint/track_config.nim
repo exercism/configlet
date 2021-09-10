@@ -295,6 +295,13 @@ func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
   for con in trackConfig.concepts:
     result.incl con.slug
 
+func joinWithNewlines[A](s: SomeSet[A]): string =
+  result = ""
+  for item in s:
+    result.add item
+    result.add "\n"
+  result.setLen(result.len - 1)
+
 proc checkExercisePractices(trackConfig: TrackConfig;
                             conceptSlugs: HashSet[string]; b: var bool;
                             path: Path) =
@@ -319,11 +326,7 @@ proc checkExercisePractices(trackConfig: TrackConfig;
     let msg = "The following concepts exist in the `practices` array " &
               &"of a Practice Exercise in `{path}`, but do not exist in the " &
                "top-level `concepts` array"
-    var slugs = ""
-    for slug in practicesNotInTopLevelConcepts:
-      slugs.add slug
-      slugs.add "\n"
-    slugs.setLen(slugs.len - 1)
+    let slugs = joinWithNewlines(practicesNotInTopLevelConcepts)
     warn(msg, slugs)
 
   for conceptPracticed, count in countConceptsPracticed.pairs:
@@ -423,22 +426,14 @@ proc checkPracticeExercisePrerequisites(trackConfig: TrackConfig;
     let msg = "The following concepts exist in the `prerequisites` array " &
               &"of a Practice Exercise in `{path}`, but are not in the " &
                "`concepts` array of any user-facing Concept Exercise"
-    var slugs = ""
-    for slug in prereqsNotTaught:
-      slugs.add slug
-      slugs.add "\n"
-    slugs.setLen(slugs.len - 1)
+    let slugs = joinWithNewlines(prereqsNotTaught)
     warn(msg, slugs)
 
   if prereqsNotInTopLevelConcepts.len > 0:
     let msg = "The following concepts exist in the `prerequisites` array " &
               &"of a Practice Exercise in `{path}`, but do not exist in the " &
                "top-level `concepts` array"
-    var slugs = ""
-    for slug in prereqsNotInTopLevelConcepts:
-      slugs.add slug
-      slugs.add "\n"
-    slugs.setLen(slugs.len - 1)
+    let slugs = joinWithNewlines(prereqsNotInTopLevelConcepts)
     warn(msg, slugs)
 
 proc statusMsg(exercise: ConceptExercise | PracticeExercise;
