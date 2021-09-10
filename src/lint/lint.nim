@@ -55,6 +55,7 @@ For more information on resolving the problems, please see the documentation:
   if printedWarning:
     echo ""
     const msg = """
-      Configlet produced at least one warning - these will become errors in the future.
-      For more information, please see the documentation""".unindent()
+      Configlet produced at least one warning.
+      These warnings will become errors in a future configlet release (at the end of October 2021).
+      For more information, please see the documentation:""".unindent()
     warn(msg, url, doubleFinalNewline = false)
