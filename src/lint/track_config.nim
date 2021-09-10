@@ -302,15 +302,15 @@ func joinWithNewlines[A](s: SomeSet[A]): string =
     result.add "\n"
   result.setLen(result.len - 1)
 
-proc checkExercisePractices(trackConfig: TrackConfig;
-                            conceptSlugs: HashSet[string]; b: var bool;
-                            path: Path) =
-  ## Checks the `practices` array of each user-facing Practice Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
+proc checkPractices(practiceExercises: seq[PracticeExercise];
+                    conceptSlugs: HashSet[string]; b: var bool;
+                    path: Path) =
+  ## Checks the `practices` of each user-facing Practice Exercise in
+  ## `practiceExercises`, and sets `b` to `false` if a check fails.
   var countConceptsPracticed = initCountTable[string]()
   var practicesNotInTopLevelConcepts = initOrderedSet[string]()
 
-  for practiceExercise in trackConfig.exercises.practice:
+  for practiceExercise in practiceExercises:
     for conceptPracticed in practiceExercise.practices:
       countConceptsPracticed.inc conceptPracticed
       if conceptPracticed notin conceptSlugs:
@@ -391,15 +391,15 @@ proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkPracticeExercisePrerequisites(trackConfig: TrackConfig;
-                                        conceptSlugs, conceptsTaught: HashSet[string];
-                                        b: var bool; path: Path) =
-  ## Checks the `prerequisites` array of each user-facing Practice Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
+proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
+                        conceptSlugs, conceptsTaught: HashSet[string];
+                        b: var bool; path: Path) =
+  ## Checks the `prerequisites` of each user-facing Practice Exercise in
+  ## `practiceExercises`, and sets `b` to `false` if a check fails.
   var prereqsNotTaught = initOrderedSet[string]()
   var prereqsNotInTopLevelConcepts = initOrderedSet[string]()
 
-  for practiceExercise in trackConfig.exercises.practice:
+  for practiceExercise in practiceExercises:
     case practiceExercise.status
     of sMissing, sBeta, sActive:
       for prereq in practiceExercise.prerequisites:
@@ -580,13 +580,13 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   result = true
 
   let conceptSlugs = getConceptSlugs(trackConfig)
-  checkExercisePractices(trackConfig, conceptSlugs, result, path)
+  checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
   let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
                                              path)
   checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
                                     result, path)
-  checkPracticeExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
-                                     result, path)
+  checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
+                     conceptsTaught, result, path)
   checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
   checkExercisesPCP(trackConfig.exercises.practice, result, path)
   checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
