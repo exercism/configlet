@@ -597,7 +597,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkExercisesPCP(practiceExercises, result, path)
   checkExerciseSlugsAndForegone(exercises, result, path)
 
-proc isValidTrackConfig(data: JsonNode; path: Path): bool =
+proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
   if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "language", path, maxLen = 255),
@@ -620,7 +620,7 @@ proc isTrackConfigValid*(trackDir: Path): bool =
   let trackConfigPath = trackDir / "config.json"
   let j = parseJsonFile(trackConfigPath, result)
   if j != nil:
-    if not isValidTrackConfig(j, trackConfigPath):
+    if not satisfiesFirstPass(j, trackConfigPath):
       result = false
 
   # Perform the second pass only if the track passes every previous check.
