@@ -340,11 +340,12 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
       else:
         b.setFalseAndPrint(msg, path)
 
-iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
-  ## Yields every Concept Exercise in `trackConfig` that appears on the website.
+iterator visible(conceptExercises: seq[ConceptExercise]): ConceptExercise =
+  ## Yields every Concept Exercise in `conceptExercises` that appears on the
+  ## website.
   ## That is, every Concept Exercise that has a `status` of `beta` or `active`,
   ## or that omits the `status` property entirely (which implies `active`).
-  for conceptExercise in trackConfig.exercises.`concept`:
+  for conceptExercise in conceptExercises:
     if conceptExercise.status in [sMissing, sBeta, sActive]:
       yield conceptExercise
 
@@ -354,7 +355,7 @@ proc checkExerciseConcepts(trackConfig: TrackConfig;
   ## Checks the `concepts` array of each user-facing Concept Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
   result = initHashSet[string]()
-  for conceptExercise in visibleConceptExercises(trackConfig):
+  for conceptExercise in visible(trackConfig.exercises.`concept`):
     for conceptTaught in conceptExercise.concepts:
       # Build a set of every concept taught by a user-facing Concept Exercise
       if result.containsOrIncl(conceptTaught):
@@ -373,7 +374,7 @@ proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
                                        b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `trackConfig`, and sets `b` to `false` if a check fails.
-  for conceptExercise in visibleConceptExercises(trackConfig):
+  for conceptExercise in visible(trackConfig.exercises.`concept`):
     for prereq in conceptExercise.prerequisites:
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
