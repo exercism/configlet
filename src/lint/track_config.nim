@@ -262,7 +262,7 @@ type
     exercises: Exercises
     concepts: Concepts
 
-proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
+func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
   ## Returns the line and column number corresponding to the `offset` in `s`.
   result = (1, 1)
   for i, c in s:
@@ -461,7 +461,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
     let slugs = joinWithNewlines(prereqsNotInTopLevelConcepts)
     warn(msg, slugs)
 
-proc statusMsg(exercise: ConceptExercise | PracticeExercise;
+func statusMsg(exercise: ConceptExercise | PracticeExercise;
                problem: string): string =
   ## Returns the error text for an `exercise` with the status-related `problem`.
   const exerciseKind =
