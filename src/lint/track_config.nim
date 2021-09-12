@@ -302,7 +302,7 @@ proc tidyJsonyErrorMsg(trackConfigContents: string): string =
   """.unindent()
   result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
 
-proc toTrackConfig(trackConfigContents: string): TrackConfig =
+proc init(T: typedesc[TrackConfig]; trackConfigContents: string): T =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
   try:
     result = fromJson(trackConfigContents, TrackConfig)
@@ -601,7 +601,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   ## To make these checks easier, this proc uses `jsony` to deserialize to a
   ## strongly typed `TrackConfig` object. Note that `jsony` is non-strict in
   ## several ways, so we do a first pass that verifies the key names and types.
-  let trackConfig = toTrackConfig(trackConfigContents)
+  let trackConfig = TrackConfig.init(trackConfigContents)
   result = true
 
   let exercises = trackConfig.exercises
