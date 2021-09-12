@@ -598,6 +598,9 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkExerciseSlugsAndForegone(exercises, result, path)
 
 proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
+  ## Returns `true` if `data` passes the first round of checks for a track-level
+  ## `config.json` file. This includes checking that the types are as expected,
+  ## so that we can perform more complex checks after deserializing via `jsony`.
   if isObject(data, jsonRoot, path):
     let checks = [
       hasString(data, "language", path, maxLen = 255),
