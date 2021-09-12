@@ -3,50 +3,6 @@ import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
 
-const tags = [
-  "paradigm/declarative",
-  "paradigm/functional",
-  "paradigm/imperative",
-  "paradigm/logic",
-  "paradigm/object_oriented",
-  "paradigm/procedural",
-  "typing/static",
-  "typing/dynamic",
-  "typing/strong",
-  "typing/weak",
-  "execution_mode/compiled",
-  "execution_mode/interpreted",
-  "platform/windows",
-  "platform/mac",
-  "platform/linux",
-  "platform/ios",
-  "platform/android",
-  "platform/web",
-  "runtime/standalone_executable",
-  "runtime/language_specific",
-  "runtime/clr",
-  "runtime/jvm",
-  "runtime/beam",
-  "runtime/wasmtime",
-  "used_for/artificial_intelligence",
-  "used_for/backends",
-  "used_for/cross_platform_development",
-  "used_for/embedded_systems",
-  "used_for/financial_systems",
-  "used_for/frontends",
-  "used_for/games",
-  "used_for/guis",
-  "used_for/mobile",
-  "used_for/robotics",
-  "used_for/scientific_calculations",
-  "used_for/scripts",
-  "used_for/web_development",
-].toHashSet()
-
-proc hasValidTags(data: JsonNode; path: Path): bool =
-  result = hasArrayOfStrings(data, "tags", path, allowed = tags,
-                             uniqueValues = true)
-
 proc hasValidStatus(data: JsonNode; path: Path): bool =
   const k = "status"
   if hasObject(data, k, path):
@@ -196,6 +152,50 @@ proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
 proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
                       isRequired = false, allowedLength = 6..6)
+
+const tags = [
+  "paradigm/declarative",
+  "paradigm/functional",
+  "paradigm/imperative",
+  "paradigm/logic",
+  "paradigm/object_oriented",
+  "paradigm/procedural",
+  "typing/static",
+  "typing/dynamic",
+  "typing/strong",
+  "typing/weak",
+  "execution_mode/compiled",
+  "execution_mode/interpreted",
+  "platform/windows",
+  "platform/mac",
+  "platform/linux",
+  "platform/ios",
+  "platform/android",
+  "platform/web",
+  "runtime/standalone_executable",
+  "runtime/language_specific",
+  "runtime/clr",
+  "runtime/jvm",
+  "runtime/beam",
+  "runtime/wasmtime",
+  "used_for/artificial_intelligence",
+  "used_for/backends",
+  "used_for/cross_platform_development",
+  "used_for/embedded_systems",
+  "used_for/financial_systems",
+  "used_for/frontends",
+  "used_for/games",
+  "used_for/guis",
+  "used_for/mobile",
+  "used_for/robotics",
+  "used_for/scientific_calculations",
+  "used_for/scripts",
+  "used_for/web_development",
+].toHashSet()
+
+proc hasValidTags(data: JsonNode; path: Path): bool =
+  result = hasArrayOfStrings(data, "tags", path, allowed = tags,
+                             uniqueValues = true)
 
 proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
   ## Returns `true` if `data` passes the first round of checks for a track-level
