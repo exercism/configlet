@@ -376,6 +376,8 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                            path: Path): HashSet[string] =
   ## Checks the `concepts` array of each user-facing Concept Exercise in
   ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  ##
+  ## Returns a `HashSet` of concepts taught by a user-facing Concept Exercise.
   result = initHashSet[string]()
   for conceptExercise in visible(conceptExercises):
     for conceptTaught in conceptExercise.concepts:
