@@ -226,8 +226,9 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
-  # We can use a `HashSet` for `concepts`, `prerequisites` and `practices`
-  # because the first pass has already checked that each has unique values.
+  # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
+  # `foregone` because the first pass has already checked that each has unique
+  # values.
   ConceptExercise = object
     slug: string
     # name: string
