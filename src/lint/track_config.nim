@@ -197,6 +197,27 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
                       isRequired = false, allowedLength = 6..6)
 
+proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
+  ## Returns `true` if `data` passes the first round of checks for a track-level
+  ## `config.json` file. This includes checking that the types are as expected,
+  ## so that we can perform more complex checks after deserializing via `jsony`.
+  if isObject(data, jsonRoot, path):
+    let checks = [
+      hasString(data, "language", path, maxLen = 255),
+      hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
+      hasBoolean(data, "active", path),
+      hasString(data, "blurb", path, maxLen = 400),
+      hasInteger(data, "version", path, allowed = 3..3),
+      hasValidStatus(data, path),
+      hasValidOnlineEditor(data, path),
+      hasValidTestRunner(data, path),
+      hasValidExercises(data, path),
+      hasValidConcepts(data, path),
+      hasValidKeyFeatures(data, path),
+      hasValidTags(data, path),
+    ]
+    result = allTrue(checks)
+
 type
   Status = enum
     sMissing = "missing"
@@ -596,27 +617,6 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkExercisesPCP(conceptExercises, result, path)
   checkExercisesPCP(practiceExercises, result, path)
   checkExerciseSlugsAndForegone(exercises, result, path)
-
-proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
-  ## Returns `true` if `data` passes the first round of checks for a track-level
-  ## `config.json` file. This includes checking that the types are as expected,
-  ## so that we can perform more complex checks after deserializing via `jsony`.
-  if isObject(data, jsonRoot, path):
-    let checks = [
-      hasString(data, "language", path, maxLen = 255),
-      hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
-      hasBoolean(data, "active", path),
-      hasString(data, "blurb", path, maxLen = 400),
-      hasInteger(data, "version", path, allowed = 3..3),
-      hasValidStatus(data, path),
-      hasValidOnlineEditor(data, path),
-      hasValidTestRunner(data, path),
-      hasValidExercises(data, path),
-      hasValidConcepts(data, path),
-      hasValidKeyFeatures(data, path),
-      hasValidTags(data, path),
-    ]
-    result = allTrue(checks)
 
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
