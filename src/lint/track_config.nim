@@ -419,9 +419,9 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
 proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
                         b: var bool; path: Path) =
-  var prerequisitesByConcept = initTable[string, seq[string]]()
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  var prerequisitesByConcept = initTable[string, seq[string]]()
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
       if c notin prerequisitesByConcept:
