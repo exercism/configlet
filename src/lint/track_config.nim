@@ -393,12 +393,11 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkForCycle(
-  prerequisitesByConcept: Table[string, seq[string]];
-  currentConcept: string;
-  prereqPath: seq[string];
-  conceptExercise: ConceptExercise;
-  b: var bool; path: Path) =
+proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
+                   currentConcept: string;
+                   prereqPath: seq[string];
+                   conceptExercise: ConceptExercise;
+                   b: var bool; path: Path) =
   let updatedPrereqPath = prereqPath & @[currentConcept]
   if currentConcept in prereqPath:
     var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
