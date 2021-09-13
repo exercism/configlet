@@ -445,13 +445,7 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
   ## Concept Exercise in `trackConfig`, and sets `b` to `false` if a check fails.
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
-      checkForCycle(
-        prerequisitesByConcept,
-        c,
-        @[],
-        conceptExercise,
-        b,
-        path)
+      checkForCycle(prerequisitesByConcept, c, @[], conceptExercise, b, path)
 
 proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
