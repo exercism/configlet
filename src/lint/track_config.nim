@@ -376,8 +376,12 @@ proc checkForCycle(
   b: var bool; path: Path) =
   let updatedPrereqPath = prereqPath & @[currentConcept]
   if currentConcept in prereqPath:
+    var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
+    for i in 1..high(prereqPath):
+      formattedCycle &= &", which depends on {q updatedPrereqPath[i + 1]}"
+    formattedCycle &= " forming a cycle"
     let msg = &"The Concept Exercise {q conceptExercise.slug} has a " &
-              &"cycle in its `prerequisites`: {updatedPrereqPath}"
+              &"cycle in its `prerequisites`: {formattedCycle}"
     b.setFalseAndPrint(msg, path)
     return
   
