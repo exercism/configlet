@@ -402,17 +402,17 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
     for prereq in conceptExercise.prerequisites:
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in both its `prerequisites` and its `concepts`"
+                  &"{q prereq} in both its `prerequisites` and its `concepts`"
         b.setFalseAndPrint(msg, path)
       elif prereq notin conceptsTaught:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in its `prerequisites`, which is not in the " &
+                  &"{q prereq} in its `prerequisites`, which is not in the " &
                    "`concepts` array of any other user-facing Concept Exercise"
         b.setFalseAndPrint(msg, path)
 
       if prereq notin conceptSlugs:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in its `prerequisites`, which is not a " &
+                  &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
@@ -433,7 +433,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           # TODO: Eventually make this an error, not a warning.
           if false:
             let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                      &"{q preReq} in its `prerequisites`, which is not in " &
+                      &"{q prereq} in its `prerequisites`, which is not in " &
                        "the `concepts` array of any user-facing Concept Exercise"
             b.setFalseAndPrint(msg, path)
         if prereq notin conceptSlugs:
@@ -441,7 +441,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           # TODO: Eventually make this an error, not a warning.
           if false:
             let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                      &"{q preReq} in its `prerequisites`, which is not a " &
+                      &"{q prereq} in its `prerequisites`, which is not a " &
                        "`slug` in the top-level `concepts` array"
             b.setFalseAndPrint(msg, path)
     of sWip, sDeprecated:
