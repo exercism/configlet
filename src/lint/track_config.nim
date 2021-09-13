@@ -398,6 +398,8 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
                    prereqPath: seq[string];
                    conceptExercise: ConceptExercise;
                    b: var bool; path: Path) =
+  ## Sets `b` to `false` if the given `conceptExercise` has a cycle in its
+  ## `prerequisites` array.
   let updatedPrereqPath = prereqPath & @[currentConcept]
   if currentConcept in prereqPath:
     var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
@@ -442,8 +444,7 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                   &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
-  ## Checks if there are cycles in the `prerequisites` array of each user-facing
-  ## Concept Exercise in `trackConfig`, and sets `b` to `false` if a check fails.
+  # Check for cycles
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
       checkForCycle(prerequisitesByConcept, c, @[], conceptExercise, b, path)
