@@ -1,4 +1,4 @@
-import std/[json, sets, strformat, strscans, strutils, tables]
+import std/[json, os, sets, strformat, strscans, strutils, tables]
 import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
@@ -621,6 +621,39 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkExercisesPCP(practiceExercises, result, path)
   checkExerciseSlugsAndForegone(exercises, result, path)
 
+proc getExerciseSlugs(data: JsonNode; k: string): HashSet[string] =
+  result = initHashSet[string]()
+  if data.kind == JObject:
+    if data.hasKey("exercises"):
+      let exercises = data["exercises"]
+      if exercises.kind == JObject:
+        if exercises.hasKey(k):
+          if exercises[k].kind == JArray:
+            for exercise in exercises[k]:
+              if exercise.kind == JObject:
+                if exercise.hasKey("slug"):
+                  let slug = exercise["slug"]
+                  if slug.kind == JString:
+                    let slugStr = slug.getStr()
+                    if slugStr.len > 0:
+                      result.incl slugStr
+
+proc checkExerciseDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
+                                       b: var bool; path: Path) =
+  ## Sets `b` to `false` if there is an exercise directory that is
+  ## not an exercise `slug` in `data`.
+  for exerciseKind in ["concept", "practice"]:
+    let exerciseSlugs = getExerciseSlugs(data, exerciseKind)
+    if exerciseSlugs.len > 0:
+      let exercisesDir = trackDir / "exercises" / exerciseKind
+      if dirExists(exercisesDir):
+        for exerciseDir in getSortedSubdirs(exercisesDir):
+          let dirSlug = lastPathPart(exerciseDir.string)
+          if dirSlug notin exerciseSlugs:
+            let msg = &"{q $exercisesDir} contains a directory named {q dirSlug}, " &
+                      &"which is not a `slug` in the array of {exerciseKind} exercises"
+            b.setFalseAndPrint(msg, path)
+
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
   let trackConfigPath = trackDir / "config.json"
@@ -633,3 +666,5 @@ proc isTrackConfigValid*(trackDir: Path): bool =
   if result:
     let trackConfigContents = readFile(trackConfigPath)
     result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
+
+  checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
