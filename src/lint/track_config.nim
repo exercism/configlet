@@ -424,7 +424,7 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
   ## `conceptExercises`, and sets `b` to `false` if a check fails.
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
-      if not prerequisitesByConcept.hasKey(c):
+      if c notin prerequisitesByConcept:
         prerequisitesByConcept[c] = @[]
     for prereq in conceptExercise.prerequisites:
       for c in conceptExercise.concepts:
