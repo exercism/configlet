@@ -411,7 +411,8 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
 
   if prerequisitesByConcept.hasKey(currentConcept):
     for prereq in prerequisitesByConcept[currentConcept]:
-      checkForCycle(prerequisitesByConcept, prereq, updatedPrereqPath, conceptExercise, b, path)
+      checkForCycle(prerequisitesByConcept, prereq, updatedPrereqPath,
+                    conceptExercise, b, path)
 
 proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
