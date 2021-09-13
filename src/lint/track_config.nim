@@ -3,50 +3,6 @@ import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
 
-const tags = [
-  "paradigm/declarative",
-  "paradigm/functional",
-  "paradigm/imperative",
-  "paradigm/logic",
-  "paradigm/object_oriented",
-  "paradigm/procedural",
-  "typing/static",
-  "typing/dynamic",
-  "typing/strong",
-  "typing/weak",
-  "execution_mode/compiled",
-  "execution_mode/interpreted",
-  "platform/windows",
-  "platform/mac",
-  "platform/linux",
-  "platform/ios",
-  "platform/android",
-  "platform/web",
-  "runtime/standalone_executable",
-  "runtime/language_specific",
-  "runtime/clr",
-  "runtime/jvm",
-  "runtime/beam",
-  "runtime/wasmtime",
-  "used_for/artificial_intelligence",
-  "used_for/backends",
-  "used_for/cross_platform_development",
-  "used_for/embedded_systems",
-  "used_for/financial_systems",
-  "used_for/frontends",
-  "used_for/games",
-  "used_for/guis",
-  "used_for/mobile",
-  "used_for/robotics",
-  "used_for/scientific_calculations",
-  "used_for/scripts",
-  "used_for/web_development",
-].toHashSet()
-
-proc hasValidTags(data: JsonNode; path: Path): bool =
-  result = hasArrayOfStrings(data, "tags", path, allowed = tags,
-                             uniqueValues = true)
-
 proc hasValidStatus(data: JsonNode; path: Path): bool =
   const k = "status"
   if hasObject(data, k, path):
@@ -197,6 +153,71 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
                       isRequired = false, allowedLength = 6..6)
 
+const tags = [
+  "paradigm/declarative",
+  "paradigm/functional",
+  "paradigm/imperative",
+  "paradigm/logic",
+  "paradigm/object_oriented",
+  "paradigm/procedural",
+  "typing/static",
+  "typing/dynamic",
+  "typing/strong",
+  "typing/weak",
+  "execution_mode/compiled",
+  "execution_mode/interpreted",
+  "platform/windows",
+  "platform/mac",
+  "platform/linux",
+  "platform/ios",
+  "platform/android",
+  "platform/web",
+  "runtime/standalone_executable",
+  "runtime/language_specific",
+  "runtime/clr",
+  "runtime/jvm",
+  "runtime/beam",
+  "runtime/wasmtime",
+  "used_for/artificial_intelligence",
+  "used_for/backends",
+  "used_for/cross_platform_development",
+  "used_for/embedded_systems",
+  "used_for/financial_systems",
+  "used_for/frontends",
+  "used_for/games",
+  "used_for/guis",
+  "used_for/mobile",
+  "used_for/robotics",
+  "used_for/scientific_calculations",
+  "used_for/scripts",
+  "used_for/web_development",
+].toHashSet()
+
+proc hasValidTags(data: JsonNode; path: Path): bool =
+  result = hasArrayOfStrings(data, "tags", path, allowed = tags,
+                             uniqueValues = true)
+
+proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
+  ## Returns `true` if `data` passes the first round of checks for a track-level
+  ## `config.json` file. This includes checking that the types are as expected,
+  ## so that we can perform more complex checks after deserializing via `jsony`.
+  if isObject(data, jsonRoot, path):
+    let checks = [
+      hasString(data, "language", path, maxLen = 255),
+      hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
+      hasBoolean(data, "active", path),
+      hasString(data, "blurb", path, maxLen = 400),
+      hasInteger(data, "version", path, allowed = 3..3),
+      hasValidStatus(data, path),
+      hasValidOnlineEditor(data, path),
+      hasValidTestRunner(data, path),
+      hasValidExercises(data, path),
+      hasValidConcepts(data, path),
+      hasValidKeyFeatures(data, path),
+      hasValidTags(data, path),
+    ]
+    result = allTrue(checks)
+
 type
   Status = enum
     sMissing = "missing"
@@ -205,8 +226,9 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
-  # We can use a `HashSet` for `concepts`, `prerequisites` and `practices`
-  # because the first pass has already checked that each has unique values.
+  # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
+  # `foregone` because the first pass has already checked that each has unique
+  # values.
   ConceptExercise = object
     slug: string
     # name: string
@@ -240,7 +262,7 @@ type
     exercises: Exercises
     concepts: Concepts
 
-proc toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
+func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
   ## Returns the line and column number corresponding to the `offset` in `s`.
   result = (1, 1)
   for i, c in s:
@@ -280,7 +302,7 @@ proc tidyJsonyErrorMsg(trackConfigContents: string): string =
   """.unindent()
   result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
 
-proc toTrackConfig(trackConfigContents: string): TrackConfig =
+proc init(T: typedesc[TrackConfig]; trackConfigContents: string): T =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
   try:
     result = fromJson(trackConfigContents, TrackConfig)
@@ -288,11 +310,11 @@ proc toTrackConfig(trackConfigContents: string): TrackConfig =
     let msg = tidyJsonyErrorMsg(trackConfigContents)
     showError(msg)
 
-func getConceptSlugs(trackConfig: TrackConfig): HashSet[string] =
+func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track
   ## `config.json` file.
   result = initHashSet[string]()
-  for con in trackConfig.concepts:
+  for con in concepts:
     result.incl con.slug
 
 func joinWithNewlines[A](s: SomeSet[A]): string =
@@ -340,21 +362,24 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
       else:
         b.setFalseAndPrint(msg, path)
 
-iterator visibleConceptExercises(trackConfig: TrackConfig): ConceptExercise =
-  ## Yields every Concept Exercise in `trackConfig` that appears on the website.
+iterator visible(conceptExercises: seq[ConceptExercise]): ConceptExercise =
+  ## Yields every Concept Exercise in `conceptExercises` that appears on the
+  ## website.
   ## That is, every Concept Exercise that has a `status` of `beta` or `active`,
   ## or that omits the `status` property entirely (which implies `active`).
-  for conceptExercise in trackConfig.exercises.`concept`:
+  for conceptExercise in conceptExercises:
     if conceptExercise.status in [sMissing, sBeta, sActive]:
       yield conceptExercise
 
-proc checkExerciseConcepts(trackConfig: TrackConfig;
+proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                            conceptSlugs: HashSet[string]; b: var bool;
                            path: Path): HashSet[string] =
   ## Checks the `concepts` array of each user-facing Concept Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
+  ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  ##
+  ## Returns a `HashSet` of concepts taught by a user-facing Concept Exercise.
   result = initHashSet[string]()
-  for conceptExercise in visibleConceptExercises(trackConfig):
+  for conceptExercise in visible(conceptExercises):
     for conceptTaught in conceptExercise.concepts:
       # Build a set of every concept taught by a user-facing Concept Exercise
       if result.containsOrIncl(conceptTaught):
@@ -368,26 +393,26 @@ proc checkExerciseConcepts(trackConfig: TrackConfig;
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkConceptExercisePrerequisites(trackConfig: TrackConfig;
-                                       conceptSlugs, conceptsTaught: HashSet[string];
-                                       b: var bool; path: Path) =
+proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
+                        conceptSlugs, conceptsTaught: HashSet[string];
+                        b: var bool; path: Path) =
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
-  ## `trackConfig`, and sets `b` to `false` if a check fails.
-  for conceptExercise in visibleConceptExercises(trackConfig):
+  ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  for conceptExercise in visible(conceptExercises):
     for prereq in conceptExercise.prerequisites:
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in both its `prerequisites` and its `concepts`"
+                  &"{q prereq} in both its `prerequisites` and its `concepts`"
         b.setFalseAndPrint(msg, path)
       elif prereq notin conceptsTaught:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in its `prerequisites`, which is not in the " &
+                  &"{q prereq} in its `prerequisites`, which is not in the " &
                    "`concepts` array of any other user-facing Concept Exercise"
         b.setFalseAndPrint(msg, path)
 
       if prereq notin conceptSlugs:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
-                  &"{q preReq} in its `prerequisites`, which is not a " &
+                  &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
@@ -408,7 +433,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           # TODO: Eventually make this an error, not a warning.
           if false:
             let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                      &"{q preReq} in its `prerequisites`, which is not in " &
+                      &"{q prereq} in its `prerequisites`, which is not in " &
                        "the `concepts` array of any user-facing Concept Exercise"
             b.setFalseAndPrint(msg, path)
         if prereq notin conceptSlugs:
@@ -416,7 +441,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           # TODO: Eventually make this an error, not a warning.
           if false:
             let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
-                      &"{q preReq} in its `prerequisites`, which is not a " &
+                      &"{q prereq} in its `prerequisites`, which is not a " &
                        "`slug` in the top-level `concepts` array"
             b.setFalseAndPrint(msg, path)
     of sWip, sDeprecated:
@@ -436,7 +461,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
     let slugs = joinWithNewlines(prereqsNotInTopLevelConcepts)
     warn(msg, slugs)
 
-proc statusMsg(exercise: ConceptExercise | PracticeExercise;
+func statusMsg(exercise: ConceptExercise | PracticeExercise;
                problem: string): string =
   ## Returns the error text for an `exercise` with the status-related `problem`.
   const exerciseKind =
@@ -525,8 +550,8 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
       for slug in conceptExercisesWithEmptyPrereqs:
         msg.add &"{q slug}, "
       msg.setLen(msg.len - 2)
-      msg.add " each have an empty array of `prerequisites`, but only one Concept " &
-              "Exercise is allowed to have that"
+      msg.add " each have an empty array of `prerequisites`, but only one " &
+              "Concept Exercise is allowed to have that"
       b.setFalseAndPrint(msg, path)
 
 proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
@@ -576,45 +601,32 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   ## To make these checks easier, this proc uses `jsony` to deserialize to a
   ## strongly typed `TrackConfig` object. Note that `jsony` is non-strict in
   ## several ways, so we do a first pass that verifies the key names and types.
-  let trackConfig = toTrackConfig(trackConfigContents)
+  let trackConfig = TrackConfig.init(trackConfigContents)
   result = true
 
-  let conceptSlugs = getConceptSlugs(trackConfig)
-  checkPractices(trackConfig.exercises.practice, conceptSlugs, result, path)
-  let conceptsTaught = checkExerciseConcepts(trackConfig, conceptSlugs, result,
-                                             path)
-  checkConceptExercisePrerequisites(trackConfig, conceptSlugs, conceptsTaught,
-                                    result, path)
-  checkPrerequisites(trackConfig.exercises.practice, conceptSlugs,
-                     conceptsTaught, result, path)
-  checkExercisesPCP(trackConfig.exercises.`concept`, result, path)
-  checkExercisesPCP(trackConfig.exercises.practice, result, path)
-  checkExerciseSlugsAndForegone(trackConfig.exercises, result, path)
+  let exercises = trackConfig.exercises
+  let conceptExercises = exercises.`concept`
+  let practiceExercises = exercises.practice
+  let concepts = trackConfig.concepts
 
-proc isValidTrackConfig(data: JsonNode; path: Path): bool =
-  if isObject(data, jsonRoot, path):
-    let checks = [
-      hasString(data, "language", path, maxLen = 255),
-      hasString(data, "slug", path, maxLen = 255, checkIsKebab = true),
-      hasBoolean(data, "active", path),
-      hasString(data, "blurb", path, maxLen = 400),
-      hasInteger(data, "version", path, allowed = 3..3),
-      hasValidStatus(data, path),
-      hasValidOnlineEditor(data, path),
-      hasValidTestRunner(data, path),
-      hasValidExercises(data, path),
-      hasValidConcepts(data, path),
-      hasValidKeyFeatures(data, path),
-      hasValidTags(data, path),
-    ]
-    result = allTrue(checks)
+  let conceptSlugs = getConceptSlugs(concepts)
+  checkPractices(practiceExercises, conceptSlugs, result, path)
+  let conceptsTaught = checkExerciseConcepts(conceptExercises, conceptSlugs,
+                                             result, path)
+  checkPrerequisites(conceptExercises, conceptSlugs, conceptsTaught, result,
+                     path)
+  checkPrerequisites(practiceExercises, conceptSlugs, conceptsTaught, result,
+                     path)
+  checkExercisesPCP(conceptExercises, result, path)
+  checkExercisesPCP(practiceExercises, result, path)
+  checkExerciseSlugsAndForegone(exercises, result, path)
 
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
   let trackConfigPath = trackDir / "config.json"
   let j = parseJsonFile(trackConfigPath, result)
   if j != nil:
-    if not isValidTrackConfig(j, trackConfigPath):
+    if not satisfiesFirstPass(j, trackConfigPath):
       result = false
 
   # Perform the second pass only if the track passes every previous check.
