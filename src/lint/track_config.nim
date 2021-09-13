@@ -396,10 +396,14 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
 proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
                         b: var bool; path: Path) =
+  prerequisitesBySlug = initTable[string: seq[string]]()
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `conceptExercises`, and sets `b` to `false` if a check fails.
-  for conceptExercise in visible(conceptExercises):
+  var visibleExercises = visible(conceptExercises)
+  for conceptExercise in visibleExercises:
+    prerequisitesBySlug[conceptExercise.slug] = @[]
     for prereq in conceptExercise.prerequisites:
+      prerequisitesBySlug[conceptExercise.slug].add(prereq)
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q prereq} in both its `prerequisites` and its `concepts`"
@@ -415,6 +419,31 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                   &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
+  ## Checks if there are cycles in the `prerequisites` array of each user-facing
+  ## Concept Exercise in `trackConfig`, and sets `b` to `false` if a check fails.
+  for conceptExercise in visibleExercises:
+    checkForCycle(
+      prerequisitesBySlug,
+      conceptExercise.slug,
+      initSeq[string](),
+      conceptExercise,
+      b,
+      path)
+
+proc checkForCycle(prerequisitesBySlug: Table[string: seq[string]];
+                   current: string;
+                   prereqPath: seq[string];
+                   conceptExercise: ConceptExercise;
+                   b var: bool; path: Path) =
+  let updatedPrereqPath = prereqPath & @[current]
+  if current in prereqPath:
+    let msg = &"The Concept Exercise {q conceptExercise.slug} has a " &
+              "cycle in its `prerequisites`: {q updatedPrereqPath}"
+    b.setFalseAndPrint(msg, path)
+    return
+
+  for prereq in prerequisitesBySlug[current]:
+    checkForCycle(prerequisitesBySlug, prereq, updatedPrereqPath, conceptExercise, b, path)
 
 proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
