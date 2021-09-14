@@ -393,18 +393,19 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
 
-proc checkForCycle(
-  prerequisitesByConcept: Table[string, seq[string]];
-  currentConcept: string;
-  prereqPath: seq[string];
-  conceptExercise: ConceptExercise;
-  b: var bool; path: Path) =
+proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
+                   currentConcept: string;
+                   prereqPath: seq[string];
+                   conceptExercise: ConceptExercise;
+                   b: var bool; path: Path) =
+  ## Sets `b` to `false` if the given `conceptExercise` has a cycle in its
+  ## `prerequisites` array.
   let updatedPrereqPath = prereqPath & @[currentConcept]
   if currentConcept in prereqPath:
     var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
     for i in 1..high(prereqPath):
-      formattedCycle &= &", which depends on {q updatedPrereqPath[i + 1]}"
-    formattedCycle &= " forming a cycle"
+      formattedCycle.add &", which depends on {q updatedPrereqPath[i + 1]}"
+    formattedCycle.add " forming a cycle"
     let msg = &"The Concept Exercise {q conceptExercise.slug} has a " &
               &"cycle in its `prerequisites`: {formattedCycle}"
     b.setFalseAndPrint(msg, path)
@@ -412,17 +413,18 @@ proc checkForCycle(
 
   if prerequisitesByConcept.hasKey(currentConcept):
     for prereq in prerequisitesByConcept[currentConcept]:
-      checkForCycle(prerequisitesByConcept, prereq, updatedPrereqPath, conceptExercise, b, path)
+      checkForCycle(prerequisitesByConcept, prereq, updatedPrereqPath,
+                    conceptExercise, b, path)
 
 proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
                         b: var bool; path: Path) =
-  var prerequisitesByConcept = initTable[string, seq[string]]()
   ## Checks the `prerequisites` array of each user-facing Concept Exercise in
   ## `conceptExercises`, and sets `b` to `false` if a check fails.
+  var prerequisitesByConcept = initTable[string, seq[string]]()
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
-      if not prerequisitesByConcept.hasKey(c):
+      if c notin prerequisitesByConcept:
         prerequisitesByConcept[c] = @[]
     for prereq in conceptExercise.prerequisites:
       for c in conceptExercise.concepts:
@@ -442,17 +444,10 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                   &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
-  ## Checks if there are cycles in the `prerequisites` array of each user-facing
-  ## Concept Exercise in `trackConfig`, and sets `b` to `false` if a check fails.
+  # Check for cycles
   for conceptExercise in visible(conceptExercises):
     for c in conceptExercise.concepts:
-      checkForCycle(
-        prerequisitesByConcept,
-        c,
-        @[],
-        conceptExercise,
-        b,
-        path)
+      checkForCycle(prerequisitesByConcept, c, @[], conceptExercise, b, path)
 
 proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
