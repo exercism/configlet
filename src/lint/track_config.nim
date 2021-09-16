@@ -398,8 +398,16 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
                    prereqPath: seq[string];
                    conceptExerciseSlug: string;
                    b, hadCycle: var bool; path: Path) =
-  ## Sets `b` to `false` if the given `conceptExerciseSlug` has a cycle in its
-  ## `prerequisites` array.
+  ## Sets `b` to `false` if the given `conceptExerciseSlug` has a cycle due to
+  ## its `prerequisites`.
+  ##
+  ## An example of such a cycle:
+  ## - exercise slug A teaches concept A', and requires concept B'
+  ## - exercise slug B teaches concept B', and requires concept C'
+  ## - exercise slug C teaches concept C', and requires concept A'
+  ##
+  ## This is important to forbid because any exercise that is involved in such a
+  ## cycle would not be unlockable.
   if hadCycle:
     return
 
