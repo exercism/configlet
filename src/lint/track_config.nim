@@ -396,9 +396,9 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
 proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
                    currentConcept: string;
                    prereqPath: seq[string];
-                   conceptExercise: ConceptExercise;
+                   conceptExerciseSlug: string;
                    b, hadCycle: var bool; path: Path) =
-  ## Sets `b` to `false` if the given `conceptExercise` has a cycle in its
+  ## Sets `b` to `false` if the given `conceptExerciseSlug` has a cycle in its
   ## `prerequisites` array.
   if hadCycle:
     return
@@ -409,7 +409,7 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
     for i in 1..high(prereqPath):
       formattedCycle.add &", which depends on {q updatedPrereqPath[i + 1]}"
     formattedCycle.add " forming a cycle"
-    let msg = &"The Concept Exercise {q conceptExercise.slug} has a " &
+    let msg = &"The Concept Exercise {q conceptExerciseSlug} has a " &
               &"cycle in its `prerequisites`: {formattedCycle}"
     b.setFalseAndPrint(msg, path)
     hadCycle = true
@@ -418,7 +418,7 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
   if prerequisitesByConcept.hasKey(currentConcept):
     for prereq in prerequisitesByConcept[currentConcept]:
       checkForCycle(prerequisitesByConcept, prereq, updatedPrereqPath,
-                    conceptExercise, b, hadCycle, path)
+                    conceptExerciseSlug, b, hadCycle, path)
 
 proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
@@ -453,7 +453,8 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
   for conceptExercise in visible(conceptExercises):
     var hadCycle = false
     for c in conceptExercise.concepts:
-      checkForCycle(prerequisitesByConcept, c, @[], conceptExercise, b, hadCycle, path)
+      checkForCycle(prerequisitesByConcept, c, @[], conceptExercise.slug, b,
+                    hadCycle, path)
 
 proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
                         conceptSlugs, conceptsTaught: HashSet[string];
