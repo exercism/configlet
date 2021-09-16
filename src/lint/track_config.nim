@@ -542,6 +542,8 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
 
   when exercises is seq[ConceptExercise]:
     var conceptExercisesWithEmptyPrereqs = newSeq[string]()
+  else:
+    var countPracticeExercisesWithEmptyPractices = 0
 
   for exercise in exercises:
     let conceptsOrPractices =
@@ -555,11 +557,13 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
     case status
     of sMissing, sBeta, sActive:
       # Check either `concepts` or `practices`
-      # TODO: enable the `practices` check when more tracks have populated them.
-      when exercise is ConceptExercise:
-        if conceptsOrPractices.len == 0:
+      if conceptsOrPractices.len == 0:
+        when exercise is ConceptExercise:
           let msg = statusMsg(exercise, &"an empty array of `{conceptsOrPracticesStr}`")
           b.setFalseAndPrint(msg, path)
+        else:
+          # TODO: Make each empty `practices` an error, not a warning.
+          inc countPracticeExercisesWithEmptyPractices
 
       # Check `prerequisites`
       when exercise is ConceptExercise:
@@ -601,6 +605,11 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
       msg.add " each have an empty array of `prerequisites`, but only one " &
               "Concept Exercise is allowed to have that"
       b.setFalseAndPrint(msg, path)
+  else:
+    if countPracticeExercisesWithEmptyPractices > 0:
+      let msg = &"{countPracticeExercisesWithEmptyPractices} user-facing " &
+                 "Practice Exercises have an empty `practices` array"
+      warn(msg, path)
 
 proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                                    path: Path) =
