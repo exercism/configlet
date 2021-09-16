@@ -432,7 +432,7 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
         prerequisitesByConcept[c] = @[]
     for prereq in conceptExercise.prerequisites:
       for c in conceptExercise.concepts:
-        prerequisitesByConcept[c].add(prereq)
+        prerequisitesByConcept[c].add prereq
       if prereq in conceptExercise.concepts:
         let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
                   &"{q prereq} in both its `prerequisites` and its `concepts`"
