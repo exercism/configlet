@@ -623,20 +623,22 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
 
 proc getExerciseSlugs(data: JsonNode; k: string): HashSet[string] =
   result = initHashSet[string]()
-  if data.kind == JObject:
-    if data.hasKey("exercises"):
-      let exercises = data["exercises"]
-      if exercises.kind == JObject:
-        if exercises.hasKey(k):
-          if exercises[k].kind == JArray:
-            for exercise in exercises[k]:
-              if exercise.kind == JObject:
-                if exercise.hasKey("slug"):
-                  let slug = exercise["slug"]
-                  if slug.kind == JString:
-                    let slugStr = slug.getStr()
-                    if slugStr.len > 0:
-                      result.incl slugStr
+  if data.kind != JObject or "exercises" notin data:
+    return
+
+  let exercises = data["exercises"]
+
+  if exercises.kind != JObject or k notin exercises or exercises[k].kind != JArray:
+    return
+
+  for exercise in exercises[k]:
+    if exercise.kind == JObject:
+      if exercise.hasKey("slug"):
+        let slug = exercise["slug"]
+        if slug.kind == JString:
+          let slugStr = slug.getStr()
+          if slugStr.len > 0:
+            result.incl slugStr
 
 proc checkExerciseDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
                                        b: var bool; path: Path) =
