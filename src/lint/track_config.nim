@@ -398,10 +398,11 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
                    prereqPath: seq[string];
                    conceptExercise: ConceptExercise;
                    b, hadCycle: var bool; path: Path) =
-  if hadCycle:
-    return
   ## Sets `b` to `false` if the given `conceptExercise` has a cycle in its
   ## `prerequisites` array.
+  if hadCycle:
+    return
+
   let updatedPrereqPath = prereqPath & @[currentConcept]
   if currentConcept in prereqPath:
     var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
