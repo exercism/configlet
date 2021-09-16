@@ -651,7 +651,10 @@ proc checkExerciseDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
           let dirSlug = lastPathPart(exerciseDir.string)
           if dirSlug notin exerciseSlugs:
             let msg = &"{q $exercisesDir} contains a directory named {q dirSlug}, " &
-                      &"which is not a `slug` in the array of {exerciseKind} exercises"
+                      &"which is not a `slug` in the array of {exerciseKind} " &
+                       "exercises. Please add an entry for this exercise. If " &
+                       "the exercise is not ready to be shown on the " &
+                       "website, please set its `status` value to \"wip\""
             b.setFalseAndPrint(msg, path)
 
 proc isTrackConfigValid*(trackDir: Path): bool =
