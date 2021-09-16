@@ -448,7 +448,8 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
                   &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
-  # Check for cycles
+
+  # Check for cycles between `prerequisites` and `concepts`
   for conceptExercise in visible(conceptExercises):
     var hadCycle = false
     for c in conceptExercise.concepts:
