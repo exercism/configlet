@@ -26,7 +26,7 @@ proc getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
 proc echoHeader(s: string) =
   stdout.styledWriteLine(fgBlue, s)
 
-proc show(s: HashSet[string], header: string) =
+proc show[A](s: SomeSet[A], header: string) =
   ## Prints `header` and then the elements of `s` in alphabetical order
   echoHeader(header)
   if s.len > 0:
