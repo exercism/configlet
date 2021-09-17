@@ -19,13 +19,13 @@ proc getConcepts(j: JsonNode): HashSet[string] =
     result.incl item["slug"].getStr()
 
 proc getPrereqs(j: JsonNode): HashSet[string] =
-  ## Returns the dedeuplicated values of every practice exercise `prerequisites` key.
+  ## Returns the deduplicated values of every practice exercise `prerequisites` key.
   for item in j["exercises"]["practice"]:
     for prereq in item["prerequisites"]:
       result.incl prereq.getStr()
 
 proc getPractices(j: JsonNode): HashSet[string] =
-  ## Returns the dedeuplicated values of every practice exercise `practices` key.
+  ## Returns the deduplicated values of every practice exercise `practices` key.
   for item in j["exercises"]["practice"]:
     if item.hasKey("practices"):
       for prac in item["practices"]:
