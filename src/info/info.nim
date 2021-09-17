@@ -24,7 +24,10 @@ proc getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
       result.incl item
 
 proc echoHeader(s: string) =
-  stdout.styledWriteLine(fgBlue, s)
+  if colorStdout:
+    stdout.styledWriteLine(fgBlue, s)
+  else:
+    stdout.writeLine(s)
 
 proc show[A](s: SomeSet[A], header: string) =
   ## Prints `header` and then the elements of `s` in alphabetical order
