@@ -204,19 +204,23 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
-proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise]) =
+proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
+                                         foregone: HashSet[string]) =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
-  let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs
+  let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
   show(unimplementedProbSpecsSlugs,
        &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
-        "exercism/problem-specifications that are not implemented:")
+        "exercism/problem-specifications that are neither implemented nor " &
+        "in `foregone`:")
 
 proc info*(conf: Conf) =
   let trackConfigContents = readFile(conf.trackDir / "config.json")
   let trackConfig = TrackConfig.init(trackConfigContents)
 
-  let practiceExercises = trackConfig.exercises.practice
+  let exercises = trackConfig.exercises
+  let practiceExercises = exercises.practice
+  let foregone = exercises.foregone
   let concepts = trackConfig.concepts
 
   concepts(practiceExercises, concepts)
-  showUnimplementedProbSpecsExercises(practiceExercises)
+  showUnimplementedProbSpecsExercises(practiceExercises, foregone)
