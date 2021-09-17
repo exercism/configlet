@@ -3,17 +3,20 @@ import ".."/[cli, lint/track_config]
 
 proc getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the slug of every concept.
+  result = initHashSet[string](concepts.len)
   for item in concepts:
     result.incl item.slug
 
 proc getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the deduplicated values of every practice exercise `prerequisites` key.
+  result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for prereq in practiceExercise.prerequisites:
       result.incl prereq
 
 proc getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the deduplicated values of every practice exercise `practices` key.
+  result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for item in practiceExercise.practices:
       result.incl item
