@@ -1,17 +1,5 @@
 import std/[algorithm, json, os, sets, terminal]
-import ".."/cli
-
-proc parseTrackConfig(trackDir: string): JsonNode =
-  let trackConfigPath = trackDir / "config.json"
-  if fileExists(trackConfigPath):
-    try:
-      result = parseFile(trackConfigPath)
-    except:
-      stderr.writeLine getCurrentExceptionMsg()
-      quit(1)
-  else:
-    stderr.writeLine "Missing file: " & trackConfigPath
-    quit(1)
+import ".."/[cli, helpers, lint/validators]
 
 proc getConcepts(j: JsonNode): HashSet[string] =
   ## Returns the slug of every concept.
@@ -68,5 +56,7 @@ proc concepts(j: JsonNode) =
        "Concepts that are a prerequisite, but aren't practiced by any practice exercise:")
 
 proc info*(conf: Conf) =
-  let j = parseTrackConfig(conf.trackDir)
+  let trackConfigPath = Path(conf.trackDir / "config.json")
+  var b = true # Temporary workaround
+  let j = parseJsonFile(trackConfigPath, b)
   concepts(j)
