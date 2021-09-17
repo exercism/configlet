@@ -1,23 +1,22 @@
-import std/[algorithm, json, os, sets, terminal]
-import ".."/[cli, helpers, lint/validators]
+import std/[algorithm, os, sets, terminal]
+import ".."/[cli, lint/track_config]
 
-proc getConcepts(j: JsonNode): HashSet[string] =
+proc getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the slug of every concept.
-  for item in j["concepts"]:
-    result.incl item["slug"].getStr()
+  for item in concepts:
+    result.incl item.slug
 
-proc getPrereqs(j: JsonNode): HashSet[string] =
+proc getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the deduplicated values of every practice exercise `prerequisites` key.
-  for item in j["exercises"]["practice"]:
-    for prereq in item["prerequisites"]:
-      result.incl prereq.getStr()
+  for practiceExercise in practiceExercises:
+    for prereq in practiceExercise.prerequisites:
+      result.incl prereq
 
-proc getPractices(j: JsonNode): HashSet[string] =
+proc getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the deduplicated values of every practice exercise `practices` key.
-  for item in j["exercises"]["practice"]:
-    if item.hasKey("practices"):
-      for prac in item["practices"]:
-        result.incl prac.getStr()
+  for practiceExercise in practiceExercises:
+    for item in practiceExercise.practices:
+      result.incl item
 
 proc echoHeader(s: string) =
   stdout.styledWriteLine(fgBlue, s)
@@ -38,16 +37,20 @@ proc show(s: HashSet[string], header: string) =
     echo "none"
   echo ""
 
-proc concepts(j: JsonNode) =
-  let concepts = getConcepts(j)
+proc concepts(trackConfig: TrackConfig) =
+  let exercises = trackConfig.exercises
+  let practiceExercises = exercises.practice
+  let concepts = trackConfig.concepts
 
-  let prereqs = getPrereqs(j)
-  let conceptsThatArentAPrereq = concepts - prereqs
+  let conceptSlugs = getConceptSlugs(concepts)
+
+  let prereqs = getPrereqs(practiceExercises)
+  let conceptsThatArentAPrereq = conceptSlugs - prereqs
   show(conceptsThatArentAPrereq,
        "Concepts that aren't a prerequisite for any practice exercise:")
 
-  let practices = getPractices(j)
-  let conceptsThatArentPracticed = concepts - practices
+  let practices = getPractices(practiceExercises)
+  let conceptsThatArentPracticed = conceptSlugs - practices
   show(conceptsThatArentPracticed,
        "Concepts that aren't practiced by any practice exercise:")
 
@@ -56,7 +59,6 @@ proc concepts(j: JsonNode) =
        "Concepts that are a prerequisite, but aren't practiced by any practice exercise:")
 
 proc info*(conf: Conf) =
-  let trackConfigPath = Path(conf.trackDir / "config.json")
-  var b = true # Temporary workaround
-  let j = parseJsonFile(trackConfigPath, b)
-  concepts(j)
+  let trackConfigContents = readFile(conf.trackDir / "config.json")
+  let trackConfig = TrackConfig.init(trackConfigContents)
+  concepts(trackConfig)
