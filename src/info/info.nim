@@ -214,13 +214,18 @@ proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise
         "in `foregone`:")
 
 proc info*(conf: Conf) =
-  let trackConfigContents = readFile(conf.trackDir / "config.json")
-  let trackConfig = TrackConfig.init(trackConfigContents)
+  let trackConfigPath = conf.trackDir / "config.json"
 
-  let exercises = trackConfig.exercises
-  let practiceExercises = exercises.practice
-  let foregone = exercises.foregone
-  let concepts = trackConfig.concepts
+  if fileExists(trackConfigPath):
+    let trackConfigContents = readFile(conf.trackDir / "config.json")
+    let trackConfig = TrackConfig.init(trackConfigContents)
 
-  showConceptsInfo(practiceExercises, concepts)
-  showUnimplementedProbSpecsExercises(practiceExercises, foregone)
+    let exercises = trackConfig.exercises
+    let practiceExercises = exercises.practice
+    let foregone = exercises.foregone
+    let concepts = trackConfig.concepts
+
+    showConceptsInfo(practiceExercises, concepts)
+    showUnimplementedProbSpecsExercises(practiceExercises, foregone)
+  else:
+    showError &"file does not exist: {trackConfigPath}"
