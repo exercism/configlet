@@ -47,13 +47,13 @@ proc concepts(trackConfig: TrackConfig) =
   let concepts = trackConfig.concepts
 
   let conceptSlugs = getConceptSlugs(concepts)
-
   let prereqs = getPrereqs(practiceExercises)
+  let practices = getPractices(practiceExercises)
+
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
   show(conceptsThatArentAPrereq,
        "Concepts that aren't a prerequisite for any practice exercise:")
 
-  let practices = getPractices(practiceExercises)
   let conceptsThatArentPracticed = conceptSlugs - practices
   show(conceptsThatArentPracticed,
        "Concepts that aren't practiced by any practice exercise:")
