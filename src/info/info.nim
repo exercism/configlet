@@ -2,20 +2,22 @@ import std/[algorithm, os, sets, terminal]
 import ".."/[cli, lint/track_config]
 
 proc getConceptSlugs(concepts: Concepts): HashSet[string] =
-  ## Returns the slug of every concept.
+  ## Returns the `slug` of every concept in `concepts`.
   result = initHashSet[string](concepts.len)
   for item in concepts:
     result.incl item.slug
 
 proc getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the deduplicated values of every practice exercise `prerequisites` key.
+  ## Returns the deduplicated set of `prerequisites` for every Practice Exercise
+  ## in `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for prereq in practiceExercise.prerequisites:
       result.incl prereq
 
 proc getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the deduplicated values of every practice exercise `practices` key.
+  ## Returns the deduplicated set of `practices`for every Practice Exercise
+  ## in `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for item in practiceExercise.practices:
