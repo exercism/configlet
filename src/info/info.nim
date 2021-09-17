@@ -181,8 +181,8 @@ proc show[A](s: SomeSet[A], header: string) =
     echo "none"
   echo ""
 
-proc concepts(practiceExercises: seq[PracticeExercise],
-              concepts: seq[Concept]) =
+proc showConceptsInfo(practiceExercises: seq[PracticeExercise],
+                      concepts: seq[Concept]) =
   let conceptSlugs = getConceptSlugs(concepts)
   let prereqs = getPrereqs(practiceExercises)
   let practices = getPractices(practiceExercises)
@@ -222,5 +222,5 @@ proc info*(conf: Conf) =
   let foregone = exercises.foregone
   let concepts = trackConfig.concepts
 
-  concepts(practiceExercises, concepts)
+  showConceptsInfo(practiceExercises, concepts)
   showUnimplementedProbSpecsExercises(practiceExercises, foregone)
