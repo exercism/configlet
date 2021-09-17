@@ -1,4 +1,4 @@
-import std/[algorithm, os, sets, terminal]
+import std/[algorithm, os, sequtils, sets, terminal]
 import ".."/[cli, lint/track_config]
 
 proc getConceptSlugs(concepts: Concepts): HashSet[string] =
@@ -30,11 +30,7 @@ proc show[A](s: SomeSet[A], header: string) =
   ## Prints `header` and then the elements of `s` in alphabetical order
   echoHeader(header)
   if s.len > 0:
-    var elements = newSeq[string](s.len)
-    var i = 0
-    for item in s:
-      elements[i] = item
-      inc i
+    var elements = toSeq(s)
     sort elements
     for item in elements:
       echo item
