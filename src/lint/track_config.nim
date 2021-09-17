@@ -219,7 +219,7 @@ proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
     result = allTrue(checks)
 
 type
-  Status = enum
+  Status* = enum
     sMissing = "missing"
     sWip = "wip"
     sBeta = "beta"
@@ -229,38 +229,38 @@ type
   # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
   # `foregone` because the first pass has already checked that each has unique
   # values.
-  ConceptExercise = object
-    slug: string
-    # name: string
-    # uuid: string
-    concepts: HashSet[string]
-    prerequisites: HashSet[string]
-    status: Status
+  ConceptExercise* = object
+    slug*: string
+    # name*: string
+    # uuid*: string
+    concepts*: HashSet[string]
+    prerequisites*: HashSet[string]
+    status*: Status
 
-  PracticeExercise = object
-    slug: string
-    # name: string
-    # uuid: string
-    # difficulty: int
-    practices: HashSet[string]
-    prerequisites: HashSet[string]
-    status: Status
+  PracticeExercise* = object
+    slug*: string
+    # name*: string
+    # uuid*: string
+    # difficulty*: int
+    practices*: HashSet[string]
+    prerequisites*: HashSet[string]
+    status*: Status
 
-  Exercises = object
-    `concept`: seq[ConceptExercise]
-    practice: seq[PracticeExercise]
-    foregone: HashSet[string]
+  Exercises* = object
+    `concept`*: seq[ConceptExercise]
+    practice*: seq[PracticeExercise]
+    foregone*: HashSet[string]
 
-  Concept = object
-    name: string
-    slug: string
-    uuid: string
+  Concept* = object
+    name*: string
+    slug*: string
+    uuid*: string
 
-  Concepts = seq[Concept]
+  Concepts* = seq[Concept]
 
-  TrackConfig = object
-    exercises: Exercises
-    concepts: Concepts
+  TrackConfig* = object
+    exercises*: Exercises
+    concepts*: Concepts
 
 func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
   ## Returns the line and column number corresponding to the `offset` in `s`.
@@ -302,7 +302,7 @@ proc tidyJsonyErrorMsg(trackConfigContents: string): string =
   """.unindent()
   result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
 
-proc init(T: typedesc[TrackConfig]; trackConfigContents: string): T =
+proc init*(T: typedesc[TrackConfig]; trackConfigContents: string): T =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
   try:
     result = fromJson(trackConfigContents, TrackConfig)
