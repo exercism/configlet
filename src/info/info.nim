@@ -181,11 +181,8 @@ proc show[A](s: SomeSet[A], header: string) =
     echo "none"
   echo ""
 
-proc concepts(trackConfig: TrackConfig) =
-  let exercises = trackConfig.exercises
-  let practiceExercises = exercises.practice
-  let concepts = trackConfig.concepts
-
+proc concepts(practiceExercises: seq[PracticeExercise],
+              concepts: seq[Concept]) =
   let conceptSlugs = getConceptSlugs(concepts)
   let prereqs = getPrereqs(practiceExercises)
   let practices = getPractices(practiceExercises)
@@ -207,8 +204,7 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
-proc showUnimplementedProbSpecsExercises(trackConfig: TrackConfig) =
-  let practiceExercises = trackConfig.exercises.practice
+proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise]) =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs
   show(unimplementedProbSpecsSlugs,
@@ -218,5 +214,9 @@ proc showUnimplementedProbSpecsExercises(trackConfig: TrackConfig) =
 proc info*(conf: Conf) =
   let trackConfigContents = readFile(conf.trackDir / "config.json")
   let trackConfig = TrackConfig.init(trackConfigContents)
-  concepts(trackConfig)
-  showUnimplementedProbSpecsExercises(trackConfig)
+
+  let practiceExercises = trackConfig.exercises.practice
+  let concepts = trackConfig.concepts
+
+  concepts(practiceExercises, concepts)
+  showUnimplementedProbSpecsExercises(practiceExercises)
