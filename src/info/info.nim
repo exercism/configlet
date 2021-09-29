@@ -6,6 +6,7 @@ proc toHashSetOfLines(path: static string): HashSet[string] =
   ## line that:
   ## - is non-empty
   ## - does not begin with the '#' character
+  result = initHashSet[string]()
   var contents = staticRead(path)
   stripLineEnd(contents)
   for line in contents.splitLines():
