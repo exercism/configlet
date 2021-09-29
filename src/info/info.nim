@@ -163,65 +163,70 @@ func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
     for item in practiceExercise.practices:
       result.incl item
 
-proc echoHeader(s: string) =
+proc header(s: string): string =
   if colorStdout:
-    stdout.styledWriteLine(fgBlue, s)
+    const ansi = ansiForegroundColorCode(fgBlue)
+    &"{ansi}{s}{ansiResetCode}\n"
   else:
-    stdout.writeLine(s)
+    &"{s}\n"
 
-proc show[A](s: SomeSet[A], header: string) =
-  ## Prints `header` and then the elements of `s` in alphabetical order
-  echoHeader(header)
+proc show[A](s: SomeSet[A], header: string): string =
+  ## Returns a string containing a colorized (when appropriate) `header`, and
+  ## then the elements of `s` in alphabetical order
+  result = header(header)
   if s.len > 0:
     var elements = toSeq(s)
     sort elements
     for item in elements:
-      echo item
+      result.add item
+      result.add "\n"
   else:
-    echo "none"
-  echo ""
+    result.add "none\n"
+  result.add "\n"
 
-proc showConceptsInfo(practiceExercises: seq[PracticeExercise],
-                      concepts: seq[Concept]) =
+proc conceptsInfo(practiceExercises: seq[PracticeExercise],
+                  concepts: seq[Concept]): string =
   let conceptSlugs = getConceptSlugs(concepts)
   let prereqs = getPrereqs(practiceExercises)
   let practices = getPractices(practiceExercises)
 
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
-  show(conceptsThatArentAPrereq,
-       "Concepts that aren't a prerequisite for any practice exercise:")
+  result = show(conceptsThatArentAPrereq,
+      "Concepts that aren't a prerequisite for any practice exercise:")
 
   let conceptsThatArentPracticed = conceptSlugs - practices
-  show(conceptsThatArentPracticed,
-       "Concepts that aren't practiced by any practice exercise:")
+  result.add show(conceptsThatArentPracticed,
+      "Concepts that aren't practiced by any practice exercise:")
 
   let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
-  show(conceptsThatAreAPrereqButArentPracticed,
-       "Concepts that are a prerequisite, but aren't practiced by any practice exercise:")
+  result.add show(conceptsThatAreAPrereqButArentPracticed,
+      "Concepts that are a prerequisite, but aren't practiced by any practice exercise:")
+  stripLineEnd(result)
 
 func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   result = initHashSet[string](practiceExercises.len)
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
-proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                         foregone: HashSet[string]) =
+proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
+                                     foregone: HashSet[string]): string =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
-  show(unimplementedProbSpecsSlugs,
-       &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
-        "exercism/problem-specifications that are neither implemented nor " &
-        "in `foregone`:")
+  result = show(unimplementedProbSpecsSlugs,
+      &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
+       "exercism/problem-specifications that are neither implemented nor " &
+       "in `foregone`:")
+  stripLineEnd(result)
 
-proc showTrackSummary(conceptExercises: seq[ConceptExercise],
-                      practiceExercises: seq[PracticeExercise],
-                      concepts: seq[Concept]) =
+proc trackSummary(conceptExercises: seq[ConceptExercise],
+                  practiceExercises: seq[PracticeExercise],
+                  concepts: seq[Concept]): string =
   let numConceptExercises = conceptExercises.len
   let numPracticeExercises = practiceExercises.len
   let numExercises = numConceptExercises + numPracticeExercises
   let numConcepts = concepts.len
-  echoHeader("Track summary:")
-  echo fmt"""
+  result = header("Track summary:")
+  result.add fmt"""
     {numConceptExercises:>3} Concept Exercises
     {numPracticeExercises:>3} Practice Exercises
     {numExercises:>3} Exercises in total
@@ -240,8 +245,8 @@ proc info*(conf: Conf) =
     let foregone = exercises.foregone
     let concepts = trackConfig.concepts
 
-    showConceptsInfo(practiceExercises, concepts)
-    showUnimplementedProbSpecsExercises(practiceExercises, foregone)
-    showTrackSummary(conceptExercises, practiceExercises, concepts)
+    echo conceptsInfo(practiceExercises, concepts)
+    echo unimplementedProbSpecsExercises(practiceExercises, foregone)
+    echo trackSummary(conceptExercises, practiceExercises, concepts)
   else:
     showError &"file does not exist: {trackConfigPath}"
