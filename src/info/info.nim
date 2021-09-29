@@ -93,7 +93,7 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
   result = show(unimplementedProbSpecsSlugs,
       &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
        "`exercism/problem-specifications` that are neither implemented nor " &
-       "in `foregone`:")
+       "in the track config `exercises.foregone` array:")
   stripLineEnd(result)
 
 func count(exercises: seq[ConceptExercise] |
