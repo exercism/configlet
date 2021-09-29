@@ -192,15 +192,15 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
 
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
   result = show(conceptsThatArentAPrereq,
-      "Concepts that aren't a prerequisite for any practice exercise:")
+      "Concepts that aren't a prerequisite for any Practice Exercise:")
 
   let conceptsThatArentPracticed = conceptSlugs - practices
   result.add show(conceptsThatArentPracticed,
-      "Concepts that aren't practiced by any practice exercise:")
+      "Concepts that aren't practiced by any Practice Exercise:")
 
   let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
   result.add show(conceptsThatAreAPrereqButArentPracticed,
-      "Concepts that are a prerequisite, but aren't practiced by any practice exercise:")
+      "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
   stripLineEnd(result)
 
 func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
