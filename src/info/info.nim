@@ -25,16 +25,16 @@ func getConceptSlugs(concepts: Concepts): HashSet[string] =
     result.incl item.slug
 
 func getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the deduplicated set of `prerequisites` for every Practice Exercise
-  ## in `practiceExercises`.
+  ## Returns the set of `prerequisites` for every Practice Exercise in the
+  ## `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for prereq in practiceExercise.prerequisites:
       result.incl prereq
 
 func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the deduplicated set of `practices` for every Practice Exercise
-  ## in `practiceExercises`.
+  ## Returns the set of `practices` for every Practice Exercise in
+  ## `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for item in practiceExercise.practices:
