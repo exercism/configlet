@@ -218,18 +218,31 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
        "in `foregone`:")
   stripLineEnd(result)
 
+func count(exercises: seq[ConceptExercise] |
+                      seq[PracticeExercise]): tuple[visible: int, wip: int] =
+  result = (0, 0)
+  for exercise in exercises:
+    case exercise.status
+    of sMissing, sBeta, sActive:
+      inc result.visible
+    of sWip:
+      inc result.wip
+    of sDeprecated:
+      discard
+
 proc trackSummary(conceptExercises: seq[ConceptExercise],
                   practiceExercises: seq[PracticeExercise],
                   concepts: seq[Concept]): string =
-  let numConceptExercises = conceptExercises.len
-  let numPracticeExercises = practiceExercises.len
+  let (numConceptExercises, numConceptExercisesWip) = count(conceptExercises)
+  let (numPracticeExercises, numPracticeExercisesWip) = count(practiceExercises)
   let numExercises = numConceptExercises + numPracticeExercises
+  let numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
   let numConcepts = concepts.len
   result = header("Track summary:")
   result.add fmt"""
-    {numConceptExercises:>3} Concept Exercises
-    {numPracticeExercises:>3} Practice Exercises
-    {numExercises:>3} Exercises in total
+    {numConceptExercises:>3} Concept Exercises (plus {numConceptExercisesWip} work-in-progress)
+    {numPracticeExercises:>3} Practice Exercises (plus {numPracticeExercisesWip} work-in-progress)
+    {numExercises:>3} Exercises in total (plus {numExercisesWip} work-in-progress)
     {numConcepts:>3} Concepts""".unindent(4)
 
 proc info*(conf: Conf) =
