@@ -1,18 +1,22 @@
 import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
 import ".."/[cli, lint/track_config]
 
-# TODO: automatically update this at build-time?
-const probSpecsSlugs =
-  block:
-    var slugs = initHashSet[string]()
-    const infoDir = currentSourcePath().parentDir()
-    var slugsContents = staticRead(infoDir / "prob_specs_slugs.txt")
-    stripLineEnd(slugsContents)
-    for line in slugsContents.splitLines():
-      if line.len > 0:
-        if line[0] != '#':
-          slugs.incl line
-    slugs
+proc toHashSetOfLines(path: static string): HashSet[string] =
+  ## Reads the file at `path` at compile-time, and returns a HashSet of every
+  ## line that:
+  ## - is non-empty
+  ## - does not begin with the '#' character
+  var contents = staticRead(path)
+  stripLineEnd(contents)
+  for line in contents.splitLines():
+    if line.len > 0:
+      if line[0] != '#':
+        result.incl line
+
+proc getProbSpecsSlugs: HashSet[string] =
+  # TODO: automatically update this at build-time?
+  const slugsPath = currentSourcePath().parentDir() / "prob_specs_slugs.txt"
+  result = toHashSetOfLines(slugsPath)
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the `slug` of every concept in `concepts`.
@@ -82,7 +86,8 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
     result.incl practiceExercise.slug
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                     foregone: HashSet[string]): string =
+                                     foregone: HashSet[string],
+                                     probSpecsSlugs: HashSet[string]): string =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
   result = show(unimplementedProbSpecsSlugs,
@@ -132,7 +137,8 @@ proc info*(conf: Conf) =
     let concepts = trackConfig.concepts
 
     echo conceptsInfo(practiceExercises, concepts)
-    echo unimplementedProbSpecsExercises(practiceExercises, foregone)
+    const probSpecsSlugs = getProbSpecsSlugs()
+    echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsSlugs)
     echo trackSummary(conceptExercises, practiceExercises, concepts)
   else:
     showError &"file does not exist: {trackConfigPath}"
