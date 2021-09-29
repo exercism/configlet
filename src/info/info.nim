@@ -1,4 +1,4 @@
-import std/[algorithm, os, sequtils, sets, strformat, terminal]
+import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
 import ".."/[cli, lint/track_config]
 
 # TODO: automatically update this at build-time?
@@ -213,6 +213,20 @@ proc showUnimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise
         "exercism/problem-specifications that are neither implemented nor " &
         "in `foregone`:")
 
+proc showTrackSummary(conceptExercises: seq[ConceptExercise],
+                      practiceExercises: seq[PracticeExercise],
+                      concepts: seq[Concept]) =
+  let numConceptExercises = conceptExercises.len
+  let numPracticeExercises = practiceExercises.len
+  let numExercises = numConceptExercises + numPracticeExercises
+  let numConcepts = concepts.len
+  echoHeader("Track summary:")
+  echo fmt"""
+    {numConceptExercises:>3} Concept Exercises
+    {numPracticeExercises:>3} Practice Exercises
+    {numExercises:>3} Exercises in total
+    {numConcepts:>3} Concepts""".unindent(4)
+
 proc info*(conf: Conf) =
   let trackConfigPath = conf.trackDir / "config.json"
 
@@ -221,11 +235,13 @@ proc info*(conf: Conf) =
     let trackConfig = TrackConfig.init(trackConfigContents)
 
     let exercises = trackConfig.exercises
+    let conceptExercises = exercises.`concept`
     let practiceExercises = exercises.practice
     let foregone = exercises.foregone
     let concepts = trackConfig.concepts
 
     showConceptsInfo(practiceExercises, concepts)
     showUnimplementedProbSpecsExercises(practiceExercises, foregone)
+    showTrackSummary(conceptExercises, practiceExercises, concepts)
   else:
     showError &"file does not exist: {trackConfigPath}"
