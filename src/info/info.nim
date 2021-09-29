@@ -7,8 +7,7 @@ proc toHashSetOfLines(path: static string): HashSet[string] =
   ## - is non-empty
   ## - does not begin with the '#' character
   result = initHashSet[string]()
-  var contents = staticRead(path)
-  stripLineEnd(contents)
+  let contents = staticRead(path)
   for line in contents.splitLines():
     if line.len > 0:
       if line[0] != '#':
