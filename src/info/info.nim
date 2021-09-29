@@ -2,9 +2,9 @@ import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
 import ".."/[cli, lint/track_config]
 
 proc toHashSetOfLines(path: static string): HashSet[string] =
-  ## Reads the file at `path` at compile-time, and returns a HashSet of every
-  ## line that:
-  ## - is non-empty
+  ## Reads the file at `path` at compile-time, and returns a `HashSet` of every
+  ## line that is both:
+  ## - non-empty, and
   ## - does not begin with the '#' character
   result = initHashSet[string]()
   let contents = staticRead(path)
