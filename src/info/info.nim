@@ -217,7 +217,7 @@ proc info*(conf: Conf) =
   let trackConfigPath = conf.trackDir / "config.json"
 
   if fileExists(trackConfigPath):
-    let trackConfigContents = readFile(conf.trackDir / "config.json")
+    let trackConfigContents = readFile(trackConfigPath)
     let trackConfig = TrackConfig.init(trackConfigContents)
 
     let exercises = trackConfig.exercises
