@@ -720,4 +720,5 @@ proc isTrackConfigValid*(trackDir: Path): bool =
     let trackConfigContents = readFile(trackConfigPath)
     result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
 
-  checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
+  if j != nil:
+    checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
