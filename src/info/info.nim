@@ -214,7 +214,7 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
   result = show(unimplementedProbSpecsSlugs,
       &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
-       "exercism/problem-specifications that are neither implemented nor " &
+       "`exercism/problem-specifications` that are neither implemented nor " &
        "in `foregone`:")
   stripLineEnd(result)
 
