@@ -141,4 +141,9 @@ proc info*(conf: Conf) =
     echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsSlugs)
     echo trackSummary(conceptExercises, practiceExercises, concepts)
   else:
-    showError &"file does not exist: {trackConfigPath}"
+    var msg = &"file does not exist: {trackConfigPath}"
+    if conf.trackDir == getCurrentDir():
+      msg.add "\nBy default, configlet looks for the track config.json file " &
+              "in the current directory.\n" &
+              "To specify a different directory, use this option: --track-dir <dir>"
+    showError(msg)
