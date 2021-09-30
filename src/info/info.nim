@@ -25,16 +25,16 @@ func getConceptSlugs(concepts: Concepts): HashSet[string] =
     result.incl item.slug
 
 func getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the set of `prerequisites` for every Practice Exercise in the
-  ## `practiceExercises`.
+  ## Returns the concepts that appear at least once in the `prerequisites` array
+  ## of a Practice Exercise in `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for prereq in practiceExercise.prerequisites:
       result.incl prereq
 
 func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the set of `practices` for every Practice Exercise in
-  ## `practiceExercises`.
+  ## Returns the concepts that appear at least once in the `practices` array
+  ## of a Practice Exercise in `practiceExercises`.
   result = initHashSet[string]()
   for practiceExercise in practiceExercises:
     for item in practiceExercise.practices:
