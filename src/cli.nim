@@ -18,6 +18,7 @@ type
     actSync = "sync"
     actUuid = "uuid"
     actGenerate = "generate"
+    actInfo = "info"
 
   Action* = object
     case kind*: ActionKind
@@ -34,6 +35,8 @@ type
     of actUuid:
       num*: int
     of actGenerate:
+      discard
+    of actInfo:
       discard
 
   Conf* = object
@@ -156,7 +159,7 @@ func genHelpText: string =
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actLint, actGenerate}:
+    if actionKind notin {actNil, actLint, actGenerate, actInfo}:
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
@@ -236,6 +239,8 @@ func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
   of actUuid:
     Action(kind: actionKind, num: 1)
   of actGenerate:
+    Action(kind: actionKind)
+  of actInfo:
     Action(kind: actionKind)
 
 func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
@@ -378,6 +383,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actGenerate:
       discard
+    of actInfo:
+      discard
 
   if not isGlobalOpt and not isActionOpt:
     case conf.action.kind
@@ -412,4 +419,6 @@ proc processCmdLine*: Conf =
   of actUuid:
     discard
   of actGenerate:
+    discard
+  of actInfo:
     discard
