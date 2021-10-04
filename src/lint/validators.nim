@@ -176,10 +176,38 @@ func isUuidV4*(s: string): bool =
 
 var seenUuids = initHashSet[string](250)
 
+proc extractPlaceholder(value: string): string =
+  var i = 0
+  var phStart = -1
+  var ph = ""
+  while i < value.len:
+    var c = value[i]
+    if phStart == -1:
+      if c == '%' and value[i+1] == '{':
+        phStart = i+2
+        inc i
+    else:
+      if c == '}':
+        return ph
+      else:
+        ph = ph & c
+    inc i
+  return ""
+
+func isFilesPattern*(s: string): bool =
+  if not isEmptyOrWhitespace(s):
+    let ph = extractPlaceholder(s)
+    if ph == "" or ph == "kebab_slug" or ph == "snake_slug" or ph ==
+        "camel_slug" or ph == "pascal_slug":
+      result = true
+
+var seenFilePatterns = initHashSet[string](250)
+
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
-               checkIsUuid = false; isInArray = false): bool =
+               checkIsUuid = false; isInArray = false;
+               checkIsFilesPattern = false): bool =
   result = true
   case data.kind
   of JString:
@@ -223,6 +251,18 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
                "lowercased version 4 UUID"
+            result.setFalseAndPrint(msg, path)
+        elif checkIsFilesPattern:
+          if seenFilePatterns.containsOrIncl(s):
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not a unique " &
+               "files entry"
+            result.setFalseAndPrint(msg, path)
+          if not isFilesPattern(s):
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not a " &
+               "valid files pattern. Allowed placeholders are: %{kebab_slug}, " &
+               "%{snake_slug}, %{camel_slug} and %{pascal_slug}"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
@@ -270,7 +310,8 @@ proc isArrayOfStrings*(data: JsonNode;
                        uniqueValues = false;
                        allowed: HashSet[string];
                        allowedArrayLen: Slice;
-                       checkIsKebab: bool): bool =
+                       checkIsKebab: bool;
+                       checkIsFilesPattern: bool): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
   ##   non-empty, non-blank strings.
@@ -286,7 +327,9 @@ proc isArrayOfStrings*(data: JsonNode;
 
         for item in data:
           if not isString(item, context, path, "", isRequired, allowed,
-                          checkIsKebab = checkIsKebab, isInArray = true):
+                          checkIsKebab = checkIsKebab,
+                          checkIsFilesPattern = checkIsFilesPattern,
+                          isInArray = true):
             result = false
           elif uniqueValues:
             let itemStr = item.getStr()
@@ -322,7 +365,8 @@ proc hasArrayOfStrings*(data: JsonNode;
                         uniqueValues = false;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high;
-                        checkIsKebab = false): bool =
+                        checkIsKebab = false;
+                        checkIsFilesPattern = false): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
@@ -330,7 +374,8 @@ proc hasArrayOfStrings*(data: JsonNode;
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
                               uniqueValues, allowed, allowedArrayLen,
-                              checkIsKebab = checkIsKebab)
+                              checkIsKebab = checkIsKebab,
+                              checkIsFilesPattern = checkIsFilesPattern)
   elif not isRequired:
     result = true
 

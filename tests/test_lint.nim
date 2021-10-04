@@ -1,6 +1,26 @@
 import std/unittest
 import "."/lint/validators
 
+proc testIsFilesPattern =
+  suite "isFilesPattern":
+    test "invalid files patterns":
+      check:
+        not isFilesPattern("")
+        not isFilesPattern(" ")
+        not isFilesPattern("%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}")
+        not isFilesPattern("%{unknown_slug}")
+
+    test "valid files patterns":
+      check:
+        isFilesPattern("somefile")
+        isFilesPattern("somefile.go")
+        isFilesPattern("%{kebab_slug}.js")
+        isFilesPattern("foo%{snake_slug}bar")
+        isFilesPattern("foobar%{camel_slug}")
+        isFilesPattern("%{pascal_slug}")
+
 proc testIsKebabCase =
   suite "isKebabCase":
     test "invalid kebab-case strings":
@@ -204,6 +224,7 @@ proc testIsUuidV4 =
 proc main =
   testIsKebabCase()
   testIsUuidV4()
+  testIsFilesPattern()
 
 main()
 {.used.}
