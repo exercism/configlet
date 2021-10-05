@@ -15,10 +15,6 @@
   description: "Pull requests that update a dependency file"
   color: "0366d6"
 
-- name: "hacktoberfest-accepted"
-  description: ""
-  color: "ffffff"
-
 - name: "kind: bug"
   description: "User-facing incorrect behavior"
   color: "e31a1c"
