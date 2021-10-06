@@ -20,6 +20,10 @@ proc testIsFilesPattern =
         isFilesPattern("foo%{snake_slug}bar")
         isFilesPattern("foobar%{camel_slug}")
         isFilesPattern("%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
+        isFilesPattern("%{pascal_slug}/filename.suffix")
 
 proc testIsKebabCase =
   suite "isKebabCase":
