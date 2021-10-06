@@ -176,7 +176,7 @@ func isUuidV4*(s: string): bool =
 
 var seenUuids = initHashSet[string](250)
 
-proc extractPlaceholder(value: string): string =
+iterator extractPlaceholders*(value: string): string =
   var i = 0
   var phStart = -1
   var ph = ""
@@ -188,19 +188,26 @@ proc extractPlaceholder(value: string): string =
         inc i
     else:
       if c == '}':
-        return ph
+        yield ph
+        ph = ""
+        phStart = -1
       else:
         ph = ph & c
     inc i
-  return ""
+
+proc extractPlaceholders*(value: string): seq[string] =
+  result = newSeq[string]()
+  for placeholder in extractPlaceholders(value):
+    result.add placeholder
 
 const filesPatterns = toHashSet(["kebab_slug", "snake_slug", "camel_slug", "pascal_slug"])
 
 func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
-    let ph = extractPlaceholder(s)
-    if ph == "" or filesPatterns.contains(ph):
-      result = true
+    result = true
+    for ph in extractPlaceholders(s):
+       if not filesPatterns.contains(ph):
+          result = false
 
 var seenFilePatterns = initHashSet[string](250)
 

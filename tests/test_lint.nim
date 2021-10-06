@@ -1,6 +1,28 @@
 import std/unittest
 import "."/lint/validators
 
+proc testExtractPlaceholders =
+  suite "extractPlaceholder":
+    test "no placeholder":
+      check len(extractPlaceholders("")) == 0
+      check len(extractPlaceholders("foo")) == 0
+
+    test "with placeholder":
+      check len(extractPlaceholders("%{foo}")) == 1
+      check extractPlaceholders("%{foo}")[0] == "foo"
+      check len(extractPlaceholders("prefix%{foo}")) == 1
+      check extractPlaceholders("prefix%{foo}")[0] == "foo"
+      check len(extractPlaceholders("%{foo}suffix")) == 1
+      check extractPlaceholders("%{foo}suffix")[0] == "foo"
+      check len(extractPlaceholders("prefix%{foo}suffix")) == 1
+      check extractPlaceholders("prefix%{foo}suffix")[0] == "foo"
+
+    test "multiple placeholders":
+      let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
+      check len(r) == 2
+      check r[0] == "foo"
+      check r[1] == "baz"
+
 proc testIsFilesPattern =
   suite "isFilesPattern":
     test "invalid files patterns":
@@ -229,6 +251,7 @@ proc main =
   testIsKebabCase()
   testIsUuidV4()
   testIsFilesPattern()
+  testExtractPlaceholders()
 
 main()
 {.used.}
