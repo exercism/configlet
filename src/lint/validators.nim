@@ -194,11 +194,12 @@ proc extractPlaceholder(value: string): string =
     inc i
   return ""
 
+const filesPatterns = toHashSet(["kebab_slug", "snake_slug", "camel_slug", "pascal_slug"])
+
 func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
     let ph = extractPlaceholder(s)
-    if ph == "" or ph == "kebab_slug" or ph == "snake_slug" or ph ==
-        "camel_slug" or ph == "pascal_slug":
+    if ph == "" or filesPatterns.contains(ph):
       result = true
 
 var seenFilePatterns = initHashSet[string](250)
