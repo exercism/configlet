@@ -176,20 +176,20 @@ func isUuidV4*(s: string): bool =
 
 iterator extractPlaceholders*(s: string): string =
   var i = 0
-  var phStart = -1
+  var expectClosingBrace = false
   var ph = ""
   while i < s.len:
     let c = s[i]
-    if phStart == -1:
+    if not expectClosingBrace:
       if c == '%':
         if i+1 < s.len and s[i+1] == '{':
-          phStart = i+2
+          expectClosingBrace = true
           inc i
     else:
       if c == '}':
         yield ph
         ph.setLen(0)
-        phStart = -1
+        expectClosingBrace = false
       else:
         ph.add c
     inc i
