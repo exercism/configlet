@@ -5,24 +5,24 @@ proc testExtractPlaceholders =
   suite "extractPlaceholder":
     test "no placeholder":
       check:
-        len(extractPlaceholders("")) == 0
-        len(extractPlaceholders("foo")) == 0
+        extractPlaceholders("").len == 0
+        extractPlaceholders("foo").len == 0
 
     test "with placeholder":
       check:
-        len(extractPlaceholders("%{foo}")) == 1
+        extractPlaceholders("%{foo}").len == 1
         extractPlaceholders("%{foo}")[0] == "foo"
-        len(extractPlaceholders("prefix%{foo}")) == 1
+        extractPlaceholders("prefix%{foo}").len == 1
         extractPlaceholders("prefix%{foo}")[0] == "foo"
-        len(extractPlaceholders("%{foo}suffix")) == 1
+        extractPlaceholders("%{foo}suffix").len == 1
         extractPlaceholders("%{foo}suffix")[0] == "foo"
-        len(extractPlaceholders("prefix%{foo}suffix")) == 1
+        extractPlaceholders("prefix%{foo}suffix").len == 1
         extractPlaceholders("prefix%{foo}suffix")[0] == "foo"
 
     test "multiple placeholders":
       let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
       check:
-        len(r) == 2
+        r.len == 2
         r[0] == "foo"
         r[1] == "baz"
 
