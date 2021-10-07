@@ -179,7 +179,7 @@ iterator extractPlaceholders*(value: string): string =
   var phStart = -1
   var ph = ""
   while i < value.len:
-    var c = value[i]
+    let c = value[i]
     if phStart == -1:
       if c == '%':
         if i+1 < value.len and value[i+1] == '{':
