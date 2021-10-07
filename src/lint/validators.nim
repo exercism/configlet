@@ -196,8 +196,8 @@ iterator extractPlaceholders*(value: string): string =
 
 proc extractPlaceholders*(value: string): seq[string] =
   result = newSeq[string]()
-  for placeholder in extractPlaceholders(value):
-    result.add placeholder
+  for ph in extractPlaceholders(value):
+    result.add ph
 
 func isFilesPattern*(s: string): bool =
   const filesPatterns = [
