@@ -174,15 +174,15 @@ func isUuidV4*(s: string): bool =
     s[34] in Hex and
     s[35] in Hex
 
-iterator extractPlaceholders*(value: string): string =
+iterator extractPlaceholders*(s: string): string =
   var i = 0
   var phStart = -1
   var ph = ""
-  while i < value.len:
-    let c = value[i]
+  while i < s.len:
+    let c = s[i]
     if phStart == -1:
       if c == '%':
-        if i+1 < value.len and value[i+1] == '{':
+        if i+1 < s.len and s[i+1] == '{':
           phStart = i+2
           inc i
     else:
@@ -194,9 +194,9 @@ iterator extractPlaceholders*(value: string): string =
         ph.add c
     inc i
 
-proc extractPlaceholders*(value: string): seq[string] =
+proc extractPlaceholders*(s: string): seq[string] =
   result = newSeq[string]()
-  for ph in extractPlaceholders(value):
+  for ph in extractPlaceholders(s):
     result.add ph
 
 func isFilesPattern*(s: string): bool =
