@@ -207,6 +207,7 @@ proc testExtractPlaceholders =
       check:
         extractPlaceholders("").len == 0
         extractPlaceholders("foo").len == 0
+        extractPlaceholders("foo%").len == 0
 
     test "one placeholder":
       const patternsWithOnePlaceholder = [
