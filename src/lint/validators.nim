@@ -199,14 +199,14 @@ proc extractPlaceholders*(value: string): seq[string] =
   for placeholder in extractPlaceholders(value):
     result.add placeholder
 
-const filesPatterns = [
-  "kebab_slug",
-  "snake_slug",
-  "camel_slug",
-  "pascal_slug"
-].toHashSet()
-
 func isFilesPattern*(s: string): bool =
+  const filesPatterns = [
+    "kebab_slug",
+    "snake_slug",
+    "camel_slug",
+    "pascal_slug"
+  ].toHashSet()
+
   if not isEmptyOrWhitespace(s):
     result = true
     for ph in extractPlaceholders(s):
