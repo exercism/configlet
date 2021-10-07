@@ -188,7 +188,7 @@ iterator extractPlaceholders*(s: string): string =
     else:
       if c == '}':
         yield ph
-        ph = ""
+        ph.setLen(0)
         phStart = -1
       else:
         ph.add c
