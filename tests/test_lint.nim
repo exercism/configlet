@@ -8,7 +8,7 @@ proc testExtractPlaceholders =
         extractPlaceholders("").len == 0
         extractPlaceholders("foo").len == 0
 
-    test "with placeholder":
+    test "one placeholder":
       const patternsWithOnePlaceholder = [
         "%{foo}",
         "prefix%{foo}",
