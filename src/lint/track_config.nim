@@ -80,9 +80,9 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
     result = allTrue(checks)
 
     if result and data["slug"].getStr() == "hello-world" and data.hasKey("status"):
-      let statusKey = data["status"].getStr()
-      if not (statusKey == "active"):
-        result.setFalseAndPrint(&"The value of {format(context)}.status is `{format(statusKey)}`, but it must be `active` or absent for the hello-world exercise",
+      let statusVal = data["status"].getStr()
+      if not (statusVal == "active"):
+        result.setFalseAndPrint(&"The value of {format(context)}.status is `{format(statusVal)}`, but it must be `active` or absent for the hello-world exercise",
             path)
 
 proc hasValidExercises(data: JsonNode; path: Path): bool =
