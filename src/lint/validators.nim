@@ -183,9 +183,10 @@ iterator extractPlaceholders*(value: string): string =
   while i < value.len:
     var c = value[i]
     if phStart == -1:
-      if c == '%' and value[i+1] == '{':
-        phStart = i+2
-        inc i
+      if c == '%':
+        if i+1 < value.len and value[i+1] == '{':
+          phStart = i+2
+          inc i
     else:
       if c == '}':
         yield ph
