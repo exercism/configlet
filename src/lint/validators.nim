@@ -199,7 +199,12 @@ proc extractPlaceholders*(value: string): seq[string] =
   for placeholder in extractPlaceholders(value):
     result.add placeholder
 
-const filesPatterns = toHashSet(["kebab_slug", "snake_slug", "camel_slug", "pascal_slug"])
+const filesPatterns = [
+  "kebab_slug",
+  "snake_slug",
+  "camel_slug",
+  "pascal_slug"
+].toHashSet()
 
 func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
