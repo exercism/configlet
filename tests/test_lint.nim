@@ -9,15 +9,16 @@ proc testExtractPlaceholders =
         extractPlaceholders("foo").len == 0
 
     test "with placeholder":
-      check:
-        extractPlaceholders("%{foo}").len == 1
-        extractPlaceholders("%{foo}")[0] == "foo"
-        extractPlaceholders("prefix%{foo}").len == 1
-        extractPlaceholders("prefix%{foo}")[0] == "foo"
-        extractPlaceholders("%{foo}suffix").len == 1
-        extractPlaceholders("%{foo}suffix")[0] == "foo"
-        extractPlaceholders("prefix%{foo}suffix").len == 1
-        extractPlaceholders("prefix%{foo}suffix")[0] == "foo"
+      const patternsWithOnePlaceholder = [
+        "%{foo}",
+        "prefix%{foo}",
+        "%{foo}suffix",
+        "prefix%{foo}suffix",
+      ]
+      for pattern in patternsWithOnePlaceholder:
+        check:
+          extractPlaceholders(pattern).len == 1
+          extractPlaceholders(pattern)[0] == "foo"
 
     test "multiple placeholders":
       let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
