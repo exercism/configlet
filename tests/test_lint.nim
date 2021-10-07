@@ -1,56 +1,6 @@
 import std/unittest
 import "."/lint/validators
 
-proc testExtractPlaceholders =
-  suite "extractPlaceholder":
-    test "no placeholder":
-      check:
-        extractPlaceholders("").len == 0
-        extractPlaceholders("foo").len == 0
-
-    test "one placeholder":
-      const patternsWithOnePlaceholder = [
-        "%{foo}",
-        "prefix%{foo}",
-        "%{foo}suffix",
-        "prefix%{foo}suffix",
-      ]
-      for pattern in patternsWithOnePlaceholder:
-        check:
-          extractPlaceholders(pattern).len == 1
-          extractPlaceholders(pattern)[0] == "foo"
-
-    test "multiple placeholders":
-      let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
-      check:
-        r.len == 2
-        r[0] == "foo"
-        r[1] == "baz"
-
-proc testIsFilesPattern =
-  suite "isFilesPattern":
-    test "invalid files patterns":
-      check:
-        not isFilesPattern("")
-        not isFilesPattern(" ")
-        not isFilesPattern("%{unknown_slug}suffix")
-        not isFilesPattern("prefix%{unknown_slug}suffix")
-        not isFilesPattern("prefix%{unknown_slug}")
-        not isFilesPattern("%{unknown_slug}")
-
-    test "valid files patterns":
-      check:
-        isFilesPattern("somefile")
-        isFilesPattern("somefile.go")
-        isFilesPattern("%{kebab_slug}.js")
-        isFilesPattern("foo%{snake_slug}bar")
-        isFilesPattern("foobar%{camel_slug}")
-        isFilesPattern("%{pascal_slug}")
-        isFilesPattern("somedir/%{pascal_slug}")
-        isFilesPattern("somedir/%{pascal_slug}.suffix")
-        isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
-        isFilesPattern("%{pascal_slug}/filename.suffix")
-
 proc testIsKebabCase =
   suite "isKebabCase":
     test "invalid kebab-case strings":
@@ -251,11 +201,61 @@ proc testIsUuidV4 =
         else:
           check not isUuidV4(uuid)
 
+proc testExtractPlaceholders =
+  suite "extractPlaceholder":
+    test "no placeholder":
+      check:
+        extractPlaceholders("").len == 0
+        extractPlaceholders("foo").len == 0
+
+    test "one placeholder":
+      const patternsWithOnePlaceholder = [
+        "%{foo}",
+        "prefix%{foo}",
+        "%{foo}suffix",
+        "prefix%{foo}suffix",
+      ]
+      for pattern in patternsWithOnePlaceholder:
+        check:
+          extractPlaceholders(pattern).len == 1
+          extractPlaceholders(pattern)[0] == "foo"
+
+    test "multiple placeholders":
+      let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
+      check:
+        r.len == 2
+        r[0] == "foo"
+        r[1] == "baz"
+
+proc testIsFilesPattern =
+  suite "isFilesPattern":
+    test "invalid files patterns":
+      check:
+        not isFilesPattern("")
+        not isFilesPattern(" ")
+        not isFilesPattern("%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}")
+        not isFilesPattern("%{unknown_slug}")
+
+    test "valid files patterns":
+      check:
+        isFilesPattern("somefile")
+        isFilesPattern("somefile.go")
+        isFilesPattern("%{kebab_slug}.js")
+        isFilesPattern("foo%{snake_slug}bar")
+        isFilesPattern("foobar%{camel_slug}")
+        isFilesPattern("%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
+        isFilesPattern("%{pascal_slug}/filename.suffix")
+
 proc main =
   testIsKebabCase()
   testIsUuidV4()
-  testIsFilesPattern()
   testExtractPlaceholders()
+  testIsFilesPattern()
 
 main()
 {.used.}
