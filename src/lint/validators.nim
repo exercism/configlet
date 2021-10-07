@@ -174,8 +174,6 @@ func isUuidV4*(s: string): bool =
     s[34] in Hex and
     s[35] in Hex
 
-var seenUuids = initHashSet[string](250)
-
 iterator extractPlaceholders*(value: string): string =
   var i = 0
   var phStart = -1
@@ -210,6 +208,7 @@ func isFilesPattern*(s: string): bool =
        if not filesPatterns.contains(ph):
           result = false
 
+var seenUuids = initHashSet[string](250)
 var seenFilePatterns = initHashSet[string](250)
 
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
