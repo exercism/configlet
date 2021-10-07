@@ -205,9 +205,26 @@ proc testExtractPlaceholders =
   suite "extractPlaceholder":
     test "no placeholder":
       check:
+        # 3 missing chars
         extractPlaceholders("").len == 0
         extractPlaceholders("foo").len == 0
+
+        # 2 missing chars
         extractPlaceholders("foo%").len == 0
+        extractPlaceholders("%foo").len == 0
+        extractPlaceholders("{foo").len == 0
+        extractPlaceholders("foo}").len == 0
+
+        # 1 missing char
+        extractPlaceholders("%{foo").len == 0
+        extractPlaceholders("%foo}").len == 0
+        extractPlaceholders("{foo}").len == 0
+        extractPlaceholders("%foo{bar").len == 0
+        extractPlaceholders("%foo{bar}").len == 0
+
+        # Misc badly formed
+        extractPlaceholders("%}foo{").len == 0
+        extractPlaceholders("{%foo}").len == 0
 
     test "one placeholder":
       const patternsWithOnePlaceholder = [
