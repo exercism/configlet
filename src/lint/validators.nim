@@ -191,7 +191,7 @@ iterator extractPlaceholders*(value: string): string =
         ph = ""
         phStart = -1
       else:
-        ph = ph & c
+        ph.add c
     inc i
 
 proc extractPlaceholders*(value: string): seq[string] =
