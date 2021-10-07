@@ -205,8 +205,8 @@ func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
     result = true
     for ph in extractPlaceholders(s):
-       if not filesPatterns.contains(ph):
-          result = false
+      if not filesPatterns.contains(ph):
+        result = false
 
 var seenUuids = initHashSet[string](250)
 var seenFilePatterns = initHashSet[string](250)
