@@ -81,7 +81,7 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
 
     if result and data["slug"].getStr() == "hello-world" and data.hasKey("status"):
       let statusVal = data["status"].getStr()
-      if not (statusVal == "active"):
+      if statusVal != "active":
         result.setFalseAndPrint(&"The value of {format(context)}.status is `{format(statusVal)}`, but it must be `active` or absent for the hello-world exercise",
             path)
 
