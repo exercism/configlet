@@ -83,8 +83,9 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
     if result and data["slug"].getStr() == "hello-world" and data.hasKey(k):
       let statusVal = data[k].getStr()
       if statusVal != "active":
-        let msg = &"The value of {format(context, k)} is {q statusVal}, " &
-                   "but it must be `active` or absent for the hello-world exercise"
+        let msg = &"The hello-world Practice Exercise has a {q k} of {q statusVal}, " &
+                   "but for that exercise, either the value must be `active` or the " &
+                   "key/value pair must be omitted (which implies `active`)"
         result.setFalseAndPrint(msg, path)
 
 proc hasValidExercises(data: JsonNode; path: Path): bool =
