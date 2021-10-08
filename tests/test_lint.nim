@@ -225,9 +225,9 @@ proc testExtractPlaceholders =
         extractPlaceholders("%foo}").len == 0
         extractPlaceholders("{foo}").len == 0
         extractPlaceholders("%foo{bar").len == 0
-        extractPlaceholders("%foo{bar}").len == 0
 
         # Misc badly formed
+        extractPlaceholders("%foo{bar}").len == 0
         extractPlaceholders("%}foo{").len == 0
         extractPlaceholders("{%foo}").len == 0
 
