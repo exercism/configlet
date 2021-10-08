@@ -29,26 +29,25 @@ proc hasValidOnlineEditor(data: JsonNode; path: Path): bool =
 
 proc hasValidFiles(data: JsonNode; path: Path): bool =
   const f = "files"
-  if hasKey(data, f):
-    if hasObject(data, f, path, isRequired = false):
-      let checks = [
-        hasArrayOfStrings(data[f], "solution", path, context = f,
-                          uniqueValues = true, isRequired = false,
-                          checkIsFilesPattern = true),
-        hasArrayOfStrings(data[f], "test", path, context = f,
-                          uniqueValues = true, isRequired = false,
-                          checkIsFilesPattern = true),
-        hasArrayOfStrings(data[f], "example", path, context = f,
-                          uniqueValues = true, isRequired = false,
-                          checkIsFilesPattern = true),
-        hasArrayOfStrings(data[f], "exemplar", path, context = f,
-                          uniqueValues = true, isRequired = false,
-                          checkIsFilesPattern = true),
-        hasArrayOfStrings(data[f], "editor", path, context = f,
-                          uniqueValues = true, isRequired = false,
-                          checkIsFilesPattern = true),
-      ]
-      result = allTrue(checks)
+  if hasObject(data, f, path):
+    let checks = [
+      hasArrayOfStrings(data[f], "solution", path, context = f,
+                        uniqueValues = true, isRequired = false,
+                        checkIsFilesPattern = true),
+      hasArrayOfStrings(data[f], "test", path, context = f,
+                        uniqueValues = true, isRequired = false,
+                        checkIsFilesPattern = true),
+      hasArrayOfStrings(data[f], "example", path, context = f,
+                        uniqueValues = true, isRequired = false,
+                        checkIsFilesPattern = true),
+      hasArrayOfStrings(data[f], "exemplar", path, context = f,
+                        uniqueValues = true, isRequired = false,
+                        checkIsFilesPattern = true),
+      hasArrayOfStrings(data[f], "editor", path, context = f,
+                        uniqueValues = true, isRequired = false,
+                        checkIsFilesPattern = true),
+    ]
+    result = allTrue(checks)
   else:
     result = true
 
