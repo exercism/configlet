@@ -233,10 +233,16 @@ proc testExtractPlaceholders =
 
     test "one placeholder":
       check:
+        extractPlaceholders("%{}") == @[""]
+        extractPlaceholders("%{f}") == @["f"]
         extractPlaceholders("%{foo}") == @["foo"]
         extractPlaceholders("prefix%{foo}") == @["foo"]
         extractPlaceholders("%{foo}suffix") == @["foo"]
         extractPlaceholders("prefix%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%%{foo}suffix") == @["foo"]
+        extractPlaceholders("pre%fix%{foo}suffix") == @["foo"]
+        extractPlaceholders("pre%}fix%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%{foo}s}uffix") == @["foo"]
 
     test "multiple placeholders":
       check:
