@@ -194,7 +194,7 @@ iterator extractPlaceholders(s: string): string =
         ph.add c
     inc i
 
-proc extractPlaceholders*(s: string): seq[string] =
+func extractPlaceholders*(s: string): seq[string] =
   result = newSeq[string]()
   for ph in extractPlaceholders(s):
     result.add ph
