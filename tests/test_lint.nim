@@ -210,23 +210,23 @@ proc testExtractPlaceholders =
   suite "extractPlaceholder":
     test "no placeholder":
       check:
-        # 3 missing chars
+        # 0 placeholder characters
         extractPlaceholders("").len == 0
         extractPlaceholders("foo").len == 0
 
-        # 2 missing chars
+        # 1 placeholder character
         extractPlaceholders("foo%").len == 0
         extractPlaceholders("%foo").len == 0
         extractPlaceholders("{foo").len == 0
         extractPlaceholders("foo}").len == 0
 
-        # 1 missing char
+        # 2 placeholder characters
         extractPlaceholders("%{foo").len == 0
         extractPlaceholders("%foo}").len == 0
         extractPlaceholders("{foo}").len == 0
         extractPlaceholders("%foo{bar").len == 0
 
-        # Misc badly formed
+        # 3 placeholder characters, but badly formed
         extractPlaceholders("%foo{bar}").len == 0
         extractPlaceholders("%}foo{").len == 0
         extractPlaceholders("{%foo}").len == 0
