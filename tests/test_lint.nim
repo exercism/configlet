@@ -201,6 +201,11 @@ proc testIsUuidV4 =
         else:
           check not isUuidV4(uuid)
 
+func extractPlaceholders(s: string): seq[string] =
+  result = newSeq[string]()
+  for ph in extractPlaceholders(s):
+    result.add ph
+
 proc testExtractPlaceholders =
   suite "extractPlaceholder":
     test "no placeholder":
