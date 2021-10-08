@@ -174,7 +174,7 @@ func isUuidV4*(s: string): bool =
     s[34] in Hex and
     s[35] in Hex
 
-iterator extractPlaceholders*(s: string): string =
+iterator extractPlaceholders(s: string): string =
   var i = 0
   var expectClosingBrace = false
   var ph = ""
