@@ -227,23 +227,15 @@ proc testExtractPlaceholders =
         extractPlaceholders("{%foo}").len == 0
 
     test "one placeholder":
-      const patternsWithOnePlaceholder = [
-        "%{foo}",
-        "prefix%{foo}",
-        "%{foo}suffix",
-        "prefix%{foo}suffix",
-      ]
-      for pattern in patternsWithOnePlaceholder:
-        check:
-          extractPlaceholders(pattern).len == 1
-          extractPlaceholders(pattern)[0] == "foo"
+      check:
+        extractPlaceholders("%{foo}") == @["foo"]
+        extractPlaceholders("prefix%{foo}") == @["foo"]
+        extractPlaceholders("%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%{foo}suffix") == @["foo"]
 
     test "multiple placeholders":
-      let r = extractPlaceholders("prefix%{foo}bar%{baz}suffix")
       check:
-        r.len == 2
-        r[0] == "foo"
-        r[1] == "baz"
+        extractPlaceholders("prefix%{foo}bar%{baz}suffix") == @["foo", "baz"]
 
 proc testIsFilesPattern =
   suite "isFilesPattern":
