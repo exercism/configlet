@@ -246,7 +246,9 @@ proc testExtractPlaceholders =
 
     test "multiple placeholders":
       check:
+        extractPlaceholders("prefix%{foo}bar%{foo}suffix") == @["foo", "foo"]
         extractPlaceholders("prefix%{foo}bar%{baz}suffix") == @["foo", "baz"]
+        extractPlaceholders("prefix%{foo}%{bar}%{baz}suffix") == @["foo", "bar", "baz"]
 
 proc testIsFilesPattern =
   suite "isFilesPattern":
