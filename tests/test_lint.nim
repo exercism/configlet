@@ -260,6 +260,8 @@ proc testIsFilesPattern =
         not isFilesPattern("prefix%{unknown_slug}suffix")
         not isFilesPattern("prefix%{unknown_slug}")
         not isFilesPattern("%{unknown_slug}")
+        not isFilesPattern("%{ssnake_slug}")
+        not isFilesPattern("%{snake_slugg}")
 
     test "valid files patterns":
       check:
