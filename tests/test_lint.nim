@@ -262,6 +262,7 @@ proc testIsFilesPattern =
         not isFilesPattern("%{unknown_slug}")
         not isFilesPattern("%{ssnake_slug}")
         not isFilesPattern("%{snake_slugg}")
+        not isFilesPattern("somedir/%{snake_slug}/%{unknown_slug}.suffix")
 
     test "valid files patterns":
       check:
@@ -274,6 +275,7 @@ proc testIsFilesPattern =
         isFilesPattern("somedir/%{pascal_slug}")
         isFilesPattern("somedir/%{pascal_slug}.suffix")
         isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/%{pascal_slug}.suffix")
         isFilesPattern("%{pascal_slug}/filename.suffix")
 
 proc main =
