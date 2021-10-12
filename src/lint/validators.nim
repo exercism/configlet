@@ -206,7 +206,7 @@ func isFilesPattern*(s: string): bool =
     result = true
     for ph in extractPlaceholders(s):
       if ph notin filesPatterns:
-        result = false
+        return false
 
 func list(a: SomeSet[string]; prefix = ""; suffix = ""): string =
   ## Returns a string that lists the elements of `a`, with `prefix` before
