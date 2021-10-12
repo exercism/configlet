@@ -271,7 +271,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
               let msg =
                 &"A {format(context, key)} value is {q s}, which contains " &
                  "a possible malformed placeholder pattern. It contains " &
-                 "`%{` but not the terminating `}` character."
+                 "`%{` but not the terminating `}` character"
               warn(msg, path)
           else:
             let msg =
