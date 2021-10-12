@@ -194,19 +194,37 @@ iterator extractPlaceholders*(s: string): string =
         ph.add c
     inc i
 
-func isFilesPattern*(s: string): bool =
-  const filesPatterns = [
-    "kebab_slug",
-    "snake_slug",
-    "camel_slug",
-    "pascal_slug"
-  ].toHashSet()
+const filesPatterns = [
+  "kebab_slug",
+  "snake_slug",
+  "camel_slug",
+  "pascal_slug"
+].toHashSet()
 
+func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
     result = true
     for ph in extractPlaceholders(s):
       if ph notin filesPatterns:
         result = false
+
+func list(a: SomeSet[string]; prefix = ""; suffix = ""): string =
+  ## Returns a string that lists the elements of `a`, with `prefix` before
+  ## each element, and `suffix` after each element.
+  var seen = 0
+  for item in a:
+    if seen == 0:
+      # Use the first item to estimate the final string length.
+      let estimatedLen = a.len * (item.len + prefix.len + suffix.len + 5)
+      result = newStringOfCap(estimatedLen)
+    result.add prefix
+    result.add item
+    result.add suffix
+    inc seen
+    if seen < a.len-1:
+      result.add ", "
+    elif seen == a.len-1:
+      result.add ", and "
 
 var seenUuids = initHashSet[string](250)
 var seenFilePatterns = initHashSet[string](250)
@@ -274,10 +292,10 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                  "`%{` but not the terminating `}` character"
               warn(msg, path)
           else:
+            const validFilePatterns = list(filesPatterns, "%{", "}")
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
-               "valid files pattern. Allowed placeholders are: %{kebab_slug}, " &
-               "%{snake_slug}, %{camel_slug} and %{pascal_slug}"
+              &"valid files pattern. Allowed placeholders are: {validFilePatterns}"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
