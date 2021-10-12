@@ -264,7 +264,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
           if seenFilePatterns.containsOrIncl(s):
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a unique " &
-               "files entry"
+               "`files` entry"
             result.setFalseAndPrint(msg, path)
           if isFilesPattern(s):
             if "%{" in s and "}" notin s:
