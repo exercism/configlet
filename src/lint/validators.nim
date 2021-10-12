@@ -266,7 +266,14 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
               &"A {format(context, key)} value is {q s}, which is not a unique " &
                "files entry"
             result.setFalseAndPrint(msg, path)
-          if not isFilesPattern(s):
+          if isFilesPattern(s):
+            if "%{" in s and "}" notin s:
+              let msg =
+                &"A {format(context, key)} value is {q s}, which contains " &
+                 "a possible malformed placeholder pattern. It contains " &
+                 "`%{` but not the terminating `}` character."
+              warn(msg, path)
+          else:
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
                "valid files pattern. Allowed placeholders are: %{kebab_slug}, " &
