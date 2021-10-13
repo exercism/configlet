@@ -201,9 +201,89 @@ proc testIsUuidV4 =
         else:
           check not isUuidV4(uuid)
 
+func extractPlaceholders(s: string): seq[string] =
+  result = newSeq[string]()
+  for ph in extractPlaceholders(s):
+    result.add ph
+
+proc testExtractPlaceholders =
+  suite "extractPlaceholder":
+    test "no placeholder":
+      check:
+        # 0 placeholder characters
+        extractPlaceholders("").len == 0
+        extractPlaceholders("foo").len == 0
+
+        # 1 placeholder character
+        extractPlaceholders("foo%").len == 0
+        extractPlaceholders("%foo").len == 0
+        extractPlaceholders("{foo").len == 0
+        extractPlaceholders("foo}").len == 0
+
+        # 2 placeholder characters
+        extractPlaceholders("%{foo").len == 0
+        extractPlaceholders("%foo}").len == 0
+        extractPlaceholders("{foo}").len == 0
+        extractPlaceholders("%foo{bar").len == 0
+
+        # 3 placeholder characters, but badly formed
+        extractPlaceholders("%foo{bar}").len == 0
+        extractPlaceholders("%}foo{").len == 0
+        extractPlaceholders("{%foo}").len == 0
+
+    test "one placeholder":
+      check:
+        extractPlaceholders("%{}") == @[""]
+        extractPlaceholders("%{f}") == @["f"]
+        extractPlaceholders("%{foo}") == @["foo"]
+        extractPlaceholders("prefix%{foo}") == @["foo"]
+        extractPlaceholders("%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%%{foo}suffix") == @["foo"]
+        extractPlaceholders("pre%fix%{foo}suffix") == @["foo"]
+        extractPlaceholders("pre%}fix%{foo}suffix") == @["foo"]
+        extractPlaceholders("prefix%{foo}s}uffix") == @["foo"]
+
+    test "multiple placeholders":
+      check:
+        extractPlaceholders("prefix%{foo}bar%{foo}suffix") == @["foo", "foo"]
+        extractPlaceholders("prefix%{foo}bar%{baz}suffix") == @["foo", "baz"]
+        extractPlaceholders("prefix%{foo}%{bar}%{baz}suffix") == @["foo", "bar", "baz"]
+
+proc testIsFilesPattern =
+  suite "isFilesPattern":
+    test "invalid files patterns":
+      check:
+        not isFilesPattern("")
+        not isFilesPattern(" ")
+        not isFilesPattern("%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}suffix")
+        not isFilesPattern("prefix%{unknown_slug}")
+        not isFilesPattern("%{unknown_slug}")
+        not isFilesPattern("%{ssnake_slug}")
+        not isFilesPattern("%{snake_slugg}")
+        not isFilesPattern("somedir/%{snake_slug}/%{unknown_slug}.suffix")
+
+    test "valid files patterns":
+      check:
+        isFilesPattern("somefile")
+        isFilesPattern("somefile.go")
+        isFilesPattern("%{kebab_slug}.js")
+        isFilesPattern("foo%{snake_slug}bar")
+        isFilesPattern("foobar%{camel_slug}")
+        isFilesPattern("%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}")
+        isFilesPattern("somedir/%{pascal_slug}.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/%{pascal_slug}.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/%{snake_slug}.suffix")
+        isFilesPattern("%{pascal_slug}/filename.suffix")
+
 proc main =
   testIsKebabCase()
   testIsUuidV4()
+  testExtractPlaceholders()
+  testIsFilesPattern()
 
 main()
 {.used.}

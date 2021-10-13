@@ -174,12 +174,66 @@ func isUuidV4*(s: string): bool =
     s[34] in Hex and
     s[35] in Hex
 
+iterator extractPlaceholders*(s: string): string =
+  var i = 0
+  var expectClosingBrace = false
+  var ph = ""
+  while i < s.len:
+    let c = s[i]
+    if not expectClosingBrace:
+      if c == '%':
+        if i+1 < s.len and s[i+1] == '{':
+          expectClosingBrace = true
+          inc i
+    else:
+      if c == '}':
+        yield ph
+        ph.setLen(0)
+        expectClosingBrace = false
+      else:
+        ph.add c
+    inc i
+
+const filesPlaceholders = [
+  "kebab_slug",
+  "snake_slug",
+  "camel_slug",
+  "pascal_slug"
+].toHashSet()
+
+func isFilesPattern*(s: string): bool =
+  if not isEmptyOrWhitespace(s):
+    result = true
+    for ph in extractPlaceholders(s):
+      if ph notin filesPlaceholders:
+        return false
+
+func list(a: SomeSet[string]; prefix = ""; suffix = ""): string =
+  ## Returns a string that lists the elements of `a`, with `prefix` before
+  ## each element, and `suffix` after each element.
+  var seen = 0
+  for item in a:
+    if seen == 0:
+      # Use the first item to estimate the final string length.
+      let estimatedLen = a.len * (item.len + prefix.len + suffix.len + 5)
+      result = newStringOfCap(estimatedLen)
+    result.add prefix
+    result.add item
+    result.add suffix
+    inc seen
+    if seen < a.len-1:
+      result.add ", "
+    elif seen == a.len-1:
+      result.add ", and "
+
 var seenUuids = initHashSet[string](250)
+var seenFilePatterns = initHashSet[string](250)
 
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
-               checkIsUuid = false; isInArray = false): bool =
+               checkIsUuid = false; isInArray = false;
+               checkIsFilesPattern = false): bool =
   result = true
   case data.kind
   of JString:
@@ -223,6 +277,25 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
                "lowercased version 4 UUID"
+            result.setFalseAndPrint(msg, path)
+        elif checkIsFilesPattern:
+          if seenFilePatterns.containsOrIncl(s):
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not a unique " &
+               "`files` entry"
+            result.setFalseAndPrint(msg, path)
+          if isFilesPattern(s):
+            if "%{" in s and "}" notin s:
+              let msg =
+                &"A {format(context, key)} value is {q s}, which contains " &
+                 "a possible malformed placeholder. It contains " &
+                 "`%{` but not the terminating `}` character"
+              warn(msg, path)
+          else:
+            const placeholders = list(filesPlaceholders, "%{", "}")
+            let msg =
+              &"A {format(context, key)} value is {q s}, which is not a " &
+              &"valid file pattern. Allowed placeholders are: {placeholders}"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
@@ -270,7 +343,8 @@ proc isArrayOfStrings*(data: JsonNode;
                        uniqueValues = false;
                        allowed: HashSet[string];
                        allowedArrayLen: Slice;
-                       checkIsKebab: bool): bool =
+                       checkIsKebab: bool;
+                       checkIsFilesPattern: bool): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
   ##   non-empty, non-blank strings.
@@ -286,7 +360,9 @@ proc isArrayOfStrings*(data: JsonNode;
 
         for item in data:
           if not isString(item, context, path, "", isRequired, allowed,
-                          checkIsKebab = checkIsKebab, isInArray = true):
+                          checkIsKebab = checkIsKebab,
+                          checkIsFilesPattern = checkIsFilesPattern,
+                          isInArray = true):
             result = false
           elif uniqueValues:
             let itemStr = item.getStr()
@@ -322,7 +398,8 @@ proc hasArrayOfStrings*(data: JsonNode;
                         uniqueValues = false;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high;
-                        checkIsKebab = false): bool =
+                        checkIsKebab = false;
+                        checkIsFilesPattern = false): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
@@ -330,7 +407,8 @@ proc hasArrayOfStrings*(data: JsonNode;
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
                               uniqueValues, allowed, allowedArrayLen,
-                              checkIsKebab = checkIsKebab)
+                              checkIsKebab = checkIsKebab,
+                              checkIsFilesPattern = checkIsFilesPattern)
   elif not isRequired:
     result = true
 
