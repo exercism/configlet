@@ -750,7 +750,6 @@ proc checkConceptDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
                      "Please add the concept to that array"
           b.setFalseAndPrint(msg, path)
 
-
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
   let trackConfigPath = trackDir / "config.json"
