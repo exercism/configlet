@@ -194,7 +194,7 @@ iterator extractPlaceholders*(s: string): string =
         ph.add c
     inc i
 
-const filesPatterns = [
+const filesPlaceholders = [
   "kebab_slug",
   "snake_slug",
   "camel_slug",
@@ -205,7 +205,7 @@ func isFilesPattern*(s: string): bool =
   if not isEmptyOrWhitespace(s):
     result = true
     for ph in extractPlaceholders(s):
-      if ph notin filesPatterns:
+      if ph notin filesPlaceholders:
         return false
 
 func list(a: SomeSet[string]; prefix = ""; suffix = ""): string =
@@ -288,14 +288,14 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             if "%{" in s and "}" notin s:
               let msg =
                 &"A {format(context, key)} value is {q s}, which contains " &
-                 "a possible malformed placeholder pattern. It contains " &
+                 "a possible malformed placeholder. It contains " &
                  "`%{` but not the terminating `}` character"
               warn(msg, path)
           else:
-            const validFilePatterns = list(filesPatterns, "%{", "}")
+            const placeholders = list(filesPlaceholders, "%{", "}")
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
-              &"valid files pattern. Allowed placeholders are: {validFilePatterns}"
+              &"valid files pattern. Allowed placeholders are: {placeholders}"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
