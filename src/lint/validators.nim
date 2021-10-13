@@ -295,7 +295,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             const placeholders = list(filesPlaceholders, "%{", "}")
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
-              &"valid files pattern. Allowed placeholders are: {placeholders}"
+              &"valid file pattern. Allowed placeholders are: {placeholders}"
             result.setFalseAndPrint(msg, path)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
