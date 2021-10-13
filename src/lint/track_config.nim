@@ -747,7 +747,7 @@ proc checkConceptDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
         if dirSlug notin conceptSlugs:
           let msg = &"{q $conceptsDir} contains a directory named {q dirSlug}, " &
                     &"which is not a `slug` in the concepts array. " &
-                     "Please add the concept to that array."
+                     "Please add the concept to that array"
           b.setFalseAndPrint(msg, path)
 
 
