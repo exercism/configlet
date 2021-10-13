@@ -742,6 +742,40 @@ proc checkExerciseDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
                        "website, please set its `status` value to \"wip\""
             b.setFalseAndPrint(msg, path)
 
+proc getConceptSlugs(data: JsonNode): HashSet[string] =
+  result = initHashSet[string]()
+  if data.kind != JObject or "concepts" notin data:
+    return
+
+  let concepts = data["concepts"]
+  if concepts.kind != JArray:
+    return
+
+  for conceptNode in concepts:
+    if conceptNode.kind == JObject:
+      if conceptNode.hasKey("slug"):
+        let slug = conceptNode["slug"]
+        if slug.kind == JString:
+          let slugStr = slug.getStr()
+          if slugStr.len > 0:
+            result.incl slugStr
+
+proc checkConceptDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
+                                      b: var bool; path: Path) =
+  ## Sets `b` to `false` if there is a concept directory that is
+  ## not a concept `slug` in `data`.
+  let conceptSlugs = getConceptSlugs(data)
+  if conceptSlugs.len > 0:
+    let conceptsDir = trackDir / "concepts"
+    if dirExists(conceptsDir):
+      for conceptDir in getSortedSubdirs(conceptsDir):
+        let dirSlug = lastPathPart(conceptDir.string)
+        if dirSlug notin conceptSlugs:
+          let msg = &"{q $conceptsDir} contains a directory named {q dirSlug}, " &
+                    &"which is not a `slug` in the concepts array. " &
+                     "Please add the concept to that array"
+          b.setFalseAndPrint(msg, path)
+
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
   let trackConfigPath = trackDir / "config.json"
@@ -757,3 +791,4 @@ proc isTrackConfigValid*(trackDir: Path): bool =
 
   if j != nil:
     checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
+    checkConceptDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
