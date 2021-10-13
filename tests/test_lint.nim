@@ -276,6 +276,7 @@ proc testIsFilesPattern =
         isFilesPattern("somedir/%{pascal_slug}.suffix")
         isFilesPattern("somedir/%{pascal_slug}/filename.suffix")
         isFilesPattern("somedir/%{pascal_slug}/%{pascal_slug}.suffix")
+        isFilesPattern("somedir/%{pascal_slug}/%{snake_slug}.suffix")
         isFilesPattern("%{pascal_slug}/filename.suffix")
 
 proc main =
