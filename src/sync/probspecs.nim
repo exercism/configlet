@@ -23,16 +23,16 @@ func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
 func slug(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   lastPathPart(probSpecsExerciseDir)
 
-func uuid*(testCase: ProbSpecsTestCase): string =
+proc uuid*(testCase: ProbSpecsTestCase): string =
   testCase["uuid"].getStr()
 
-func description*(testCase: ProbSpecsTestCase): string =
+proc description*(testCase: ProbSpecsTestCase): string =
   testCase["description"].getStr()
 
 func isReimplementation*(testCase: ProbSpecsTestCase): bool =
   testCase.hasKey("reimplements")
 
-func reimplements*(testCase: ProbSpecsTestCase): string =
+proc reimplements*(testCase: ProbSpecsTestCase): string =
   testCase["reimplements"].getStr()
 
 proc initProbSpecsTestCases(node: JsonNode, prefix = ""): seq[ProbSpecsTestCase] =
