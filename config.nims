@@ -1,6 +1,7 @@
 switch("styleCheck", "hint")
 hint("Name", on)
 switch("experimental", "strictFuncs")
+switch("define", "nimStrictDelete")
 
 # Replace the stdlib JSON modules with our own stricter versions.
 patchFile("stdlib", "json", "src/patched_stdlib/json")
