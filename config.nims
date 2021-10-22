@@ -1,5 +1,6 @@
 switch("styleCheck", "hint")
 hint("Name", on)
+switch("experimental", "strictEffects")
 switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
 
