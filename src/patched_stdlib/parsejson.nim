@@ -1,5 +1,5 @@
 # This file is minimally adapted from this version in the Nim standard library:
-# https://github.com/nim-lang/Nim/blob/285539c87aa2/lib/pure/parsejson.nim
+# https://github.com/nim-lang/Nim/blob/e8657c710776/lib/pure/parsejson.nim
 # The standard library version is lenient: it silently allows line comments
 # with `//`, and long comments with `/* */`.
 # The below version is stricter: it raises a `JsonParsingError` for such
@@ -31,6 +31,9 @@
 
 import strutils, lexbase, streams, unicode
 import std/private/decode_helpers
+
+when defined(nimPreviewSlimSystem):
+  import std/assertions
 
 type
   JsonEventKind* = enum ## enumeration of all events that may occur when parsing
@@ -234,7 +237,7 @@ proc parseString(my: var JsonParser): TokKind =
           add(my.a, 'u')
         inc(pos, 2)
         var pos2 = pos
-        var r = parseEscapedUTF16(my.buf, pos)
+        var r = parseEscapedUTF16(cstring(my.buf), pos)
         if r < 0:
           my.err = errInvalidToken
           break
@@ -244,7 +247,7 @@ proc parseString(my: var JsonParser): TokKind =
             my.err = errInvalidToken
             break
           inc(pos, 2)
-          var s = parseEscapedUTF16(my.buf, pos)
+          var s = parseEscapedUTF16(cstring(my.buf), pos)
           if (s and 0xfc00) == 0xdc00 and s > 0:
             r = 0x10000 + (((r - 0xd800) shl 10) or (s - 0xdc00))
           else:
