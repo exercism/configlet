@@ -10,11 +10,16 @@ patchFile("stdlib", "parsejson", "src/patched_stdlib/parsejson")
 if defined(release):
   switch("opt", "size")
   switch("passC", "-flto")
+  switch("passL", "-flto")
 
   if defined(linux) or defined(windows):
     switch("passL", "-s")
     switch("passL", "-static")
 
   if defined(linux):
-    switch("gcc.exe", "musl-gcc")
-    switch("gcc.linkerexe", "musl-gcc")
+    if defined(gcc):
+      switch("gcc.exe", "musl-gcc")
+      switch("gcc.linkerexe", "musl-gcc")
+    elif defined(clang):
+      switch("clang.exe", "musl-clang")
+      switch("clang.linkerexe", "musl-clang")
