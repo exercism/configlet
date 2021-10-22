@@ -2,5 +2,5 @@
 
 version="$(echo "${REF}" | cut -d'/' -f3)"
 
-gh release create "${version}"
+gh release create --draft "${version}"
 gh release upload "${version}" "${ARTIFACT_FILE}"
