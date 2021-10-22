@@ -92,7 +92,7 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
       hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
       hasString(data, "name", path, context, maxLen = 255),
       hasString(data, "uuid", path, context, checkIsUuid = true),
-      hasInteger(data, "difficulty", path, context, allowed = 0..10),
+      hasInteger(data, "difficulty", path, context, allowed = 1..10),
       hasArrayOfStrings(data, "practices", path, context,
                         allowedArrayLen = 0..int.high, checkIsKebab = true,
                         uniqueValues = true),
