@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 
-version="$(echo "${REF}" | cut -d'/' -f3)"
+latest_release_tag="$(gh release view --json tagName --jq '.tagName')"
+build_tag="$(echo "${REF}" | cut -d'/' -f3)"
 
-gh release create --draft "${version}"
-gh release upload "${version}" "${ARTIFACT_FILE}"
+if [ "${latest_release_tag}" != "${build_tag}" ]; then
+  gh release create --draft "${build_tag}"
+fi
+gh release upload "${build_tag}" "${ARTIFACT_FILE}"
