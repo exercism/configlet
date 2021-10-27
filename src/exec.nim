@@ -126,3 +126,7 @@ proc gitDiffConcise*(dir: string): string =
   let diffArgs = ["--no-pager", "-C", dir, "diff", "--no-ext-diff", "--text",
                   "--unified=0", "--no-prefix", "--color=never"]
   result = gitCheck(0, diffArgs).conciseDiff()
+
+proc gitDiffExitCode*(trackDir: string): int =
+  let args = ["-C", trackDir, "diff", "--exit-code"]
+  result = git(args).exitCode
