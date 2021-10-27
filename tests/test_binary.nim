@@ -185,7 +185,8 @@ proc testsForSync(binaryPath: static string) =
         +
       """.unindent()
 
-    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
+    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram",
+                                        ".meta", "tests.toml")
 
     test "-mi: includes a missing test case for a given exercise, and exits with 0":
       execAndCheck(0, &"{syncOfflineUpdate} -e anagram -mi", expectedOutputAnagramInclude)
