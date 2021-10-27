@@ -13,6 +13,16 @@ template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
     echo outp
     fail()
 
+template testDiffThenRestore(dir, expectedDiff, restoreArg: string) =
+  ## Runs `git diff` in `dir`, and tests that the output is `expectedDiff`. Then
+  ## runs `git restore` with the argument `restoreArg`.
+  test "the diff is as expected":
+    let diff = gitDiffConcise(trackDir)
+    check diff == expectedDiff
+
+  let args = ["-C", dir, "restore", restoreArg]
+  check git(args).exitCode == 0
+
 proc testsForSync(binaryPath: string) =
   const psDir = testsDir / ".test_binary_problem_specifications"
   const trackDir = testsDir / ".test_binary_nim_track_repo"
@@ -161,12 +171,9 @@ proc testsForSync(binaryPath: string) =
       +
     """.unindent()
 
-    test "the diff is as expected":
-      let diff = gitDiffConcise(trackDir)
-      check diff == expectedAnagramDiffInclude
-
     let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
 
     test "-me: excludes a missing test case for a given exercise, and exits with 0":
       execAndCheck(0):
@@ -178,41 +185,25 @@ proc testsForSync(binaryPath: string) =
         All exercises are synced!
       """.unindent()
 
-    test "the diff is as expected":
-      let diff = gitDiffConcise(trackDir)
-      check diff == expectedAnagramDiffExclude
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+    testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
 
-    test "the diff is as expected":
-      let diff = gitDiffConcise(trackDir)
-      check diff == expectedAnagramDiffChooseInclude
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+    testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
 
     test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
 
-    test "the diff is as expected":
-      let diff = gitDiffConcise(trackDir)
-      check diff == expectedAnagramDiffExclude
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+    testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
 
-    test "the diff is as expected":
-      let diff = gitDiffConcise(trackDir)
-      check diff == &"{expectedAnagramDiffStart}\n"
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+    testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
     test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
       execAndCheck(0):

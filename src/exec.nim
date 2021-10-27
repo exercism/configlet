@@ -37,7 +37,7 @@ proc exec(command: string; args: openArray[string] = [];
         break
   close(p)
 
-proc git(args: openArray[string]): ProcessResult =
+proc git*(args: openArray[string]): ProcessResult =
   ## Runs `git` with `args`. Returns the output and exit code.
   result = exec("git", args = args)
 
