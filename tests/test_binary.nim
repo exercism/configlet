@@ -23,19 +23,19 @@ func conciseDiff(s: string): string =
         result.add '\n'
 
 proc testsForSync(binaryPath: string) =
-  suite "sync":
-    const psDir = testsDir / ".test_binary_problem_specifications"
-    const trackDir = testsDir / ".test_binary_nim_track_repo"
+  const psDir = testsDir / ".test_binary_problem_specifications"
+  const trackDir = testsDir / ".test_binary_nim_track_repo"
 
-    # Setup: clone the problem-specifications repo, and checkout a known state
-    setupExercismRepo("problem-specifications", psDir,
-                      "f17f457fdc0673369047250f652e93c7901755e1")
+  # Setup: clone the problem-specifications repo, and checkout a known state
+  setupExercismRepo("problem-specifications", psDir,
+                    "f17f457fdc0673369047250f652e93c7901755e1")
 
-    # Setup: clone a track repo, and checkout a known state
-    setupExercismRepo("nim", trackDir,
-                      "6e909c9e5338cd567c20224069df00e031fb2efa")
+  # Setup: clone a track repo, and checkout a known state
+  setupExercismRepo("nim", trackDir,
+                    "6e909c9e5338cd567c20224069df00e031fb2efa")
 
-    test "a `sync` without `--update` exits with 1 and prints the expected output":
+  suite "sync, without --update":
+    test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
       execAndCheck(1):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
 
@@ -94,7 +94,143 @@ proc testsForSync(binaryPath: string) =
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
 
-    test "`sync --update --mode=include` exits with 0 and includes the expected test cases":
+    test "a given exercise with a missing test case: prints the expected output, and exits with 1":
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e anagram")
+
+      check outp == """
+        Checking exercises...
+        [warn] anagram: missing 1 test case
+               - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
+        [warn] some exercises are missing test cases
+      """.dedent(8)
+
+    test "when passing multiple exercises, only the final exercise is acted upon":
+      # TODO: configlet should either print a warning here, or support multiple exercises being passed.
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e grade-school -e isogram")
+
+      check outp == """
+        Checking exercises...
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        [warn] some exercises are missing test cases
+      """.dedent(8)
+
+  suite "sync, with --update":
+    test "-mi: includes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir} -e anagram")
+
+      check outp == """
+        Syncing exercises...
+        [info] anagram: included 1 missing test case
+        All exercises are synced!
+      """.unindent()
+
+    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
+    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
+    const testsTomlHeaderDiff = """
+      -# This is an auto-generated file. Regular comments will be removed when this
+      -# file is regenerated. Regenerating will not touch any manually added keys,
+      -# so comments can be added in a "comment" key.
+      +# This is an auto-generated file.
+      +#
+      +# Regenerating this file via `configlet sync` will:
+      +# - Recreate every `description` key/value pair
+      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+      +# - Preserve any other key/value pair
+      +#
+      +# As user-added comments (using the # character) will be removed when this file
+      +# is regenerated, comments can be added via a `comment` key.""".unindent()
+    const expectedAnagramDiffStart = fmt"""
+      --- exercises/practice/anagram/.meta/tests.toml
+      +++ exercises/practice/anagram/.meta/tests.toml
+      {testsTomlHeaderDiff}""".unindent()
+    const expectedAnagramDiffInclude = fmt"""
+      {expectedAnagramDiffStart}
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      +
+    """.unindent()
+    const expectedAnagramDiffChooseInclude = fmt"""
+      {expectedAnagramDiffStart}
+      +include = false
+      +
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+    """.unindent()
+    const expectedAnagramDiffExclude = fmt"""
+      {expectedAnagramDiffStart}
+      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+      +description = "detects two anagrams"
+      +include = false
+      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      +
+    """.unindent()
+
+    test "the diff is as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffInclude
+
+    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "-me: excludes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -me -o -p {psDir} -e anagram")
+
+      check outp == """
+        Syncing exercises...
+        [info] anagram: excluded 1 missing test case
+        All exercises are synced!
+      """.unindent()
+
+    test "the diff is as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffExclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
+
+    test "the diff is as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffChooseInclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
+      execAndCheck(0):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
+
+    test "the diff is as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == expectedAnagramDiffExclude
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
+      execAndCheck(1):
+        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
+
+    test "the diff is as expected":
+      execAndCheck(0):
+        execCmdEx(diffCmd)
+      check outp.conciseDiff() == &"{expectedAnagramDiffStart}\n"
+
+    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+
+    test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
@@ -421,15 +557,13 @@ proc testsForSync(binaryPath: string) =
       +description = "callbacks should not be called if dependencies change but output value doesn't change"
     """.unindent()
 
-    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
-    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
-    test "`git diff` shows the expected diff":
+    test "the diff is as expected":
       execAndCheck(0):
         execCmdEx(diffCmd)
 
       check outp.conciseDiff() == expectedDiffOutput
 
-    test "after syncing, another `sync --update --mode=include` performs no changes":
+    test "after updating, another update using -mi performs no changes, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
 
@@ -438,7 +572,7 @@ proc testsForSync(binaryPath: string) =
         All exercises are synced!
       """.unindent()
 
-    test "after syncing, a `sync` without `--update` shows that exercises are up to date":
+    test "after updating, a `sync` without `--update` shows that exercises are up to date, and exits with 0":
       execAndCheck(0):
         execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
       check outp == """
@@ -446,7 +580,7 @@ proc testsForSync(binaryPath: string) =
         All exercises are up-to-date!
       """.unindent()
 
-    test "the `git diff` output is still the same":
+    test "the diff is still the same":
       execAndCheck(0):
         execCmdEx(diffCmd)
 
