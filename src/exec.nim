@@ -112,3 +112,17 @@ proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## Then checkout the given `hash` in `dest`.
   cloneExercismRepo(repoName, dest, shallow)
   gitCheckout(dest, hash)
+
+func conciseDiff(s: string): string =
+  ## Returns the lines of `s` that begin with a `+` or `-` character.
+  result = newStringOfCap(s.len)
+  for line in s.splitLines():
+    if line.len > 0:
+      if line[0] in {'+', '-'}:
+        result.add line
+        result.add '\n'
+
+proc gitDiffConcise*(dir: string): string =
+  let diffArgs = ["--no-pager", "-C", dir, "diff", "--no-ext-diff", "--text",
+                  "--unified=0", "--no-prefix", "--color=never"]
+  result = gitCheck(0, diffArgs).conciseDiff()

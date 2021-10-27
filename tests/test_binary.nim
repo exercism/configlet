@@ -13,15 +13,6 @@ template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
     echo outp
     fail()
 
-func conciseDiff(s: string): string =
-  ## Returns the lines of `s` that begin with a `+` or `-` character.
-  result = newStringOfCap(s.len)
-  for line in s.splitLines():
-    if line.len > 0:
-      if line[0] in {'+', '-'}:
-        result.add line
-        result.add '\n'
-
 proc testsForSync(binaryPath: string) =
   const psDir = testsDir / ".test_binary_problem_specifications"
   const trackDir = testsDir / ".test_binary_nim_track_repo"
@@ -128,8 +119,6 @@ proc testsForSync(binaryPath: string) =
         All exercises are synced!
       """.unindent()
 
-    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
-    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
     const testsTomlHeaderDiff = """
       -# This is an auto-generated file. Regular comments will be removed when this
       -# file is regenerated. Regenerating will not touch any manually added keys,
@@ -173,9 +162,8 @@ proc testsForSync(binaryPath: string) =
     """.unindent()
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffInclude
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedAnagramDiffInclude
 
     let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
@@ -191,9 +179,8 @@ proc testsForSync(binaryPath: string) =
       """.unindent()
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffExclude
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedAnagramDiffExclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
@@ -202,9 +189,8 @@ proc testsForSync(binaryPath: string) =
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffChooseInclude
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedAnagramDiffChooseInclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
@@ -213,9 +199,8 @@ proc testsForSync(binaryPath: string) =
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffExclude
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedAnagramDiffExclude
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
@@ -224,9 +209,8 @@ proc testsForSync(binaryPath: string) =
         execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == &"{expectedAnagramDiffStart}\n"
+      let diff = gitDiffConcise(trackDir)
+      check diff == &"{expectedAnagramDiffStart}\n"
 
     check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
 
@@ -558,10 +542,8 @@ proc testsForSync(binaryPath: string) =
     """.unindent()
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-
-      check outp.conciseDiff() == expectedDiffOutput
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedDiffOutput
 
     test "after updating, another update using -mi performs no changes, and exits with 0":
       execAndCheck(0):
@@ -581,10 +563,8 @@ proc testsForSync(binaryPath: string) =
       """.unindent()
 
     test "the diff is still the same":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-
-      check outp.conciseDiff() == expectedDiffOutput
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedDiffOutput
 
 proc prepareIntroductionFiles(trackDir, header, placeholder: string;
                               removeIntro: bool) =
