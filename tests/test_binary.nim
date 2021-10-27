@@ -224,77 +224,29 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
 
-    const expectedDiffOutput = """
+    const expectedDiffOutput = fmt"""
       --- exercises/practice/anagram/.meta/tests.toml
       +++ exercises/practice/anagram/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
       +description = "detects two anagrams"
       +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
       +
       --- exercises/practice/diffie-hellman/.meta/tests.toml
       +++ exercises/practice/diffie-hellman/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[0d25f8d7-4897-4338-a033-2d3d7a9af688]
       +description = "can calculate public key when given a different private key"
       +
       --- exercises/practice/grade-school/.meta/tests.toml
       +++ exercises/practice/grade-school/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[c125dab7-2a53-492f-a99a-56ad511940d8]
       +description = "A student can't be in two different grades"
       +
       --- exercises/practice/hamming/.meta/tests.toml
       +++ exercises/practice/hamming/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[b9228bb1-465f-4141-b40f-1f99812de5a8]
       +description = "disallow first strand longer"
       +reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
@@ -321,19 +273,7 @@ proc testsForSync(binaryPath: static string) =
       +reimplements = "920cd6e3-18f4-4143-b6b8-74270bb8f8a3"
       --- exercises/practice/high-scores/.meta/tests.toml
       +++ exercises/practice/high-scores/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       -description = "Personal top three from a list of scores"
       +description = "Top 3 scores -> Personal top three from a list of scores"
       -description = "Personal top highest to lowest"
@@ -352,37 +292,13 @@ proc testsForSync(binaryPath: static string) =
       +description = "Top 3 scores -> Scores after personal top scores"
       --- exercises/practice/isogram/.meta/tests.toml
       +++ exercises/practice/isogram/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
       +description = "word with duplicated character and with two hyphens"
       --- exercises/practice/kindergarten-garden/.meta/tests.toml
       +++ exercises/practice/kindergarten-garden/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       -description = "garden with single student"
       +description = "partial garden -> garden with single student"
       -description = "different garden with single student"
@@ -427,37 +343,13 @@ proc testsForSync(binaryPath: static string) =
       +description = "full garden -> for Larry, last student's garden"
       --- exercises/practice/luhn/.meta/tests.toml
       +++ exercises/practice/luhn/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
       +description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
       --- exercises/practice/prime-factors/.meta/tests.toml
       +++ exercises/practice/prime-factors/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[238d57c8-4c12-42ef-af34-ae4929f94789]
       +description = "another prime number"
       +
@@ -475,19 +367,7 @@ proc testsForSync(binaryPath: static string) =
       +
       --- exercises/practice/react/.meta/tests.toml
       +++ exercises/practice/react/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
       +description = "input cells have a value"
