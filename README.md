@@ -362,6 +362,43 @@ You can run `configlet generate` to generate the exercise's `introduction.md` fo
 
 ## Use in your track
 
+There are two ways that configlet can be kept up to date and used in a language track:
+
+- Using a GitHub workflow action
+- Calling directly
+
+### Action
+
+The action downloads configlet and adds it to the path where it can then be used, for example as part of CI.
+For further information, see [action.yml](./action.yml).
+
+#### Example
+
+The following would be in a `.yml` file in `./.github/workflows/`
+
+```yml
+name: Configlet CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  configlet:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Fetch configlet
+      uses: exercism/github-actions/configlet-ci@main
+
+    - name: Configlet linter
+      uses: configlet lint
+```
+
+### Script
+
 Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too. The first is a bash script, and the second is a PowerShell script.
 
 Running one of these scripts downloads the latest version of configlet to the `bin` directory. You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
