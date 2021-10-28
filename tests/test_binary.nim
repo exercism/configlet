@@ -5,24 +5,35 @@ const
   testsDir = currentSourcePath().parentDir()
   repoRootDir = testsDir.parentDir()
 
-template execAndCheck(expectedExitCode: int; body: untyped) {.dirty.} =
-  ## Runs `body`, and prints the output if the exit code is non-zero.
-  ## `body` must have the same return type as `execCmdEx`.
-  let (outp, exitCode) = body
-  if exitCode != expectedExitCode:
-    echo outp
-    fail()
+template execAndCheckExitCode(expectedExitCode: int; cmd: string;
+                              inputStr = "") =
+  ## Runs `cmd`, supplying `inputStr` on stdin, and checks that its exit code is
+  ## `expectedExitCode`
+  let exitCode = execCmdEx(cmd, input = inputStr)[1]
+  check:
+    exitCode == expectedExitCode
 
-func conciseDiff(s: string): string =
-  ## Returns the lines of `s` that begin with a `+` or `-` character.
-  result = newStringOfCap(s.len)
-  for line in s.splitLines():
-    if line.len > 0:
-      if line[0] in {'+', '-'}:
-        result.add line
-        result.add '\n'
+template execAndCheck(expectedExitCode: int; cmd, expectedOutput: string;
+                      inputStr = "") =
+  ## Runs `cmd`, supplying `inputStr` on stdin, and checks that:
+  ## - its exit code is `expectedExitCode`
+  ## - its output is `expectedOutput`
+  let (outp, exitCode) = execCmdEx(cmd, input = inputStr)
+  check:
+    exitCode == expectedExitCode
+    outp == expectedOutput
 
-proc testsForSync(binaryPath: string) =
+template testDiffThenRestore(dir, expectedDiff, restoreArg: string) =
+  ## Runs `git diff` in `dir`, and tests that the output is `expectedDiff`. Then
+  ## runs `git restore` with the argument `restoreArg`.
+  test "the diff is as expected":
+    let diff = gitDiffConcise(trackDir)
+    check diff == expectedDiff
+
+  let args = ["-C", dir, "restore", restoreArg]
+  check git(args).exitCode == 0
+
+proc testsForSync(binaryPath: static string) =
   const psDir = testsDir / ".test_binary_problem_specifications"
   const trackDir = testsDir / ".test_binary_nim_track_repo"
 
@@ -34,12 +45,12 @@ proc testsForSync(binaryPath: string) =
   setupExercismRepo("nim", trackDir,
                     "6e909c9e5338cd567c20224069df00e031fb2efa")
 
+  const syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
+  const syncOfflineUpdate = &"{syncOffline} --update"
+
   suite "sync, without --update":
     test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
-      execAndCheck(1):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
-
-      check outp == """
+      const expectedOutput = """
         Checking exercises...
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
@@ -93,148 +104,112 @@ proc testsForSync(binaryPath: string) =
                - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
         [warn] some exercises are missing test cases
       """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
+      execAndCheck(1, syncOffline, expectedOutput)
 
     test "a given exercise with a missing test case: prints the expected output, and exits with 1":
-      execAndCheck(1):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e anagram")
-
-      check outp == """
+      const expectedOutput = """
         Checking exercises...
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
         [warn] some exercises are missing test cases
       """.dedent(8)
+      execAndCheck(1, &"{syncOffline} -e anagram", expectedOutput)
 
     test "when passing multiple exercises, only the final exercise is acted upon":
       # TODO: configlet should either print a warning here, or support multiple exercises being passed.
-      execAndCheck(1):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir} -e grade-school -e isogram")
-
-      check outp == """
+      const expectedOutput = """
         Checking exercises...
         [warn] isogram: missing 1 test case
                - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
         [warn] some exercises are missing test cases
       """.dedent(8)
+      execAndCheck(1, &"{syncOffline} -e grade-school -e isogram", expectedOutput)
 
   suite "sync, with --update":
-    test "-mi: includes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir} -e anagram")
-
-      check outp == """
+    const
+      expectedOutputAnagramInclude = """
         Syncing exercises...
         [info] anagram: included 1 missing test case
         All exercises are synced!
       """.unindent()
 
-    const diffOpts = "--no-ext-diff --text --unified=0 --no-prefix --color=never"
-    const diffCmd = &"""git --no-pager -C {trackDir} diff {diffOpts}"""
-    const testsTomlHeaderDiff = """
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.""".unindent()
-    const expectedAnagramDiffStart = fmt"""
-      --- exercises/practice/anagram/.meta/tests.toml
-      +++ exercises/practice/anagram/.meta/tests.toml
-      {testsTomlHeaderDiff}""".unindent()
-    const expectedAnagramDiffInclude = fmt"""
-      {expectedAnagramDiffStart}
-      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-      +description = "detects two anagrams"
-      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-      +
-    """.unindent()
-    const expectedAnagramDiffChooseInclude = fmt"""
-      {expectedAnagramDiffStart}
-      +include = false
-      +
-      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-      +description = "detects two anagrams"
-      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-    """.unindent()
-    const expectedAnagramDiffExclude = fmt"""
-      {expectedAnagramDiffStart}
-      +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-      +description = "detects two anagrams"
-      +include = false
-      +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-      +
-    """.unindent()
-
-    test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffInclude
-
-    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram", ".meta", "tests.toml")
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
-
-    test "-me: excludes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -me -o -p {psDir} -e anagram")
-
-      check outp == """
+      expectedOutputAnagramExclude = """
         Syncing exercises...
         [info] anagram: excluded 1 missing test case
         All exercises are synced!
       """.unindent()
 
-    test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffExclude
+      testsTomlHeaderDiff = """
+        -# This is an auto-generated file. Regular comments will be removed when this
+        -# file is regenerated. Regenerating will not touch any manually added keys,
+        -# so comments can be added in a "comment" key.
+        +# This is an auto-generated file.
+        +#
+        +# Regenerating this file via `configlet sync` will:
+        +# - Recreate every `description` key/value pair
+        +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
+        +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
+        +# - Preserve any other key/value pair
+        +#
+        +# As user-added comments (using the # character) will be removed when this file
+        +# is regenerated, comments can be added via a `comment` key.""".unindent()
 
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+      expectedAnagramDiffStart = fmt"""
+        --- exercises/practice/anagram/.meta/tests.toml
+        +++ exercises/practice/anagram/.meta/tests.toml
+        {testsTomlHeaderDiff}""".unindent()
+
+      expectedAnagramDiffInclude = fmt"""
+        {expectedAnagramDiffStart}
+        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+        +description = "detects two anagrams"
+        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+        +
+      """.unindent()
+
+      expectedAnagramDiffChooseInclude = fmt"""
+        {expectedAnagramDiffStart}
+        +include = false
+        +
+        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+        +description = "detects two anagrams"
+        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+      """.unindent()
+
+      expectedAnagramDiffExclude = fmt"""
+        {expectedAnagramDiffStart}
+        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
+        +description = "detects two anagrams"
+        +include = false
+        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
+        +
+      """.unindent()
+
+    let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram",
+                                        ".meta", "tests.toml")
+
+    test "-mi: includes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdate} -e anagram -mi", expectedOutputAnagramInclude)
+    testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
+
+    test "-me: excludes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdate} -e anagram -me", expectedOutputAnagramExclude)
+    testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "y")
-
-    test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffChooseInclude
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+      execAndCheckExitCode(0, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "y")
+    testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
 
     test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "n")
-
-    test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == expectedAnagramDiffExclude
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+      execAndCheckExitCode(0, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "n")
+    testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
-      execAndCheck(1):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mc -o -p {psDir} -e anagram", input = "s")
-
-    test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-      check outp.conciseDiff() == &"{expectedAnagramDiffStart}\n"
-
-    check execCmdEx(&"git -C {trackDir} restore {anagramTestsTomlPath}")[1] == 0
+      execAndCheckExitCode(1, &"{syncOfflineUpdate} -e anagram -mc", inputStr = "s")
+    testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
     test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
-
-      check outp == """
+      const expectedOutput = """
         Syncing exercises...
         [info] anagram: included 1 missing test case
         [info] diffie-hellman: included 1 missing test case
@@ -248,78 +223,31 @@ proc testsForSync(binaryPath: string) =
         [info] react: included 14 missing test cases
         All exercises are synced!
       """.unindent()
+      execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
 
-    const expectedDiffOutput = """
+    const expectedDiffOutput = fmt"""
       --- exercises/practice/anagram/.meta/tests.toml
       +++ exercises/practice/anagram/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
       +description = "detects two anagrams"
       +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
       +
       --- exercises/practice/diffie-hellman/.meta/tests.toml
       +++ exercises/practice/diffie-hellman/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[0d25f8d7-4897-4338-a033-2d3d7a9af688]
       +description = "can calculate public key when given a different private key"
       +
       --- exercises/practice/grade-school/.meta/tests.toml
       +++ exercises/practice/grade-school/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[c125dab7-2a53-492f-a99a-56ad511940d8]
       +description = "A student can't be in two different grades"
       +
       --- exercises/practice/hamming/.meta/tests.toml
       +++ exercises/practice/hamming/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[b9228bb1-465f-4141-b40f-1f99812de5a8]
       +description = "disallow first strand longer"
       +reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
@@ -346,19 +274,7 @@ proc testsForSync(binaryPath: string) =
       +reimplements = "920cd6e3-18f4-4143-b6b8-74270bb8f8a3"
       --- exercises/practice/high-scores/.meta/tests.toml
       +++ exercises/practice/high-scores/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       -description = "Personal top three from a list of scores"
       +description = "Top 3 scores -> Personal top three from a list of scores"
       -description = "Personal top highest to lowest"
@@ -377,37 +293,13 @@ proc testsForSync(binaryPath: string) =
       +description = "Top 3 scores -> Scores after personal top scores"
       --- exercises/practice/isogram/.meta/tests.toml
       +++ exercises/practice/isogram/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[0d0b8644-0a1e-4a31-a432-2b3ee270d847]
       +description = "word with duplicated character and with two hyphens"
       --- exercises/practice/kindergarten-garden/.meta/tests.toml
       +++ exercises/practice/kindergarten-garden/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       -description = "garden with single student"
       +description = "partial garden -> garden with single student"
       -description = "different garden with single student"
@@ -452,37 +344,13 @@ proc testsForSync(binaryPath: string) =
       +description = "full garden -> for Larry, last student's garden"
       --- exercises/practice/luhn/.meta/tests.toml
       +++ exercises/practice/luhn/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[8b72ad26-c8be-49a2-b99c-bcc3bf631b33]
       +description = "non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed"
       --- exercises/practice/prime-factors/.meta/tests.toml
       +++ exercises/practice/prime-factors/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +[238d57c8-4c12-42ef-af34-ae4929f94789]
       +description = "another prime number"
       +
@@ -500,19 +368,7 @@ proc testsForSync(binaryPath: string) =
       +
       --- exercises/practice/react/.meta/tests.toml
       +++ exercises/practice/react/.meta/tests.toml
-      -# This is an auto-generated file. Regular comments will be removed when this
-      -# file is regenerated. Regenerating will not touch any manually added keys,
-      -# so comments can be added in a "comment" key.
-      +# This is an auto-generated file.
-      +#
-      +# Regenerating this file via `configlet sync` will:
-      +# - Recreate every `description` key/value pair
-      +# - Recreate every `reimplements` key/value pair, where they exist in problem-specifications
-      +# - Remove any `include = true` key/value pair (an omitted `include` key implies inclusion)
-      +# - Preserve any other key/value pair
-      +#
-      +# As user-added comments (using the # character) will be removed when this file
-      +# is regenerated, comments can be added via a `comment` key.
+      {testsTomlHeaderDiff}
       +
       +[c51ee736-d001-4f30-88d1-0c8e8b43cd07]
       +description = "input cells have a value"
@@ -558,33 +414,26 @@ proc testsForSync(binaryPath: string) =
     """.unindent()
 
     test "the diff is as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-
-      check outp.conciseDiff() == expectedDiffOutput
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedDiffOutput
 
     test "after updating, another update using -mi performs no changes, and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync --update -mi -o -p {psDir}")
-
-      check outp == """
+      const expectedOutput = """
         Syncing exercises...
         All exercises are synced!
       """.unindent()
+      execAndCheck(0, &"{syncOfflineUpdate} -mi", expectedOutput)
 
     test "after updating, a `sync` without `--update` shows that exercises are up to date, and exits with 0":
-      execAndCheck(0):
-        execCmdEx(&"{binaryPath} -t {trackDir} sync -o -p {psDir}")
-      check outp == """
+      const expectedOutput = """
         Checking exercises...
         All exercises are up-to-date!
       """.unindent()
+      execAndCheck(0, syncOffline, expectedOutput)
 
     test "the diff is still the same":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
-
-      check outp.conciseDiff() == expectedDiffOutput
+      let diff = gitDiffConcise(trackDir)
+      check diff == expectedDiffOutput
 
 proc prepareIntroductionFiles(trackDir, header, placeholder: string;
                               removeIntro: bool) =
@@ -604,23 +453,23 @@ proc prepareIntroductionFiles(trackDir, header, placeholder: string;
   if removeIntro:
     removeFile(introPath)
 
+template checkNoDiff(trackDir: string) =
+  check gitDiffExitCode(trackDir) == 0
+
 proc testsForGenerate(binaryPath: string) =
   suite "generate":
     const trackDir = testsDir / ".test_binary_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
-    let diffCmd = &"git -C {trackDir} diff --exit-code"
 
     # Setup: clone a track repo, and checkout a known state
     setupExercismRepo("elixir", trackDir,
                       "f3974abf6e0d4a434dfe3494d58581d399c18edb")
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
-      execAndCheck(0):
-        execCmdEx(generateCmd)
+      execAndCheck(0, generateCmd, "")
 
     test "and does not make a change":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
+      checkNoDiff(trackDir)
 
     # Valid placeholder syntax without spaces, and invalid slug
     prepareIntroductionFiles(trackDir, "Recursion",
@@ -628,36 +477,30 @@ proc testsForGenerate(binaryPath: string) =
                              removeIntro = false)
 
     test "`configlet generate` exits with 1 for an invalid placeholder usage":
-      execAndCheck(1):
-        execCmdEx(generateCmd)
+      execAndCheckExitCode(1, generateCmd)
 
     test "and does not make a change":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
+      checkNoDiff(trackDir)
 
     # Valid placeholder syntax without spaces, and valid slug
     prepareIntroductionFiles(trackDir, "Recursion", "%{concept:recursion}",
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for a valid `.md.tpl` file":
-      execAndCheck(0):
-        execCmdEx(generateCmd)
+      execAndCheck(0, generateCmd, "")
 
     test "and writes the `introduction.md` file as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
+      checkNoDiff(trackDir)
 
     # Valid placeholder syntax with spaces, and valid slug
     prepareIntroductionFiles(trackDir, "Recursion", "%{ concept : recursion }",
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for valid placeholder usage with spaces":
-      execAndCheck(0):
-        execCmdEx(generateCmd)
+      execAndCheck(0, generateCmd, "")
 
     test "and writes the `introduction.md` file as expected":
-      execAndCheck(0):
-        execCmdEx(diffCmd)
+      checkNoDiff(trackDir)
 
 proc main =
   const
