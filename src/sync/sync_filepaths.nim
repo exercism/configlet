@@ -178,14 +178,12 @@ proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
     let trackConfig = json.parseFile(trackConfigPath)
 
     let filePatterns = getFilePatterns(trackConfig, trackConfigPath)
-    let conceptExerciseSlugs = getExerciseSlugs(trackConfig, trackConfigPath, ekConcept)
-    let practiceExerciseSlugs = getExerciseSlugs(trackConfig, trackConfigPath, ekPractice)
 
     for exerciseKind in [ekConcept, ekPractice]:
       let slugs =
         case exerciseKind
-        of ekConcept: conceptExerciseSlugs
-        of ekPractice: practiceExerciseSlugs
+        of ekConcept: getExerciseSlugs(trackConfig, trackConfigPath, ekConcept)
+        of ekPractice: getExerciseSlugs(trackConfig, trackConfigPath, ekPractice)
       let dir =
         case exerciseKind
         of ekConcept: trackConceptExercisesDir
