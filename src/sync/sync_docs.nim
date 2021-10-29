@@ -35,6 +35,23 @@ proc checkFilesIdenticalAfterHeader(source, dest, slug, filename: string;
     if conf.action.update:
       sdPairs.add SourceDestPair(source: source, dest: dest)
 
+proc checkIntroduction(conf: Conf;
+                       slug, trackDocsDir, psExerciseDir: string;
+                       seenUnsynced: var set[SyncKind];
+                       sdPairs: var seq[SourceDestPair]) =
+  # If the exercise in problem-specifications has an `introduction.md`
+  # file, the track exercise must have a `.docs/introduction.md` file.
+  let introFilename = "introduction.md"
+  let psIntroPath = psExerciseDir / introFilename
+  if fileExists(psIntroPath):
+    let trackIntroPath = trackDocsDir / introFilename
+    if fileExists(trackIntroPath):
+      checkFilesIdenticalAfterHeader(psIntroPath, trackIntroPath, slug,
+                                     introFilename, seenUnsynced, conf, sdPairs)
+    else:
+      logNormal(&"[error] {slug}: {introFilename} is missing")
+      seenUnsynced.incl skDocs
+
 proc checkDocs*(conf: Conf,
                 seenUnsynced: var set[SyncKind],
                 trackPracticeExercisesDir: string,
@@ -47,19 +64,8 @@ proc checkDocs*(conf: Conf,
     if dirExists(trackDocsDir):
       let psExerciseDir = psExercisesDir / slug
       if dirExists(psExerciseDir):
-
-        # If the exercise in problem-specifications has an `introduction.md`
-        # file, the track exercise must have a `.docs/introduction.md` file.
-        let introFilename = "introduction.md"
-        let psIntroPath = psExerciseDir / introFilename
-        if fileExists(psIntroPath):
-          let trackIntroPath = trackDocsDir / introFilename
-          if fileExists(trackIntroPath):
-            checkFilesIdenticalAfterHeader(psIntroPath, trackIntroPath, slug,
-                               introFilename, seenUnsynced, conf, result)
-          else:
-            logNormal(&"[error] {slug}: {introFilename} is missing")
-            seenUnsynced.incl skDocs
+        checkIntroduction(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
+                          result)
 
         # The track exercise must have a `.docs/instructions.md` file.
         # Its contents should match those of the corresponding `instructions.md`
