@@ -26,6 +26,7 @@ proc checkFilesIdenticalAfterHeader(source, dest, slug, filename: string;
                                     sdPairs: var seq[SourceDestPair]) =
   ## Prints a message that describes whether the files at `source` and `dest`
   ## have identical contents.
+  # TODO: Optimize this.
   if contentsAfterFirstHeader(source) == contentsAfterFirstHeader(dest):
     logDetailed(&"[skip] {slug}: {filename} is up-to-date")
   else:
