@@ -166,7 +166,7 @@ func genHelpText: string =
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
-    optSyncUpdate: "Prompt the user to include, exclude, or skip any missing tests",
+    optSyncUpdate: "Update unsynced docs, filepaths, metadata, and tests",
     optSyncYes: "Auto-confirm every prompt",
     optSyncDocs: "Sync `.docs/introduction.md` and `.docs/instructions.md`",
     optSyncFilepaths: "Sync filepaths",
