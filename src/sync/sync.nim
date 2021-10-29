@@ -26,12 +26,8 @@ proc update(configPairs: seq[PathAndUpdatedJson], conf: Conf,
                   configPair.updatedJson.pretty() & "\n")
       seenUnsynced.excl syncKind
 
-proc sync*(conf: Conf) =
-  logNormal("Checking exercises...")
-
+proc syncImpl(conf: Conf): set[SyncKind] =
   let probSpecsDir = initProbSpecsDir(conf)
-  var seenUnsynced: set[SyncKind]
-
   try:
     let exercises = toSeq findExercises(conf, probSpecsDir)
     let psExercisesDir = probSpecsDir / "exercises"
@@ -43,7 +39,7 @@ proc sync*(conf: Conf) =
       case syncKind
       # Check/update docs
       of skDocs:
-        let sdPairs = checkDocs(conf, seenUnsynced, trackPracticeExercisesDir,
+        let sdPairs = checkDocs(conf, result, trackPracticeExercisesDir,
                                 exercises, psExercisesDir)
         if sdPairs.len > 0: # Implies that `--update` was passed.
           if conf.action.yes or userSaysYes(syncKind):
@@ -52,30 +48,35 @@ proc sync*(conf: Conf) =
               # For example: the below currently writes `# Description`
               # instead of `# Instructions`
               copyFile(sdPair.source, sdPair.dest)
-            seenUnsynced.excl syncKind
+            result.excl syncKind
 
       # Check/update filepaths
       of skFilepaths:
-        let configPairs = checkFilepaths(conf, seenUnsynced, trackPracticeExercisesDir,
+        let configPairs = checkFilepaths(conf, result, trackPracticeExercisesDir,
                                          trackConceptExercisesDir)
-        update(configPairs, conf, syncKind, seenUnsynced)
+        update(configPairs, conf, syncKind, result)
 
       # Check/update metadata
       of skMetadata:
-        let configPairs = checkMetadata(conf, seenUnsynced, trackPracticeExercisesDir,
+        let configPairs = checkMetadata(conf, result, trackPracticeExercisesDir,
                                         exercises, psExercisesDir)
-        update(configPairs, conf, syncKind, seenUnsynced)
+        update(configPairs, conf, syncKind, result)
 
       # Check/update tests
       of skTests:
         if conf.action.update:
-          updateTests(exercises, conf, seenUnsynced)
+          updateTests(exercises, conf, result)
         else:
-          checkTests(exercises, seenUnsynced)
+          checkTests(exercises, result)
 
   finally:
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
+
+proc sync*(conf: Conf) =
+  logNormal("Checking exercises...")
+
+  let seenUnsynced = syncImpl(conf)
 
   if seenUnsynced.len > 0:
     for syncKind in seenUnsynced:
