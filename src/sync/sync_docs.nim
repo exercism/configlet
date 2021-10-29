@@ -80,10 +80,10 @@ proc checkInstructions(conf: Conf;
     logNormal(&"[error] {slug}: {instrFilename} is missing")
     seenUnsynced.incl skDocs
 
-proc checkDocs*(conf: Conf,
-                seenUnsynced: var set[SyncKind],
-                trackPracticeExercisesDir: string,
-                exercises: seq[Exercise],
+proc checkDocs*(conf: Conf;
+                seenUnsynced: var set[SyncKind];
+                trackPracticeExercisesDir: string;
+                exercises: seq[Exercise];
                 psExercisesDir: string): seq[SourceDestPair] =
   for exercise in exercises:
     let slug = exercise.slug.string

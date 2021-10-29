@@ -56,10 +56,10 @@ proc isThisMetadataSynced(res: var seq[PathAndUpdatedJson]; conf: Conf; slug: st
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
-proc checkMetadata*(conf: Conf,
-                    seenUnsynced: var set[SyncKind],
-                    trackPracticeExercisesDir: string,
-                    exercises: seq[Exercise],
+proc checkMetadata*(conf: Conf;
+                    seenUnsynced: var set[SyncKind];
+                    trackPracticeExercisesDir: string;
+                    exercises: seq[Exercise];
                     psExercisesDir: string): seq[PathAndUpdatedJson] =
   for exercise in exercises:
     let slug = exercise.slug.string
