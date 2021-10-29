@@ -20,10 +20,10 @@ type
     source*: string
     dest*: string
 
-proc checkFilesIdentical(source, dest, slug, filename: string;
-                         seenUnsynced: var set[SyncKind];
-                         conf: Conf;
-                         sdPairs: var seq[SourceDestPair]) =
+proc checkFilesIdenticalAfterHeader(source, dest, slug, filename: string;
+                                    seenUnsynced: var set[SyncKind];
+                                    conf: Conf;
+                                    sdPairs: var seq[SourceDestPair]) =
   ## Prints a message that describes whether the files at `source` and `dest`
   ## have identical contents.
   if contentsAfterFirstHeader(source) == contentsAfterFirstHeader(dest):
@@ -54,7 +54,7 @@ proc checkDocs*(conf: Conf,
         if fileExists(psIntroPath):
           let trackIntroPath = trackDocsDir / introFilename
           if fileExists(trackIntroPath):
-            checkFilesIdentical(psIntroPath, trackIntroPath, slug,
+            checkFilesIdenticalAfterHeader(psIntroPath, trackIntroPath, slug,
                                introFilename, seenUnsynced, conf, result)
           else:
             logNormal(&"[error] {slug}: {introFilename} is missing")
@@ -71,11 +71,11 @@ proc checkDocs*(conf: Conf,
           let psInstrPath = psExerciseDir / instrFilename
           let psDescPath = psExerciseDir / descFilename
           if fileExists(psInstrPath):
-            checkFilesIdentical(psInstrPath, trackInstrPath, slug,
-                               instrFilename, seenUnsynced, conf, result)
+            checkFilesIdenticalAfterHeader(psInstrPath, trackInstrPath, slug,
+                                           instrFilename, seenUnsynced, conf, result)
           elif fileExists(psDescPath):
-            checkFilesIdentical(psDescPath, trackInstrPath, slug,
-                                instrFilename, seenUnsynced, conf, result)
+            checkFilesIdenticalAfterHeader(psDescPath, trackInstrPath, slug,
+                                           instrFilename, seenUnsynced, conf, result)
           else:
             logNormal(&"[error] {slug}: does not have an upstream " &
                       &"{instrFilename} or {descFilename} file")
