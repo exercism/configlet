@@ -88,7 +88,7 @@ proc sync*(conf: Conf) =
       if userExercise.len > 0:
         &"The `{userExercise}` Practice Exercise"
       else:
-        "Every exercise"
+        "Every Practice Exercise"
     if conf.action.scope == {SyncKind.low .. SyncKind.high}:
       logNormal(&"{wording} has up-to-date docs, filepaths, metadata, and tests!")
     else:
