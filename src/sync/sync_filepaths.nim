@@ -81,16 +81,9 @@ proc getFilePatterns(trackConfig: JsonNode, path: string): FilePatterns =
   else:
     logNormal(&"[error] file does not have a `files` key:\n{path}")
 
-type
-  CaseKind = enum
-    ckCamel, ckPascal
-
-func snakeToCamelOrPascal(s: string, caseKind: CaseKind): string =
+func snakeToCamelOrPascal(s: string, capitalizeFirstLetter: bool): string =
   result = newStringOfCap(s.len)
-  var capitalizeNext =
-    case caseKind
-    of ckCamel: false
-    of ckPascal: true
+  var capitalizeNext = capitalizeFirstLetter
   for c in s:
     if c == '_':
       capitalizeNext = true
@@ -98,11 +91,11 @@ func snakeToCamelOrPascal(s: string, caseKind: CaseKind): string =
       result.add(if capitalizeNext: toUpperAscii(c) else: c)
       capitalizeNext = false
 
-func snakeToCamel(s: string): string {.inline.} =
-  s.snakeToCamelOrPascal(ckCamel)
+func snakeToCamel(s: string): string =
+  snakeToCamelOrPascal(s, capitalizeFirstLetter = false)
 
-func snakeToPascal(s: string): string {.inline.} =
-  s.snakeToCamelOrPascal(ckPascal)
+func snakeToPascal(s: string): string =
+  snakeToCamelOrPascal(s, capitalizeFirstLetter = true)
 
 proc toFilenames(slug: string, patterns: seq[string]): JsonNode =
   # Returns a string corresponding to the `pattern`.
