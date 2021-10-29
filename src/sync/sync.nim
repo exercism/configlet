@@ -18,7 +18,7 @@ proc userSaysYes(syncKind: SyncKind): bool =
 
 proc update(configPairs: seq[PathAndUpdatedJson], conf: Conf,
             syncKind: SyncKind, seenUnsynced: var set[SyncKind]) =
-  assert syncKind in [skFilepaths, skMetadata]
+  assert syncKind in {skFilepaths, skMetadata}
   if configPairs.len > 0: # Implies that `--update` was passed.
     if conf.action.yes or userSaysYes(syncKind):
       for configPair in configPairs:
