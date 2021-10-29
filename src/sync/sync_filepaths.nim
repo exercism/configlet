@@ -36,6 +36,7 @@ proc handleField(files: JsonNode; fieldName, path: string;
         if f.kind == JString:
           let fStrVal = f.str
           if fStrVal.len > 0:
+            # TODO: Handle multiple placeholder patterns (present on `swift` track)
             if fStrVal.scanf("$*%{$+}$*", s1, s2, s3):
               const validPlaceholders = [
                 "snake_slug", "kebab_slug",
