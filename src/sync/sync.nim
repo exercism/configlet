@@ -84,7 +84,7 @@ proc sync*(conf: Conf) =
     quit(QuitFailure)
   else:
     if conf.action.scope == {SyncKind.low .. SyncKind.high}:
-      logNormal("All exercises are up to date!")
+      logNormal("Every exercise is up to date!")
     else:
       for syncKind in conf.action.scope:
         logNormal(&"All {syncKind} are up to date!")
