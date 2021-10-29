@@ -167,7 +167,7 @@ func genHelpText: string =
     optSyncOffline: "Do not check that the directory specified by " &
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
     optSyncUpdate: "Update unsynced docs, filepaths, metadata, and tests",
-    optSyncYes: "Auto-confirm every prompt",
+    optSyncYes: "Auto-confirm every prompt for updating docs, filepaths, and metadata",
     optSyncDocs: "Sync `.docs/introduction.md` and `.docs/instructions.md`",
     optSyncFilepaths: "Sync filepaths",
     optSyncMetadata: "Sync metadata",
