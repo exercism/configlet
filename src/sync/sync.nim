@@ -66,7 +66,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
 
-proc explain(syncKind: SyncKind): string =
+func explain(syncKind: SyncKind): string =
   case syncKind
   of skDocs: "have unsynced docs"
   of skFilepaths: "have unsynced filepaths"
