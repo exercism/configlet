@@ -55,12 +55,12 @@ proc testsForSync(binaryPath: static string) =
     # footerUnsyncedFilepaths = "[warn] some exercises have unsynced filepaths"
     footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
     footerUnsyncedTests = "[warn] some exercises are missing test cases"
-    docsBody = """
+    footerSyncedFilepaths = """
+      All filepaths are up to date!""".unindent()
+    bodyUnsyncedDocs = """
       [warn] hamming: instructions.md is unsynced
       [warn] yacht: instructions.md is unsynced""".unindent()
-    filepathsBody = """
-      All filepaths are up to date!""".unindent()
-    metadataBody = """
+    bodyUnsyncedMetadata = """
       [warn] acronym: metadata are unsynced
       [warn] armstrong-numbers: metadata are unsynced
       [warn] binary: metadata are unsynced
@@ -75,7 +75,7 @@ proc testsForSync(binaryPath: static string) =
       [warn] twelve-days: metadata are unsynced
       [warn] two-fer: metadata are unsynced
       [warn] yacht: metadata are unsynced""".unindent()
-    testsBody = """
+    bodyUnsyncedTests = """
       [warn] anagram: missing 1 test case
              - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
       [warn] diffie-hellman: missing 1 test case
@@ -130,7 +130,7 @@ proc testsForSync(binaryPath: static string) =
 
   suite "sync, without --update":
     const docsMetadataTests = &"{header}\n" &
-                              &"{docsBody}\n{metadataBody}\n{testsBody}\n" &
+                              &"{bodyUnsyncedDocs}\n{bodyUnsyncedMetadata}\n{bodyUnsyncedTests}\n" &
                               &"{footerUnsyncedDocs}\n{footerUnsyncedMetadata}\n{footerUnsyncedTests}\n"
 
     test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
@@ -158,7 +158,7 @@ proc testsForSync(binaryPath: static string) =
     test "--docs: with unsynced docs, prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
         {header}
-        {docsBody}
+        {bodyUnsyncedDocs}
         {footerUnsyncedDocs}
       """.unindent()
       execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
@@ -166,20 +166,20 @@ proc testsForSync(binaryPath: static string) =
     test "--filepaths: with synced filepaths, prints the expected output, and exits with 0":
       const expectedOutput = fmt"""
         {header}
-        {filepathsBody}
+        {footerSyncedFilepaths}
       """.unindent()
       execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
     test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
         {header}
-        {metadataBody}
+        {bodyUnsyncedMetadata}
         {footerUnsyncedMetadata}
       """.unindent()
       execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
 
     test "--tests: with unsynced tests, prints the expected output, and exits with 1":
-      const expectedOutput = &"{header}\n{testsBody}\n{footerUnsyncedTests}\n"
+      const expectedOutput = &"{header}\n{bodyUnsyncedTests}\n{footerUnsyncedTests}\n"
       execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
 
     test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
@@ -491,8 +491,8 @@ proc testsForSync(binaryPath: static string) =
     test "after updating only tests, a plain `sync` shows that only docs are unsynced, and exits with 1":
       const expectedOutput = fmt"""
         {header}
-        {docsBody}
-        {metadataBody}
+        {bodyUnsyncedDocs}
+        {bodyUnsyncedMetadata}
         {footerUnsyncedDocs}
         {footerUnsyncedMetadata}
       """.unindent()
