@@ -52,6 +52,34 @@ proc checkIntroduction(conf: Conf;
       logNormal(&"[error] {slug}: {introFilename} is missing")
       seenUnsynced.incl skDocs
 
+proc checkInstructions(conf: Conf;
+                       slug, trackDocsDir, psExerciseDir: string;
+                       seenUnsynced: var set[SyncKind];
+                       sdPairs: var seq[SourceDestPair]) =
+  # The track exercise must have a `.docs/instructions.md` file.
+  # Its contents should match those of the corresponding `instructions.md`
+  # file in problem-specifications (or `description.md` if that file
+  # doesn't exist).
+  let instrFilename = "instructions.md"
+  let trackInstrPath = trackDocsDir / instrFilename
+  if fileExists(trackInstrPath):
+    let descFilename = "description.md"
+    let psInstrPath = psExerciseDir / instrFilename
+    let psDescPath = psExerciseDir / descFilename
+    if fileExists(psInstrPath):
+      checkFilesIdenticalAfterHeader(psInstrPath, trackInstrPath, slug,
+                                     instrFilename, seenUnsynced, conf, sdPairs)
+    elif fileExists(psDescPath):
+      checkFilesIdenticalAfterHeader(psDescPath, trackInstrPath, slug,
+                                     instrFilename, seenUnsynced, conf, sdPairs)
+    else:
+      logNormal(&"[error] {slug}: does not have an upstream " &
+                &"{instrFilename} or {descFilename} file")
+      seenUnsynced.incl skDocs
+  else:
+    logNormal(&"[error] {slug}: {instrFilename} is missing")
+    seenUnsynced.incl skDocs
+
 proc checkDocs*(conf: Conf,
                 seenUnsynced: var set[SyncKind],
                 trackPracticeExercisesDir: string,
@@ -66,31 +94,8 @@ proc checkDocs*(conf: Conf,
       if dirExists(psExerciseDir):
         checkIntroduction(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
                           result)
-
-        # The track exercise must have a `.docs/instructions.md` file.
-        # Its contents should match those of the corresponding `instructions.md`
-        # file in problem-specifications (or `description.md` if that file
-        # doesn't exist).
-        let instrFilename = "instructions.md"
-        let trackInstrPath = trackDocsDir / instrFilename
-        if fileExists(trackInstrPath):
-          let descFilename = "description.md"
-          let psInstrPath = psExerciseDir / instrFilename
-          let psDescPath = psExerciseDir / descFilename
-          if fileExists(psInstrPath):
-            checkFilesIdenticalAfterHeader(psInstrPath, trackInstrPath, slug,
-                                           instrFilename, seenUnsynced, conf, result)
-          elif fileExists(psDescPath):
-            checkFilesIdenticalAfterHeader(psDescPath, trackInstrPath, slug,
-                                           instrFilename, seenUnsynced, conf, result)
-          else:
-            logNormal(&"[error] {slug}: does not have an upstream " &
-                      &"{instrFilename} or {descFilename} file")
-            seenUnsynced.incl skDocs
-        else:
-          logNormal(&"[error] {slug}: {instrFilename} is missing")
-          seenUnsynced.incl skDocs
-
+        checkInstructions(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
+                          result)
       else:
         logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
     else:
