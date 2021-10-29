@@ -41,7 +41,7 @@ proc checkIntroduction(conf: Conf;
                        sdPairs: var seq[SourceDestPair]) =
   # If the exercise in problem-specifications has an `introduction.md`
   # file, the track exercise must have a `.docs/introduction.md` file.
-  let introFilename = "introduction.md"
+  const introFilename = "introduction.md"
   let psIntroPath = psExerciseDir / introFilename
   if fileExists(psIntroPath):
     let trackIntroPath = trackDocsDir / introFilename
@@ -60,10 +60,10 @@ proc checkInstructions(conf: Conf;
   # Its contents should match those of the corresponding `instructions.md`
   # file in problem-specifications (or `description.md` if that file
   # doesn't exist).
-  let instrFilename = "instructions.md"
+  const instrFilename = "instructions.md"
   let trackInstrPath = trackDocsDir / instrFilename
   if fileExists(trackInstrPath):
-    let descFilename = "description.md"
+    const descFilename = "description.md"
     let psInstrPath = psExerciseDir / instrFilename
     let psDescPath = psExerciseDir / descFilename
     if fileExists(psInstrPath):

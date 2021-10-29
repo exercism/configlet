@@ -171,7 +171,7 @@ proc checkFilepathsForExercise(res: var seq[PathAndUpdatedJson], conf: Conf,
 proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
                      trackPracticeExercisesDir: string,
                      trackConceptExercisesDir: string): seq[PathAndUpdatedJson] =
-  let configFilename = "config.json"
+  const configFilename = "config.json"
   let trackConfigPath = conf.trackDir / configFilename
 
   if fileExists(trackConfigPath):
