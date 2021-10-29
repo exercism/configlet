@@ -51,12 +51,15 @@ proc testsForSync(binaryPath: static string) =
     syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
     header = "Checking exercises..."
+    headerUpdateTests = "Updating tests..."
     footerUnsyncedDocs = "[warn] some exercises have unsynced docs"
     # footerUnsyncedFilepaths = "[warn] some exercises have unsynced filepaths"
     footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
     footerUnsyncedTests = "[warn] some exercises are missing test cases"
     footerSyncedFilepaths = """
       All filepaths are up to date!""".unindent()
+    footerSyncedTests = """
+      All tests are up to date!""".unindent()
     bodyUnsyncedDocs = """
       [warn] hamming: instructions.md is unsynced
       [warn] yacht: instructions.md is unsynced""".unindent()
@@ -189,16 +192,16 @@ proc testsForSync(binaryPath: static string) =
     const
       expectedOutputAnagramInclude = fmt"""
         {header}
-        Updating tests...
+        {headerUpdateTests}
         [info] anagram: included 1 missing test case
-        All tests are up to date!
+        {footerSyncedTests}
       """.unindent()
 
       expectedOutputAnagramExclude = fmt"""
         {header}
-        Updating tests...
+        {headerUpdateTests}
         [info] anagram: excluded 1 missing test case
-        All tests are up to date!
+        {footerSyncedTests}
       """.unindent()
 
       testsTomlHeaderDiff = """
@@ -273,7 +276,7 @@ proc testsForSync(binaryPath: static string) =
     test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
       const expectedOutput = fmt"""
         {header}
-        Updating tests...
+        {headerUpdateTests}
         [info] anagram: included 1 missing test case
         [info] diffie-hellman: included 1 missing test case
         [info] grade-school: included 1 missing test case
@@ -284,7 +287,7 @@ proc testsForSync(binaryPath: static string) =
         [info] luhn: included 1 missing test case
         [info] prime-factors: included 5 missing test cases
         [info] react: included 14 missing test cases
-        All tests are up to date!
+        {footerSyncedTests}
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
@@ -483,8 +486,8 @@ proc testsForSync(binaryPath: static string) =
     test "after updating tests, another tests update using -mi performs no changes, and exits with 0":
       const expectedOutput = fmt"""
         {header}
-        Updating tests...
-        All tests are up to date!
+        {headerUpdateTests}
+        {footerSyncedTests}
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
