@@ -3,13 +3,6 @@ import ".."/[cli, logger]
 import "."/[exercises, probspecs, sync_docs, sync_filepaths, sync_metadata,
             sync_tests]
 
-proc explain(syncKind: SyncKind): string =
-  case syncKind
-  of skDocs: "have unsynced docs"
-  of skFilepaths: "have unsynced filepaths"
-  of skMetadata: "have unsynced metadata"
-  of skTests: "are missing test cases"
-
 proc userSaysYes(syncKind: SyncKind): bool =
   stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
   let resp = stdin.readLine().toLowerAscii()
@@ -72,6 +65,13 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   finally:
     if conf.action.probSpecsDir.len == 0:
       removeDir(probSpecsDir)
+
+proc explain(syncKind: SyncKind): string =
+  case syncKind
+  of skDocs: "have unsynced docs"
+  of skFilepaths: "have unsynced filepaths"
+  of skMetadata: "have unsynced metadata"
+  of skTests: "are missing test cases"
 
 proc sync*(conf: Conf) =
   logNormal("Checking exercises...")
