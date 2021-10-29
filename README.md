@@ -14,11 +14,16 @@ Commands:
   lint, sync, uuid, generate, info
 
 Options for sync:
-  -e, --exercise <slug>        Only sync this exercise
+  -e, --exercise <slug>        Only operate on this exercise
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
-  -u, --update                 Prompt the user to include, exclude, or skip any missing tests
+  -u, --update                 Update unsynced docs, filepaths, metadata, and tests
+  -y, --yes                    Auto-confirm every prompt for updating docs, filepaths, and metadata
+      --docs                   Sync `.docs/introduction.md` and `.docs/instructions.md`
+      --filepaths              Sync filepaths
+      --metadata               Sync metadata
+      --tests                  Sync tests
 
 Options for uuid:
   -n, --num <int>              Number of UUIDs to generate
