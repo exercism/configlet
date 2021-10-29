@@ -20,7 +20,12 @@ proc update(configPairs: seq[PathAndUpdatedJson], conf: Conf,
       seenUnsynced.excl syncKind
 
 proc syncImpl(conf: Conf): set[SyncKind] =
-  let probSpecsDir = initProbSpecsDir(conf)
+  # Don't clone problem-specifications if only `--filepaths` is given
+  let probSpecsDir =
+    if conf.action.scope == {skFilepaths}:
+      ProbSpecsDir("not-a-real-directory")
+    else:
+      initProbSpecsDir(conf)
   try:
     let exercises = toSeq findExercises(conf, probSpecsDir)
     let psExercisesDir = probSpecsDir / "exercises"
@@ -63,7 +68,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
           checkTests(exercises, result)
 
   finally:
-    if conf.action.probSpecsDir.len == 0:
+    if conf.action.probSpecsDir.len == 0 and conf.action.scope != {skFilepaths}:
       removeDir(probSpecsDir)
 
 func explain(syncKind: SyncKind): string =
