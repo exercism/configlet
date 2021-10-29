@@ -41,7 +41,7 @@ proc sync*(conf: Conf) =
 
     for syncKind in conf.action.scope:
       case syncKind
-      # Check/sync docs
+      # Check/update docs
       of skDocs:
         let sdPairs = checkDocs(conf, seenUnsynced, trackPracticeExercisesDir,
                                 exercises, psExercisesDir)
@@ -54,19 +54,19 @@ proc sync*(conf: Conf) =
               copyFile(sdPair.source, sdPair.dest)
             seenUnsynced.excl syncKind
 
-      # Check/sync filepaths
+      # Check/update filepaths
       of skFilepaths:
         let configPairs = checkFilepaths(conf, seenUnsynced, trackPracticeExercisesDir,
                                          trackConceptExercisesDir)
         update(configPairs, conf, syncKind, seenUnsynced)
 
-      # Check/sync metadata
+      # Check/update metadata
       of skMetadata:
         let configPairs = checkMetadata(conf, seenUnsynced, trackPracticeExercisesDir,
                                         exercises, psExercisesDir)
         update(configPairs, conf, syncKind, seenUnsynced)
 
-      # Check/sync tests
+      # Check/update tests
       of skTests:
         if conf.action.update:
           updateTests(exercises, conf, seenUnsynced)
