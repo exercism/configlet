@@ -160,7 +160,7 @@ func genHelpText: string =
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
-    optSyncExercise: "Only sync this exercise",
+    optSyncExercise: "Only operate on this exercise",
     optSyncMode: &"What to do with missing test cases. {allowedValues(Mode)}",
     optSyncProbSpecsDir: "Use this `problem-specifications` directory, " &
                          "rather than cloning temporarily",
