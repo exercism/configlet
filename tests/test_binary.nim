@@ -45,116 +45,157 @@ proc testsForSync(binaryPath: static string) =
   setupExercismRepo("nim", trackDir,
                     "6e909c9e5338cd567c20224069df00e031fb2efa")
 
-  const syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
-  const syncOfflineUpdate = &"{syncOffline} --update"
-  const syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
+  const
+    syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
+    syncOfflineUpdate = &"{syncOffline} --update"
+    syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
+
+    header = "Checking exercises..."
+    docsFooter = "[warn] some exercises have unsynced docs"
+    # filepathsFooter = "[warn] some exercises have unsynced filepaths"
+    metadataFooter = "[warn] some exercises have unsynced metadata"
+    testsFooter = "[warn] some exercises are missing test cases"
+    docsBody = """
+      [warn] hamming: instructions.md is unsynced
+      [warn] yacht: instructions.md is unsynced""".unindent()
+    filepathsBody = """
+      All filepaths are up to date!""".unindent()
+    metadataBody = """
+      [warn] acronym: metadata are unsynced
+      [warn] armstrong-numbers: metadata are unsynced
+      [warn] binary: metadata are unsynced
+      [warn] collatz-conjecture: metadata are unsynced
+      [warn] darts: metadata are unsynced
+      [warn] grade-school: metadata are unsynced
+      [warn] hello-world: metadata are unsynced
+      [warn] high-scores: metadata are unsynced
+      [warn] resistor-color: metadata are unsynced
+      [warn] reverse-string: metadata are unsynced
+      [warn] scale-generator: metadata are unsynced
+      [warn] twelve-days: metadata are unsynced
+      [warn] two-fer: metadata are unsynced
+      [warn] yacht: metadata are unsynced""".unindent()
+    testsBody = """
+      [warn] anagram: missing 1 test case
+             - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
+      [warn] diffie-hellman: missing 1 test case
+             - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
+      [warn] grade-school: missing 1 test case
+             - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
+      [warn] hamming: missing 6 test cases
+             - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
+             - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
+             - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
+             - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
+             - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
+             - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
+      [warn] high-scores: missing 2 test cases
+             - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
+             - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
+      [warn] isogram: missing 1 test case
+             - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+      [warn] kindergarten-garden: missing 8 test cases
+             - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
+             - full garden -> for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
+             - full garden -> for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
+             - full garden -> for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
+             - full garden -> for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
+             - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
+             - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
+             - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
+      [warn] luhn: missing 1 test case
+             - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
+      [warn] prime-factors: missing 5 test cases
+             - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
+             - product of first prime (756949d3-3158-4e3d-91f2-c4f9f043ee70)
+             - product of second prime (7d6a3300-a4cb-4065-bd33-0ced1de6cb44)
+             - product of third prime (073ac0b2-c915-4362-929d-fc45f7b9a9e4)
+             - product of first and second prime (6e0e4912-7fb6-47f3-a9ad-dbcd79340c75)
+      [warn] react: missing 14 test cases
+             - input cells have a value (c51ee736-d001-4f30-88d1-0c8e8b43cd07)
+             - an input cell's value can be set (dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851)
+             - compute cells calculate initial value (5854b975-f545-4f93-8968-cc324cde746e)
+             - compute cells take inputs in the right order (25795a3d-b86c-4e91-abe7-1c340e71560c)
+             - compute cells update value when dependencies are changed (c62689bf-7be5-41bb-b9f8-65178ef3e8ba)
+             - compute cells can depend on other compute cells (5ff36b09-0a88-48d4-b7f8-69dcf3feea40)
+             - compute cells fire callbacks (abe33eaf-68ad-42a5-b728-05519ca88d2d)
+             - callback cells only fire on change (9e5cb3a4-78e5-4290-80f8-a78612c52db2)
+             - callbacks do not report already reported values (ada17cb6-7332-448a-b934-e3d7495c13d3)
+             - callbacks can fire from multiple cells (ac271900-ea5c-461c-9add-eeebcb8c03e5)
+             - callbacks can be added and removed (95a82dcc-8280-4de3-a4cd-4f19a84e3d6f)
+             - removing a callback multiple times doesn't interfere with other callbacks (f2a7b445-f783-4e0e-8393-469ab4915f2a)
+             - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
+             - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)""".dedent(6)
+    # Note: `dedent` above, not `unindent`. We want to preserve the indentation of the list items.
 
   suite "sync, without --update":
-    test "multiple exercises with missing test cases: prints the expected output, and exits with 1":
-      const expectedOutput = """
-        Checking exercises...
-        [warn] hamming: instructions.md is unsynced
-        [warn] yacht: instructions.md is unsynced
-        [warn] acronym: metadata are unsynced
-        [warn] armstrong-numbers: metadata are unsynced
-        [warn] binary: metadata are unsynced
-        [warn] collatz-conjecture: metadata are unsynced
-        [warn] darts: metadata are unsynced
-        [warn] grade-school: metadata are unsynced
-        [warn] hello-world: metadata are unsynced
-        [warn] high-scores: metadata are unsynced
-        [warn] resistor-color: metadata are unsynced
-        [warn] reverse-string: metadata are unsynced
-        [warn] scale-generator: metadata are unsynced
-        [warn] twelve-days: metadata are unsynced
-        [warn] two-fer: metadata are unsynced
-        [warn] yacht: metadata are unsynced
-        [warn] anagram: missing 1 test case
-               - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-        [warn] diffie-hellman: missing 1 test case
-               - can calculate public key when given a different private key (0d25f8d7-4897-4338-a033-2d3d7a9af688)
-        [warn] grade-school: missing 1 test case
-               - A student can't be in two different grades (c125dab7-2a53-492f-a99a-56ad511940d8)
-        [warn] hamming: missing 6 test cases
-               - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
-               - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
-               - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
-               - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
-               - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
-               - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
-        [warn] high-scores: missing 2 test cases
-               - Top 3 scores -> Latest score after personal top scores (2df075f9-fec9-4756-8f40-98c52a11504f)
-               - Top 3 scores -> Scores after personal top scores (809c4058-7eb1-4206-b01e-79238b9b71bc)
-        [warn] isogram: missing 1 test case
-               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
-        [warn] kindergarten-garden: missing 8 test cases
-               - full garden -> for Charlie (566b621b-f18e-4c5f-873e-be30544b838c)
-               - full garden -> for David (3ad3df57-dd98-46fc-9269-1877abf612aa)
-               - full garden -> for Eve (0f0a55d1-9710-46ed-a0eb-399ba8c72db2)
-               - full garden -> for Fred (a7e80c90-b140-4ea1-aee3-f4625365c9a4)
-               - full garden -> for Ginny (9d94b273-2933-471b-86e8-dba68694c615)
-               - full garden -> for Harriet (f55bc6c2-ade8-4844-87c4-87196f1b7258)
-               - full garden -> for Ileana (759070a3-1bb1-4dd4-be2c-7cce1d7679ae)
-               - full garden -> for Joseph (78578123-2755-4d4a-9c7d-e985b8dda1c6)
-        [warn] luhn: missing 1 test case
-               - non-numeric, non-space char in the middle with a sum that's divisible by 10 isn't allowed (8b72ad26-c8be-49a2-b99c-bcc3bf631b33)
-        [warn] prime-factors: missing 5 test cases
-               - another prime number (238d57c8-4c12-42ef-af34-ae4929f94789)
-               - product of first prime (756949d3-3158-4e3d-91f2-c4f9f043ee70)
-               - product of second prime (7d6a3300-a4cb-4065-bd33-0ced1de6cb44)
-               - product of third prime (073ac0b2-c915-4362-929d-fc45f7b9a9e4)
-               - product of first and second prime (6e0e4912-7fb6-47f3-a9ad-dbcd79340c75)
-        [warn] react: missing 14 test cases
-               - input cells have a value (c51ee736-d001-4f30-88d1-0c8e8b43cd07)
-               - an input cell's value can be set (dedf0fe0-da0c-4d5d-a582-ffaf5f4d0851)
-               - compute cells calculate initial value (5854b975-f545-4f93-8968-cc324cde746e)
-               - compute cells take inputs in the right order (25795a3d-b86c-4e91-abe7-1c340e71560c)
-               - compute cells update value when dependencies are changed (c62689bf-7be5-41bb-b9f8-65178ef3e8ba)
-               - compute cells can depend on other compute cells (5ff36b09-0a88-48d4-b7f8-69dcf3feea40)
-               - compute cells fire callbacks (abe33eaf-68ad-42a5-b728-05519ca88d2d)
-               - callback cells only fire on change (9e5cb3a4-78e5-4290-80f8-a78612c52db2)
-               - callbacks do not report already reported values (ada17cb6-7332-448a-b934-e3d7495c13d3)
-               - callbacks can fire from multiple cells (ac271900-ea5c-461c-9add-eeebcb8c03e5)
-               - callbacks can be added and removed (95a82dcc-8280-4de3-a4cd-4f19a84e3d6f)
-               - removing a callback multiple times doesn't interfere with other callbacks (f2a7b445-f783-4e0e-8393-469ab4915f2a)
-               - callbacks should only be called once even if multiple dependencies change (daf6feca-09e0-4ce5-801d-770ddfe1c268)
-               - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)
-        [warn] some exercises have unsynced docs
-        [warn] some exercises have unsynced metadata
-        [warn] some exercises are missing test cases
-      """.dedent(8) # Not `unindent`. We want to preserve the indentation of the list items.
-      execAndCheck(1, syncOffline, expectedOutput)
+    const docsMetadataTests = &"{header}\n" &
+                              &"{docsBody}\n{metadataBody}\n{testsBody}\n" &
+                              &"{docsFooter}\n{metadataFooter}\n{testsFooter}\n"
 
-    test "a given exercise with a missing test case: prints the expected output, and exits with 1":
-      const expectedOutput = """
-        Checking exercises...
+    test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
+      execAndCheck(1, syncOffline, docsMetadataTests)
+
+    test "no scope: a given exercise with a missing test case: prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {header}
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-        [warn] some exercises are missing test cases
+        {testsFooter}
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e anagram", expectedOutput)
 
-    test "when passing multiple exercises, only the final exercise is acted upon":
+    test "no scope: when passing multiple exercises, only the final exercise is acted upon":
       # TODO: configlet should either print a warning here, or support multiple exercises being passed.
-      const expectedOutput = """
-        Checking exercises...
+      const expectedOutput = fmt"""
+        {header}
         [warn] isogram: missing 1 test case
                - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
-        [warn] some exercises are missing test cases
+        {testsFooter}
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e grade-school -e isogram", expectedOutput)
 
+    test "--docs: with unsynced docs, prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {header}
+        {docsBody}
+        {docsFooter}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
+
+    test "--filepaths: with synced filepaths, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        {filepathsBody}
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
+
+    test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {header}
+        {metadataBody}
+        {metadataFooter}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
+
+    test "--tests: with unsynced tests, prints the expected output, and exits with 1":
+      const expectedOutput = &"{header}\n{testsBody}\n{testsFooter}\n"
+      execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
+
+    test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
+      execAndCheck(1, &"{syncOffline} --docs --metadata --tests", docsMetadataTests)
+
   suite "sync, with --update":
     const
-      expectedOutputAnagramInclude = """
-        Checking exercises...
+      expectedOutputAnagramInclude = fmt"""
+        {header}
         Updating tests...
         [info] anagram: included 1 missing test case
         All tests are up to date!
       """.unindent()
 
-      expectedOutputAnagramExclude = """
-        Checking exercises...
+      expectedOutputAnagramExclude = fmt"""
+        {header}
         Updating tests...
         [info] anagram: excluded 1 missing test case
         All tests are up to date!
@@ -230,8 +271,8 @@ proc testsForSync(binaryPath: static string) =
     testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
     test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
-      const expectedOutput = """
-        Checking exercises...
+      const expectedOutput = fmt"""
+        {header}
         Updating tests...
         [info] anagram: included 1 missing test case
         [info] diffie-hellman: included 1 missing test case
@@ -440,34 +481,20 @@ proc testsForSync(binaryPath: static string) =
       check diff == expectedDiffOutput
 
     test "after updating tests, another tests update using -mi performs no changes, and exits with 0":
-      const expectedOutput = """
-        Checking exercises...
+      const expectedOutput = fmt"""
+        {header}
         Updating tests...
         All tests are up to date!
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
     test "after updating only tests, a plain `sync` shows that only docs are unsynced, and exits with 1":
-      const expectedOutput = """
-        Checking exercises...
-        [warn] hamming: instructions.md is unsynced
-        [warn] yacht: instructions.md is unsynced
-        [warn] acronym: metadata are unsynced
-        [warn] armstrong-numbers: metadata are unsynced
-        [warn] binary: metadata are unsynced
-        [warn] collatz-conjecture: metadata are unsynced
-        [warn] darts: metadata are unsynced
-        [warn] grade-school: metadata are unsynced
-        [warn] hello-world: metadata are unsynced
-        [warn] high-scores: metadata are unsynced
-        [warn] resistor-color: metadata are unsynced
-        [warn] reverse-string: metadata are unsynced
-        [warn] scale-generator: metadata are unsynced
-        [warn] twelve-days: metadata are unsynced
-        [warn] two-fer: metadata are unsynced
-        [warn] yacht: metadata are unsynced
-        [warn] some exercises have unsynced docs
-        [warn] some exercises have unsynced metadata
+      const expectedOutput = fmt"""
+        {header}
+        {docsBody}
+        {metadataBody}
+        {docsFooter}
+        {metadataFooter}
       """.unindent()
       execAndCheck(1, syncOffline, expectedOutput)
 
