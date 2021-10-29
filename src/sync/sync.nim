@@ -93,5 +93,5 @@ proc sync*(conf: Conf) =
       logNormal(&"{wording} has up-to-date docs, filepaths, metadata, and tests!")
     else:
       for syncKind in conf.action.scope:
-        logNormal(&"All {syncKind} are up to date!")
+        logNormal(&"{wording} has up-to-date {syncKind}!")
     quit(QuitSuccess)

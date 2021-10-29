@@ -57,9 +57,9 @@ proc testsForSync(binaryPath: static string) =
     footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
     footerUnsyncedTests = "[warn] some exercises are missing test cases"
     footerSyncedFilepaths = """
-      All filepaths are up to date!""".unindent()
+      Every Practice Exercise has up-to-date filepaths!""".unindent()
     footerSyncedTests = """
-      All tests are up to date!""".unindent()
+      Every Practice Exercise has up-to-date tests!""".unindent()
     bodyUnsyncedDocs = """
       [warn] hamming: instructions.md is unsynced
       [warn] yacht: instructions.md is unsynced""".unindent()
@@ -194,14 +194,14 @@ proc testsForSync(binaryPath: static string) =
         {header}
         {headerUpdateTests}
         [info] anagram: included 1 missing test case
-        {footerSyncedTests}
+        The `anagram` Practice Exercise has up-to-date tests!
       """.unindent()
 
       expectedOutputAnagramExclude = fmt"""
         {header}
         {headerUpdateTests}
         [info] anagram: excluded 1 missing test case
-        {footerSyncedTests}
+        The `anagram` Practice Exercise has up-to-date tests!
       """.unindent()
 
       testsTomlHeaderDiff = """
