@@ -2,12 +2,30 @@ import std/[algorithm, json, os, sets, strformat, strscans, strutils]
 import ".."/[cli, logger]
 
 type
-  FilePatterns = object
-    solution: seq[string]
-    test: seq[string]
-    example: seq[string]
-    exemplar: seq[string]
-    editor: seq[string]
+  ExerciseKind = enum
+    ekConcept = "concept"
+    ekPractice = "practice"
+
+proc getExerciseSlugs(trackConfig: JsonNode, path: string,
+                      exerciseKind: ExerciseKind): seq[string] =
+  ## Returns a seq of the Concept Exercise slugs in `j`, in alphabetical order.
+  if trackConfig.hasKey("exercises"):
+    let exercises = trackConfig["exercises"]
+    let ekStr = $exerciseKind
+    if exercises.hasKey(ekStr):
+      let e = exercises[ekStr]
+      result = newSeqOfCap[string](e.len)
+
+      for exercise in e:
+        if exercise.hasKey("slug"):
+          if exercise["slug"].kind == JString:
+            let slug = exercise["slug"].str
+            result.add slug
+  else:
+    stderr.writeLine &"Error: file does not have an `exercises` key:\n{path}"
+    quit(1)
+
+  sort result
 
 proc handleField(files: JsonNode; fieldName, path: string; s1, s2, s3: var string): seq[string] =
   let key = fieldName
@@ -44,6 +62,14 @@ proc handleField(files: JsonNode; fieldName, path: string; s1, s2, s3: var strin
       stderr.writeLine &"Error: value of `files.{key}` is not an array: {files[key]}:\n{path}"
       quit(1)
 
+type
+  FilePatterns = object
+    solution: seq[string]
+    test: seq[string]
+    example: seq[string]
+    exemplar: seq[string]
+    editor: seq[string]
+
 proc getFilePatterns(trackConfig: JsonNode, path: string): FilePatterns =
   if trackConfig.hasKey("files"):
     let files = trackConfig["files"]
@@ -54,32 +80,6 @@ proc getFilePatterns(trackConfig: JsonNode, path: string): FilePatterns =
         fieldVal = handleField(files, fieldName, path, s1, s2, s3)
   else:
     logNormal(&"[error] file does not have a `files` key:\n{path}")
-
-type
-  ExerciseKind = enum
-    ekConcept = "concept"
-    ekPractice = "practice"
-
-proc getExerciseSlugs(trackConfig: JsonNode, path: string,
-                      exerciseKind: ExerciseKind): seq[string] =
-  ## Returns a seq of the Concept Exercise slugs in `j`, in alphabetical order.
-  if trackConfig.hasKey("exercises"):
-    let exercises = trackConfig["exercises"]
-    let ekStr = $exerciseKind
-    if exercises.hasKey(ekStr):
-      let e = exercises[ekStr]
-      result = newSeqOfCap[string](e.len)
-
-      for exercise in e:
-        if exercise.hasKey("slug"):
-          if exercise["slug"].kind == JString:
-            let slug = exercise["slug"].str
-            result.add slug
-  else:
-    stderr.writeLine &"Error: file does not have an `exercises` key:\n{path}"
-    quit(1)
-
-  sort result
 
 type
   CaseKind = enum
