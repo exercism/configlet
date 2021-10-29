@@ -51,10 +51,10 @@ proc testsForSync(binaryPath: static string) =
     syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
     header = "Checking exercises..."
-    docsFooter = "[warn] some exercises have unsynced docs"
-    # filepathsFooter = "[warn] some exercises have unsynced filepaths"
-    metadataFooter = "[warn] some exercises have unsynced metadata"
-    testsFooter = "[warn] some exercises are missing test cases"
+    footerUnsyncedDocs = "[warn] some exercises have unsynced docs"
+    # footerUnsyncedFilepaths = "[warn] some exercises have unsynced filepaths"
+    footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
+    footerUnsyncedTests = "[warn] some exercises are missing test cases"
     docsBody = """
       [warn] hamming: instructions.md is unsynced
       [warn] yacht: instructions.md is unsynced""".unindent()
@@ -131,7 +131,7 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, without --update":
     const docsMetadataTests = &"{header}\n" &
                               &"{docsBody}\n{metadataBody}\n{testsBody}\n" &
-                              &"{docsFooter}\n{metadataFooter}\n{testsFooter}\n"
+                              &"{footerUnsyncedDocs}\n{footerUnsyncedMetadata}\n{footerUnsyncedTests}\n"
 
     test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
       execAndCheck(1, syncOffline, docsMetadataTests)
@@ -141,7 +141,7 @@ proc testsForSync(binaryPath: static string) =
         {header}
         [warn] anagram: missing 1 test case
                - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-        {testsFooter}
+        {footerUnsyncedTests}
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e anagram", expectedOutput)
 
@@ -151,7 +151,7 @@ proc testsForSync(binaryPath: static string) =
         {header}
         [warn] isogram: missing 1 test case
                - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
-        {testsFooter}
+        {footerUnsyncedTests}
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e grade-school -e isogram", expectedOutput)
 
@@ -159,7 +159,7 @@ proc testsForSync(binaryPath: static string) =
       const expectedOutput = fmt"""
         {header}
         {docsBody}
-        {docsFooter}
+        {footerUnsyncedDocs}
       """.unindent()
       execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
 
@@ -174,12 +174,12 @@ proc testsForSync(binaryPath: static string) =
       const expectedOutput = fmt"""
         {header}
         {metadataBody}
-        {metadataFooter}
+        {footerUnsyncedMetadata}
       """.unindent()
       execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
 
     test "--tests: with unsynced tests, prints the expected output, and exits with 1":
-      const expectedOutput = &"{header}\n{testsBody}\n{testsFooter}\n"
+      const expectedOutput = &"{header}\n{testsBody}\n{footerUnsyncedTests}\n"
       execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
 
     test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
@@ -493,8 +493,8 @@ proc testsForSync(binaryPath: static string) =
         {header}
         {docsBody}
         {metadataBody}
-        {docsFooter}
-        {metadataFooter}
+        {footerUnsyncedDocs}
+        {footerUnsyncedMetadata}
       """.unindent()
       execAndCheck(1, syncOffline, expectedOutput)
 
