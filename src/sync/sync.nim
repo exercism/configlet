@@ -83,8 +83,14 @@ proc sync*(conf: Conf) =
       logNormal(&"[warn] some exercises {explain(syncKind)}")
     quit(QuitFailure)
   else:
+    let userExercise = conf.action.exercise
+    let wording =
+      if userExercise.len > 0:
+        &"The `{userExercise}` Practice Exercise"
+      else:
+        "Every exercise"
     if conf.action.scope == {SyncKind.low .. SyncKind.high}:
-      logNormal("Every exercise has up-to-date docs, filepaths, metadata, and tests!")
+      logNormal(&"{wording} has up-to-date docs, filepaths, metadata, and tests!")
     else:
       for syncKind in conf.action.scope:
         logNormal(&"All {syncKind} are up to date!")
