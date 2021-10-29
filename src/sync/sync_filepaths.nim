@@ -177,8 +177,6 @@ proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
   if fileExists(trackConfigPath):
     let trackConfig = json.parseFile(trackConfigPath)
 
-    let filePatterns = getFilePatterns(trackConfig, trackConfigPath)
-
     for exerciseKind in [ekConcept, ekPractice]:
       let slugs =
         case exerciseKind
@@ -194,6 +192,7 @@ proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
 
         if dirExists(trackMetaDir):
           let trackExerciseConfigPath = trackMetaDir / configFilename
+          let filePatterns = getFilePatterns(trackConfig, trackConfigPath)
           if not checkFilepathsForExercise(result, conf, exerciseKind, slug,
                                            trackExerciseConfigPath, filePatterns):
             seenUnsynced.incl skFilepaths
