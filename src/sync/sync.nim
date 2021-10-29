@@ -25,7 +25,6 @@ proc syncImpl(conf: Conf): set[SyncKind] =
     let exercises = toSeq findExercises(conf, probSpecsDir)
     let psExercisesDir = probSpecsDir / "exercises"
     let trackExercisesDir = conf.trackDir / "exercises"
-    let trackConceptExercisesDir = trackExercisesDir / "concept"
     let trackPracticeExercisesDir = trackExercisesDir / "practice"
 
     for syncKind in conf.action.scope:
@@ -45,6 +44,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
 
       # Check/update filepaths
       of skFilepaths:
+        let trackConceptExercisesDir = trackExercisesDir / "concept"
         let configPairs = checkFilepaths(conf, result, trackPracticeExercisesDir,
                                          trackConceptExercisesDir)
         update(configPairs, conf, syncKind, result)
