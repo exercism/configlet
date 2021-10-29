@@ -27,7 +27,8 @@ proc getExerciseSlugs(trackConfig: JsonNode, path: string,
 
   sort result
 
-proc handleField(files: JsonNode; fieldName, path: string; s1, s2, s3: var string): seq[string] =
+proc handleField(files: JsonNode; fieldName, path: string;
+                 s1, s2, s3: var string): seq[string] =
   let key = fieldName
   if files.hasKey(key):
     if files[key].kind == JArray:
@@ -40,26 +41,32 @@ proc handleField(files: JsonNode; fieldName, path: string; s1, s2, s3: var strin
                 "snake_slug", "kebab_slug",
                 "camel_slug", "pascal_slug"].toHashSet()
               if s1.len > 0 and s1[0] == '/':
-                let msg = &"Error: `files.{key}` contains non-relative pattern: `{fStrVal}`:\n{path}"
+                let msg = &"Error: `files.{key}` contains non-relative pattern: " &
+                          &"`{fStrVal}`:\n{path}"
                 stderr.writeLine msg
                 quit(1)
               else:
                 if s2 in validPlaceholders:
                   result.add fStrVal
                 else:
-                  let msg = &"Error: `files.{key}` contains invalid pattern: `{fStrVal}`:\n{path}"
+                  let msg = &"Error: `files.{key}` contains invalid pattern: " &
+                            &"`{fStrVal}`:\n{path}"
                   stderr.writeLine msg
                   quit(1)
             else:
               result.add fStrVal
           else:
-            stderr.writeLine &"Error: `files.{key}` contains empty string:\n{path}"
+            let msg = &"Error: `files.{key}` contains empty string:\n{path}"
+            stderr.writeLine msg
             quit(1)
         else:
-          stderr.writeLine &"Error: `files.{key}` contains a non-string: `{f}`:\n{path}"
+          let msg = &"Error: `files.{key}` contains a non-string: `{f}`:\n{path}"
+          stderr.writeLine msg
           quit(1)
     else:
-      stderr.writeLine &"Error: value of `files.{key}` is not an array: {files[key]}:\n{path}"
+      let msg = &"Error: value of `files.{key}` is not an array: " &
+                &"{files[key]}:\n{path}"
+      stderr.writeLine msg
       quit(1)
 
 type
