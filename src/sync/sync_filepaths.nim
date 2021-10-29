@@ -98,7 +98,7 @@ func snakeToPascal(s: string): string =
   snakeToCamelOrPascal(s, capitalizeFirstLetter = true)
 
 proc toFilenames(slug: string, patterns: seq[string]): JsonNode =
-  # Returns a string corresponding to the `pattern`.
+  # Returns a `JArray` of `JString` corresponding to the `patterns`.
   result = newJArray()
   for pattern in patterns:
     result.add pattern.multiReplace(
