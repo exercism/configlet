@@ -9,8 +9,9 @@ proc userSaysYes(syncKind: SyncKind): bool =
   if resp == "y" or resp == "yes":
     result = true
 
-proc update(configPairs: seq[PathAndUpdatedJson], conf: Conf,
-            syncKind: SyncKind, seenUnsynced: var set[SyncKind]) =
+proc updateFilepathsOrMetadata(configPairs: seq[PathAndUpdatedJson], conf: Conf,
+                               syncKind: SyncKind,
+                               seenUnsynced: var set[SyncKind]) =
   assert syncKind in {skFilepaths, skMetadata}
   if configPairs.len > 0: # Implies that `--update` was passed.
     if conf.action.yes or userSaysYes(syncKind):
@@ -52,13 +53,13 @@ proc syncImpl(conf: Conf): set[SyncKind] =
         let trackConceptExercisesDir = trackExercisesDir / "concept"
         let configPairs = checkFilepaths(conf, result, trackPracticeExercisesDir,
                                          trackConceptExercisesDir)
-        update(configPairs, conf, syncKind, result)
+        updateFilepathsOrMetadata(configPairs, conf, syncKind, result)
 
       # Check/update metadata
       of skMetadata:
         let configPairs = checkMetadata(conf, result, trackPracticeExercisesDir,
                                         exercises, psExercisesDir)
-        update(configPairs, conf, syncKind, result)
+        updateFilepathsOrMetadata(configPairs, conf, syncKind, result)
 
       # Check/update tests
       of skTests:
