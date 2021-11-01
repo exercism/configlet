@@ -77,7 +77,7 @@ proc checkInstructions(conf: Conf;
                 &"{instrFilename} or {descFilename} file")
       seenUnsynced.incl skDocs
   else:
-    logNormal(&"[error] {slug}: {instrFilename} is missing")
+    logNormal(&"[warn] {slug}: {instrFilename} is missing")
     seenUnsynced.incl skDocs
 
 proc checkDocs*(conf: Conf;
@@ -89,15 +89,16 @@ proc checkDocs*(conf: Conf;
     let slug = exercise.slug.string
     let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
 
-    if dirExists(trackDocsDir):
-      let psExerciseDir = psExercisesDir / slug
-      if dirExists(psExerciseDir):
-        checkIntroduction(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
-                          result)
-        checkInstructions(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
-                          result)
-      else:
-        logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
-    else:
-      logNormal(&"[error] {slug}: .docs dir missing")
+    if not dirExists(trackDocsDir):
+      if conf.action.update:
+        createDir(trackDocsDir)
       seenUnsynced.incl skDocs
+
+    let psExerciseDir = psExercisesDir / slug
+    if dirExists(psExerciseDir):
+      checkIntroduction(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
+                        result)
+      checkInstructions(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
+                        result)
+    else:
+      logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
