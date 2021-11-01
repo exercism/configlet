@@ -1,6 +1,6 @@
 import std/[os, strformat]
 import ".."/[cli, logger]
-import "."/exercises
+import "."/[exercises, sync_common]
 
 proc contentsAfterFirstHeader(path: string): string =
   result = newStringOfCap(getFileSize(path))
@@ -16,14 +16,13 @@ proc contentsAfterFirstHeader(path: string): string =
       result.add '\n'
 
 type
-  SourceDestPair* = object
-    source*: string
-    dest*: string
+  SourceDestPair = object
+    source: string
+    dest: string
 
-proc checkFilesIdenticalAfterHeader(source, dest, slug, filename: string;
-                                    seenUnsynced: var set[SyncKind];
-                                    conf: Conf;
-                                    sdPairs: var seq[SourceDestPair]) =
+proc addPairIfNonIdenticalAfterHeader(sdPairs: var seq[SourceDestPair],
+                                      source, dest, slug, filename: string;
+                                      seenUnsynced: var set[SyncKind]) =
   ## Prints a message that describes whether the files at `source` and `dest`
   ## have identical contents.
   # TODO: Optimize this.
@@ -32,13 +31,11 @@ proc checkFilesIdenticalAfterHeader(source, dest, slug, filename: string;
   else:
     logNormal(&"[warn] {slug}: {filename} is unsynced")
     seenUnsynced.incl skDocs
-    if conf.action.update:
-      sdPairs.add SourceDestPair(source: source, dest: dest)
+    sdPairs.add SourceDestPair(source: source, dest: dest)
 
-proc checkIntroduction(conf: Conf;
-                       slug, trackDocsDir, psExerciseDir: string;
-                       seenUnsynced: var set[SyncKind];
-                       sdPairs: var seq[SourceDestPair]) =
+proc addUnsyncedIntroductionPaths(sdPairs: var seq[SourceDestPair];
+                                  slug, trackDocsDir, psExerciseDir: string;
+                                  seenUnsynced: var set[SyncKind]) =
   # If the exercise in problem-specifications has an `introduction.md`
   # file, the track exercise must have a `.docs/introduction.md` file.
   const introFilename = "introduction.md"
@@ -46,16 +43,15 @@ proc checkIntroduction(conf: Conf;
   if fileExists(psIntroPath):
     let trackIntroPath = trackDocsDir / introFilename
     if fileExists(trackIntroPath):
-      checkFilesIdenticalAfterHeader(psIntroPath, trackIntroPath, slug,
-                                     introFilename, seenUnsynced, conf, sdPairs)
+      addPairIfNonIdenticalAfterHeader(sdPairs, psIntroPath, trackIntroPath,
+                                       slug, introFilename, seenUnsynced)
     else:
       logNormal(&"[error] {slug}: {introFilename} is missing")
       seenUnsynced.incl skDocs
 
-proc checkInstructions(conf: Conf;
-                       slug, trackDocsDir, psExerciseDir: string;
-                       seenUnsynced: var set[SyncKind];
-                       sdPairs: var seq[SourceDestPair]) =
+proc addUnsyncedInstructionsPaths(sdPairs: var seq[SourceDestPair];
+                                  slug, trackDocsDir, psExerciseDir: string;
+                                  seenUnsynced: var set[SyncKind]) =
   # The track exercise must have a `.docs/instructions.md` file.
   # Its contents should match those of the corresponding `instructions.md`
   # file in problem-specifications (or `description.md` if that file
@@ -67,11 +63,11 @@ proc checkInstructions(conf: Conf;
     let psInstrPath = psExerciseDir / instrFilename
     let psDescPath = psExerciseDir / descFilename
     if fileExists(psInstrPath):
-      checkFilesIdenticalAfterHeader(psInstrPath, trackInstrPath, slug,
-                                     instrFilename, seenUnsynced, conf, sdPairs)
+      addPairIfNonIdenticalAfterHeader(sdPairs, psInstrPath, trackInstrPath,
+                                       slug, instrFilename, seenUnsynced)
     elif fileExists(psDescPath):
-      checkFilesIdenticalAfterHeader(psDescPath, trackInstrPath, slug,
-                                     instrFilename, seenUnsynced, conf, sdPairs)
+      addPairIfNonIdenticalAfterHeader(sdPairs, psDescPath, trackInstrPath,
+                                       slug, instrFilename, seenUnsynced)
     else:
       logNormal(&"[error] {slug}: does not have an upstream " &
                 &"{instrFilename} or {descFilename} file")
@@ -80,11 +76,19 @@ proc checkInstructions(conf: Conf;
     logNormal(&"[warn] {slug}: {instrFilename} is missing")
     seenUnsynced.incl skDocs
 
-proc checkDocs*(conf: Conf;
-                seenUnsynced: var set[SyncKind];
-                trackPracticeExercisesDir: string;
-                exercises: seq[Exercise];
-                psExercisesDir: string): seq[SourceDestPair] =
+proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
+                        conf: Conf;
+                        trackPracticeExercisesDir: string;
+                        exercises: seq[Exercise];
+                        psExercisesDir: string) =
+  ## Prints a message for each Practice Exercise on the track with an outdated
+  ## `.docs/introduction.md` or `.docs/instructions.md` file, and updates them
+  ## if `--update` was passed and the user confirms.
+  ##
+  ## Includes `skDocs` in `seenUnsynced` if there are still such unsynced files
+  ## afterwards.
+  var sdPairs = newSeq[SourceDestPair]()
+
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
@@ -94,11 +98,20 @@ proc checkDocs*(conf: Conf;
         createDir(trackDocsDir)
       seenUnsynced.incl skDocs
 
+    # Get pairs of unsynced paths
     let psExerciseDir = psExercisesDir / slug
     if dirExists(psExerciseDir):
-      checkIntroduction(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
-                        result)
-      checkInstructions(conf, slug, trackDocsDir, psExerciseDir, seenUnsynced,
-                        result)
+      sdPairs.addUnsyncedIntroductionPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)
+      sdPairs.addUnsyncedInstructionsPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)
     else:
       logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+
+  # Update docs
+  if conf.action.update and sdPairs.len > 0:
+    if conf.action.yes or userSaysYes(skDocs):
+      for sdPair in sdPairs:
+        # TODO: don't replace first top-level header?
+        # For example: the below currently writes `# Description`
+        # instead of `# Instructions`
+        copyFile(sdPair.source, sdPair.dest)
+      seenUnsynced.excl skDocs

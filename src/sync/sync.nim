@@ -1,36 +1,7 @@
-import std/[json, os, sequtils, strformat, strutils]
+import std/[os, sequtils, strformat]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, sync_docs, sync_filepaths, sync_metadata,
             sync_tests]
-
-proc userSaysYes(syncKind: SyncKind): bool =
-  stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
-  let resp = stdin.readLine().toLowerAscii()
-  if resp == "y" or resp == "yes":
-    result = true
-
-proc updateDocs(sdPairs: seq[SourceDestPair], conf: Conf, syncKind: SyncKind,
-                seenUnsynced: var set[SyncKind]) =
-  assert syncKind == skDocs
-  if sdPairs.len > 0: # Implies that `--update` was passed.
-    if conf.action.yes or userSaysYes(syncKind):
-      for sdPair in sdPairs:
-        # TODO: don't replace first top-level header?
-        # For example: the below currently writes `# Description`
-        # instead of `# Instructions`
-        copyFile(sdPair.source, sdPair.dest)
-      seenUnsynced.excl syncKind
-
-proc updateFilepathsOrMetadata(configPairs: seq[PathAndUpdatedJson], conf: Conf,
-                               syncKind: SyncKind,
-                               seenUnsynced: var set[SyncKind]) =
-  assert syncKind in {skFilepaths, skMetadata}
-  if configPairs.len > 0: # Implies that `--update` was passed.
-    if conf.action.yes or userSaysYes(syncKind):
-      for configPair in configPairs:
-        writeFile(configPair.path,
-                  configPair.updatedJson.pretty() & "\n")
-      seenUnsynced.excl syncKind
 
 proc syncImpl(conf: Conf): set[SyncKind] =
   # Don't clone problem-specifications if only `--filepaths` is given
@@ -49,22 +20,19 @@ proc syncImpl(conf: Conf): set[SyncKind] =
       case syncKind
       # Check/update docs
       of skDocs:
-        let sdPairs = checkDocs(conf, result, trackPracticeExercisesDir,
-                                exercises, psExercisesDir)
-        updateDocs(sdPairs, conf, syncKind, result)
+        checkOrUpdateDocs(result, conf, trackPracticeExercisesDir,
+                          exercises, psExercisesDir)
+
+      # Check/update metadata
+      of skMetadata:
+        checkOrUpdateMetadata(result, conf, trackPracticeExercisesDir,
+                              exercises, psExercisesDir)
 
       # Check/update filepaths
       of skFilepaths:
         let trackConceptExercisesDir = trackExercisesDir / "concept"
-        let configPairs = checkFilepaths(conf, result, trackPracticeExercisesDir,
-                                         trackConceptExercisesDir)
-        updateFilepathsOrMetadata(configPairs, conf, syncKind, result)
-
-      # Check/update metadata
-      of skMetadata:
-        let configPairs = checkMetadata(conf, result, trackPracticeExercisesDir,
-                                        exercises, psExercisesDir)
-        updateFilepathsOrMetadata(configPairs, conf, syncKind, result)
+        checkOrUpdateFilepaths(result, conf, trackPracticeExercisesDir,
+                               trackConceptExercisesDir)
 
       # Check/update tests
       of skTests:

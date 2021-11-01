@@ -1,5 +1,6 @@
 import std/[algorithm, json, os, sets, strformat, strscans, strutils]
 import ".."/[cli, logger]
+import "."/sync_common
 
 type
   ExerciseKind = enum
@@ -116,15 +117,10 @@ proc toFilenames(slug: string, patterns: seq[string]): JsonNode =
       ("%{pascal_slug}", slug.snakeToPascal)
     ).newJString()
 
-type
-  PathAndUpdatedJson* = object
-    path*: string
-    updatedJson*: JsonNode
-
-proc checkFilepathsForExercise(res: var seq[PathAndUpdatedJson], conf: Conf,
-                               exerciseKind: ExerciseKind, slug: string,
-                               trackExerciseConfigPath: string,
-                               filePatterns: FilePatterns): bool =
+proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedJson], conf: Conf,
+                          exerciseKind: ExerciseKind, slug: string,
+                          trackExerciseConfigPath: string,
+                          filePatterns: FilePatterns, seenUnsynced: var set[SyncKind]) =
   const conceptKeys = ["solution", "test", "exemplar"]
   const practiceKeys = ["solution", "test", "example"]
   let keys =
@@ -149,31 +145,35 @@ proc checkFilepathsForExercise(res: var seq[PathAndUpdatedJson], conf: Conf,
                   inc numKeysAlreadyUpToDate
           if numKeysAlreadyUpToDate == keys.len:
             logDetailed(&"[skip] {slug}: filepaths are up to date")
-            result = true
           else:
             logNormal(&"[warn] {slug}: filepaths are unsynced")
+            seenUnsynced.incl skFilepaths
             if conf.action.update:
               for fieldName, fieldVal in fieldPairs(filePatterns):
                 if fieldName in keys:
                   j["files"][fieldName] = toFilenames(slug, fieldVal)
-              res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                         updatedJson: j)
+              configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                                 updatedJson: j)
+
   else:
     logNormal(&"[warn] {slug}: {trackExerciseConfigPath} is missing")
+    seenUnsynced.incl skFilepaths
     if conf.action.update:
       var j = newJObject()
       j["files"] = newJObject()
       for fieldName, fieldVal in fieldPairs(filePatterns):
         if fieldName in keys:
           j["files"][fieldName] = toFilenames(slug, fieldVal)
-      res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                 updatedJson: j)
+      configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                         updatedJson: j)
 
-proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
-                     trackPracticeExercisesDir: string,
-                     trackConceptExercisesDir: string): seq[PathAndUpdatedJson] =
+proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
+                             conf: Conf; trackPracticeExercisesDir: string,
+                             trackConceptExercisesDir: string) =
   const configFilename = "config.json"
   let trackConfigPath = conf.trackDir / configFilename
+
+  var configPairs = newSeq[PathAndUpdatedJson]()
 
   if fileExists(trackConfigPath):
     let trackConfig = json.parseFile(trackConfigPath)
@@ -194,12 +194,13 @@ proc checkFilepaths*(conf: Conf; seenUnsynced: var set[SyncKind],
         if dirExists(trackMetaDir):
           let trackExerciseConfigPath = trackMetaDir / configFilename
           let filePatterns = getFilePatterns(trackConfig, trackConfigPath)
-          if not checkFilepathsForExercise(result, conf, exerciseKind, slug,
-                                           trackExerciseConfigPath, filePatterns):
-            seenUnsynced.incl skFilepaths
+          addUnsyncedFilepaths(configPairs, conf, exerciseKind, slug,
+                               trackExerciseConfigPath, filePatterns, seenUnsynced):
         else:
           logNormal(&"[error] {slug}: .meta dir missing")
           seenUnsynced.incl skFilepaths
   else:
     stderr.writeLine &"Error: file does not exist:\n {trackConfigPath}"
     quit(1)
+
+  updateFilepathsOrMetadata(seenUnsynced, configPairs, conf, skFilepaths)

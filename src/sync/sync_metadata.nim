@@ -1,10 +1,12 @@
 import std/[json, os, strformat]
 import pkg/parsetoml
 import ".."/[cli, logger]
-import "."/[exercises, sync_filepaths]
+import "."/[exercises, sync_common]
 
-proc isThisMetadataSynced(res: var seq[PathAndUpdatedJson]; conf: Conf; slug: string;
-                          psMetadataTomlPath, trackExerciseConfigPath: string): bool =
+proc addUnsynced(configPairs: var seq[PathAndUpdatedJson];
+                 conf: Conf;
+                 slug, psMetadataTomlPath, trackExerciseConfigPath: string;
+                 seenUnsynced: var set[SyncKind]) =
   ## Returns `true` if the values of any `blurb`, `source` and `source_url` keys
   ## in `psMetadataTomlPath` are the same as those in `trackExerciseConfigPath`.
   ##
@@ -34,15 +36,16 @@ proc isThisMetadataSynced(res: var seq[PathAndUpdatedJson]; conf: Conf; slug: st
 
       if numKeysAlreadyUpToDate == numTomlKeys:
         logDetailed(&"[skip] {slug}: metadata are up-to-date")
-        result = true
       else:
         logNormal(&"[warn] {slug}: metadata are unsynced")
+        seenUnsynced.incl skMetadata
         if conf.action.update:
-          res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                     updatedJson: j)
+          configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                             updatedJson: j)
 
     else:
       logNormal(&"[warn] {slug}: {trackExerciseConfigPath} is missing")
+      seenUnsynced.incl skMetadata
       if conf.action.update:
         let toml = parsetoml.parseFile(psMetadataTomlPath)
         var j = newJObject()
@@ -51,16 +54,24 @@ proc isThisMetadataSynced(res: var seq[PathAndUpdatedJson]; conf: Conf; slug: st
             let upstreamVal = toml[key]
             if upstreamVal.kind == TomlValueKind.String:
               j[key] = newJString(upstreamVal.stringVal)
-              res.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                         updatedJson: j)
+              configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
+                                                 updatedJson: j)
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
-proc checkMetadata*(conf: Conf;
-                    seenUnsynced: var set[SyncKind];
-                    trackPracticeExercisesDir: string;
-                    exercises: seq[Exercise];
-                    psExercisesDir: string): seq[PathAndUpdatedJson] =
+proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
+                            conf: Conf;
+                            trackPracticeExercisesDir: string;
+                            exercises: seq[Exercise];
+                            psExercisesDir: string) =
+  ## Prints a message for each Practice Exercise on the track with an outdated
+  ## `.meta/config.json` file, and updates them if `--update` was passed and the
+  ## user confirms.
+  ##
+  ## Includes `skMetadata` in `seenUnsynced` if there are still such unsynced
+  ## files afterwards.
+  var configPairs = newSeq[PathAndUpdatedJson]()
+
   for exercise in exercises:
     let slug = exercise.slug.string
     let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
@@ -72,11 +83,12 @@ proc checkMetadata*(conf: Conf;
         const configFilename = "config.json"
         let psMetadataTomlPath = psExerciseDir / metadataFilename
         let trackExerciseConfigPath = trackMetaDir / configFilename
-        if not isThisMetadataSynced(result, conf, slug, psMetadataTomlPath,
-                                    trackExerciseConfigPath):
-          seenUnsynced.incl skMetadata
+        addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
+                    trackExerciseConfigPath, seenUnsynced)
       else:
         logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
     else:
       logNormal(&"[error] {slug}: .meta dir missing")
       seenUnsynced.incl skMetadata
+
+  updateFilepathsOrMetadata(seenUnsynced, configPairs, conf, skMetadata)
