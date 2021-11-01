@@ -9,6 +9,18 @@ proc userSaysYes(syncKind: SyncKind): bool =
   if resp == "y" or resp == "yes":
     result = true
 
+proc updateDocs(sdPairs: seq[SourceDestPair], conf: Conf, syncKind: SyncKind,
+                seenUnsynced: var set[SyncKind]) =
+  assert syncKind == skDocs
+  if sdPairs.len > 0: # Implies that `--update` was passed.
+    if conf.action.yes or userSaysYes(syncKind):
+      for sdPair in sdPairs:
+        # TODO: don't replace first top-level header?
+        # For example: the below currently writes `# Description`
+        # instead of `# Instructions`
+        copyFile(sdPair.source, sdPair.dest)
+      seenUnsynced.excl syncKind
+
 proc updateFilepathsOrMetadata(configPairs: seq[PathAndUpdatedJson], conf: Conf,
                                syncKind: SyncKind,
                                seenUnsynced: var set[SyncKind]) =
@@ -39,14 +51,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
       of skDocs:
         let sdPairs = checkDocs(conf, result, trackPracticeExercisesDir,
                                 exercises, psExercisesDir)
-        if sdPairs.len > 0: # Implies that `--update` was passed.
-          if conf.action.yes or userSaysYes(syncKind):
-            for sdPair in sdPairs:
-              # TODO: don't replace first top-level header?
-              # For example: the below currently writes `# Description`
-              # instead of `# Instructions`
-              copyFile(sdPair.source, sdPair.dest)
-            result.excl syncKind
+        updateDocs(sdPairs, conf, syncKind, result)
 
       # Check/update filepaths
       of skFilepaths:
