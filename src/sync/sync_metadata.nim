@@ -1,61 +1,98 @@
-import std/[json, os, strformat]
-import pkg/parsetoml
+import std/[os, strformat, strscans, strutils]
+import pkg/jsony
 import ".."/[cli, logger]
 import "."/[exercises, sync_common]
 
-proc addUnsynced(configPairs: var seq[PathAndUpdatedJson];
+# Ignore the styleCheck warning for `source_url`.
+{.push hint[Name]:off.}
+
+type
+  UpstreamMetadata = object
+    blurb: string
+    source: string
+    source_url: string
+
+  PathAndUpdatedConfig = object
+    path: string
+    practiceExerciseConfig: PracticeExerciseConfig
+
+{.pop.}
+
+proc parseMetadataToml(path: string): UpstreamMetadata =
+  ## Parses the problem-specifications `metadata.toml` file at `path`, and
+  ## returns an object containing the `blurb`, `source`, and `source_url` values.
+  result = UpstreamMetadata()
+  var key, val: string
+  var i = 1
+  for line in path.lines:
+    # TODO: Improve this hacky TOML parsing - the below doesn't support e.g.
+    # - inline comments
+    # - multiline strings
+    # - literal strings
+    # - whitespace around key names and values
+    if line.scanf("$+ = \"$+", key, val):
+      if val[^1] == '"':
+        val.setLen(val.len - 1)
+        val = val.replace("\\", "")
+        if key == "blurb":
+          result.blurb = val
+        elif key == "source":
+          result.source = val
+        elif key == "source_url":
+          result.source_url = val
+        elif key != "title":
+          logNormal(&"[error] unexpected key/value pair:\n{path}({i}): {line}")
+    elif line.len > 0:
+      logNormal(&"[error] unexpected line:\n{path}({i}): {line}")
+    inc i
+
+func metadataAreUpToDate(p: PracticeExerciseConfig;
+                         upstreamMetadata: UpstreamMetadata): bool =
+  ## Returns `true` if the values of the `blurb`, `source`, and `source_url`
+  ## fields in `p` are the same as those in `upstreamMetadata`.
+  p.blurb == upstreamMetadata.blurb and
+      p.source == upstreamMetadata.source and
+      p.source_url == upstreamMetadata.source_url
+
+func update(p: var PracticeExerciseConfig;
+            upstreamMetadata: UpstreamMetadata) =
+  ## Sets the values of the `blurb`, `source`, and `source_url` fields in
+  ## `p` to those in `upstreamMetadata`.
+  p.blurb = upstreamMetadata.blurb
+  p.source = upstreamMetadata.source
+  p.source_url = upstreamMetadata.source_url
+
+proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
                  conf: Conf;
                  slug, psMetadataTomlPath, trackExerciseConfigPath: string;
                  seenUnsynced: var set[SyncKind]) =
-  ## Returns `true` if the values of any `blurb`, `source` and `source_url` keys
-  ## in `psMetadataTomlPath` are the same as those in `trackExerciseConfigPath`.
+  ## Includes `skMetadata` in `seenUnsynced` if the given
+  ## `trackExerciseConfigPath` is unsynced with `psMetadataTomlPath`.
   ##
-  ## Otherwise, appends to `res` if `conf.action.update` is `true`.
+  ## Adds to `configPairs` if `--update` was passed.
   if fileExists(psMetadataTomlPath):
-    const keys = ["blurb", "source", "source_url"]
     if fileExists(trackExerciseConfigPath):
-      let toml = parsetoml.parseFile(psMetadataTomlPath)
-      var j = json.parseFile(trackExerciseConfigPath)
-      var numTomlKeys = 0
-      var numKeysAlreadyUpToDate = 0
+      let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
+      var p = parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
 
-      for key in keys:
-        if toml.hasKey(key):
-          inc numTomlKeys
-          let upstreamVal = toml[key]
-          if upstreamVal.kind == TomlValueKind.String:
-            if j.hasKey(key):
-              let trackVal = j[key]
-              if trackVal.kind == JString and (upstreamVal.stringVal == trackVal.str):
-                inc numKeysAlreadyUpToDate
-              elif conf.action.update:
-                j[key] = newJString(upstreamVal.stringVal)
-          else:
-            let msg = &"value of '{key}' is `{upstreamVal}`, but it must be a string"
-            logNormal(&"[error] {msg}:\n{psMetadataTomlPath}")
-
-      if numKeysAlreadyUpToDate == numTomlKeys:
+      if metadataAreUpToDate(p, upstreamMetadata):
         logDetailed(&"[skip] {slug}: metadata are up-to-date")
       else:
         logNormal(&"[warn] {slug}: metadata are unsynced")
         seenUnsynced.incl skMetadata
         if conf.action.update:
-          configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                             updatedJson: j)
-
+          update(p, upstreamMetadata)
+          configPairs.add PathAndUpdatedConfig(path: trackExerciseConfigPath,
+                                               practiceExerciseConfig: p)
     else:
       logNormal(&"[warn] {slug}: {trackExerciseConfigPath} is missing")
       seenUnsynced.incl skMetadata
       if conf.action.update:
-        let toml = parsetoml.parseFile(psMetadataTomlPath)
-        var j = newJObject()
-        for key in keys:
-          if toml.hasKey(key):
-            let upstreamVal = toml[key]
-            if upstreamVal.kind == TomlValueKind.String:
-              j[key] = newJString(upstreamVal.stringVal)
-              configPairs.add PathAndUpdatedJson(path: trackExerciseConfigPath,
-                                                 updatedJson: j)
+        let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
+        var p = PracticeExerciseConfig()
+        update(p, upstreamMetadata)
+        configPairs.add PathAndUpdatedConfig(path: trackExerciseConfigPath,
+                                             practiceExerciseConfig: p)
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
@@ -70,7 +107,7 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   ##
   ## Includes `skMetadata` in `seenUnsynced` if there are still such unsynced
   ## files afterwards.
-  var configPairs = newSeq[PathAndUpdatedJson]()
+  var configPairs = newSeq[PathAndUpdatedConfig]()
 
   for exercise in exercises:
     let slug = exercise.slug.string
@@ -91,4 +128,11 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
       logNormal(&"[error] {slug}: .meta dir missing")
       seenUnsynced.incl skMetadata
 
-  updateFilepathsOrMetadata(seenUnsynced, configPairs, conf, skMetadata)
+  # For each item in `configPairs`, write the JSON to the corresponding path.
+  # If successful, exclude `syncKind` from `seenUnsynced`.
+  if conf.action.update and configPairs.len > 0:
+    if conf.action.yes or userSaysYes(skMetadata):
+      for configPair in configPairs:
+        writeFile(configPair.path,
+                  configPair.practiceExerciseConfig.toJson() & "\n")
+      seenUnsynced.excl skMetadata
