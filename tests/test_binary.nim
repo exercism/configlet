@@ -191,7 +191,7 @@ proc testsForSync(binaryPath: static string) =
     test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
       execAndCheck(1, syncOffline, docsMetadataTests)
 
-    test "no scope: a given exercise with a missing test case: prints the expected output, and exits with 1":
+    test "no scope: a given exercise with only tests unsynced: prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
         {header}
         [warn] anagram: missing 1 test case
