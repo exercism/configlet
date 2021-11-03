@@ -9,7 +9,7 @@ proc main =
   suite "findPracticeExercises":
     const trackDir = testsDir / ".test_nim_track_repo"
     setupExercismRepo("nim", trackDir,
-                      "6e909c9e5338cd567c20224069df00e031fb2efa")
+                      "6e909c9e5338cd567c20224069df00e031fb2efa") # 2021-04-08
 
     let conf = Conf(
       action: initAction(actSync, scope = {skTests}),

@@ -39,11 +39,11 @@ proc testsForSync(binaryPath: static string) =
 
   # Setup: clone the problem-specifications repo, and checkout a known state
   setupExercismRepo("problem-specifications", psDir,
-                    "daf620d47ed905409564dec5fa9610664e294bde")
+                    "daf620d47ed905409564dec5fa9610664e294bde") # 2021-06-18
 
   # Setup: clone a track repo, and checkout a known state
   setupExercismRepo("nim", trackDir,
-                    "6e909c9e5338cd567c20224069df00e031fb2efa")
+                    "6e909c9e5338cd567c20224069df00e031fb2efa") # 2021-04-08
 
   const
     syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
@@ -533,7 +533,7 @@ proc testsForGenerate(binaryPath: string) =
 
     # Setup: clone a track repo, and checkout a known state
     setupExercismRepo("elixir", trackDir,
-                      "f3974abf6e0d4a434dfe3494d58581d399c18edb")
+                      "f3974abf6e0d4a434dfe3494d58581d399c18edb") # 2021-05-09
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0, generateCmd, "")
