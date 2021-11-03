@@ -183,6 +183,72 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
+  suite "sync, without --update, for an unsynced scope for one exercise (prints the expected output, and exits with 1)":
+    test "-e yacht --docs":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] yacht: instructions.md is unsynced
+        {footerUnsyncedDocs}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} -e yacht --docs", expectedOutput)
+
+    test "-e darts --metadata":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] darts: metadata are unsynced
+        {footerUnsyncedMetadata}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} -e darts --metadata", expectedOutput)
+
+    test "-e isogram --tests":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        {footerUnsyncedTests}
+      """.dedent(8)
+      execAndCheck(1, &"{syncOffline} -e isogram --tests", expectedOutput)
+
+    test "-e grade-school -e isogram --tests (when passing multiple exercises, only the final exercise is acted upon)":
+      # TODO: configlet should either print a warning here, or support multiple exercises being passed.
+      const expectedOutput = fmt"""
+        {header}
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        {footerUnsyncedTests}
+      """.dedent(8)
+      execAndCheck(1, &"{syncOffline} -e grade-school -e isogram --tests", expectedOutput)
+
+    test "-e isogram":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] isogram: missing 1 test case
+               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
+        {footerUnsyncedTests}
+      """.dedent(8)
+      execAndCheck(1, &"{syncOffline} -e isogram", expectedOutput)
+
+  suite "sync, without --update, for multiple unsynced scopes for one exercise (prints the expected output, and exits with 1)":
+    test "-e yacht --docs --metadata":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] yacht: instructions.md is unsynced
+        [warn] yacht: metadata are unsynced
+        {footerUnsyncedDocs}
+        {footerUnsyncedMetadata}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} -e yacht --docs --metadata", expectedOutput)
+
+    test "-e yacht":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] yacht: instructions.md is unsynced
+        [warn] yacht: metadata are unsynced
+        {footerUnsyncedDocs}
+        {footerUnsyncedMetadata}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} -e yacht", expectedOutput)
+
   suite "sync, without --update, for an unsynced scope with every exercise (prints the expected output, and exits with 1)":
     test "--docs":
       const expectedOutput = fmt"""
@@ -213,26 +279,6 @@ proc testsForSync(binaryPath: static string) =
 
     test "no options":
       execAndCheck(1, syncOffline, docsMetadataTests)
-
-  suite "sync, without --update, for an exercise with one unsynced scope (prints the expected output, and exits with 1)":
-    test "-e anagram (only tests unsynced)":
-      const expectedOutput = fmt"""
-        {header}
-        [warn] anagram: missing 1 test case
-               - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
-        {footerUnsyncedTests}
-      """.dedent(8)
-      execAndCheck(1, &"{syncOffline} -e anagram", expectedOutput)
-
-    test "-e grade-school -e isogram (when passing multiple exercises, only the final exercise is acted upon)":
-      # TODO: configlet should either print a warning here, or support multiple exercises being passed.
-      const expectedOutput = fmt"""
-        {header}
-        [warn] isogram: missing 1 test case
-               - word with duplicated character and with two hyphens (0d0b8644-0a1e-4a31-a432-2b3ee270d847)
-        {footerUnsyncedTests}
-      """.dedent(8)
-      execAndCheck(1, &"{syncOffline} -e grade-school -e isogram", expectedOutput)
 
   suite "sync, with --update":
     const
