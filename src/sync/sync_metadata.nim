@@ -29,8 +29,8 @@ proc parseMetadataToml(path: string): UpstreamMetadata =
     # - inline comments
     # - multiline strings
     # - literal strings
-    # - whitespace around key names and values
-    if line.scanf("$+ = \"$+", key, val):
+    # - whitespace after values
+    if line.scanf("$w$s=$s\"$+", key, val):
       if val[^1] == '"':
         val.setLen(val.len - 1)
         val = val.replace("\\", "")
