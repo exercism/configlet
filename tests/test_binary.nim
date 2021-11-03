@@ -132,6 +132,58 @@ proc testsForSync(binaryPath: static string) =
     # Note: `dedent` above, not `unindent`. We want to preserve the indentation of the list items.
 
   suite "sync, without --update":
+    # With synced items
+    test "--docs: with synced docs, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date docs!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob --docs", expectedOutput)
+
+    test "--filepaths: with synced filepaths, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date filepaths!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob --filepaths", expectedOutput)
+
+    test "--metadata: with synced metadata, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date metadata!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob --metadata", expectedOutput)
+
+    test "--tests: with synced tests, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date tests!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob --tests", expectedOutput)
+
+    test "--metadata --tests: with synced metadata and tests, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date metadata!
+        The `bob` Practice Exercise has up-to-date tests!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob --metadata --tests", expectedOutput)
+
+    test "no scope: with everything synced, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date docs, filepaths, metadata, and tests!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} -e bob", expectedOutput)
+
+    test "--filepaths: with synced filepaths for every exercise, prints the expected output, and exits with 0":
+      const expectedOutput = fmt"""
+        {header}
+        {footerSyncedFilepaths}
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
+
+    # With unsynced items
     const docsMetadataTests = &"{header}\n" &
                               &"{bodyUnsyncedDocs}\n{bodyUnsyncedMetadata}\n{bodyUnsyncedTests}\n" &
                               &"{footerUnsyncedDocs}\n{footerUnsyncedMetadata}\n{footerUnsyncedTests}\n"
@@ -165,13 +217,6 @@ proc testsForSync(binaryPath: static string) =
         {footerUnsyncedDocs}
       """.unindent()
       execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
-
-    test "--filepaths: with synced filepaths, prints the expected output, and exits with 0":
-      const expectedOutput = fmt"""
-        {header}
-        {footerSyncedFilepaths}
-      """.unindent()
-      execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
     test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
