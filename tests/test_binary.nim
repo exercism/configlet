@@ -280,7 +280,7 @@ proc testsForSync(binaryPath: static string) =
     test "no options":
       execAndCheck(1, syncOffline, docsMetadataTests)
 
-  suite "sync, with --update":
+  suite "sync, with --update and --tests":
     const
       expectedOutputAnagramInclude = fmt"""
         {header}
