@@ -43,7 +43,7 @@ proc testsForSync(binaryPath: static string) =
 
   # Setup: clone a track repo, and checkout a known state
   setupExercismRepo("nim", trackDir,
-                    "6e909c9e5338cd567c20224069df00e031fb2efa") # 2021-04-08
+                    "736245965db724cafc5ec8e9dcae83c850b7c5a8") # 2021-10-22
 
   const
     syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
