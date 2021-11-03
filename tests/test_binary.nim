@@ -33,6 +33,9 @@ template testDiffThenRestore(dir, expectedDiff, restoreArg: string) =
   let args = ["-C", dir, "restore", restoreArg]
   check git(args).exitCode == 0
 
+template checkNoDiff(trackDir: string) =
+  check gitDiffExitCode(trackDir) == 0
+
 proc testsForSync(binaryPath: static string) =
   const psDir = testsDir / ".test_problem_specifications"
   const trackDir = testsDir / ".test_nim_track_repo"
@@ -58,6 +61,8 @@ proc testsForSync(binaryPath: static string) =
     footerUnsyncedTests = "[warn] some exercises are missing test cases"
     footerSyncedFilepaths = """
       Every Practice Exercise has up-to-date filepaths!""".unindent()
+    footerSyncedMetadata = """
+      Every Practice Exercise has up-to-date metadata!""".unindent()
     footerSyncedTests = """
       Every Practice Exercise has up-to-date tests!""".unindent()
     bodyUnsyncedDocs = """
@@ -279,6 +284,112 @@ proc testsForSync(binaryPath: static string) =
 
     test "no options":
       execAndCheck(1, syncOffline, docsMetadataTests)
+
+  suite "sync, with --update and --metadata (no diff for an exercise with up-to-date metadata, and exits with 0)":
+    test "--metadata -e bob":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` Practice Exercise has up-to-date metadata!
+      """.unindent()
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata -e bob", expectedOutput)
+      checkNoDiff(trackDir)
+
+  suite "sync, with --update and --metadata (updates unsynced metadata for a given exercise, and exits with 0)":
+    const expectedOutput = fmt"""
+      {header}
+      [warn] darts: metadata are unsynced
+      The `darts` Practice Exercise has up-to-date metadata!
+    """.unindent()
+    const expectedDiff = """
+      --- exercises/practice/darts/.meta/config.json
+      +++ exercises/practice/darts/.meta/config.json
+      -  "blurb": "Write a function that returns the earned points in a single toss of a Darts game",
+      -  "contributors": [],
+      +  "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
+    """.unindent()
+    let configPath = joinPath("exercises", "practice", "darts", ".meta", "config.json")
+
+    test "--metadata --yes -e darts":
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e darts", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
+  suite "sync, with --update and --metadata (updates metadata for every exercise, and exits with 0)":
+    const expectedOutput = fmt"""
+      {header}
+      {bodyUnsyncedMetadata}
+      {footerSyncedMetadata}
+    """.unindent()
+    const expectedDiff = """
+      --- exercises/practice/acronym/.meta/config.json
+      +++ exercises/practice/acronym/.meta/config.json
+      -  "blurb": "Convert a long phrase to its acronym",
+      +  "blurb": "Convert a long phrase to its acronym.",
+      --- exercises/practice/armstrong-numbers/.meta/config.json
+      +++ exercises/practice/armstrong-numbers/.meta/config.json
+      -  "blurb": "Determine if a number is an Armstrong number",
+      +  "blurb": "Determine if a number is an Armstrong number.",
+      --- exercises/practice/binary/.meta/config.json
+      +++ exercises/practice/binary/.meta/config.json
+      -  "blurb": "Convert a binary number, represented as a string (e.g. '101010'), to its decimal equivalent using first principles",
+      +  "blurb": "Convert a binary number, represented as a string (e.g. '101010'), to its decimal equivalent using first principles.",
+      --- exercises/practice/collatz-conjecture/.meta/config.json
+      +++ exercises/practice/collatz-conjecture/.meta/config.json
+      -  "blurb": "Calculate the number of steps to reach 1 using the Collatz conjecture",
+      +  "blurb": "Calculate the number of steps to reach 1 using the Collatz conjecture.",
+      --- exercises/practice/darts/.meta/config.json
+      +++ exercises/practice/darts/.meta/config.json
+      -  "blurb": "Write a function that returns the earned points in a single toss of a Darts game",
+      -  "contributors": [],
+      +  "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
+      --- exercises/practice/grade-school/.meta/config.json
+      +++ exercises/practice/grade-school/.meta/config.json
+      -  "blurb": "Given students' names along with the grade that they are in, create a roster for the school",
+      +  "blurb": "Given students' names along with the grade that they are in, create a roster for the school.",
+      --- exercises/practice/hello-world/.meta/config.json
+      +++ exercises/practice/hello-world/.meta/config.json
+      -  "blurb": "The classical introductory exercise. Just say \"Hello, World!\"",
+      +  "blurb": "The classical introductory exercise. Just say \"Hello, World!\".",
+      --- exercises/practice/high-scores/.meta/config.json
+      +++ exercises/practice/high-scores/.meta/config.json
+      -  "blurb": "Manage a player's High Score list",
+      -  "contributors": [],
+      +  "blurb": "Manage a player's High Score list.",
+      --- exercises/practice/resistor-color/.meta/config.json
+      +++ exercises/practice/resistor-color/.meta/config.json
+      -  "blurb": "Convert a resistor band's color to its numeric representation",
+      -  "contributors": [],
+      +  "blurb": "Convert a resistor band's color to its numeric representation.",
+      --- exercises/practice/reverse-string/.meta/config.json
+      +++ exercises/practice/reverse-string/.meta/config.json
+      -  "blurb": "Reverse a string",
+      +  "blurb": "Reverse a string.",
+      --- exercises/practice/scale-generator/.meta/config.json
+      +++ exercises/practice/scale-generator/.meta/config.json
+      -  "blurb": "Generate musical scales, given a starting note and a set of intervals. ",
+      -  "contributors": [],
+      -  }
+      +  },
+      +  "blurb": "Generate musical scales, given a starting note and a set of intervals."
+      --- exercises/practice/twelve-days/.meta/config.json
+      +++ exercises/practice/twelve-days/.meta/config.json
+      -  "blurb": "Output the lyrics to 'The Twelve Days of Christmas'",
+      -  "contributors": [],
+      +  "blurb": "Output the lyrics to 'The Twelve Days of Christmas'.",
+      --- exercises/practice/two-fer/.meta/config.json
+      +++ exercises/practice/two-fer/.meta/config.json
+      -  "blurb": "Create a sentence of the form \"One for X, one for me.\"",
+      +  "blurb": "Create a sentence of the form \"One for X, one for me.\".",
+      --- exercises/practice/yacht/.meta/config.json
+      +++ exercises/practice/yacht/.meta/config.json
+      -  "blurb": "Score a single throw of dice in the game Yacht",
+      -  "contributors": [],
+      +  "blurb": "Score a single throw of dice in the game Yacht.",
+    """.unindent()
+    let configPaths = joinPath("exercises", "practice", "*", ".meta", "config.json")
+
+    test "--metadata --yes":
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPaths)
 
   suite "sync, with --update and --tests":
     const
@@ -614,9 +725,6 @@ proc prepareIntroductionFiles(trackDir, header, placeholder: string;
   writeFile(templatePath, templateContents)
   if removeIntro:
     removeFile(introPath)
-
-template checkNoDiff(trackDir: string) =
-  check gitDiffExitCode(trackDir) == 0
 
 proc testsForGenerate(binaryPath: string) =
   suite "generate":
