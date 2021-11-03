@@ -583,7 +583,7 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
 
-    test "after updating only tests, a plain `sync` shows that only docs are unsynced, and exits with 1":
+    test "after updating only tests, a plain `sync` shows that only docs and metadata are unsynced, and exits with 1":
       const expectedOutput = fmt"""
         {header}
         {bodyUnsyncedDocs}
