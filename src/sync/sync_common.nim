@@ -119,4 +119,8 @@ type
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
-  readFile(path).fromJson(T)
+  let contents = readFile(path)
+  if contents.len > 0:
+    contents.fromJson(T)
+  else:
+    T()
