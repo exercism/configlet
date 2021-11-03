@@ -34,8 +34,8 @@ template testDiffThenRestore(dir, expectedDiff, restoreArg: string) =
   check git(args).exitCode == 0
 
 proc testsForSync(binaryPath: static string) =
-  const psDir = testsDir / ".test_binary_problem_specifications"
-  const trackDir = testsDir / ".test_binary_nim_track_repo"
+  const psDir = testsDir / ".test_problem_specifications"
+  const trackDir = testsDir / ".test_nim_track_repo"
 
   # Setup: clone the problem-specifications repo, and checkout a known state
   setupExercismRepo("problem-specifications", psDir,
@@ -528,7 +528,7 @@ template checkNoDiff(trackDir: string) =
 
 proc testsForGenerate(binaryPath: string) =
   suite "generate":
-    const trackDir = testsDir / ".test_binary_elixir_track_repo"
+    const trackDir = testsDir / ".test_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
 
     # Setup: clone a track repo, and checkout a known state

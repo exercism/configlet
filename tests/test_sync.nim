@@ -8,7 +8,7 @@ const
 
 proc testSyncCommon =
   suite "parseFile":
-    const trackDir = testsDir / ".test_binary_elixir_track_repo"
+    const trackDir = testsDir / ".test_elixir_track_repo"
 
     # Setup: clone a track repo, and checkout a known state
     setupExercismRepo("elixir", trackDir,
@@ -64,7 +64,7 @@ proc testSyncCommon =
 
 proc testSyncMetadata =
   suite "parseMetadataToml":
-    const psDir = testsDir / ".test_binary_problem_specifications"
+    const psDir = testsDir / ".test_problem_specifications"
 
     # Setup: clone the problem-specifications repo, and checkout a known state
     setupExercismRepo("problem-specifications", psDir,
