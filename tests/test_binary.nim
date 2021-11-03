@@ -131,37 +131,36 @@ proc testsForSync(binaryPath: static string) =
              - callbacks should not be called if dependencies change but output value doesn't change (9a5b159f-b7aa-4729-807e-f1c38a46d377)""".dedent(6)
     # Note: `dedent` above, not `unindent`. We want to preserve the indentation of the list items.
 
-  suite "sync, without --update":
-    # With synced items
-    test "--docs: with synced docs, prints the expected output, and exits with 0":
+  suite "sync, without --update, for an up-to-date exercise (prints the expected output, and exits with 0)":
+    test "-e bob --docs":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date docs!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --docs", expectedOutput)
 
-    test "--filepaths: with synced filepaths, prints the expected output, and exits with 0":
+    test "-e bob --filepaths":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date filepaths!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --filepaths", expectedOutput)
 
-    test "--metadata: with synced metadata, prints the expected output, and exits with 0":
+    test "-e bob --metadata":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date metadata!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --metadata", expectedOutput)
 
-    test "--tests: with synced tests, prints the expected output, and exits with 0":
+    test "-e bob --tests":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date tests!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --tests", expectedOutput)
 
-    test "--metadata --tests: with synced metadata and tests, prints the expected output, and exits with 0":
+    test "-e bob --metadata --tests":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date metadata!
@@ -169,22 +168,23 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --metadata --tests", expectedOutput)
 
-    test "no scope: with everything synced, prints the expected output, and exits with 0":
+    test "-e bob":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date docs, filepaths, metadata, and tests!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob", expectedOutput)
 
-    test "--filepaths: with synced filepaths for every exercise, prints the expected output, and exits with 0":
+  suite "sync, without --update, for an up-to-date scope with every exercise (prints the expected output, and exits with 0)":
+    test "--filepaths":
       const expectedOutput = fmt"""
         {header}
         {footerSyncedFilepaths}
       """.unindent()
       execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
-    # With unsynced items
-    test "--docs: with unsynced docs, prints the expected output, and exits with 1":
+  suite "sync, without --update, for an unsynced scope with every exercise (prints the expected output, and exits with 1)":
+    test "--docs":
       const expectedOutput = fmt"""
         {header}
         {bodyUnsyncedDocs}
@@ -192,7 +192,7 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
 
-    test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
+    test "--metadata":
       const expectedOutput = fmt"""
         {header}
         {bodyUnsyncedMetadata}
@@ -200,7 +200,7 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
 
-    test "--tests: with unsynced tests, prints the expected output, and exits with 1":
+    test "--tests":
       const expectedOutput = &"{header}\n{bodyUnsyncedTests}\n{footerUnsyncedTests}\n"
       execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
 
@@ -208,13 +208,14 @@ proc testsForSync(binaryPath: static string) =
                               &"{bodyUnsyncedDocs}\n{bodyUnsyncedMetadata}\n{bodyUnsyncedTests}\n" &
                               &"{footerUnsyncedDocs}\n{footerUnsyncedMetadata}\n{footerUnsyncedTests}\n"
 
-    test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
+    test "--docs --metadata --tests":
       execAndCheck(1, &"{syncOffline} --docs --metadata --tests", docsMetadataTests)
 
-    test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
+    test "no options":
       execAndCheck(1, syncOffline, docsMetadataTests)
 
-    test "no scope: a given exercise with only tests unsynced: prints the expected output, and exits with 1":
+  suite "sync, without --update, for an exercise with one unsynced scope (prints the expected output, and exits with 1)":
+    test "-e anagram (only tests unsynced)":
       const expectedOutput = fmt"""
         {header}
         [warn] anagram: missing 1 test case
@@ -223,7 +224,7 @@ proc testsForSync(binaryPath: static string) =
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e anagram", expectedOutput)
 
-    test "no scope: when passing multiple exercises, only the final exercise is acted upon":
+    test "-e grade-school -e isogram (when passing multiple exercises, only the final exercise is acted upon)":
       # TODO: configlet should either print a warning here, or support multiple exercises being passed.
       const expectedOutput = fmt"""
         {header}
