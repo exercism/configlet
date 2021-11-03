@@ -184,9 +184,32 @@ proc testsForSync(binaryPath: static string) =
       execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
     # With unsynced items
+    test "--docs: with unsynced docs, prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {header}
+        {bodyUnsyncedDocs}
+        {footerUnsyncedDocs}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
+
+    test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {header}
+        {bodyUnsyncedMetadata}
+        {footerUnsyncedMetadata}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
+
+    test "--tests: with unsynced tests, prints the expected output, and exits with 1":
+      const expectedOutput = &"{header}\n{bodyUnsyncedTests}\n{footerUnsyncedTests}\n"
+      execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
+
     const docsMetadataTests = &"{header}\n" &
                               &"{bodyUnsyncedDocs}\n{bodyUnsyncedMetadata}\n{bodyUnsyncedTests}\n" &
                               &"{footerUnsyncedDocs}\n{footerUnsyncedMetadata}\n{footerUnsyncedTests}\n"
+
+    test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
+      execAndCheck(1, &"{syncOffline} --docs --metadata --tests", docsMetadataTests)
 
     test "no scope: multiple exercises with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
       execAndCheck(1, syncOffline, docsMetadataTests)
@@ -209,29 +232,6 @@ proc testsForSync(binaryPath: static string) =
         {footerUnsyncedTests}
       """.dedent(8)
       execAndCheck(1, &"{syncOffline} -e grade-school -e isogram", expectedOutput)
-
-    test "--docs: with unsynced docs, prints the expected output, and exits with 1":
-      const expectedOutput = fmt"""
-        {header}
-        {bodyUnsyncedDocs}
-        {footerUnsyncedDocs}
-      """.unindent()
-      execAndCheck(1, &"{syncOffline} --docs", expectedOutput)
-
-    test "--metadata: with unsynced metadata, prints the expected output, and exits with 1":
-      const expectedOutput = fmt"""
-        {header}
-        {bodyUnsyncedMetadata}
-        {footerUnsyncedMetadata}
-      """.unindent()
-      execAndCheck(1, &"{syncOffline} --metadata", expectedOutput)
-
-    test "--tests: with unsynced tests, prints the expected output, and exits with 1":
-      const expectedOutput = &"{header}\n{bodyUnsyncedTests}\n{footerUnsyncedTests}\n"
-      execAndCheck(1, &"{syncOffline} --tests", expectedOutput)
-
-    test "--docs --metadata --tests: with unsynced docs + metadata + tests, prints the expected output, and exits with 1":
-      execAndCheck(1, &"{syncOffline} --docs --metadata --tests", docsMetadataTests)
 
   suite "sync, with --update":
     const
