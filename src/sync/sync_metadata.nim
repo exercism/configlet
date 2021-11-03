@@ -1,4 +1,4 @@
-import std/[os, strformat, strscans, strutils]
+import std/[os, parseutils, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, logger]
 import "."/[exercises, sync_common]
@@ -18,33 +18,59 @@ type
 
 {.pop.}
 
+func parseString(s: string, i: var int, val: var string) =
+  ## Parses the TOML string starting at `s[i]` into `val`.
+  inc i
+  while i < s.len:
+    let c = s[i]
+    if c == '"':
+      break
+    elif c == '\\':
+      inc i
+      let c = s[i]
+      if c in {'"', '\\'}:
+        val.add c
+      else:
+        val.add c
+    else:
+      val.add c
+    inc i
+  inc i
+
 proc parseMetadataToml(path: string): UpstreamMetadata =
   ## Parses the problem-specifications `metadata.toml` file at `path`, and
   ## returns an object containing the `blurb`, `source`, and `source_url` values.
+  # TODO: Improve this TOML parsing. This proc doesn't currently support e.g.
+  # - non-inline comments
+  # - quoted keys
+  # - multi-line strings
+  # - literal strings
+  # But as of 2021-11-01, `metadata.toml` files in `problem-specifications`
+  # do not contain these.
   result = UpstreamMetadata()
+  let toml = readFile(path)
+  var i = 0
+  var indexLineStart = 0
   var key, val: string
-  var i = 1
-  for line in path.lines:
-    # TODO: Improve this hacky TOML parsing - the below doesn't support e.g.
-    # - inline comments
-    # - multiline strings
-    # - literal strings
-    # - whitespace after values
-    if line.scanf("$w$s=$s\"$+", key, val):
-      if val[^1] == '"':
-        val.setLen(val.len - 1)
-        val = val.replace("\\", "")
-        if key == "blurb":
-          result.blurb = val
-        elif key == "source":
-          result.source = val
-        elif key == "source_url":
-          result.source_url = val
-        elif key != "title":
-          logNormal(&"[error] unexpected key/value pair:\n{path}({i}): {line}")
-    elif line.len > 0:
-      logNormal(&"[error] unexpected line:\n{path}({i}): {line}")
-    inc i
+
+  while i < toml.len:
+    i += skipWhile(toml, {' ', '\n'}, i)
+    indexLineStart = i
+    i += parseUntil(toml, key, {' ', '='}, i)
+    i += skipUntil(toml, '"', i)
+    parseString(toml, i, val)
+    if key == "blurb":
+      result.blurb = val
+    elif key == "source":
+      result.source = val
+    elif key == "source_url":
+      result.source_url = val
+    elif key.len > 0 and key != "title":
+      let j = min(toml.high, i)
+      let line = toml[indexLineStart .. j].strip()
+      echo(&"[error] unexpected key/value pair:\n{path}:\n{line}")
+    val.setLen 0
+    i += skipUntil(toml, '\n', i)
 
 func metadataAreUpToDate(p: PracticeExerciseConfig;
                          upstreamMetadata: UpstreamMetadata): bool =
