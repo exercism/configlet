@@ -1,10 +1,13 @@
 # This file implements tests for `src/tracks.nim`
-import std/[os, sequtils, sets, strformat, unittest]
+import std/[os, sequtils, sets, unittest]
 import "."/[cli, exec, sync/tracks]
+
+const
+  testsDir = currentSourcePath().parentDir()
 
 proc main =
   suite "findPracticeExercises":
-    const trackDir = ".test_tracks_nim_track_repo"
+    const trackDir = testsDir / ".test_nim_track_repo"
     setupExercismRepo("nim", trackDir,
                       "6e909c9e5338cd567c20224069df00e031fb2efa")
 
@@ -45,18 +48,6 @@ proc main =
 
       check:
         practiceExercises[65] == expectedTwoFer
-
-    # Try to remove the track directory, but allow the tests to pass if there
-    # was an error removing it.
-    # This resolves a CI failure on Windows.
-    # "The process cannot access the file because it is being used by another
-    # process."
-    try:
-      sleep(1000)
-      removeDir(trackDir)
-    except CatchableError:
-      stderr.writeLine &"Error: could not remove the directory: {trackDir}"
-      stderr.writeLine getCurrentExceptionMsg()
 
 main()
 {.used.}
