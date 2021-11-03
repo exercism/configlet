@@ -1,4 +1,4 @@
-import std/[json, os, parseutils, strformat, strutils]
+import std/[json, options, os, parseutils, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, logger]
 import "."/[exercises, sync_common]
@@ -138,11 +138,16 @@ proc pretty(p: PracticeExerciseConfig): string =
       delete(j["files"], "editor")
 
   # Delete empty optional string keys
-  const optionalStringKeys = ["language_versions", "source", "source_url",
-                              "test_runner"]
+  const optionalStringKeys = ["language_versions", "source", "source_url"]
   for key in optionalStringKeys:
     if j[key].getStr().len == 0:
       delete(j, key)
+
+  # Keep the `test_runner` key only when it was present in the
+  # `.meta/config.json` that we parsed, and had the value `false`.
+  # The spec says that an omitted `test_runner` key implies the value `true`.
+  if p.test_runner.isNone() or p.test_runner.get():
+    delete(j, "test_runner")
 
   result = j.pretty()
   result.add '\n'

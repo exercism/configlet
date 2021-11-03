@@ -1,4 +1,4 @@
-import std/[strformat, strutils]
+import std/[options, strformat, strutils]
 import pkg/jsony
 import ".."/cli
 
@@ -42,7 +42,7 @@ type
   #       forked_from: seq[string]
   #       icon: string
   #     of ekPractice:
-  #       test_runner: string
+  #       test_runner: Option[bool]
   #
   # and parse with `jsony.fromJson` because the JSON does not actually contain a
   # `kind` key. Furthermore, the unique keys for Practice and Concept exercises
@@ -102,7 +102,7 @@ type
     source*: string
     source_url*: string
     # The below are unique to Practice Exercises
-    test_runner: string
+    test_runner*: Option[bool]
 
   ExerciseConfig* = object
     case kind*: ExerciseKind
