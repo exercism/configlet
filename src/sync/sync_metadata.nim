@@ -1,4 +1,4 @@
-import std/[os, parseutils, strformat, strutils]
+import std/[json, os, parseutils, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, logger]
 import "."/[exercises, sync_common]
@@ -122,6 +122,31 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
+proc pretty(p: PracticeExerciseConfig): string =
+  # TODO: optimize this serialization to pretty JSON.
+  # The below currently does an extra round-trip.
+  var j = p.toJson().parseJson()
+
+  # Delete empty optional array keys
+  # Note that `authors` is optional for a Practice Exercise, but not for a
+  # Concept Exercise.
+  const optionalArrayKeys = ["authors", "contributors"]
+  for key in optionalArrayKeys:
+    if j[key].len == 0:
+      delete(j, key)
+  if j["files"]["editor"].len == 0:
+      delete(j["files"], "editor")
+
+  # Delete empty optional string keys
+  const optionalStringKeys = ["language_versions", "source", "source_url",
+                              "test_runner"]
+  for key in optionalStringKeys:
+    if j[key].getStr().len == 0:
+      delete(j, key)
+
+  result = j.pretty()
+  result.add '\n'
+
 proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
                             conf: Conf;
                             trackPracticeExercisesDir: string;
@@ -159,6 +184,7 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   if conf.action.update and configPairs.len > 0:
     if conf.action.yes or userSaysYes(skMetadata):
       for configPair in configPairs:
-        writeFile(configPair.path,
-                  configPair.practiceExerciseConfig.toJson() & "\n")
+        doAssert configPair.path.endsWith("config.json")
+        let updatedJson = pretty(configPair.practiceExerciseConfig)
+        writeFile(configPair.path, updatedJson)
       seenUnsynced.excl skMetadata
