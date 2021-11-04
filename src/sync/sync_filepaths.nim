@@ -1,6 +1,6 @@
 import std/[algorithm, os, strformat, strutils]
 import pkg/jsony
-import ".."/[cli, logger]
+import ".."/[cli, lint/validators, logger]
 import "."/sync_common
 
 type
@@ -20,13 +20,22 @@ type
     exercises: Exercises
     files: FilePatterns
 
-# TODO: add `jsony` parseHook to enforce that the `slug` value is a kebab-case string.
-
 func `==`(x, y: Slug): bool {.borrow.}
 func `<`(x, y: Slug): bool {.borrow.}
 func replace(slug: Slug, sub: char, by: char): string {.borrow.}
 func len(slug: Slug): int {.borrow.}
 func `$`(slug: Slug): string {.borrow.}
+
+proc parseHook(s: string, i: var int, v: var Slug) =
+  ## Quits with an error message if a `slug` value is not a kebab-case string.
+  var x: string
+  parseHook(s, i, x)
+  if not x.isKebabCase():
+    let msg = &"Error: the track `config.json` file contains " &
+              &"an exercise slug of \"{x}\", which is not a kebab-case string"
+    stderr.writeLine msg
+    quit 1
+  v = cast[Slug](x)
 
 func getSlugs(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
   ## Returns a seq of the slugs `e`, in alphabetical order.
