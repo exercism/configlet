@@ -1,6 +1,7 @@
 import std/[importutils, os, options, strformat, unittest]
 import pkg/parsetoml
 import "."/[exec, sync/sync_common]
+from "."/sync/sync_filepaths {.all.} import update
 from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
     metadataAreUpToDate, update
 
@@ -62,6 +63,70 @@ proc testSyncCommon =
       )
       let exerciseConfig = parseFile(dartsConfigPath, PracticeExerciseConfig)
       check exerciseConfig == expected
+
+proc testSyncFilepaths =
+  suite "update":
+    test "Concept Exercise":
+      const patterns = FilePatterns(
+        solution: @["lib/%{snake_slug}.ex"],
+        test: @["test/%{snake_slug}_test.exs"],
+        example: @[".meta/example.ex"],
+        exemplar: @[".meta/exemplar.ex"],
+      )
+      const expected = ConceptExerciseFiles(
+        solution: @["lib/hello_world.ex"],
+        test: @["test/hello_world_test.exs"],
+        exemplar: @[".meta/exemplar.ex"],
+      )
+      var f = ConceptExerciseFiles()
+      update(f, patterns, "hello-world")
+      check f == expected
+
+    test "Practice Exercise":
+      const patterns = FilePatterns(
+        solution: @["Sources/%{pascal_slug}/%{pascal_slug}.swift"],
+        test: @["Tests/%{pascal_slug}Tests/%{pascal_slug}Tests.swift"],
+        example: @[".meta/Sources/%{pascal_slug}/%{pascal_slug}Example.swift"],
+        exemplar: @[".meta/Sources/%{pascal_slug}/%{pascal_slug}Exemplar.swift"],
+      )
+      const expected = PracticeExerciseFiles(
+        solution: @["Sources/HelloWorld/HelloWorld.swift"],
+        test: @["Tests/HelloWorldTests/HelloWorldTests.swift"],
+        example: @[".meta/Sources/HelloWorld/HelloWorldExample.swift"],
+      )
+      var f = PracticeExerciseFiles()
+      update(f, patterns, "hello-world")
+      check f == expected
+
+    const patterns = FilePatterns(
+      solution: @["prefix/%{snake_slug}.foo"],
+      test: @["prefix/test-%{kebab_slug}.foo"],
+      example: @[".meta/%{camel_slug}Example.foo"],
+      exemplar: @[".meta/%{pascal_slug}Exemplar.foo"],
+      editor: @["%{snake_slug}.bar"],
+    )
+
+    test "every placeholder - Concept Exercise":
+      const expected = ConceptExerciseFiles(
+        solution: @["prefix/hello_world.foo"],
+        test: @["prefix/test-hello-world.foo"],
+        exemplar: @[".meta/HelloWorldExemplar.foo"],
+        editor: @["hello_world.bar"],
+      )
+      var f = ConceptExerciseFiles()
+      update(f, patterns, "hello-world")
+      check f == expected
+
+    test "every placeholder - Practice Exercise":
+      const expected = PracticeExerciseFiles(
+        solution: @["prefix/hello_world.foo"],
+        test: @["prefix/test-hello-world.foo"],
+        example: @[".meta/helloWorldExample.foo"],
+        editor: @["hello_world.bar"],
+      )
+      var f = PracticeExerciseFiles()
+      update(f, patterns, "hello-world")
+      check f == expected
 
 proc testSyncMetadata =
   suite "parseMetadataToml":
@@ -192,6 +257,7 @@ proc testSyncMetadata =
 
 proc main =
   testSyncCommon()
+  testSyncFilepaths()
   testSyncMetadata()
 
 main()
