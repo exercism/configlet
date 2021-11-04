@@ -183,8 +183,13 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
     if conf.action.update and configPairs.len > 0:
       if conf.action.yes or userSaysYes(skFilepaths):
         for configPair in configPairs:
-          writeFile(configPair.path,
-                    configPair.exerciseConfig.toJson() & "\n")
+          case configPair.exerciseConfig.kind
+          of ekConcept:
+            writeFile(configPair.path,
+                      configPair.exerciseConfig.c.pretty())
+          of ekPractice:
+            writeFile(configPair.path,
+                      configPair.exerciseConfig.p.pretty())
         seenUnsynced.excl skFilepaths
 
   else:

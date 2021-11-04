@@ -157,3 +157,16 @@ proc pretty*(p: PracticeExerciseConfig): string =
 
   result = j.pretty()
   result.add '\n'
+
+proc pretty*(c: ConceptExerciseConfig): string =
+  # TODO: optimize this serialization to pretty JSON.
+  # The below currently does an extra round-trip.
+  var j = c.toJson().parseJson()
+  j.deleteCommonEmptyOptionalProperties()
+
+  for key in ["forked_from", "icon"]:
+    if j[key].len == 0:
+      delete(j, key)
+
+  result = j.pretty()
+  result.add '\n'
