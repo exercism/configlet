@@ -4,7 +4,7 @@ import ".."/[cli, logger]
 import "."/[exercises, sync_common]
 
 # Ignore the styleCheck warning for `source_url`.
-{.push hint[Name]:off.}
+{.push hint[Name]: off.}
 
 type
   UpstreamMetadata = object
@@ -135,7 +135,7 @@ proc pretty(p: PracticeExerciseConfig): string =
     if j[key].len == 0:
       delete(j, key)
   if j["files"]["editor"].len == 0:
-      delete(j["files"], "editor")
+    delete(j["files"], "editor")
 
   # Delete empty optional string keys
   const optionalStringKeys = ["language_versions", "source", "source_url"]

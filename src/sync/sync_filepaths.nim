@@ -26,7 +26,8 @@ func getSlugs(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[string] =
   sort result
 
 when false:
-  proc foo(trackConfig: TrackConfig, exerciseConfig: PracticeExerciseConfig | ConceptExerciseConfig) =
+  proc foo(trackConfig: TrackConfig,
+           exerciseConfig: PracticeExerciseConfig | ConceptExerciseConfig) =
     # TODO: Handle multiple placeholder patterns (present on `swift` track)
     if fStrVal.scanf("$*%{$+}$*", s1, s2, s3):
       const validPlaceholders = [

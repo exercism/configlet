@@ -8,7 +8,7 @@ proc userSaysYes*(syncKind: SyncKind): bool =
   if resp == "y" or resp == "yes":
     result = true
 
-{.push hint[Name]:off.}
+{.push hint[Name]: off.}
 
 type
   ExerciseKind* = enum
