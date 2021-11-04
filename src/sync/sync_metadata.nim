@@ -111,7 +111,13 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
           configPairs.add PathAndUpdatedConfig(path: trackExerciseConfigPath,
                                                practiceExerciseConfig: p)
     else:
-      logNormal(&"[warn] {slug}: the `.meta/config.json` file is missing")
+      let metaDir = trackExerciseConfigPath.parentDir()
+      if dirExists(metaDir):
+        logNormal(&"[warn] {slug}: the `.meta/config.json` file is missing")
+      else:
+        logNormal(&"[warn] {slug}: the `.meta` directory is missing")
+        if conf.action.update:
+          createDir(metaDir)
       seenUnsynced.incl skMetadata
       if conf.action.update:
         let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
@@ -169,20 +175,16 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
     let slug = exercise.slug.string
     let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
 
-    if dirExists(trackMetaDir):
-      let psExerciseDir = psExercisesDir / slug
-      if dirExists(psExerciseDir):
-        const metadataFilename = "metadata.toml"
-        const configFilename = "config.json"
-        let psMetadataTomlPath = psExerciseDir / metadataFilename
-        let trackExerciseConfigPath = trackMetaDir / configFilename
-        addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
-                    trackExerciseConfigPath, seenUnsynced)
-      else:
-        logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+    let psExerciseDir = psExercisesDir / slug
+    if dirExists(psExerciseDir):
+      const metadataFilename = "metadata.toml"
+      const configFilename = "config.json"
+      let psMetadataTomlPath = psExerciseDir / metadataFilename
+      let trackExerciseConfigPath = trackMetaDir / configFilename
+      addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
+                  trackExerciseConfigPath, seenUnsynced)
     else:
-      logNormal(&"[error] {slug}: .meta dir missing")
-      seenUnsynced.incl skMetadata
+      logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
 
   # For each item in `configPairs`, write the JSON to the corresponding path.
   # If successful, exclude `syncKind` from `seenUnsynced`.

@@ -23,15 +23,17 @@ template execAndCheck(expectedExitCode: int; cmd, expectedOutput: string;
     exitCode == expectedExitCode
     outp == expectedOutput
 
+template gitRestore(dir, arg: string) =
+  let args = ["-C", dir, "restore", arg]
+  check git(args).exitCode == 0
+
 template testDiffThenRestore(dir, expectedDiff, restoreArg: string) =
   ## Runs `git diff` in `dir`, and tests that the output is `expectedDiff`. Then
   ## runs `git restore` with the argument `restoreArg`.
   test "the diff is as expected":
     let diff = gitDiffConcise(trackDir)
     check diff == expectedDiff
-
-  let args = ["-C", dir, "restore", restoreArg]
-  check git(args).exitCode == 0
+  gitRestore(dir, restoreArg)
 
 template checkNoDiff(trackDir: string) =
   check gitDiffExitCode(trackDir) == 0
@@ -319,6 +321,20 @@ proc testsForSync(binaryPath: static string) =
     """.unindent()
     let configPath = joinPath("exercises", "practice", "diffie-hellman", ".meta", "config.json")
     let configPathAbsolute = trackDir / configPath
+    let metaDir = configPathAbsolute.parentDir()
+    doAssert metaDir.lastPathPart() == ".meta"
+
+    test "--metadata --yes -e diffie-hellman (missing `.meta` dir)":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] diffie-hellman: the `.meta` directory is missing
+        The `diffie-hellman` Practice Exercise has up-to-date metadata!
+      """.unindent()
+      removeDir(metaDir)
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    gitRestore(trackDir, configPath.parentDir() / "example.nim")
+    gitRestore(trackDir, configPath.parentDir() / "tests.toml")
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
 
     test "--metadata --yes -e diffie-hellman (missing `.meta/config.json`)":
       const expectedOutput = fmt"""
