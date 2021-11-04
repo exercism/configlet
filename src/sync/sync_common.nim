@@ -1,4 +1,4 @@
-import std/[options, strformat, strutils]
+import std/[json, options, strformat, strutils]
 import pkg/jsony
 import ".."/cli
 
@@ -124,3 +124,33 @@ proc parseFile*(path: string, T: typedesc): T =
     contents.fromJson(T)
   else:
     T()
+
+proc pretty*(p: PracticeExerciseConfig): string =
+  # TODO: optimize this serialization to pretty JSON.
+  # The below currently does an extra round-trip.
+  var j = p.toJson().parseJson()
+
+  # Delete empty optional array keys
+  # Note that `authors` is optional for a Practice Exercise, but not for a
+  # Concept Exercise.
+  const optionalArrayKeys = ["authors", "contributors"]
+  for key in optionalArrayKeys:
+    if j[key].len == 0:
+      delete(j, key)
+  if j["files"]["editor"].len == 0:
+    delete(j["files"], "editor")
+
+  # Delete empty optional string keys
+  const optionalStringKeys = ["language_versions", "source", "source_url"]
+  for key in optionalStringKeys:
+    if j[key].getStr().len == 0:
+      delete(j, key)
+
+  # Keep the `test_runner` key only when it was present in the
+  # `.meta/config.json` that we parsed, and had the value `false`.
+  # The spec says that an omitted `test_runner` key implies the value `true`.
+  if p.test_runner.isNone() or p.test_runner.get():
+    delete(j, "test_runner")
+
+  result = j.pretty()
+  result.add '\n'
