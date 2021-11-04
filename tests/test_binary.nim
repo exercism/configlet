@@ -294,6 +294,73 @@ proc testsForSync(binaryPath: static string) =
       execAndCheck(0, &"{syncOfflineUpdate} --metadata -e bob", expectedOutput)
       checkNoDiff(trackDir)
 
+  suite "sync, with --update and --metadata (adds metadata for exercise with missing/empty/unsynced `.meta/config.json`, and exits with 0)":
+    const expectedDiff = """
+      --- exercises/practice/diffie-hellman/.meta/config.json
+      +++ exercises/practice/diffie-hellman/.meta/config.json
+      -  "blurb": "Diffie-Hellman key exchange.",
+      -  "authors": [
+      -    "ee7"
+      -  ],
+      -  "contributors": [],
+      -    "solution": [
+      -      "diffie_hellman.nim"
+      -    ],
+      -    "test": [
+      -      "test_diffie_hellman.nim"
+      -    ],
+      -    "example": [
+      -      ".meta/example.nim"
+      -    ]
+      +    "solution": [],
+      +    "test": [],
+      +    "example": []
+      +  "blurb": "Diffie-Hellman key exchange.",
+    """.unindent()
+    let configPath = joinPath("exercises", "practice", "diffie-hellman", ".meta", "config.json")
+    let configPathAbsolute = trackDir / configPath
+
+    test "--metadata --yes -e diffie-hellman (missing `.meta/config.json`)":
+      const expectedOutput = fmt"""
+        {header}
+        [warn] diffie-hellman: the `.meta/config.json` file is missing
+        The `diffie-hellman` Practice Exercise has up-to-date metadata!
+      """.unindent()
+      removeFile(configPathAbsolute)
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
+    const expectedOutput = fmt"""
+      {header}
+      [warn] diffie-hellman: metadata are unsynced
+      The `diffie-hellman` Practice Exercise has up-to-date metadata!
+    """.unindent()
+    # The `blurb`, `source`, and `source_url` are added again.
+
+    test "--metadata --yes -e diffie-hellman (`.meta/config.json` is zero-length)":
+      removeFile(configPathAbsolute)
+      writeFile(configPathAbsolute, "")
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
+    test "--metadata --yes -e diffie-hellman (`.meta/config.json` is empty JSON object)":
+      removeFile(configPathAbsolute)
+      writeFile(configPathAbsolute, "{}")
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
+    test "--metadata --yes -e diffie-hellman (empty `blurb` value)":
+      removeFile(configPathAbsolute)
+      writeFile(configPathAbsolute, """{"blurb": ""}""")
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
+    test "--metadata --yes -e diffie-hellman (empty `blurb`, `source`, `source_url` value)":
+      removeFile(configPathAbsolute)
+      writeFile(configPathAbsolute, """{"blurb": "", "source": "", "source_url": ""}""")
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
+    testDiffThenRestore(trackDir, expectedDiff, configPath)
+
   suite "sync, with --update and --metadata (updates unsynced metadata for a given exercise, and exits with 0)":
     const expectedOutput = fmt"""
       {header}

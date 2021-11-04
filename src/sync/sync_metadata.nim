@@ -111,7 +111,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
           configPairs.add PathAndUpdatedConfig(path: trackExerciseConfigPath,
                                                practiceExerciseConfig: p)
     else:
-      logNormal(&"[warn] {slug}: {trackExerciseConfigPath} is missing")
+      logNormal(&"[warn] {slug}: the `.meta/config.json` file is missing")
       seenUnsynced.incl skMetadata
       if conf.action.update:
         let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
