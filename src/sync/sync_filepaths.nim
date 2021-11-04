@@ -4,11 +4,13 @@ import ".."/[cli, logger]
 import "."/sync_common
 
 type
+  Slug = distinct string # A kebab-case string.
+
   ConceptExercise = object
-    slug: string
+    slug: Slug
 
   PracticeExercise = object
-    slug: string
+    slug: Slug
 
   Exercises = object
     `concept`: seq[ConceptExercise]
@@ -18,46 +20,57 @@ type
     exercises: Exercises
     files: FilePatterns
 
-func getSlugs(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[string] =
+# TODO: add `jsony` parseHook to enforce that the `slug` value is a kebab-case string.
+
+func `==`(x, y: Slug): bool {.borrow.}
+func `<`(x, y: Slug): bool {.borrow.}
+func replace(slug: Slug, sub: char, by: char): string {.borrow.}
+func len(slug: Slug): int {.borrow.}
+func `$`(slug: Slug): string {.borrow.}
+
+func getSlugs(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
   ## Returns a seq of the slugs `e`, in alphabetical order.
-  result = newSeq[string](e.len)
+  result = newSeq[Slug](e.len)
   for i, item in e:
     result[i] = item.slug
   sort result
 
-func kebabToCamelOrPascal(s: string, capitalizeFirstLetter: bool): string =
-  result = newStringOfCap(s.len)
+func kebabToSnake(slug: Slug): string =
+  slug.replace('-', '_')
+
+func kebabToCamelOrPascal(slug: Slug, capitalizeFirstLetter: bool): string =
+  result = newStringOfCap(slug.len)
   var capitalizeNext = capitalizeFirstLetter
-  for c in s:
+  for c in slug.string:
     if c == '-':
       capitalizeNext = true
     else:
       result.add(if capitalizeNext: toUpperAscii(c) else: c)
       capitalizeNext = false
 
-func kebabToCamel(s: string): string =
-  kebabToCamelOrPascal(s, capitalizeFirstLetter = false)
+func kebabToCamel(slug: Slug): string =
+  kebabToCamelOrPascal(slug, capitalizeFirstLetter = false)
 
-func kebabToPascal(s: string): string =
-  kebabToCamelOrPascal(s, capitalizeFirstLetter = true)
+func kebabToPascal(slug: Slug): string =
+  kebabToCamelOrPascal(slug, capitalizeFirstLetter = true)
 
-func toFilepathsImpl(patterns: seq[string], slug: string): seq[string] =
+func toFilepathsImpl(patterns: seq[string], slug: Slug): seq[string] =
   result = newSeq[string](patterns.len)
   for i, pattern in patterns:
     result[i] = pattern.multiReplace(
-      ("%{snake_slug}", slug.replace('-', '_')),
-      ("%{kebab_slug}", slug),
+      ("%{snake_slug}", slug.kebabToSnake()),
+      ("%{kebab_slug}", slug.string),
       ("%{camel_slug}", slug.kebabToCamel()),
       ("%{pascal_slug}", slug.kebabToPascal())
     )
 
-func update(f: var ConceptExerciseFiles, patterns: FilePatterns, slug: string) =
+func update(f: var ConceptExerciseFiles, patterns: FilePatterns, slug: Slug) =
   f.solution = toFilepathsImpl(patterns.solution, slug)
   f.test = toFilepathsImpl(patterns.test, slug)
   f.exemplar = toFilepathsImpl(patterns.exemplar, slug)
   f.editor = toFilepathsImpl(patterns.editor, slug)
 
-func update(f: var PracticeExerciseFiles, patterns: FilePatterns, slug: string) =
+func update(f: var PracticeExerciseFiles, patterns: FilePatterns, slug: Slug) =
   f.solution = toFilepathsImpl(patterns.solution, slug)
   f.test = toFilepathsImpl(patterns.test, slug)
   f.example = toFilepathsImpl(patterns.example, slug)
@@ -66,7 +79,7 @@ func update(f: var PracticeExerciseFiles, patterns: FilePatterns, slug: string) 
 proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           conf: Conf,
                           exerciseKind: ExerciseKind,
-                          slug: string,
+                          slug: Slug,
                           trackExerciseConfigPath: string,
                           filePatterns: FilePatterns,
                           seenUnsynced: var set[SyncKind]) =
@@ -151,7 +164,7 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
         of ekPractice: trackPracticeExercisesDir
 
       for slug in slugs:
-        let trackExerciseConfigPath = joinPath(dir, slug, ".meta", configFilename)
+        let trackExerciseConfigPath = joinPath(dir, slug.string, ".meta", configFilename)
         addUnsyncedFilepaths(configPairs, conf, exerciseKind, slug,
                              trackExerciseConfigPath, trackConfig.files,
                              seenUnsynced)

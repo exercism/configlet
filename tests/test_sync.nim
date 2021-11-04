@@ -1,7 +1,7 @@
 import std/[importutils, os, options, strformat, unittest]
 import pkg/parsetoml
 import "."/[exec, sync/sync_common]
-from "."/sync/sync_filepaths {.all.} import update
+from "."/sync/sync_filepaths {.all.} import Slug, update
 from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
     metadataAreUpToDate, update
 
@@ -66,6 +66,7 @@ proc testSyncCommon =
 
 proc testSyncFilepaths =
   suite "update":
+    const helloWorldSlug = Slug("hello-world")
     test "Concept Exercise":
       const patterns = FilePatterns(
         solution: @["lib/%{snake_slug}.ex"],
@@ -79,7 +80,7 @@ proc testSyncFilepaths =
         exemplar: @[".meta/exemplar.ex"],
       )
       var f = ConceptExerciseFiles()
-      update(f, patterns, "hello-world")
+      update(f, patterns, helloWorldSlug)
       check f == expected
 
     test "Practice Exercise":
@@ -95,7 +96,7 @@ proc testSyncFilepaths =
         example: @[".meta/Sources/HelloWorld/HelloWorldExample.swift"],
       )
       var f = PracticeExerciseFiles()
-      update(f, patterns, "hello-world")
+      update(f, patterns, helloWorldSlug)
       check f == expected
 
     const patterns = FilePatterns(
@@ -114,7 +115,7 @@ proc testSyncFilepaths =
         editor: @["hello_world.bar"],
       )
       var f = ConceptExerciseFiles()
-      update(f, patterns, "hello-world")
+      update(f, patterns, helloWorldSlug)
       check f == expected
 
     test "every placeholder - Practice Exercise":
@@ -125,7 +126,7 @@ proc testSyncFilepaths =
         editor: @["hello_world.bar"],
       )
       var f = PracticeExerciseFiles()
-      update(f, patterns, "hello-world")
+      update(f, patterns, helloWorldSlug)
       check f == expected
 
 proc testSyncMetadata =
