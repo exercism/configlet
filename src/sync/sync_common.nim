@@ -125,26 +125,29 @@ proc parseFile*(path: string, T: typedesc): T =
   else:
     T()
 
+proc deleteCommonEmptyOptionalProperties(j: var JsonNode) =
+  ## Deletes optional properties from `j`  when the corresponding value is
+  ## empty.
+  # Delete empty optional array properties.
+  if j["contributors"].len == 0:
+    delete(j, "contributors")
+  if j["files"]["editor"].len == 0:
+    delete(j["files"], "editor")
+
+  # Delete empty optional string properties.
+  for key in ["language_versions", "source", "source_url"]:
+    if j[key].getStr().len == 0:
+      delete(j, key)
+
 proc pretty*(p: PracticeExerciseConfig): string =
   # TODO: optimize this serialization to pretty JSON.
   # The below currently does an extra round-trip.
   var j = p.toJson().parseJson()
+  j.deleteCommonEmptyOptionalProperties()
 
-  # Delete empty optional array keys
-  # Note that `authors` is optional for a Practice Exercise, but not for a
-  # Concept Exercise.
-  const optionalArrayKeys = ["authors", "contributors"]
-  for key in optionalArrayKeys:
-    if j[key].len == 0:
-      delete(j, key)
-  if j["files"]["editor"].len == 0:
-    delete(j["files"], "editor")
-
-  # Delete empty optional string keys
-  const optionalStringKeys = ["language_versions", "source", "source_url"]
-  for key in optionalStringKeys:
-    if j[key].getStr().len == 0:
-      delete(j, key)
+  # `authors` is optional for a Practice Exercise, but not for a Concept Exercise.
+  if j["authors"].len == 0:
+    delete(j, "authors")
 
   # Keep the `test_runner` key only when it was present in the
   # `.meta/config.json` that we parsed, and had the value `false`.
