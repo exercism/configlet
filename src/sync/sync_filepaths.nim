@@ -195,6 +195,7 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
     if conf.action.update and configPairs.len > 0:
       if conf.action.yes or userSaysYes(skFilepaths):
         for configPair in configPairs:
+          doAssert lastPathPart(configPair.path) == "config.json"
           case configPair.exerciseConfig.kind
           of ekConcept:
             writeFile(configPair.path,

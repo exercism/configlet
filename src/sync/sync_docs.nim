@@ -113,5 +113,6 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
         # TODO: don't replace first top-level header?
         # For example: the below currently writes `# Description`
         # instead of `# Instructions`
+        doAssert lastPathPart(sdPair.dest) in ["instructions.md", "introduction.md"]
         copyFile(sdPair.source, sdPair.dest)
       seenUnsynced.excl skDocs

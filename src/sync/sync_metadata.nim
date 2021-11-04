@@ -160,7 +160,7 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   if conf.action.update and configPairs.len > 0:
     if conf.action.yes or userSaysYes(skMetadata):
       for configPair in configPairs:
-        doAssert configPair.path.endsWith("config.json")
         let updatedJson = pretty(configPair.practiceExerciseConfig)
+        doAssert lastPathPart(configPair.path) == "config.json"
         writeFile(configPair.path, updatedJson)
       seenUnsynced.excl skMetadata
