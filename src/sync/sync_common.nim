@@ -104,17 +104,6 @@ type
     # The below are unique to Practice Exercises
     test_runner*: Option[bool]
 
-  ExerciseConfig* = object
-    case kind*: ExerciseKind
-    of ekConcept:
-      c*: ConceptExerciseConfig
-    of ekPractice:
-      p*: PracticeExerciseConfig
-
-  PathAndUpdatedExerciseConfig* = object
-    path*: string
-    exerciseConfig*: ExerciseConfig
-
 {.pop.}
 
 proc parseFile*(path: string, T: typedesc): T =

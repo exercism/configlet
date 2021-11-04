@@ -85,6 +85,18 @@ func update(f: var PracticeExerciseFiles, patterns: FilePatterns, slug: Slug) =
   f.example = toFilepathsImpl(patterns.example, slug)
   f.editor = toFilepathsImpl(patterns.editor, slug)
 
+type
+  ExerciseConfig = object
+    case kind: ExerciseKind
+    of ekConcept:
+      c: ConceptExerciseConfig
+    of ekPractice:
+      p: PracticeExerciseConfig
+
+  PathAndUpdatedExerciseConfig = object
+    path: string
+    exerciseConfig: ExerciseConfig
+
 proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           conf: Conf,
                           exerciseKind: ExerciseKind,
