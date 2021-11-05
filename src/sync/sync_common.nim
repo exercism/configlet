@@ -119,49 +119,82 @@ proc parseFile*(path: string, T: typedesc): T =
   else:
     T()
 
-proc deleteCommonEmptyOptionalProperties(j: var JsonNode) =
-  ## Deletes optional properties from `j`  when the corresponding value is
-  ## empty.
-  # Delete empty optional array properties.
-  if j["contributors"].len == 0:
-    delete(j, "contributors")
-  if j["files"]["editor"].len == 0:
-    delete(j["files"], "editor")
+func addNewlineAndIndent(s: var string, indentLevel: int) =
+  ## Adds a newline and spaces to `s`.
+  s.add '\n'
+  const indentSize = 2
+  let numSpaces = indentSize * indentLevel
+  for _ in 1..numSpaces:
+    s.add ' '
 
-  # Delete empty optional string properties.
-  for key in ["language_versions", "source", "source_url"]:
-    if j[key].getStr().len == 0:
-      delete(j, key)
+func addArray(s: var string; key: string; val: openArray[string];
+              isRequired = true, indentLevel = 1) =
+  if isRequired or val.len > 0:
+    s.addNewlineAndIndent(indentLevel)
+    escapeJson(key, s)
+    s.add ": "
+    if val.len > 0:
+      s.add '['
+      let inner = indentLevel + 1
+      for i, item in val:
+        if i > 0:
+          s.add ','
+        s.addNewlineAndIndent(inner)
+        escapeJson(item, s)
+      s.addNewlineAndIndent(indentLevel)
+      s.add "],"
+    else:
+      s.add "[],"
 
-proc pretty*(p: PracticeExerciseConfig): string =
-  # TODO: optimize this serialization to pretty JSON.
-  # The below currently does an extra round-trip.
-  var j = p.toJson().parseJson()
-  j.deleteCommonEmptyOptionalProperties()
+func addString(s: var string; key, val: string; isRequired = true,
+               indentLevel = 1) =
+  if isRequired or val.len > 0:
+    s.addNewlineAndIndent(indentLevel)
+    escapeJson(key, s)
+    s.add ": "
+    escapeJson(val, s)
+    s.add ','
 
-  # `authors` is optional for a Practice Exercise, but not for a Concept Exercise.
-  if j["authors"].len == 0:
-    delete(j, "authors")
+func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
+              indentLevel = 1) =
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson("files", s)
+  s.add ": {"
+  let inner = indentLevel + 1
+  s.addArray("solution", val.solution, indentLevel = inner)
+  s.addArray("test", val.test, indentLevel = inner)
+  s.addArray("editor", val.editor, isRequired = false, indentLevel = inner)
+  when val is ConceptExerciseFiles:
+    s.addArray("exemplar", val.exemplar, indentLevel = inner)
+  when val is PracticeExerciseFiles:
+    s.addArray("example", val.example, indentLevel = inner)
+  s.setLen s.len-1 # Remove comma.
+  s.addNewlineAndIndent(indentLevel)
+  s.add "},"
 
-  # Keep the `test_runner` key only when it was present in the
-  # `.meta/config.json` that we parsed, and had the value `false`.
-  # The spec says that an omitted `test_runner` key implies the value `true`.
-  if p.test_runner.isNone() or p.test_runner.get():
-    delete(j, "test_runner")
-
-  result = j.pretty()
-  result.add '\n'
-
-proc pretty*(c: ConceptExerciseConfig): string =
-  # TODO: optimize this serialization to pretty JSON.
-  # The below currently does an extra round-trip.
-  var j = c.toJson().parseJson()
-  j.deleteCommonEmptyOptionalProperties()
-
-  if c.forked_from.isNone() or c.forked_from.get().len == 0:
-    delete(j, "forked_from")
-  if j["icon"].len == 0:
-    delete(j, "icon")
-
-  result = j.pretty()
-  result.add '\n'
+func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
+  result = newStringOfCap(100)
+  result.add '{'
+  when e is ConceptExerciseConfig:
+    result.addArray("authors", e.authors)
+  when e is PracticeExerciseConfig:
+    result.addArray("authors", e.authors, isRequired = false)
+  if e.contributors.isSome():
+    result.addArray("contributors", e.contributors.get(), isRequired = false)
+  result.addFiles(e.files)
+  result.addString("language_versions", e.language_versions, isRequired = false)
+  when e is ConceptExerciseConfig:
+    if e.forked_from.isSome():
+      result.addArray("forked_from", e.forked_from.get(), isRequired = false)
+    result.addString("icon", e.icon, isRequired = false)
+  when e is PracticeExerciseConfig:
+    # Keep the `test_runner` key only when it was present in the
+    # `.meta/config.json` that we parsed, and had the value `false`.
+    # The spec says that an omitted `test_runner` key implies the value `true`.
+    if e.test_runner.isSome() and not e.test_runner.get():
+      result.addString("test_runner", "false") # Hack.
+  result.addString("blurb", e.blurb)
+  result.addString("source", e.source, isRequired = false)
+  result.addString("source_url", e.source_url, isRequired = false)
+  result.setLen result.len-1 # Remove comma.
+  result.add "\n}\n"
