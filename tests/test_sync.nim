@@ -26,7 +26,7 @@ proc testSyncCommon =
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
       const expected = ConceptExerciseConfig(
         authors: @["neenjaw"],
-        contributors: @["angelikatyborska"],
+        contributors: some(@["angelikatyborska"]),
         files: ConceptExerciseFiles(
           solution: @["lib/lasagna.ex"],
           test: @["test/lasagna_test.exs"],
@@ -48,7 +48,7 @@ proc testSyncCommon =
       const dartsConfigPath = joinPath(dartsDir, ".meta", "config.json")
       const expected = PracticeExerciseConfig(
         authors: @["jiegillet"],
-        contributors: @["angelikatyborska"],
+        contributors: some(@["angelikatyborska"]),
         files: PracticeExerciseFiles(
           solution: @["lib/darts.ex"],
           test: @["test/darts_test.exs"],
@@ -256,7 +256,7 @@ proc testSyncMetadata =
     test "updates `blurb`, `source`, and `source_url`":
       var p = PracticeExerciseConfig(
         authors: @["foo"],
-        contributors: @["foo"],
+        contributors: some(@["foo"]),
         files: PracticeExerciseFiles(
           solution: @["foo"],
           test: @["foo"],
@@ -272,7 +272,7 @@ proc testSyncMetadata =
       update(p, metadata)
       const expected = PracticeExerciseConfig(
         authors: @["foo"],
-        contributors: @["foo"],
+        contributors: some(@["foo"]),
         files: PracticeExerciseFiles(
           solution: @["foo"],
           test: @["foo"],

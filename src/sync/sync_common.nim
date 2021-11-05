@@ -31,7 +31,7 @@ type
   #
   #   ExerciseConfig* = object
   #     authors: seq[string]
-  #     contributors: seq[string]
+  #     contributors: Option[seq[string]]
   #     files*: Files
   #     language_versions: string
   #     blurb*: string
@@ -83,7 +83,7 @@ type
 
   ConceptExerciseConfig* = object
     authors: seq[string]
-    contributors: seq[string]
+    contributors: Option[seq[string]]
     files*: ConceptExerciseFiles
     language_versions: string
     blurb*: string
@@ -95,7 +95,7 @@ type
 
   PracticeExerciseConfig* = object
     authors: seq[string]
-    contributors: seq[string]
+    contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
     language_versions: string
     blurb*: string
