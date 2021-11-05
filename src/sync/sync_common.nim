@@ -3,10 +3,15 @@ import pkg/jsony
 import ".."/cli
 
 proc userSaysYes*(syncKind: SyncKind): bool =
-  stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
-  let resp = stdin.readLine().toLowerAscii()
-  if resp == "y" or resp == "yes":
-    result = true
+  while true:
+    stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
+    case stdin.readLine().toLowerAscii()
+    of "y", "yes":
+      return true
+    of "n", "no":
+      return false
+    else:
+      stderr.writeLine "Unrecognized response. Please answer [y]es or [n]o."
 
 {.push hint[Name]: off.}
 
