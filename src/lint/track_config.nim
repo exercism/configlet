@@ -333,7 +333,7 @@ func getConceptSlugs(concepts: Concepts): HashSet[string] =
   for con in concepts:
     result.incl con.slug
 
-func joinWithNewlines[A](s: SomeSet[A]): string =
+func joinWithNewlines[A](s: sets.SomeSet[A]): string =
   result = ""
   for item in s:
     result.add item
