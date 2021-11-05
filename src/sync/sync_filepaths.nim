@@ -114,6 +114,17 @@ type
     path: string
     exerciseConfig: ExerciseConfig
 
+proc init(T: typedesc, kind: ExerciseKind, trackExerciseConfigPath: string): T =
+  case kind
+  of ekConcept: T(
+    kind: kind,
+    c: parseFile(trackExerciseConfigPath, ConceptExerciseConfig)
+  )
+  of ekPractice: T(
+    kind: kind,
+    p: parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
+  )
+
 proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           conf: Conf,
                           exerciseKind: ExerciseKind,
@@ -122,18 +133,7 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           filePatterns: FilePatterns,
                           seenUnsynced: var set[SyncKind]) =
   if fileExists(trackExerciseConfigPath):
-    var exerciseConfig =
-      case exerciseKind
-      of ekConcept:
-        ExerciseConfig(
-          kind: exerciseKind,
-          c: parseFile(trackExerciseConfigPath, ConceptExerciseConfig)
-        )
-      of ekPractice:
-        ExerciseConfig(
-          kind: exerciseKind,
-          p: parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
-        )
+    var exerciseConfig = ExerciseConfig.init(exerciseKind, trackExerciseConfigPath)
 
     let filepathsAreSynced =
       case exerciseKind
