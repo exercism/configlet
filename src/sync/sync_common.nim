@@ -39,7 +39,7 @@ type
   #     source_url*: string
   #     case kind*: ExerciseKind
   #     of ekConcept:
-  #       forked_from: seq[string]
+  #       forked_from: Option[seq[string]]
   #       icon: string
   #     of ekPractice:
   #       test_runner: Option[bool]
@@ -90,7 +90,7 @@ type
     source*: string
     source_url*: string
     # The below are unique to Concept Exercises
-    forked_from: seq[string]
+    forked_from: Option[seq[string]]
     icon: string
 
   PracticeExerciseConfig* = object
@@ -153,9 +153,10 @@ proc pretty*(c: ConceptExerciseConfig): string =
   var j = c.toJson().parseJson()
   j.deleteCommonEmptyOptionalProperties()
 
-  for key in ["forked_from", "icon"]:
-    if j[key].len == 0:
-      delete(j, key)
+  if c.forked_from.isNone() or c.forked_from.get().len == 0:
+    delete(j, "forked_from")
+  if j["icon"].len == 0:
+    delete(j, "icon")
 
   result = j.pretty()
   result.add '\n'

@@ -37,7 +37,7 @@ proc testSyncCommon =
         blurb: "Learn about the basics of Elixir by following a lasagna recipe.",
         source: "",
         source_url: "",
-        forked_from: @["csharp/lucians-luscious-lasagna"],
+        forked_from: some(@["csharp/lucians-luscious-lasagna"]),
         icon: ""
       )
       let exerciseConfig = parseFile(lasagnaConfigPath, ConceptExerciseConfig)
