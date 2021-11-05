@@ -20,10 +20,10 @@ Options for sync:
   -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
   -u, --update                 Update unsynced docs, filepaths, metadata, and tests
   -y, --yes                    Auto-confirm every prompt for updating docs, filepaths, and metadata
-      --docs                   Sync `.docs/introduction.md` and `.docs/instructions.md`
-      --filepaths              Sync filepaths
-      --metadata               Sync metadata
-      --tests                  Sync tests
+      --docs                   Sync exercise .docs/introduction.md and .docs/instructions.md files
+      --filepaths              Sync exercise .meta/config.json `files` values
+      --metadata               Sync exercise .meta/config.json metadata values
+      --tests                  Sync exercise .meta/tests.toml files
 
 Options for uuid:
   -n, --num <int>              Number of UUIDs to generate

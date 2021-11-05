@@ -168,10 +168,10 @@ func genHelpText: string =
                     &"`{list(optSyncProbSpecsDir)}` is up-to-date",
     optSyncUpdate: "Update unsynced docs, filepaths, metadata, and tests",
     optSyncYes: "Auto-confirm every prompt for updating docs, filepaths, and metadata",
-    optSyncDocs: "Sync `.docs/introduction.md` and `.docs/instructions.md`",
-    optSyncFilepaths: "Sync filepaths",
-    optSyncMetadata: "Sync metadata",
-    optSyncTests: "Sync tests",
+    optSyncDocs: "Sync exercise .docs/introduction.md and .docs/instructions.md files",
+    optSyncFilepaths: "Sync exercise .meta/config.json `files` values",
+    optSyncMetadata: "Sync exercise .meta/config.json metadata values",
+    optSyncTests: "Sync exercise .meta/tests.toml files",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
