@@ -459,7 +459,7 @@ proc processCmdLine*: Conf =
       let msg = fmt"""
         '{list(optSyncYes)}' cannot be used when updating tests
         You can either:
-        - remove  '{list(optSyncYes)}'
+        - remove '{list(optSyncYes)}'
         - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
         If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
       showError(msg)
