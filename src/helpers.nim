@@ -1,4 +1,4 @@
-import std/[algorithm, os, strformat, terminal]
+import std/[algorithm, os, strformat, strscans, terminal]
 import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
@@ -65,3 +65,24 @@ proc dirExists*(path: Path): bool {.borrow.}
 proc fileExists*(path: Path): bool {.borrow.}
 proc readFile*(path: Path): string {.borrow.}
 proc writeFile*(path: Path; content: string) {.borrow.}
+
+func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
+  ## Returns the line and column number corresponding to the `offset` in `s`.
+  result = (1, 1)
+  for i, c in s:
+    if i == offset:
+      break
+    elif c == '\n':
+      inc result.line
+      result.col = 0
+    inc result.col
+
+proc tidyJsonyMessage*(jsonyMsg, fileContents: string): string =
+  var jsonyMsgStart = ""
+  var offset = -1
+  # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
+  if jsonyMsg.scanf("$* At offset: $i$.", jsonyMsgStart, offset):
+    let (line, col) = toLineAndCol(fileContents, offset)
+    &"({line}, {col}): {jsonyMsgStart}"
+  else:
+    &": {jsonyMsg}"

@@ -1,6 +1,6 @@
 import std/[json, options, strformat, strutils]
 import pkg/jsony
-import ".."/cli
+import ".."/[cli, helpers]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
   while true:
@@ -115,7 +115,14 @@ proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
   let contents = readFile(path)
   if contents.len > 0:
-    contents.fromJson(T)
+    try:
+      contents.fromJson(T)
+    except jsony.JsonError:
+      let jsonyMsg = getCurrentExceptionMsg()
+      let details = tidyJsonyMessage(jsonyMsg, contents)
+      let msg = &"JSON parsing error:\n{path}{details}"
+      stderr.writeLine msg
+      quit 1
   else:
     T()
 
