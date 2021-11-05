@@ -172,6 +172,15 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
       configPairs.add PathAndUpdatedExerciseConfig(path: trackExerciseConfigPath,
                                                    exerciseConfig: exerciseConfig)
 
+proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
+  for configPair in configPairs:
+    doAssert lastPathPart(configPair.path) == "config.json"
+    case configPair.exerciseConfig.kind
+    of ekConcept:
+      writeFile(configPair.path, configPair.exerciseConfig.c.pretty())
+    of ekPractice:
+      writeFile(configPair.path, configPair.exerciseConfig.p.pretty())
+
 proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
                              conf: Conf;
                              trackPracticeExercisesDir: string,
@@ -213,15 +222,7 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
     # If successful, excludes `skFilepaths` from `seenUnsynced`.
     if conf.action.update and configPairs.len > 0:
       if conf.action.yes or userSaysYes(skFilepaths):
-        for configPair in configPairs:
-          doAssert lastPathPart(configPair.path) == "config.json"
-          case configPair.exerciseConfig.kind
-          of ekConcept:
-            writeFile(configPair.path,
-                      configPair.exerciseConfig.c.pretty())
-          of ekPractice:
-            writeFile(configPair.path,
-                      configPair.exerciseConfig.p.pretty())
+        write(configPairs)
         seenUnsynced.excl skFilepaths
 
   else:
