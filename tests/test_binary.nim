@@ -287,13 +287,19 @@ proc testsForSync(binaryPath: static string) =
     test "no options":
       execAndCheck(1, syncOffline, docsMetadataTests)
 
+  suite "sync, with --update and --metadata, without --yes (no diff for an exercise with up-to-date metadata, and exits with 1)":
+    test "--metadata -e bob":
+      let exitCode = execCmdEx(&"{syncOfflineUpdate} --metadata -e bob")[1]
+      check exitCode == 1
+      checkNoDiff(trackDir)
+
   suite "sync, with --update and --metadata (no diff for an exercise with up-to-date metadata, and exits with 0)":
     test "--metadata -e bob":
       const expectedOutput = fmt"""
         {header}
         The `bob` Practice Exercise has up-to-date metadata!
       """.unindent()
-      execAndCheck(0, &"{syncOfflineUpdate} --metadata -e bob", expectedOutput)
+      execAndCheck(0, &"{syncOfflineUpdate} --metadata -e bob --yes", expectedOutput)
       checkNoDiff(trackDir)
 
   suite "sync, with --update and --metadata (adds metadata for exercise with missing/empty/unsynced `.meta/config.json`, and exits with 0)":

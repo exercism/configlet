@@ -455,14 +455,26 @@ proc processCmdLine*: Conf =
                 &"'{list(optSyncProbSpecsDir)}'")
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-    if result.action.update and result.action.yes and skTests in result.action.scope:
-      let msg = fmt"""
-        '{list(optSyncYes)}' cannot be used when updating tests
-        You can either:
-        - remove '{list(optSyncYes)}'
-        - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
-        If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
-      showError(msg)
+    if result.action.update:
+      if result.action.yes and skTests in result.action.scope:
+        let msg = fmt"""
+          '{list(optSyncYes)}' cannot be used when updating tests
+          You can either:
+          - remove '{list(optSyncYes)}'
+          - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
+          If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
+        showError(msg)
+      if not isatty(stdin):
+        if not result.action.yes:
+          let intersection = result.action.scope * {skDocs, skFilepaths, skMetadata}
+          if intersection.len > 0:
+            let msg = fmt"""
+              Configlet was used in a non-interactive context, and the --update option was passed without the --yes option
+              You can either:
+              - keep using configlet non-interactively, and remove the --update option so that no destructive changes are performed
+              - keep using configlet non-interactively, and add the --yes option to perform destructive changes
+              - use configlet in an interactive terminal""".unindent()
+            showError(msg)
   of actUuid:
     discard
   of actGenerate:
