@@ -125,6 +125,20 @@ proc init(T: typedesc, kind: ExerciseKind, trackExerciseConfigPath: string): T =
     p: parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
   )
 
+func hasSyncedFilepaths(e: ExerciseConfig, patterns: FilePatterns): bool =
+  case e.kind
+  of ekConcept:
+    isSynced(e.c.files, patterns)
+  of ekPractice:
+    isSynced(e.p.files, patterns)
+
+func update(e: var ExerciseConfig, patterns: FilePatterns, slug: Slug) =
+  case e.kind
+  of ekConcept:
+    update(e.c.files, patterns, slug)
+  of ekPractice:
+    update(e.p.files, patterns, slug)
+
 proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           conf: Conf,
                           exerciseKind: ExerciseKind,
@@ -134,27 +148,15 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
                           seenUnsynced: var set[SyncKind]) =
   if fileExists(trackExerciseConfigPath):
     var exerciseConfig = ExerciseConfig.init(exerciseKind, trackExerciseConfigPath)
-
-    let filepathsAreSynced =
-      case exerciseKind
-      of ekConcept:
-        isSynced(exerciseConfig.c.files, filePatterns)
-      of ekPractice:
-        isSynced(exerciseConfig.p.files, filePatterns)
-
+    let filepathsAreSynced = hasSyncedFilepaths(exerciseConfig, filePatterns)
     if filepathsAreSynced:
       logDetailed(&"[skip] {slug}: filepaths are up to date")
     else:
       logNormal(&"[warn] {slug}: filepaths are unsynced")
       seenUnsynced.incl skFilepaths
-      case exerciseKind
-      of ekConcept:
-        update(exerciseConfig.c.files, filePatterns, slug)
-      of ekPractice:
-        update(exerciseConfig.p.files, filePatterns, slug)
+      update(exerciseConfig, filePatterns, slug)
       configPairs.add PathAndUpdatedExerciseConfig(path: trackExerciseConfigPath,
                                                    exerciseConfig: exerciseConfig)
-
   else:
     let metaDir = trackExerciseConfigPath.parentDir()
     if dirExists(metaDir):
@@ -165,12 +167,8 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
         createDir(metaDir)
     seenUnsynced.incl skFilepaths
     if conf.action.update:
-      var exerciseConfig = ExerciseConfig()
-      case exerciseKind
-      of ekConcept:
-        update(exerciseConfig.c.files, filePatterns, slug)
-      of ekPractice:
-        update(exerciseConfig.p.files, filePatterns, slug)
+      var exerciseConfig = ExerciseConfig(kind: exerciseKind)
+      update(exerciseConfig, filePatterns, slug)
       configPairs.add PathAndUpdatedExerciseConfig(path: trackExerciseConfigPath,
                                                    exerciseConfig: exerciseConfig)
 
