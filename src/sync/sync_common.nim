@@ -39,15 +39,15 @@ type
   #     contributors: Option[seq[string]]
   #     files*: Files
   #     language_versions: string
-  #     blurb*: string
-  #     source*: string
-  #     source_url*: string
   #     case kind*: ExerciseKind
   #     of ekConcept:
   #       forked_from: Option[seq[string]]
   #       icon: string
   #     of ekPractice:
   #       test_runner: Option[bool]
+  #     blurb*: string
+  #     source*: string
+  #     source_url*: string
   #
   # and parse with `jsony.fromJson` because the JSON does not actually contain a
   # `kind` key. Furthermore, the unique keys for Practice and Concept exercises
@@ -91,23 +91,23 @@ type
     contributors: Option[seq[string]]
     files*: ConceptExerciseFiles
     language_versions: string
+    forked_from: Option[seq[string]] # Allowed only for a Concept Exercise
+    icon: string # Allowed only for a Concept Exercises
     blurb*: string
     source*: string
     source_url*: string
-    # The below are unique to Concept Exercises
-    forked_from: Option[seq[string]]
-    icon: string
 
   PracticeExerciseConfig* = object
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
     language_versions: string
+    test_runner*: Option[bool] # Allowed only for a Practice Exercise
+    # The below fields are synced for a Practice Exercise that exists in the
+    # `exercism/problem-specifications` repo.
     blurb*: string
     source*: string
     source_url*: string
-    # The below are unique to Practice Exercises
-    test_runner*: Option[bool]
 
 {.pop.}
 
