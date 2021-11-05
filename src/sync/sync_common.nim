@@ -47,7 +47,7 @@ type
   #       forked_from: Option[seq[string]]
   #       icon: string
   #     of ekPractice:
-  #       test_runner: Option[bool]
+  #       test_runner: bool
   #
   # and parse with `jsony.fromJson` because the JSON does not actually contain a
   # `kind` key. Furthermore, the unique keys for Practice and Concept exercises
@@ -107,9 +107,13 @@ type
     source*: string
     source_url*: string
     # The below are unique to Practice Exercises
-    test_runner*: Option[bool]
+    test_runner*: bool
 
 {.pop.}
+
+func newHook*(p: var PracticeExerciseConfig) =
+  # Set a default value of `p` before deserialization.
+  p.test_runner = true
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
@@ -146,7 +150,7 @@ proc pretty*(p: PracticeExerciseConfig): string =
   # Keep the `test_runner` key only when it was present in the
   # `.meta/config.json` that we parsed, and had the value `false`.
   # The spec says that an omitted `test_runner` key implies the value `true`.
-  if p.test_runner.isNone() or p.test_runner.get():
+  if p.test_runner:
     delete(j, "test_runner")
 
   result = j.pretty()
