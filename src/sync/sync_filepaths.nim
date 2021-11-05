@@ -26,16 +26,14 @@ func replace(slug: Slug, sub: char, by: char): string {.borrow.}
 func len(slug: Slug): int {.borrow.}
 func `$`(slug: Slug): string {.borrow.}
 
-proc parseHook(s: string, i: var int, v: var Slug) =
+proc postHook(e: ConceptExercise | PracticeExercise) =
   ## Quits with an error message if a `slug` value is not a kebab-case string.
-  var x: string
-  parseHook(s, i, x)
-  if not x.isKebabCase():
+  let s = e.slug.string
+  if not isKebabCase(s):
     let msg = "Error: the track `config.json` file contains " &
-              &"an exercise slug of \"{x}\", which is not a kebab-case string"
+              &"an exercise slug of \"{s}\", which is not a kebab-case string"
     stderr.writeLine msg
     quit 1
-  v = cast[Slug](x)
 
 func getSlugs(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
   ## Returns a seq of the slugs `e`, in alphabetical order.
