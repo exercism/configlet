@@ -67,7 +67,39 @@ proc testSyncCommon =
 proc testSyncFilepaths =
   suite "update":
     const helloWorldSlug = Slug("hello-world")
-    test "Concept Exercise":
+
+    block:
+      const patterns = FilePatterns(
+        solution: @["lib/%{snake_slug}.ex"],
+        test: @["test/%{snake_slug}_test.exs"],
+        example: @[".meta/example.ex"],
+        exemplar: @[".meta/exemplar.ex"],
+        editor: @["abc"],
+      )
+
+      test "synced Concept Exercise":
+        const fBefore = ConceptExerciseFiles(
+          solution: @["foo"],
+          test: @["foo"],
+          exemplar: @["foo"],
+          editor: @["foo"],
+        )
+        var f = fBefore
+        update(f, patterns, helloWorldSlug)
+        check f == fBefore
+
+      test "synced Practice Exercise":
+        const fBefore = PracticeExerciseFiles(
+          solution: @["foo"],
+          test: @["foo"],
+          example: @["foo"],
+          editor: @["foo"],
+        )
+        var f = fBefore
+        update(f, patterns, helloWorldSlug)
+        check f == fBefore
+
+    test "unsynced Concept Exercise":
       const patterns = FilePatterns(
         solution: @["lib/%{snake_slug}.ex"],
         test: @["test/%{snake_slug}_test.exs"],
@@ -83,7 +115,7 @@ proc testSyncFilepaths =
       update(f, patterns, helloWorldSlug)
       check f == expected
 
-    test "Practice Exercise":
+    test "unsynced Practice Exercise":
       const patterns = FilePatterns(
         solution: @["Sources/%{pascal_slug}/%{pascal_slug}.swift"],
         test: @["Tests/%{pascal_slug}Tests/%{pascal_slug}Tests.swift"],
@@ -99,35 +131,36 @@ proc testSyncFilepaths =
       update(f, patterns, helloWorldSlug)
       check f == expected
 
-    const patterns = FilePatterns(
-      solution: @["prefix/%{snake_slug}.foo"],
-      test: @["prefix/test-%{kebab_slug}.foo"],
-      example: @[".meta/%{camel_slug}Example.foo"],
-      exemplar: @[".meta/%{pascal_slug}Exemplar.foo"],
-      editor: @["%{snake_slug}.bar"],
-    )
-
-    test "every placeholder - Concept Exercise":
-      const expected = ConceptExerciseFiles(
-        solution: @["prefix/hello_world.foo"],
-        test: @["prefix/test-hello-world.foo"],
-        exemplar: @[".meta/HelloWorldExemplar.foo"],
-        editor: @["hello_world.bar"],
+    block:
+      const patterns = FilePatterns(
+        solution: @["prefix/%{snake_slug}.foo"],
+        test: @["prefix/test-%{kebab_slug}.foo"],
+        example: @[".meta/%{camel_slug}Example.foo"],
+        exemplar: @[".meta/%{pascal_slug}Exemplar.foo"],
+        editor: @["%{snake_slug}.bar"],
       )
-      var f = ConceptExerciseFiles()
-      update(f, patterns, helloWorldSlug)
-      check f == expected
 
-    test "every placeholder - Practice Exercise":
-      const expected = PracticeExerciseFiles(
-        solution: @["prefix/hello_world.foo"],
-        test: @["prefix/test-hello-world.foo"],
-        example: @[".meta/helloWorldExample.foo"],
-        editor: @["hello_world.bar"],
-      )
-      var f = PracticeExerciseFiles()
-      update(f, patterns, helloWorldSlug)
-      check f == expected
+      test "every placeholder - Concept Exercise":
+        const expected = ConceptExerciseFiles(
+          solution: @["prefix/hello_world.foo"],
+          test: @["prefix/test-hello-world.foo"],
+          exemplar: @[".meta/HelloWorldExemplar.foo"],
+          editor: @["hello_world.bar"],
+        )
+        var f = ConceptExerciseFiles()
+        update(f, patterns, helloWorldSlug)
+        check f == expected
+
+      test "every placeholder - Practice Exercise":
+        const expected = PracticeExerciseFiles(
+          solution: @["prefix/hello_world.foo"],
+          test: @["prefix/test-hello-world.foo"],
+          example: @[".meta/helloWorldExample.foo"],
+          editor: @["hello_world.bar"],
+        )
+        var f = PracticeExerciseFiles()
+        update(f, patterns, helloWorldSlug)
+        check f == expected
 
 proc testSyncMetadata =
   suite "parseMetadataToml":

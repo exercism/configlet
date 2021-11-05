@@ -63,7 +63,7 @@ func kebabToCamel(slug: Slug): string =
 func kebabToPascal(slug: Slug): string =
   kebabToCamelOrPascal(slug, capitalizeFirstLetter = true)
 
-func toFilepathsImpl(patterns: seq[string], slug: Slug): seq[string] =
+func toFilepaths(patterns: seq[string], slug: Slug): seq[string] =
   result = newSeq[string](patterns.len)
   for i, pattern in patterns:
     result[i] = pattern.multiReplace(
@@ -73,17 +73,34 @@ func toFilepathsImpl(patterns: seq[string], slug: Slug): seq[string] =
       ("%{pascal_slug}", slug.kebabToPascal())
     )
 
-func update(f: var ConceptExerciseFiles, patterns: FilePatterns, slug: Slug) =
-  f.solution = toFilepathsImpl(patterns.solution, slug)
-  f.test = toFilepathsImpl(patterns.test, slug)
-  f.exemplar = toFilepathsImpl(patterns.exemplar, slug)
-  f.editor = toFilepathsImpl(patterns.editor, slug)
+func update(a: var seq[string], b: seq[string], slug: Slug) =
+  if a.len == 0 and b.len > 0:
+    a = toFilepaths(b, slug)
 
-func update(f: var PracticeExerciseFiles, patterns: FilePatterns, slug: Slug) =
-  f.solution = toFilepathsImpl(patterns.solution, slug)
-  f.test = toFilepathsImpl(patterns.test, slug)
-  f.example = toFilepathsImpl(patterns.example, slug)
-  f.editor = toFilepathsImpl(patterns.editor, slug)
+func update(f: var (ConceptExerciseFiles | PracticeExerciseFiles),
+            patterns: FilePatterns,
+            slug: Slug) =
+  update(f.solution, patterns.solution, slug)
+  update(f.test, patterns.test, slug)
+  update(f.editor, patterns.editor, slug)
+  when f is ConceptExerciseFiles:
+    update(f.exemplar, patterns.exemplar, slug)
+  when f is PracticeExerciseFiles:
+    update(f.example, patterns.example, slug)
+
+func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
+              patterns: FilePatterns): bool =
+  # Returns `true` if every field of `f` is either non-empty or cannot be synced
+  # from the corresponding field in `patterns`.
+  when f is ConceptExerciseFiles:
+    if patterns.exemplar.len > 0 and f.exemplar.len == 0:
+      return false
+  when f is PracticeExerciseFiles:
+    if patterns.example.len > 0 and f.example.len == 0:
+      return false
+  (patterns.solution.len == 0 or f.solution.len > 0) and
+      (patterns.test.len == 0 or f.test.len > 0) and
+      (patterns.editor.len == 0 or f.editor.len > 0)
 
 type
   ExerciseConfig = object
@@ -121,21 +138,22 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
     let filepathsAreSynced =
       case exerciseKind
       of ekConcept:
-        let filesBefore = exerciseConfig.c.files
-        update(exerciseConfig.c.files, filePatterns, slug)
-        filesBefore == exerciseConfig.c.files
+        isSynced(exerciseConfig.c.files, filePatterns)
       of ekPractice:
-        let filesBefore = exerciseConfig.p.files
-        update(exerciseConfig.p.files, filePatterns, slug)
-        filesBefore == exerciseConfig.p.files
+        isSynced(exerciseConfig.p.files, filePatterns)
 
     if filepathsAreSynced:
       logDetailed(&"[skip] {slug}: filepaths are up to date")
     else:
       logNormal(&"[warn] {slug}: filepaths are unsynced")
       seenUnsynced.incl skFilepaths
+      case exerciseKind
+      of ekConcept:
+        update(exerciseConfig.c.files, filePatterns, slug)
+      of ekPractice:
+        update(exerciseConfig.p.files, filePatterns, slug)
       configPairs.add PathAndUpdatedExerciseConfig(path: trackExerciseConfigPath,
-                                                  exerciseConfig: exerciseConfig)
+                                                   exerciseConfig: exerciseConfig)
 
   else:
     let metaDir = trackExerciseConfigPath.parentDir()
@@ -160,10 +178,13 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
                              conf: Conf;
                              trackPracticeExercisesDir: string,
                              trackConceptExercisesDir: string) =
-  ## Prints a message for each exercise on the track that has a
-  ## `.meta/config.json` file containing `files` values that are unsynced with
-  ## the track `config.json` file, and updates them if `--update` was passed and
-  ## the user confirms.
+  ## Prints a message for each track exercise that:
+  ## - lacks a `.meta/config.json` file
+  ## - or has a `.meta/config.json` file with an missing/empty
+  ##   `files.solution|test|editor|example|exemplar` array, when that value has
+  ##   a pattern defined in the track-level `config.json` file.
+  ##
+  ## Populates those values if `--update` was passed and the user confirms.
   ##
   ## Includes `skFilepaths` in `seenUnsynced` if there are still such unsynced
   ## files afterwards.
