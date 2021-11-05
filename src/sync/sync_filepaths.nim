@@ -31,7 +31,7 @@ proc parseHook(s: string, i: var int, v: var Slug) =
   var x: string
   parseHook(s, i, x)
   if not x.isKebabCase():
-    let msg = &"Error: the track `config.json` file contains " &
+    let msg = "Error: the track `config.json` file contains " &
               &"an exercise slug of \"{x}\", which is not a kebab-case string"
     stderr.writeLine msg
     quit 1
