@@ -67,7 +67,7 @@ proc parseMetadataToml(path: string): UpstreamMetadata =
     elif key.len > 0 and key != "title":
       let j = min(toml.high, i)
       let line = toml[indexLineStart .. j].strip()
-      echo(&"[error] unexpected key/value pair:\n{path}:\n{line}")
+      logNormal(&"[error] unexpected key/value pair:\n{path}:\n{line}")
     val.setLen 0
     i += skipUntil(toml, '\n', i)
 
