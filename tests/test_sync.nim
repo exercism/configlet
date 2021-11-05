@@ -59,7 +59,7 @@ proc testSyncCommon =
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
         source_url: "",
-        test_runner: true
+        test_runner: none(bool)
       )
       let exerciseConfig = parseFile(dartsConfigPath, PracticeExerciseConfig)
       check exerciseConfig == expected
@@ -267,7 +267,7 @@ proc testSyncMetadata =
         blurb: "",
         source: "",
         source_url: "",
-        test_runner: true
+        test_runner: none(bool)
       )
       update(p, metadata)
       const expected = PracticeExerciseConfig(
@@ -283,7 +283,7 @@ proc testSyncMetadata =
         blurb: "This is a really good exercise.",
         source: "From a conversation with ee7.",
         source_url: "https://example.com",
-        test_runner: true
+        test_runner: none(bool)
         )
       check:
         p == expected
