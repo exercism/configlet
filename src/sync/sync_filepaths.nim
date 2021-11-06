@@ -72,7 +72,7 @@ func toFilepaths(patterns: seq[string], slug: Slug): seq[string] =
     )
 
 func update(a: var seq[string], b: seq[string], slug: Slug) =
-  if a.len == 0 and b.len > 0:
+  if (a.len == 0 or a == @[""]) and b.len > 0:
     a = toFilepaths(b, slug)
 
 func update(f: var (ConceptExerciseFiles | PracticeExerciseFiles),
@@ -91,14 +91,14 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
   # Returns `true` if every field of `f` is either non-empty or cannot be synced
   # from the corresponding field in `patterns`.
   when f is ConceptExerciseFiles:
-    if patterns.exemplar.len > 0 and f.exemplar.len == 0:
+    if patterns.exemplar.len > 0 and (f.exemplar.len == 0 or f.exemplar == [""]):
       return false
   when f is PracticeExerciseFiles:
-    if patterns.example.len > 0 and f.example.len == 0:
+    if patterns.example.len > 0 and (f.example.len == 0 or f.example == [""]):
       return false
-  (patterns.solution.len == 0 or f.solution.len > 0) and
-      (patterns.test.len == 0 or f.test.len > 0) and
-      (patterns.editor.len == 0 or f.editor.len > 0)
+  (patterns.solution.len == 0 or (f.solution.len > 0 and f.solution != [""])) and
+      (patterns.test.len == 0 or (f.test.len > 0 and f.test != [""])) and
+      (patterns.editor.len == 0 or (f.editor.len > 0 and f.editor != [""]))
 
 type
   ExerciseConfig = object
