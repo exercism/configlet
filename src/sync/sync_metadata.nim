@@ -127,6 +127,12 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
   else:
     logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
 
+proc write(configPairs: seq[PathAndUpdatedConfig]) =
+  for configPair in configPairs:
+    let updatedJson = pretty(configPair.practiceExerciseConfig)
+    doAssert lastPathPart(configPair.path) == "config.json"
+    writeFile(configPair.path, updatedJson)
+
 proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
                             conf: Conf;
                             trackPracticeExercisesDir: string;
@@ -159,8 +165,5 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   # If successful, exclude `syncKind` from `seenUnsynced`.
   if conf.action.update and configPairs.len > 0:
     if conf.action.yes or userSaysYes(skMetadata):
-      for configPair in configPairs:
-        let updatedJson = pretty(configPair.practiceExerciseConfig)
-        doAssert lastPathPart(configPair.path) == "config.json"
-        writeFile(configPair.path, updatedJson)
+      write(configPairs)
       seenUnsynced.excl skMetadata
