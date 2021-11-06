@@ -92,7 +92,7 @@ type
     files*: ConceptExerciseFiles
     language_versions: string
     forked_from: Option[seq[string]] # Allowed only for a Concept Exercise
-    icon: string # Allowed only for a Concept Exercises
+    icon: string                     # Allowed only for a Concept Exercises
     blurb*: string
     source*: string
     source_url*: string
