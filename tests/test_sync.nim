@@ -1,7 +1,7 @@
 import std/[importutils, os, options, strformat, unittest]
 import pkg/parsetoml
 import "."/[exec, sync/sync_common]
-from "."/sync/sync_filepaths {.all.} import Slug, update
+from "."/sync/sync_filepaths {.all.} import update
 from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
     metadataAreUpToDate, update
 

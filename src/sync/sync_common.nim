@@ -1,6 +1,6 @@
-import std/[json, options, strformat, strutils]
+import std/[algorithm, json, options, strformat, strutils]
 import pkg/jsony
-import ".."/[cli, helpers]
+import ".."/[cli, helpers, lint/validators]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
   while true:
@@ -16,9 +16,17 @@ proc userSaysYes*(syncKind: SyncKind): bool =
 {.push hint[Name]: off.}
 
 type
-  ExerciseKind* = enum
-    ekConcept = "concept"
-    ekPractice = "practice"
+  Slug* = distinct string # A kebab-case string.
+
+  ConceptExercise* = object
+    slug*: Slug
+
+  PracticeExercise* = object
+    slug*: Slug
+
+  Exercises* = object
+    `concept`*: seq[ConceptExercise]
+    practice*: seq[PracticeExercise]
 
   FilePatterns* = object
     solution*: seq[string]
@@ -26,6 +34,37 @@ type
     exemplar*: seq[string]
     example*: seq[string]
     editor*: seq[string]
+
+  TrackConfig* = object
+    exercises*: Exercises
+    files*: FilePatterns
+
+proc postHook*(e: ConceptExercise | PracticeExercise) =
+  ## Quits with an error message if a `slug` value is not a kebab-case string.
+  let s = e.slug.string
+  if not isKebabCase(s):
+    let msg = "Error: the track `config.json` file contains " &
+              &"an exercise slug of \"{s}\", which is not a kebab-case string"
+    stderr.writeLine msg
+    quit 1
+
+func `==`*(x, y: Slug): bool {.borrow.}
+func `<`*(x, y: Slug): bool {.borrow.}
+
+func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
+  ## Returns a seq of the slugs `e`, in alphabetical order.
+  result = newSeq[Slug](e.len)
+  for i, item in e:
+    result[i] = item.slug
+  sort result
+
+func len*(slug: Slug): int {.borrow.}
+func `$`*(slug: Slug): string {.borrow.}
+
+type
+  ExerciseKind* = enum
+    ekConcept = "concept"
+    ekPractice = "practice"
 
   # TODO: can we refactor the below types as variant objects?
   #
@@ -113,7 +152,13 @@ type
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
-  let contents = readFile(path)
+  let contents =
+    try:
+      readFile(path)
+    except IOError:
+      let msg = getCurrentExceptionMsg()
+      stderr.writeLine &"Error: {msg}"
+      quit 1
   if contents.len > 0:
     try:
       contents.fromJson(T)

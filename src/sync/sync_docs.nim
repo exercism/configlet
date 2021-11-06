@@ -1,6 +1,6 @@
 import std/[os, strformat]
 import ".."/[cli, logger]
-import "."/[exercises, sync_common]
+import "."/sync_common
 
 proc contentsAfterFirstHeader(path: string): string =
   result = newStringOfCap(getFileSize(path))
@@ -88,8 +88,8 @@ proc write(sdPairs: seq[SourceDestPair]) =
 
 proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
                         conf: Conf;
+                        practiceExerciseSlugs: seq[Slug];
                         trackPracticeExercisesDir: string;
-                        exercises: seq[Exercise];
                         psExercisesDir: string) =
   ## Prints a message for each Practice Exercise on the track with an outdated
   ## `.docs/introduction.md` or `.docs/instructions.md` file, and updates them
@@ -99,8 +99,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
   ## afterwards.
   var sdPairs = newSeq[SourceDestPair]()
 
-  for exercise in exercises:
-    let slug = exercise.slug.string
+  for practiceExerciseSlug in practiceExerciseSlugs:
+    let slug = practiceExerciseSlug.string
     let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
 
     if not dirExists(trackDocsDir):

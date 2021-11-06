@@ -1,6 +1,6 @@
 import std/[os, parseutils, strformat, strutils]
 import ".."/[cli, logger]
-import "."/[exercises, sync_common]
+import "."/sync_common
 
 # Ignore the styleCheck warning for `source_url`.
 {.push hint[Name]: off.}
@@ -137,8 +137,8 @@ proc write(configPairs: seq[PathAndUpdatedConfig]) =
 
 proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
                             conf: Conf;
+                            practiceExerciseSlugs: seq[Slug];
                             trackPracticeExercisesDir: string;
-                            exercises: seq[Exercise];
                             psExercisesDir: string) =
   ## Prints a message for each Practice Exercise on the track with an outdated
   ## `.meta/config.json` file, and updates them if `--update` was passed and the
@@ -148,8 +148,8 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   ## files afterwards.
   var configPairs = newSeq[PathAndUpdatedConfig]()
 
-  for exercise in exercises:
-    let slug = exercise.slug.string
+  for practiceExerciseSlug in practiceExerciseSlugs:
+    let slug = practiceExerciseSlug.string
     let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
 
     let psExerciseDir = psExercisesDir / slug
