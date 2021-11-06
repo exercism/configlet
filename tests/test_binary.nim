@@ -311,6 +311,7 @@ proc testsForSync(binaryPath: static string) =
       -    "ee7"
       -  ],
       -  "contributors": [],
+      +  "authors": [],
       -    "solution": [
       -      "diffie_hellman.nim"
       -    ],

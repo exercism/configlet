@@ -182,10 +182,7 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
 func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
   result = newStringOfCap(100)
   result.add '{'
-  when e is ConceptExerciseConfig:
-    result.addArray("authors", e.authors)
-  when e is PracticeExerciseConfig:
-    result.addArray("authors", e.authors, isRequired = false)
+  result.addArray("authors", e.authors)
   if e.contributors.isSome():
     result.addArray("contributors", e.contributors.get(), isRequired = false)
   result.addFiles(e.files)
