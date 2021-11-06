@@ -32,6 +32,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let (conceptExerciseSlugs, practiceExerciseSlugs) = getSlugs(trackConfig.exercises,
                                                                conf, trackConfigPath)
+  logNormal("Checking exercises...")
 
   # Don't clone problem-specifications if only `--filepaths` is given
   let probSpecsDir =
@@ -84,8 +85,6 @@ func explain(syncKind: SyncKind): string =
   of skTests: "are missing test cases"
 
 proc sync*(conf: Conf) =
-  logNormal("Checking exercises...")
-
   let seenUnsynced = syncImpl(conf)
 
   if seenUnsynced.len > 0:
