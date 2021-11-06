@@ -83,6 +83,8 @@ proc write(sdPairs: seq[SourceDestPair]) =
     # instead of `# Instructions`
     doAssert lastPathPart(sdPair.dest) in ["instructions.md", "introduction.md"]
     copyFile(sdPair.source, sdPair.dest)
+  let s = if sdPairs.len > 1: "s" else: ""
+  logNormal(&"Updated the docs for {sdPairs.len} Practice Exercise{s}")
 
 proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
                         conf: Conf;

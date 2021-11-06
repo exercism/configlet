@@ -132,6 +132,8 @@ proc write(configPairs: seq[PathAndUpdatedConfig]) =
     let updatedJson = pretty(configPair.practiceExerciseConfig)
     doAssert lastPathPart(configPair.path) == "config.json"
     writeFile(configPair.path, updatedJson)
+  let s = if configPairs.len > 1: "s" else: ""
+  logNormal(&"Updated the metadata for {configPairs.len} Practice Exercise{s}")
 
 proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
                             conf: Conf;

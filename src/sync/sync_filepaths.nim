@@ -178,6 +178,8 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
       writeFile(configPair.path, configPair.exerciseConfig.c.pretty())
     of ekPractice:
       writeFile(configPair.path, configPair.exerciseConfig.p.pretty())
+  let s = if configPairs.len > 1: "s" else: ""
+  logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")
 
 proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
                              conf: Conf;

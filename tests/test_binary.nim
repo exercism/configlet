@@ -335,6 +335,7 @@ proc testsForSync(binaryPath: static string) =
       const expectedOutput = fmt"""
         {header}
         [warn] diffie-hellman: the `.meta` directory is missing
+        Updated the metadata for 1 Practice Exercise
         The `diffie-hellman` Practice Exercise has up-to-date metadata!
       """.unindent()
       removeDir(metaDir)
@@ -347,6 +348,7 @@ proc testsForSync(binaryPath: static string) =
       const expectedOutput = fmt"""
         {header}
         [warn] diffie-hellman: the `.meta/config.json` file is missing
+        Updated the metadata for 1 Practice Exercise
         The `diffie-hellman` Practice Exercise has up-to-date metadata!
       """.unindent()
       removeFile(configPathAbsolute)
@@ -356,6 +358,7 @@ proc testsForSync(binaryPath: static string) =
     const expectedOutput = fmt"""
       {header}
       [warn] diffie-hellman: metadata are unsynced
+      Updated the metadata for 1 Practice Exercise
       The `diffie-hellman` Practice Exercise has up-to-date metadata!
     """.unindent()
     # The `blurb`, `source`, and `source_url` are added again.
@@ -388,6 +391,7 @@ proc testsForSync(binaryPath: static string) =
     const expectedOutput = fmt"""
       {header}
       [warn] darts: metadata are unsynced
+      Updated the metadata for 1 Practice Exercise
       The `darts` Practice Exercise has up-to-date metadata!
     """.unindent()
     const expectedDiff = """
@@ -407,6 +411,7 @@ proc testsForSync(binaryPath: static string) =
     const expectedOutput = fmt"""
       {header}
       {bodyUnsyncedMetadata}
+      Updated the metadata for 14 Practice Exercises
       {footerSyncedMetadata}
     """.unindent()
     const expectedDiff = """
