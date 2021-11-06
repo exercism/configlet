@@ -5,11 +5,11 @@ import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
 
 proc getSlugs(exercises: Exercises, conf: Conf,
               trackConfigPath: string): tuple[c: seq[Slug], p: seq[Slug]] =
-  ## Returns the slugs of Concept Exercises and Practice Exercises in `exercises`.
-  ## If `conf.action.exercise` has a non-zero length, returns only that one slug
-  ## if the given exercise was found on the track.
+  ## Returns the slugs of Concept Exercises and Practice Exercises in
+  ## `exercises`. If `conf.action.exercise` has a non-zero length, returns only
+  ## that one slug if the given exercise was found on the track.
   ##
-  ## If the exercise was not found, prints an error and exits.
+  ## If that exercise was not found, prints an error and exits.
   result.c = getSlugs(exercises.`concept`)
   result.p = getSlugs(exercises.practice)
   let userExercise = Slug(conf.action.exercise)
@@ -28,6 +28,10 @@ proc getSlugs(exercises: Exercises, conf: Conf,
       quit 1
 
 proc syncImpl(conf: Conf): set[SyncKind] =
+  ## Checks the data specified in `conf.action.scope`, and updates them if
+  ## `--update` was passed and the user confirms.
+  ##
+  ## Returns a `set` of the still-unsynced `SyncKind`.
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let (conceptExerciseSlugs, practiceExerciseSlugs) = getSlugs(trackConfig.exercises,
@@ -85,6 +89,8 @@ func explain(syncKind: SyncKind): string =
   of skTests: "are missing test cases"
 
 proc sync*(conf: Conf) =
+  ## Checks/updates the data according to `conf`, and exits with 1 if we saw
+  ## data that is still unsynced.
   let seenUnsynced = syncImpl(conf)
 
   if seenUnsynced.len > 0:

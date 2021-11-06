@@ -3,6 +3,8 @@ import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
+  ## Asks the user if they want to sync the given `syncKind`, and returns `true`
+  ## if they confirm.
   while true:
     stderr.write &"sync the above {syncKind} ([y]es/[n]o)? "
     case stdin.readLine().toLowerAscii()
@@ -16,7 +18,7 @@ proc userSaysYes*(syncKind: SyncKind): bool =
 {.push hint[Name]: off.}
 
 type
-  Slug* = distinct string # A kebab-case string.
+  Slug* = distinct string ## A `slug` value in a track `config.json` file is a kebab-case string.
 
   ConceptExercise* = object
     slug*: Slug
@@ -40,7 +42,8 @@ type
     files*: FilePatterns
 
 proc postHook*(e: ConceptExercise | PracticeExercise) =
-  ## Quits with an error message if a `slug` value is not a kebab-case string.
+  ## Quits with an error message if an `e.slug` value is not a kebab-case
+  ## string.
   let s = e.slug.string
   if not isKebabCase(s):
     let msg = "Error: the track `config.json` file contains " &
@@ -52,7 +55,7 @@ func `==`*(x, y: Slug): bool {.borrow.}
 func `<`*(x, y: Slug): bool {.borrow.}
 
 func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
-  ## Returns a seq of the slugs `e`, in alphabetical order.
+  ## Returns a seq of the slugs in `e`, in alphabetical order.
   result = newSeq[Slug](e.len)
   for i, item in e:
     result[i] = item.slug
@@ -66,7 +69,7 @@ type
     ekConcept = "concept"
     ekPractice = "practice"
 
-  # TODO: can we refactor the below types as variant objects?
+  # TODO: can/should we refactor the below types as variant objects?
   #
   # The difficulty: an exercise `config.json` file does not contain a shared
   # key that we can use as a discriminator.
@@ -130,8 +133,8 @@ type
     contributors: Option[seq[string]]
     files*: ConceptExerciseFiles
     language_versions: string
-    forked_from: Option[seq[string]] # Allowed only for a Concept Exercise
-    icon: string                     # Allowed only for a Concept Exercises
+    forked_from: Option[seq[string]] ## Allowed only for a Concept Exercise.
+    icon: string                     ## Allowed only for a Concept Exercise.
     blurb*: string
     source*: string
     source_url*: string
@@ -141,7 +144,7 @@ type
     contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
     language_versions: string
-    test_runner*: Option[bool] # Allowed only for a Practice Exercise
+    test_runner*: Option[bool] ## Allowed only for a Practice Exercise.
     # The below fields are synced for a Practice Exercise that exists in the
     # `exercism/problem-specifications` repo.
     blurb*: string
@@ -172,7 +175,8 @@ proc parseFile*(path: string, T: typedesc): T =
     T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
-  ## Adds a newline and spaces to `s`.
+  ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
+  ## `s`.
   s.add '\n'
   const indentSize = 2
   let numSpaces = indentSize * indentLevel
@@ -181,6 +185,10 @@ func addNewlineAndIndent(s: var string, indentLevel: int) =
 
 func addArray(s: var string; key: string; val: openArray[string];
               isRequired = true, indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its string array `val` to
+  ## `s`.
+  ##
+  ## Does not append if both `isRequired` is `false` and `val` is empty.
   if isRequired or val.len > 0:
     s.addNewlineAndIndent(indentLevel)
     escapeJson(key, s)
@@ -200,6 +208,9 @@ func addArray(s: var string; key: string; val: openArray[string];
 
 func addString(s: var string; key, val: string; isRequired = true,
                indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its string `val` to `s`.
+  ##
+  ## Does not append if both `isRequired` is `false` and `val` is empty.
   if isRequired or val.len > 0:
     s.addNewlineAndIndent(indentLevel)
     escapeJson(key, s)
@@ -209,6 +220,7 @@ func addString(s: var string; key, val: string; isRequired = true,
 
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
               indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
   s.addNewlineAndIndent(indentLevel)
   escapeJson("files", s)
   s.add ": {"
@@ -225,6 +237,7 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   s.add "},"
 
 func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
+  ## Serializes `e` as pretty-printed JSON.
   result = newStringOfCap(100)
   result.add '{'
   result.addArray("authors", e.authors)

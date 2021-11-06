@@ -94,7 +94,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
   ## Includes `skMetadata` in `seenUnsynced` if the given
   ## `trackExerciseConfigPath` is unsynced with `psMetadataTomlPath`.
   ##
-  ## Adds to `configPairs` if `--update` was passed.
+  ## Appends to `configPairs` if `--update` was passed.
   if fileExists(psMetadataTomlPath):
     if fileExists(trackExerciseConfigPath):
       let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
