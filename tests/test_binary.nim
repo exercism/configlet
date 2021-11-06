@@ -146,6 +146,14 @@ proc testsForSync(binaryPath: static string) =
       let cmd = &"{binaryPath} -t my_missing_directory sync -o -p {psDir}"
       execAndCheck(1, cmd, expectedOutput)
 
+  suite "sync, for an exercise that does not exist (prints the expected output, and exits with 1)":
+    test "-e foo":
+      const expectedOutput = fmt"""
+        The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
+        {trackDir / "config.json"}
+      """.unindent()
+      execAndCheck(1, &"{syncOffline} -e foo --docs", expectedOutput)
+
   suite "sync, without --update, for an up-to-date exercise (prints the expected output, and exits with 0)":
     test "-e bob --docs":
       const expectedOutput = fmt"""
