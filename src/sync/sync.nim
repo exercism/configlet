@@ -30,23 +30,30 @@ proc validate(conf: Conf) =
             - use configlet in an interactive terminal""".unindent()
           showError(msg)
 
+type
+  TrackExerciseSlugs = object
+    `concept`: seq[Slug]
+    practice: seq[Slug]
+
 proc getSlugs(exercises: Exercises, conf: Conf,
-              trackConfigPath: string): tuple[c: seq[Slug], p: seq[Slug]] =
+              trackConfigPath: string): TrackExerciseSlugs =
   ## Returns the slugs of Concept Exercises and Practice Exercises in
   ## `exercises`. If `conf.action.exercise` has a non-zero length, returns only
   ## that one slug if the given exercise was found on the track.
   ##
   ## If that exercise was not found, prints an error and exits.
-  result.c = getSlugs(exercises.`concept`)
-  result.p = getSlugs(exercises.practice)
+  result = TrackExerciseSlugs(
+    `concept`: getSlugs(exercises.`concept`),
+    practice: getSlugs(exercises.practice)
+  )
   let userExercise = Slug(conf.action.exercise)
   if userExercise.len > 0:
-    if userExercise in result.c:
-      result.c = @[userExercise]
-      result.p.setLen 0
-    elif userExercise in result.p:
-      result.c.setLen 0
-      result.p = @[userExercise]
+    if userExercise in result.`concept`:
+      result.`concept` = @[userExercise]
+      result.practice.setLen 0
+    elif userExercise in result.practice:
+      result.`concept`.setLen 0
+      result.practice = @[userExercise]
     else:
       let msg = &"The `-e, --exercise` option was used to specify an " &
                 &"exercise slug, but `{userExercise}` is not an slug in the " &
@@ -61,8 +68,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   ## Returns a `set` of the still-unsynced `SyncKind`.
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
-  let (conceptExerciseSlugs, practiceExerciseSlugs) = getSlugs(trackConfig.exercises,
-                                                               conf, trackConfigPath)
+  let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   logNormal("Checking exercises...")
 
   # Don't clone problem-specifications if only `--filepaths` is given
@@ -81,19 +87,19 @@ proc syncImpl(conf: Conf): set[SyncKind] =
       case syncKind
       # Check/update docs
       of skDocs:
-        checkOrUpdateDocs(result, conf, practiceExerciseSlugs,
+        checkOrUpdateDocs(result, conf, trackExerciseSlugs.practice,
                           trackPracticeExercisesDir, psExercisesDir)
 
       # Check/update metadata
       of skMetadata:
-        checkOrUpdateMetadata(result, conf, practiceExerciseSlugs,
+        checkOrUpdateMetadata(result, conf, trackExerciseSlugs.practice,
                               trackPracticeExercisesDir, psExercisesDir)
 
       # Check/update filepaths
       of skFilepaths:
         let trackConceptExercisesDir = trackExercisesDir / "concept"
-        checkOrUpdateFilepaths(result, conf, conceptExerciseSlugs,
-                               practiceExerciseSlugs, trackConfig.files,
+        checkOrUpdateFilepaths(result, conf, trackExerciseSlugs.`concept`,
+                               trackExerciseSlugs.practice, trackConfig.files,
                                trackPracticeExercisesDir, trackConceptExercisesDir)
 
       # Check/update tests
