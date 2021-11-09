@@ -149,14 +149,11 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   var configPairs = newSeq[PathAndUpdatedConfig]()
 
   for slug in practiceExerciseSlugs:
-    let trackMetaDir = joinPath(trackPracticeExercisesDir, slug.string, ".meta")
-
     let psExerciseDir = psExercisesDir / slug.string
     if dirExists(psExerciseDir):
-      const metadataFilename = "metadata.toml"
-      const configFilename = "config.json"
-      let psMetadataTomlPath = psExerciseDir / metadataFilename
-      let trackExerciseConfigPath = trackMetaDir / configFilename
+      let psMetadataTomlPath = psExerciseDir / "metadata.toml"
+      let trackExerciseConfigPath = joinPath(trackPracticeExercisesDir,
+                                             slug.string, ".meta", "config.json")
       addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
                   trackExerciseConfigPath, seenUnsynced)
     else:
