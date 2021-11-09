@@ -120,7 +120,7 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   writeTestsToml(result, conf.trackDir)
 
 proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
-  ## Syncs the given `exercises` if it has missing tests, and returns `true` if
+  ## Syncs the given `exercise` if it has missing tests, and returns `true` if
   ## it is up-to-date afterwards.
   case exercise.status()
   of exOutOfSync:
