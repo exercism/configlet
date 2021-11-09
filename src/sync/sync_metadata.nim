@@ -101,7 +101,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
       var p = parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
 
       if metadataAreUpToDate(p, upstreamMetadata):
-        logDetailed(&"[skip] {slug}: metadata are up-to-date")
+        logDetailed(&"[skip] {slug}: metadata are up to date")
       else:
         logNormal(&"[warn] {slug}: metadata are unsynced")
         seenUnsynced.incl skMetadata

@@ -17,7 +17,7 @@ Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
   -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
-  -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up-to-date
+  -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up to date
   -u, --update                 Update unsynced docs, filepaths, metadata, and tests
   -y, --yes                    Auto-confirm every prompt for updating docs, filepaths, and metadata
       --docs                   Sync Practice Exercise .docs/introduction.md and .docs/instructions.md files

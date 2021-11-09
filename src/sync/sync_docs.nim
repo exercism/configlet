@@ -28,7 +28,7 @@ proc addPairIfNonIdenticalAfterHeader(sdPairs: var seq[SourceDestPair],
   ## have identical contents.
   # TODO: Optimize this.
   if contentsAfterFirstHeader(source) == contentsAfterFirstHeader(dest):
-    logDetailed(&"[skip] {slug}: {filename} is up-to-date")
+    logDetailed(&"[skip] {slug}: {filename} is up to date")
   else:
     logNormal(&"[warn] {slug}: {filename} is unsynced")
     seenUnsynced.incl skDocs

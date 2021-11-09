@@ -15,7 +15,7 @@ proc checkTests*(seenUnsynced: var set[SyncKind], exercises: seq[Exercise]) =
         if testCase.uuid in exercise.tests.missing:
           logNormal(&"       - {testCase.description} ({testCase.uuid})")
     of exInSync:
-      logDetailed(&"[skip] {exercise.slug}: up-to-date")
+      logDetailed(&"[skip] {exercise.slug}: tests are up to date")
     of exNoCanonicalData:
       logDetailed(&"[skip] {exercise.slug}: does not have canonical data")
 
@@ -121,13 +121,13 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
 
 proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
   ## Syncs the given `exercise` if it has missing tests, and returns `true` if
-  ## it is up-to-date afterwards.
+  ## it is up to date afterwards.
   case exercise.status()
   of exOutOfSync:
     let syncedExercise = sync(exercise, conf)
     syncedExercise.status() == exInSync
   of exInSync:
-    logDetailed(&"[skip] {exercise.slug} is up-to-date")
+    logDetailed(&"[skip] {exercise.slug} tests are up to date")
     true
   of exNoCanonicalData:
     logDetailed(&"[skip] {exercise.slug} does not have canonical data")
