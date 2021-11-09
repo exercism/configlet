@@ -21,7 +21,8 @@ type
     dest: string
 
 proc addPairIfNonIdenticalAfterHeader(sdPairs: var seq[SourceDestPair],
-                                      source, dest, slug, filename: string;
+                                      slug: Slug;
+                                      source, dest, filename: string;
                                       seenUnsynced: var set[SyncKind]) =
   ## Prints a message that describes whether the files at `source` and `dest`
   ## have identical contents.
@@ -34,7 +35,8 @@ proc addPairIfNonIdenticalAfterHeader(sdPairs: var seq[SourceDestPair],
     sdPairs.add SourceDestPair(source: source, dest: dest)
 
 proc addUnsyncedIntroductionPaths(sdPairs: var seq[SourceDestPair];
-                                  slug, trackDocsDir, psExerciseDir: string;
+                                  slug: Slug;
+                                  trackDocsDir, psExerciseDir: string;
                                   seenUnsynced: var set[SyncKind]) =
   # If the exercise in problem-specifications has an `introduction.md`
   # file, the track exercise must have a `.docs/introduction.md` file.
@@ -43,14 +45,15 @@ proc addUnsyncedIntroductionPaths(sdPairs: var seq[SourceDestPair];
   if fileExists(psIntroPath):
     let trackIntroPath = trackDocsDir / introFilename
     if fileExists(trackIntroPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, psIntroPath, trackIntroPath,
-                                       slug, introFilename, seenUnsynced)
+      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psIntroPath,
+                                       trackIntroPath, introFilename, seenUnsynced)
     else:
       logNormal(&"[error] {slug}: {introFilename} is missing")
       seenUnsynced.incl skDocs
 
 proc addUnsyncedInstructionsPaths(sdPairs: var seq[SourceDestPair];
-                                  slug, trackDocsDir, psExerciseDir: string;
+                                  slug: Slug;
+                                  trackDocsDir, psExerciseDir: string;
                                   seenUnsynced: var set[SyncKind]) =
   # The track exercise must have a `.docs/instructions.md` file.
   # Its contents should match those of the corresponding `instructions.md`
@@ -63,11 +66,11 @@ proc addUnsyncedInstructionsPaths(sdPairs: var seq[SourceDestPair];
     let psInstrPath = psExerciseDir / instrFilename
     let psDescPath = psExerciseDir / descFilename
     if fileExists(psInstrPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, psInstrPath, trackInstrPath,
-                                       slug, instrFilename, seenUnsynced)
+      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psInstrPath,
+                                       trackInstrPath, instrFilename, seenUnsynced)
     elif fileExists(psDescPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, psDescPath, trackInstrPath,
-                                       slug, instrFilename, seenUnsynced)
+      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psDescPath, trackInstrPath,
+                                       instrFilename, seenUnsynced)
     else:
       logNormal(&"[error] {slug}: does not have an upstream " &
                 &"{instrFilename} or {descFilename} file")
@@ -99,9 +102,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
   ## afterwards.
   var sdPairs = newSeq[SourceDestPair]()
 
-  for practiceExerciseSlug in practiceExerciseSlugs:
-    let slug = practiceExerciseSlug.string
-    let trackDocsDir = joinPath(trackPracticeExercisesDir, slug, ".docs")
+  for slug in practiceExerciseSlugs:
+    let trackDocsDir = joinPath(trackPracticeExercisesDir, slug.string, ".docs")
 
     if not dirExists(trackDocsDir):
       if conf.action.update:
@@ -109,7 +111,7 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
       seenUnsynced.incl skDocs
 
     # Get pairs of unsynced paths
-    let psExerciseDir = psExercisesDir / slug
+    let psExerciseDir = psExercisesDir / slug.string
     if dirExists(psExerciseDir):
       sdPairs.addUnsyncedIntroductionPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)
       sdPairs.addUnsyncedInstructionsPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)

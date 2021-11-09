@@ -88,8 +88,8 @@ func update(p: var PracticeExerciseConfig;
   p.source_url = upstreamMetadata.source_url
 
 proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
-                 conf: Conf;
-                 slug, psMetadataTomlPath, trackExerciseConfigPath: string;
+                 conf: Conf; slug: Slug;
+                 psMetadataTomlPath, trackExerciseConfigPath: string;
                  seenUnsynced: var set[SyncKind]) =
   ## Includes `skMetadata` in `seenUnsynced` if the given
   ## `trackExerciseConfigPath` is unsynced with `psMetadataTomlPath`.
@@ -148,11 +148,10 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   ## files afterwards.
   var configPairs = newSeq[PathAndUpdatedConfig]()
 
-  for practiceExerciseSlug in practiceExerciseSlugs:
-    let slug = practiceExerciseSlug.string
-    let trackMetaDir = joinPath(trackPracticeExercisesDir, slug, ".meta")
+  for slug in practiceExerciseSlugs:
+    let trackMetaDir = joinPath(trackPracticeExercisesDir, slug.string, ".meta")
 
-    let psExerciseDir = psExercisesDir / slug
+    let psExerciseDir = psExercisesDir / slug.string
     if dirExists(psExerciseDir):
       const metadataFilename = "metadata.toml"
       const configFilename = "config.json"
