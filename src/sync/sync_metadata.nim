@@ -2,7 +2,7 @@ import std/[os, parseutils, strformat, strutils]
 import ".."/[cli, logger]
 import "."/sync_common
 
-# Ignore the styleCheck warning for `source_url`.
+# Silence the styleCheck hint for `source_url`.
 {.push hint[Name]: off.}
 
 type

@@ -85,6 +85,7 @@ type
     ekConcept = "concept"
     ekPractice = "practice"
 
+# Silence the styleCheck hint for `source_url`.
 {.push hint[Name]: off.}
 
 type
