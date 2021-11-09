@@ -62,11 +62,11 @@ proc testsForSync(binaryPath: static string) =
     footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
     footerUnsyncedTests = "[warn] some exercises are missing test cases"
     footerSyncedFilepaths = """
-      Every Practice Exercise has up-to-date filepaths!""".unindent()
+      Every exercise has up-to-date filepaths!""".unindent()
     footerSyncedMetadata = """
-      Every Practice Exercise has up-to-date metadata!""".unindent()
+      Every exercise has up-to-date metadata!""".unindent()
     footerSyncedTests = """
-      Every Practice Exercise has up-to-date tests!""".unindent()
+      Every exercise has up-to-date tests!""".unindent()
     bodyUnsyncedDocs = """
       [warn] hamming: instructions.md is unsynced
       [warn] yacht: instructions.md is unsynced""".unindent()
@@ -158,43 +158,43 @@ proc testsForSync(binaryPath: static string) =
     test "-e bob --docs":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date docs!
+        The `bob` exercise has up-to-date docs!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --docs", expectedOutput)
 
     test "-e bob --filepaths":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date filepaths!
+        The `bob` exercise has up-to-date filepaths!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --filepaths", expectedOutput)
 
     test "-e bob --metadata":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date metadata!
+        The `bob` exercise has up-to-date metadata!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --metadata", expectedOutput)
 
     test "-e bob --tests":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date tests!
+        The `bob` exercise has up-to-date tests!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --tests", expectedOutput)
 
     test "-e bob --metadata --tests":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date metadata!
-        The `bob` Practice Exercise has up-to-date tests!
+        The `bob` exercise has up-to-date metadata!
+        The `bob` exercise has up-to-date tests!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob --metadata --tests", expectedOutput)
 
     test "-e bob":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date docs, filepaths, metadata, and tests!
+        The `bob` exercise has up-to-date docs, filepaths, metadata, and tests!
       """.unindent()
       execAndCheck(0, &"{syncOffline} -e bob", expectedOutput)
 
@@ -313,7 +313,7 @@ proc testsForSync(binaryPath: static string) =
     test "--metadata -e bob":
       const expectedOutput = fmt"""
         {header}
-        The `bob` Practice Exercise has up-to-date metadata!
+        The `bob` exercise has up-to-date metadata!
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdate} --metadata -e bob --yes", expectedOutput)
       checkNoDiff(trackDir)
@@ -352,7 +352,7 @@ proc testsForSync(binaryPath: static string) =
         {header}
         [warn] diffie-hellman: the `.meta` directory is missing
         Updated the metadata for 1 Practice Exercise
-        The `diffie-hellman` Practice Exercise has up-to-date metadata!
+        The `diffie-hellman` exercise has up-to-date metadata!
       """.unindent()
       removeDir(metaDir)
       execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
@@ -365,7 +365,7 @@ proc testsForSync(binaryPath: static string) =
         {header}
         [warn] diffie-hellman: the `.meta/config.json` file is missing
         Updated the metadata for 1 Practice Exercise
-        The `diffie-hellman` Practice Exercise has up-to-date metadata!
+        The `diffie-hellman` exercise has up-to-date metadata!
       """.unindent()
       removeFile(configPathAbsolute)
       execAndCheck(0, &"{syncOfflineUpdate} --metadata --yes -e diffie-hellman", expectedOutput)
@@ -375,7 +375,7 @@ proc testsForSync(binaryPath: static string) =
       {header}
       [warn] diffie-hellman: metadata are unsynced
       Updated the metadata for 1 Practice Exercise
-      The `diffie-hellman` Practice Exercise has up-to-date metadata!
+      The `diffie-hellman` exercise has up-to-date metadata!
     """.unindent()
     # The `blurb`, `source`, and `source_url` are added again.
 
@@ -408,7 +408,7 @@ proc testsForSync(binaryPath: static string) =
       {header}
       [warn] darts: metadata are unsynced
       Updated the metadata for 1 Practice Exercise
-      The `darts` Practice Exercise has up-to-date metadata!
+      The `darts` exercise has up-to-date metadata!
     """.unindent()
     const expectedDiff = """
       --- exercises/practice/darts/.meta/config.json
@@ -508,14 +508,14 @@ proc testsForSync(binaryPath: static string) =
         {header}
         {headerUpdateTests}
         [info] anagram: included 1 missing test case
-        The `anagram` Practice Exercise has up-to-date tests!
+        The `anagram` exercise has up-to-date tests!
       """.unindent()
 
       expectedOutputAnagramExclude = fmt"""
         {header}
         {headerUpdateTests}
         [info] anagram: excluded 1 missing test case
-        The `anagram` Practice Exercise has up-to-date tests!
+        The `anagram` exercise has up-to-date tests!
       """.unindent()
 
       testsTomlHeaderDiff = """

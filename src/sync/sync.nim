@@ -101,9 +101,9 @@ proc sync*(conf: Conf) =
     let userExercise = conf.action.exercise
     let wording =
       if userExercise.len > 0:
-        &"The `{userExercise}` Practice Exercise"
+        &"The `{userExercise}` exercise"
       else:
-        "Every Practice Exercise"
+        "Every exercise"
     if conf.action.scope == {SyncKind.low .. SyncKind.high}:
       logNormal(&"{wording} has up-to-date docs, filepaths, metadata, and tests!")
     else:
