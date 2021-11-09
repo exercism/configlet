@@ -15,8 +15,6 @@ proc userSaysYes*(syncKind: SyncKind): bool =
     else:
       stderr.writeLine "Unrecognized response. Please answer [y]es or [n]o."
 
-{.push hint[Name]: off.}
-
 type
   Slug* = distinct string ## A `slug` value in a track `config.json` file is a kebab-case string.
 
@@ -87,6 +85,9 @@ type
     ekConcept = "concept"
     ekPractice = "practice"
 
+{.push hint[Name]: off.}
+
+type
   # TODO: can/should we refactor the below types as variant objects?
   #
   # The difficulty: an exercise `config.json` file does not contain a shared
