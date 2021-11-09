@@ -49,19 +49,19 @@ func update(f: var (ConceptExerciseFiles | PracticeExerciseFiles),
   when f is PracticeExerciseFiles:
     update(f.example, patterns.example, slug)
 
+template genCond(field: untyped) =
+  patterns.field.len == 0 or (f.field.len > 0 and f.field != [""])
+
 func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
               patterns: FilePatterns): bool =
   # Returns `true` if every field of `f` is either non-empty or cannot be synced
   # from the corresponding field in `patterns`.
-  let cond =
+  let uniqueCond =
     when f is ConceptExerciseFiles:
-      patterns.exemplar.len == 0 or (f.exemplar.len > 0 and f.exemplar != [""])
+      genCond(exemplar)
     else:
-      patterns.example.len == 0 or (f.example.len > 0 and f.example != [""])
-  cond and
-      (patterns.solution.len == 0 or (f.solution.len > 0 and f.solution != [""])) and
-      (patterns.test.len == 0 or (f.test.len > 0 and f.test != [""])) and
-      (patterns.editor.len == 0 or (f.editor.len > 0 and f.editor != [""]))
+      genCond(example)
+  uniqueCond and genCond(solution) and genCond(test) and genCond(editor)
 
 type
   ExerciseConfig = object
