@@ -1,7 +1,7 @@
 import std/[os, sequtils, strformat, strutils, terminal]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
-           sync_metadata, sync_tests]
+            sync_metadata, sync_tests]
 
 proc validate(conf: Conf) =
   ## Exits with an error message if the given `conf` contains an invalid
