@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, strformat, strutils]
+import std/[algorithm, json, options, os, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
@@ -63,6 +63,20 @@ func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
 
 func len*(slug: Slug): int {.borrow.}
 func `$`*(slug: Slug): string {.borrow.}
+
+func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
+  ## Truncates `s` to `truncateLen`, then appends `slug`.
+  assert truncateLen <= s.len and s[truncateLen-1] == DirSep
+  s.setLen truncateLen
+  s.add slug.string
+
+func addMetadataTomlPath*(s: var string) =
+  const pathMetadataToml = DirSep & "metadata.toml"
+  s.add pathMetadataToml
+
+func addExerciseConfigPath*(s: var string) =
+  const pathExerciseConfig = DirSep & joinPath(".meta", "config.json")
+  s.add pathExerciseConfig
 
 type
   ExerciseKind* = enum

@@ -168,13 +168,16 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
       case exerciseKind
       of ekConcept: conceptExerciseSlugs
       of ekPractice: practiceExerciseSlugs
-    let dir =
+    var trackExerciseConfigPath =
       case exerciseKind
       of ekConcept: trackConceptExercisesDir
       of ekPractice: trackPracticeExercisesDir
+    normalizePathEnd(trackExerciseConfigPath, trailingSep = true)
+    let startLen = trackExerciseConfigPath.len
 
     for slug in slugs:
-      let trackExerciseConfigPath = joinPath(dir, slug.string, ".meta", "config.json")
+      trackExerciseConfigPath.truncateAndAdd(startLen, slug)
+      trackExerciseConfigPath.addExerciseConfigPath()
       addUnsyncedFilepaths(configPairs, conf, exerciseKind, slug,
                            trackExerciseConfigPath, filePatterns,
                            seenUnsynced)

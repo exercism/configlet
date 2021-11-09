@@ -147,13 +147,18 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   ## Includes `skMetadata` in `seenUnsynced` if there are still such unsynced
   ## files afterwards.
   var configPairs = newSeq[PathAndUpdatedConfig]()
+  var psMetadataTomlPath = normalizePathEnd(psExercisesDir, trailingSep = true)
+  let startLenPsPath = psMetadataTomlPath.len
+  var trackExerciseConfigPath = normalizePathEnd(trackPracticeExercisesDir,
+                                                 trailingSep = true)
+  let startLenTrackPath = trackExerciseConfigPath.len
 
   for slug in practiceExerciseSlugs:
-    let psExerciseDir = psExercisesDir / slug.string
-    if dirExists(psExerciseDir):
-      let psMetadataTomlPath = psExerciseDir / "metadata.toml"
-      let trackExerciseConfigPath = joinPath(trackPracticeExercisesDir,
-                                             slug.string, ".meta", "config.json")
+    psMetadataTomlPath.truncateAndAdd(startLenPsPath, slug)
+    if dirExists(psMetadataTomlPath):
+      psMetadataTomlPath.addMetadataTomlPath()
+      trackExerciseConfigPath.truncateAndAdd(startLenTrackPath, slug)
+      trackExerciseConfigPath.addExerciseConfigPath()
       addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
                   trackExerciseConfigPath, seenUnsynced)
     else:
