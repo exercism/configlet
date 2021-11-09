@@ -1,7 +1,34 @@
-import std/[os, sequtils, strformat]
+import std/[os, sequtils, strformat, strutils, terminal]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
            sync_metadata, sync_tests]
+
+proc validate(conf: Conf) =
+  ## Exits with an error message if the given `conf` contains an invalid
+  ## combination of options.
+  if conf.action.offline and conf.action.probSpecsDir.len == 0:
+    showError(&"'{list(optSyncOffline)}' was given without passing " &
+              &"'{list(optSyncProbSpecsDir)}'")
+  if conf.action.update:
+    if conf.action.yes and skTests in conf.action.scope:
+      let msg = fmt"""
+        '{list(optSyncYes)}' cannot be used when updating tests
+        You can either:
+        - remove '{list(optSyncYes)}'
+        - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
+        If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
+      showError(msg)
+    if not isatty(stdin):
+      if not conf.action.yes:
+        let intersection = conf.action.scope * {skDocs, skFilepaths, skMetadata}
+        if intersection.len > 0:
+          let msg = fmt"""
+            Configlet was used in a non-interactive context, and the --update option was passed without the --yes option
+            You can either:
+            - keep using configlet non-interactively, and remove the --update option so that no destructive changes are performed
+            - keep using configlet non-interactively, and add the --yes option to perform destructive changes
+            - use configlet in an interactive terminal""".unindent()
+          showError(msg)
 
 proc getSlugs(exercises: Exercises, conf: Conf,
               trackConfigPath: string): tuple[c: seq[Slug], p: seq[Slug]] =
@@ -91,6 +118,8 @@ func explain(syncKind: SyncKind): string =
 proc sync*(conf: Conf) =
   ## Checks/updates the data according to `conf`, and exits with 1 if we saw
   ## data that is still unsynced.
+  validate(conf)
+
   let seenUnsynced = syncImpl(conf)
 
   if seenUnsynced.len > 0:

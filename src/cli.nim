@@ -52,7 +52,7 @@ type
     trackDir*: string
     verbosity*: Verbosity
 
-  Opt = enum
+  Opt* = enum
     # Global options
     optHelp = "help"
     optVersion = "version"
@@ -115,7 +115,7 @@ func camelToKebab(s: string): string =
     else:
       result &= c
 
-func list(opt: Opt): string =
+func list*(opt: Opt): string =
   if short[opt] == '_':
     &"    --{camelToKebab($opt)}"
   else:
@@ -447,37 +447,9 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
-  of actLint:
-    discard
   of actSync:
-    if result.action.offline and result.action.probSpecsDir.len == 0:
-      showError(&"'{list(optSyncOffline)}' was given without passing " &
-                &"'{list(optSyncProbSpecsDir)}'")
+    # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-    if result.action.update:
-      if result.action.yes and skTests in result.action.scope:
-        let msg = fmt"""
-          '{list(optSyncYes)}' cannot be used when updating tests
-          You can either:
-          - remove '{list(optSyncYes)}'
-          - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
-          If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
-        showError(msg)
-      if not isatty(stdin):
-        if not result.action.yes:
-          let intersection = result.action.scope * {skDocs, skFilepaths, skMetadata}
-          if intersection.len > 0:
-            let msg = fmt"""
-              Configlet was used in a non-interactive context, and the --update option was passed without the --yes option
-              You can either:
-              - keep using configlet non-interactively, and remove the --update option so that no destructive changes are performed
-              - keep using configlet non-interactively, and add the --yes option to perform destructive changes
-              - use configlet in an interactive terminal""".unindent()
-            showError(msg)
-  of actUuid:
-    discard
-  of actGenerate:
-    discard
-  of actInfo:
+  of actLint, actUuid, actGenerate, actInfo:
     discard
