@@ -69,6 +69,9 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
+  logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
+              &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
+               trackConfigPath)
   logNormal("Checking exercises...")
 
   # Don't clone problem-specifications if only `--filepaths` is given
