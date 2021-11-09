@@ -74,7 +74,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   # Don't clone problem-specifications if only `--filepaths` is given
   let probSpecsDir =
     if conf.action.scope == {skFilepaths}:
-      ProbSpecsDir("not-a-real-directory")
+      ProbSpecsDir("this_will_not_be_used")
     else:
       initProbSpecsDir(conf)
 
