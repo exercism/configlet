@@ -70,6 +70,10 @@ func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   s.setLen truncateLen
   s.add slug.string
 
+func addDocsDir*(s: var string) =
+  const pathDocs = DirSep & ".docs"
+  s.add pathDocs
+
 func addMetadataTomlPath*(s: var string) =
   const pathMetadataToml = DirSep & "metadata.toml"
   s.add pathMetadataToml

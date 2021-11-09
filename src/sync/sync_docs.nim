@@ -1,93 +1,122 @@
-import std/[os, strformat]
+import std/[os, strformat, strutils]
 import ".."/[cli, logger]
 import "."/sync_common
 
-proc contentsAfterFirstHeader(path: string): string =
-  result = newStringOfCap(getFileSize(path))
-  var isFirstLine = true
-  for line in path.lines:
-    if isFirstLine:
-      if not (line.len > 2 and line[0] == '#' and line[1] == ' '):
-        result.add line
-        result.add '\n'
-      isFirstLine = false
-    else:
-      result.add line
-      result.add '\n'
+type
+  PathAndContents = object
+    path: string
+    contents: string
+
+func addAndIncl(pairsToWrite: var seq[PathAndContents];
+                path, contents: string;
+                seenUnsynced: var set[SyncKind]) =
+  ## Appends the `path` and `contents` pair to `pairsToWrite`, and includes
+  ## `skDocs` in `seenUnsynced`.
+  pairsToWrite.add PathAndContents(path: path, contents: contents)
+  seenUnsynced.incl skDocs
 
 type
-  SourceDestPair = object
-    source: string
-    dest: string
+  ProbSpecsSourceKind = enum
+    psskInstr = "instructions.md"
+    psskDesc = "description.md"
+    psskIntro = "introduction.md"
 
-proc addPairIfNonIdenticalAfterHeader(sdPairs: var seq[SourceDestPair],
-                                      slug: Slug;
-                                      source, dest, filename: string;
-                                      seenUnsynced: var set[SyncKind]) =
-  ## Prints a message that describes whether the files at `source` and `dest`
-  ## have identical contents.
-  # TODO: Optimize this.
-  if contentsAfterFirstHeader(source) == contentsAfterFirstHeader(dest):
-    logDetailed(&"[skip] {slug}: {filename} is up to date")
-  else:
-    logNormal(&"[warn] {slug}: {filename} is unsynced")
-    seenUnsynced.incl skDocs
-    sdPairs.add SourceDestPair(source: source, dest: dest)
+proc getPsSourceContents(psSourcePath: string;
+                         pssk: ProbSpecsSourceKind): string =
+  ## Reads `psSourceContents`, but if `pssk == psskDesc`, a starting
+  ## "# Description" header is replaced with an "# Instructions" header.
+  const descHeader = "# Description\n"
+  result = readFile(psSourcePath)
 
-proc addUnsyncedIntroductionPaths(sdPairs: var seq[SourceDestPair];
-                                  slug: Slug;
-                                  trackDocsDir, psExerciseDir: string;
-                                  seenUnsynced: var set[SyncKind]) =
-  # If the exercise in problem-specifications has an `introduction.md`
-  # file, the track exercise must have a `.docs/introduction.md` file.
-  const introFilename = "introduction.md"
-  let psIntroPath = psExerciseDir / introFilename
-  if fileExists(psIntroPath):
-    let trackIntroPath = trackDocsDir / introFilename
-    if fileExists(trackIntroPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psIntroPath,
-                                       trackIntroPath, introFilename, seenUnsynced)
+  if pssk == psskDesc and result.startsWith(descHeader):
+    const instrHeader = "# Instructions\n"
+    # Replace header.
+    result.setLen result.len + instrHeader.len - descHeader.len
+    for i in countdown(result.high, descHeader.len):
+      result[i] = result[i-1]
+    for i, c in instrHeader:
+      result[i] = instrHeader[i]
+
+proc addUnsyncedImpl(pairsToWrite: var seq[PathAndContents];
+                     psSourcePath, trackDestPath: string;
+                     conf: Conf;
+                     slug: Slug;
+                     pssk: ProbSpecsSourceKind;
+                     seenUnsynced: var set[SyncKind]) =
+  ## Given a `psSourcePath` which is known to exist, appends to `pairsToWrite`
+  ## if the corresponding file at `trackDestPath` is unsynced.
+  let psSourceContents = getPsSourceContents(psSourcePath, pssk)
+  let psskStr = if pssk == psskDesc: psskInstr else: pssk
+  if psSourceContents.len == 0:
+    logNormal(&"[error] Empty source file: {psSourcePath}")
+  elif fileExists(trackDestPath):
+    let trackDestContents = readFile(trackDestPath)
+    if trackDestContents == psSourceContents:
+      logDetailed(&"[skip] {slug}: {psskStr} is up to date")
     else:
-      logNormal(&"[error] {slug}: {introFilename} is missing")
-      seenUnsynced.incl skDocs
+      logNormal(&"[warn] {slug}: {psskStr} is unsynced")
+      pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
+  else:
+    let docsDirPath = trackDestPath.parentDir()
+    if dirExists(docsDirPath): # e.g. /foo/zig/exercises/practice/bob/.docs
+      logNormal(&"[warn] {slug}: {psskStr} is missing")
+    else:
+      logNormal(&"[warn] {slug}: .meta directory is missing")
+      if conf.action.update:
+        createDir(docsDirPath)
+    pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
 
-proc addUnsyncedInstructionsPaths(sdPairs: var seq[SourceDestPair];
-                                  slug: Slug;
-                                  trackDocsDir, psExerciseDir: string;
-                                  seenUnsynced: var set[SyncKind]) =
+proc addUnsynced(pairsToWrite: var seq[PathAndContents];
+                 psSourcePath, trackDestPath: var string;
+                 conf: Conf;
+                 slug: Slug;
+                 seenUnsynced: var set[SyncKind]) =
+  ## Appends to `pairsToWrite` if the file at `trackDestPath` is unsynced with
+  ## the file at `psSourcePath`.
+  let psStartLen = psSourcePath.len
+  let trackStartLen = trackDestPath.len
+  const pathInstr = DirSep & $psskInstr
+  psSourcePath.add pathInstr # e.g. /foo/problem-specifications/exercises/bob/instructions.md
+  trackDestPath.add pathInstr # e.g. /foo/zig/exercises/practice/bob/.docs/instructions.md
+
   # The track exercise must have a `.docs/instructions.md` file.
-  # Its contents should match those of the corresponding `instructions.md`
-  # file in problem-specifications (or `description.md` if that file
-  # doesn't exist).
-  const instrFilename = "instructions.md"
-  let trackInstrPath = trackDocsDir / instrFilename
-  if fileExists(trackInstrPath):
-    const descFilename = "description.md"
-    let psInstrPath = psExerciseDir / instrFilename
-    let psDescPath = psExerciseDir / descFilename
-    if fileExists(psInstrPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psInstrPath,
-                                       trackInstrPath, instrFilename, seenUnsynced)
-    elif fileExists(psDescPath):
-      addPairIfNonIdenticalAfterHeader(sdPairs, slug, psDescPath, trackInstrPath,
-                                       instrFilename, seenUnsynced)
-    else:
-      logNormal(&"[error] {slug}: does not have an upstream " &
-                &"{instrFilename} or {descFilename} file")
-      seenUnsynced.incl skDocs
+  # Its contents should match those of the corresponding `instructions.md` file
+  # in problem-specifications (or `description.md` if that file doesn't exist).
+  # So first, check against an upstream `instructions.md` file
+  if fileExists(psSourcePath):
+    addUnsyncedImpl(pairsToWrite, psSourcePath, trackDestPath, conf, slug,
+                    psskInstr, seenUnsynced)
   else:
-    logNormal(&"[warn] {slug}: {instrFilename} is missing")
-    seenUnsynced.incl skDocs
+    # No upstream `instructions.md` - check against an upstream `description.md` file.
+    const pathDesc = DirSep & $psskDesc
+    psSourcePath.setLen(psStartLen)
+    psSourcePath.add pathDesc # e.g. /foo/problem-specifications/exercises/bob/description.md
+    if fileExists(psSourcePath):
+      addUnsyncedImpl(pairsToWrite, psSourcePath, trackDestPath, conf, slug,
+                      psskDesc, seenUnsynced)
+    else:
+      logNormal(&"[error] {slug}: does not have an upstream {psskInstr} " &
+                &"or {psskDesc} file")
 
-proc write(sdPairs: seq[SourceDestPair]) =
-  for sdPair in sdPairs:
-    # TODO: don't replace first top-level header?
-    # For example: the below currently writes `# Description`
-    # instead of `# Instructions`
-    doAssert lastPathPart(sdPair.dest) in ["instructions.md", "introduction.md"]
-    copyFile(sdPair.source, sdPair.dest)
-  let s = if sdPairs.len > 1: "s" else: ""
-  logNormal(&"Updated the docs for {sdPairs.len} Practice Exercise{s}")
+  # The track exercise must have a `.docs/introduction.md` file if
+  # the problem-specifications exercise has an `introduction.md` file.
+  psSourcePath.setLen psStartLen # e.g. /foo/problem-specifications/exercises/bob
+  const pathIntro = DirSep & $psskIntro
+  psSourcePath.add pathIntro # e.g. /foo/problem-specifications/exercises/bob/introduction.md
+  if fileExists(psSourcePath):
+    trackDestPath.setLen trackStartLen
+    trackDestPath.add pathIntro # e.g. /foo/zig/exercises/practice/bob/.docs/introduction.md
+    addUnsyncedImpl(pairsToWrite, psSourcePath, trackDestPath, conf, slug,
+                    psskIntro, seenUnsynced)
+
+proc write(pairsToWrite: seq[PathAndContents]) =
+  ## Writes to each `item.path` with `item.contents`.
+  for pathAndContents in pairsToWrite:
+    let path = pathAndContents.path
+    doAssert lastPathPart(path) in [$psskInstr, $psskIntro]
+    writeFile(path, pathAndContents.contents)
+  let s = if pairsToWrite.len > 1: "s" else: ""
+  logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")
 
 proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
                         conf: Conf;
@@ -100,26 +129,23 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
   ##
   ## Includes `skDocs` in `seenUnsynced` if there are still such unsynced files
   ## afterwards.
-  var sdPairs = newSeq[SourceDestPair]()
+  var pairsToWrite = newSeq[PathAndContents]()
+  var psSourcePath = normalizePathEnd(psExercisesDir, trailingSep = true)
+  let psStartLen = psSourcePath.len
+  var trackDestPath = normalizePathEnd(trackPracticeExercisesDir, trailingSep = true)
+  let trackDestStartLen = trackDestPath.len
 
   for slug in practiceExerciseSlugs:
-    let trackDocsDir = joinPath(trackPracticeExercisesDir, slug.string, ".docs")
-
-    if not dirExists(trackDocsDir):
-      if conf.action.update:
-        createDir(trackDocsDir)
-      seenUnsynced.incl skDocs
-
-    # Get pairs of unsynced paths
-    let psExerciseDir = psExercisesDir / slug.string
-    if dirExists(psExerciseDir):
-      sdPairs.addUnsyncedIntroductionPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)
-      sdPairs.addUnsyncedInstructionsPaths(slug, trackDocsDir, psExerciseDir, seenUnsynced)
+    psSourcePath.truncateAndAdd(psStartLen, slug)
+    if dirExists(psSourcePath): # e.g. /foo/problem-specifications/exercises/bob
+      trackDestPath.truncateAndAdd(trackDestStartLen, slug)
+      trackDestPath.addDocsDir()
+      addUnsynced(pairsToWrite, psSourcePath, trackDestPath, conf, slug, seenUnsynced)
     else:
       logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
 
   # Update docs
-  if conf.action.update and sdPairs.len > 0:
+  if conf.action.update and pairsToWrite.len > 0:
     if conf.action.yes or userSaysYes(skDocs):
-      write(sdPairs)
+      write(pairsToWrite)
       seenUnsynced.excl skDocs
