@@ -109,9 +109,9 @@ proc syncImpl(conf: Conf): set[SyncKind] =
       of skTests:
         let exercises = toSeq findExercises(conf, probSpecsDir)
         if conf.action.update:
-          updateTests(exercises, conf, result)
+          updateTests(result, conf, exercises)
         else:
-          checkTests(exercises, result)
+          checkTests(result, exercises)
 
   finally:
     if conf.action.probSpecsDir.len == 0 and conf.action.scope != {skFilepaths}:

@@ -2,7 +2,7 @@ import std/[options, sets, strformat, strutils]
 import ".."/[cli, logger]
 import "."/[exercises, probspecs]
 
-proc checkTests*(exercises: seq[Exercise], seenUnsynced: var set[SyncKind]) =
+proc checkTests*(seenUnsynced: var set[SyncKind], exercises: seq[Exercise]) =
   for exercise in exercises:
     let numMissing = exercise.tests.missing.len
     let wording = if numMissing == 1: "test case" else: "test cases"
@@ -133,8 +133,8 @@ proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
     logDetailed(&"[skip] {exercise.slug} does not have canonical data")
     true
 
-proc updateTests*(exercises: seq[Exercise], conf: Conf,
-                  seenUnsynced: var set[SyncKind]) =
+proc updateTests*(seenUnsynced: var set[SyncKind], conf: Conf,
+                  exercises: seq[Exercise]) =
   logNormal("Updating tests...")
 
   var everyExerciseIsSynced = true
