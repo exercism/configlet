@@ -101,9 +101,10 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
       var p = parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
 
       if metadataAreUpToDate(p, upstreamMetadata):
-        logDetailed(&"[skip] {slug}: metadata are up to date")
+        logDetailed(&"[skip] metadata: up-to-date: {slug}")
       else:
-        logNormal(&"[warn] {slug}: metadata are unsynced")
+        let padding = if conf.verbosity == verDetailed: "  " else: ""
+        logNormal(&"[warn] metadata: unsynced: {padding}{slug}") # Aligns slug.
         seenUnsynced.incl skMetadata
         if conf.action.update:
           update(p, upstreamMetadata)
@@ -112,9 +113,9 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
     else:
       let metaDir = trackExerciseConfigPath.parentDir()
       if dirExists(metaDir):
-        logNormal(&"[warn] {slug}: the `.meta/config.json` file is missing")
+        logNormal(&"[warn] metadata: missing .meta/config.json file: {slug}")
       else:
-        logNormal(&"[warn] {slug}: the `.meta` directory is missing")
+        logNormal(&"[warn] metadata: missing .meta directory: {slug}")
         if conf.action.update:
           createDir(metaDir)
       seenUnsynced.incl skMetadata
@@ -125,7 +126,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
         configPairs.add PathAndUpdatedConfig(path: trackExerciseConfigPath,
                                              practiceExerciseConfig: p)
   else:
-    logNormal(&"[error] {slug}: {psMetadataTomlPath} is missing")
+    logNormal(&"[error] metadata: {slug}: missing {psMetadataTomlPath}")
 
 proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
@@ -162,7 +163,8 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
       addUnsynced(configPairs, conf, slug, psMetadataTomlPath,
                   trackExerciseConfigPath, seenUnsynced)
     else:
-      logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+      logDetailed(&"[skip] metadata: exercise does not exist in " &
+                  &"problem-specifications: {slug}")
 
   # For each item in `configPairs`, write the JSON to the corresponding path.
   # If successful, exclude `syncKind` from `seenUnsynced`.

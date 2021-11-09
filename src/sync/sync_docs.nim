@@ -17,9 +17,9 @@ func addAndIncl(pairsToWrite: var seq[PathAndContents];
 
 type
   ProbSpecsSourceKind = enum
-    psskInstr = "instructions.md"
-    psskDesc = "description.md"
-    psskIntro = "introduction.md"
+    psskInstr = "instructions"
+    psskDesc = "description"
+    psskIntro = "introduction"
 
 proc getPsSourceContents(psSourcePath: string;
                          pssk: ProbSpecsSourceKind): string =
@@ -48,23 +48,27 @@ proc addUnsyncedImpl(pairsToWrite: var seq[PathAndContents];
   let psSourceContents = getPsSourceContents(psSourcePath, pssk)
   let psskStr = if pssk == psskDesc: psskInstr else: pssk
   if psSourceContents.len == 0:
-    logNormal(&"[error] Empty source file: {psSourcePath}")
+    logNormal(&"[error] docs: empty source file: {psSourcePath}")
   elif fileExists(trackDestPath):
     let trackDestContents = readFile(trackDestPath)
     if trackDestContents == psSourceContents:
-      logDetailed(&"[skip] {slug}: {psskStr} is up to date")
+      logDetailed(&"[skip] docs: {psskStr} up-to-date: {slug}")
     else:
-      logNormal(&"[warn] {slug}: {psskStr} is unsynced")
+      let padding = if conf.verbosity == verDetailed: "  " else: ""
+      logNormal(&"[warn] docs: {psskStr} unsynced: {padding}{slug}") # Aligns slug.
       pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
   else:
     let docsDirPath = trackDestPath.parentDir()
     if dirExists(docsDirPath): # e.g. /foo/zig/exercises/practice/bob/.docs
-      logNormal(&"[warn] {slug}: {psskStr} is missing")
+      logNormal(&"[warn] docs: {psskStr} missing: {slug}")
     else:
-      logNormal(&"[warn] {slug}: .meta directory is missing")
+      logNormal(&"[warn] docs: missing .meta directory: {slug}")
       if conf.action.update:
         createDir(docsDirPath)
     pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
+
+func toPath(pssk: ProbSpecsSourceKind): string =
+  &"{DirSep}{pssk}.md"
 
 proc addUnsynced(pairsToWrite: var seq[PathAndContents];
                  psSourcePath, trackDestPath: var string;
@@ -75,7 +79,7 @@ proc addUnsynced(pairsToWrite: var seq[PathAndContents];
   ## the file at `psSourcePath`.
   let psStartLen = psSourcePath.len
   let trackStartLen = trackDestPath.len
-  const pathInstr = DirSep & $psskInstr
+  const pathInstr = toPath(psskInstr)
   psSourcePath.add pathInstr # e.g. /foo/problem-specifications/exercises/bob/instructions.md
   trackDestPath.add pathInstr # e.g. /foo/zig/exercises/practice/bob/.docs/instructions.md
 
@@ -88,20 +92,20 @@ proc addUnsynced(pairsToWrite: var seq[PathAndContents];
                     psskInstr, seenUnsynced)
   else:
     # No upstream `instructions.md` - check against an upstream `description.md` file.
-    const pathDesc = DirSep & $psskDesc
+    const pathDesc = toPath(psskDesc)
     psSourcePath.setLen(psStartLen)
     psSourcePath.add pathDesc # e.g. /foo/problem-specifications/exercises/bob/description.md
     if fileExists(psSourcePath):
       addUnsyncedImpl(pairsToWrite, psSourcePath, trackDestPath, conf, slug,
                       psskDesc, seenUnsynced)
     else:
-      logNormal(&"[error] {slug}: does not have an upstream {psskInstr} " &
-                &"or {psskDesc} file")
+      logNormal(&"[error] docs: missing upstream {psskInstr} or {psskDesc} " &
+                &"file: {slug}")
 
   # The track exercise must have a `.docs/introduction.md` file if
   # the problem-specifications exercise has an `introduction.md` file.
   psSourcePath.setLen psStartLen # e.g. /foo/problem-specifications/exercises/bob
-  const pathIntro = DirSep & $psskIntro
+  const pathIntro = toPath(psskIntro)
   psSourcePath.add pathIntro # e.g. /foo/problem-specifications/exercises/bob/introduction.md
   if fileExists(psSourcePath):
     trackDestPath.setLen trackStartLen
@@ -113,7 +117,7 @@ proc write(pairsToWrite: seq[PathAndContents]) =
   ## Writes to each `item.path` with `item.contents`.
   for pathAndContents in pairsToWrite:
     let path = pathAndContents.path
-    doAssert lastPathPart(path) in [$psskInstr, $psskIntro]
+    doAssert lastPathPart(path) in [$psskInstr & ".md", $psskIntro & ".md"]
     writeFile(path, pathAndContents.contents)
   let s = if pairsToWrite.len > 1: "s" else: ""
   logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")
@@ -142,7 +146,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
       trackDestPath.addDocsDir()
       addUnsynced(pairsToWrite, psSourcePath, trackDestPath, conf, slug, seenUnsynced)
     else:
-      logDetailed(&"[skip] {slug}: does not exist in problem-specifications")
+      logDetailed(&"[skip] docs: exercise does not exist in " &
+                  &"problem-specifications: {slug}")
 
   # Update docs
   if conf.action.update and pairsToWrite.len > 0:

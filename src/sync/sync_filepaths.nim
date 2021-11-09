@@ -111,9 +111,10 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
     var exerciseConfig = ExerciseConfig.init(exerciseKind, trackExerciseConfigPath)
     let filepathsAreSynced = hasSyncedFilepaths(exerciseConfig, filePatterns)
     if filepathsAreSynced:
-      logDetailed(&"[skip] {slug}: filepaths are up to date")
+      logDetailed(&"[skip] filepaths: up-to-date: {slug}")
     else:
-      logNormal(&"[warn] {slug}: filepaths are unsynced")
+      let padding = if conf.verbosity == verDetailed: "  " else: ""
+      logNormal(&"[warn] filepaths: unsynced: {padding}{slug}") # Aligns slug.
       seenUnsynced.incl skFilepaths
       update(exerciseConfig, filePatterns, slug)
       configPairs.add PathAndUpdatedExerciseConfig(path: trackExerciseConfigPath,
@@ -121,9 +122,9 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
   else:
     let metaDir = trackExerciseConfigPath.parentDir()
     if dirExists(metaDir):
-      logNormal(&"[warn] {slug}: `.meta/config.json` is missing")
+      logNormal(&"[warn] filepaths: missing .meta/config.json: {slug}")
     else:
-      logNormal(&"[warn] {slug}: `.meta` directory is missing")
+      logNormal(&"[warn] filepaths: missing .meta directory: {slug}")
       if conf.action.update:
         createDir(metaDir)
     seenUnsynced.incl skFilepaths
