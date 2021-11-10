@@ -1,4 +1,4 @@
-import std/[importutils, json, os, options, strformat, unittest]
+import std/[importutils, json, os, options, strformat, strutils, unittest]
 import pkg/[jsony, parsetoml]
 import "."/[exec, helpers, sync/sync_common]
 from "."/sync/sync_filepaths {.all.} import update
@@ -65,6 +65,151 @@ proc testSyncCommon =
       check exerciseConfig == expected
 
   suite "pretty serialization":
+    test "empty Concept Exercise":
+      const empty = ConceptExerciseConfig()
+      const expected = """{
+        "authors": [],
+        "files": {
+          "solution": [],
+          "test": [],
+          "exemplar": []
+        },
+        "blurb": ""
+      }
+      """.dedent(6)
+      check:
+        empty.pretty() == expected
+
+    test "empty Practice Exercise":
+      const empty = PracticeExerciseConfig()
+      const expected = """{
+        "authors": [],
+        "files": {
+          "solution": [],
+          "test": [],
+          "example": []
+        },
+        "blurb": ""
+      }
+      """.dedent(6)
+      check:
+        empty.pretty() == expected
+
+    test "populated Concept Exercise":
+      const exerciseConfig = ConceptExerciseConfig(
+        authors: @["author1"],
+        contributors: some(@["contributor1"]),
+        files: ConceptExerciseFiles(
+          solution: @["lasagna.foo"],
+          test: @["test_lasagna.foo"],
+          exemplar: @[".meta/exemplar.foo"],
+          editor: @["extra_file.foo"]
+        ),
+        language_versions: ">=1.2.3",
+        forked_from: some(@["bar/lovely-lasagna"]),
+        icon: "myicon",
+        blurb: "Learn about the basics of Foo by following a lasagna recipe.",
+        source: "mysource",
+        source_url: "https://example.com"
+      )
+      const expected = """{
+        "authors": [
+          "author1"
+        ],
+        "contributors": [
+          "contributor1"
+        ],
+        "files": {
+          "solution": [
+            "lasagna.foo"
+          ],
+          "test": [
+            "test_lasagna.foo"
+          ],
+          "exemplar": [
+            ".meta/exemplar.foo"
+          ],
+          "editor": [
+            "extra_file.foo"
+          ]
+        },
+        "language_versions": ">=1.2.3",
+        "forked_from": [
+          "bar/lovely-lasagna"
+        ],
+        "icon": "myicon",
+        "blurb": "Learn about the basics of Foo by following a lasagna recipe.",
+        "source": "mysource",
+        "source_url": "https://example.com"
+      }
+      """.dedent(6)
+      check:
+        exerciseConfig.pretty() == expected
+
+    test "populated Practice Exercise":
+      const exerciseConfig = PracticeExerciseConfig(
+        authors: @["author1"],
+        contributors: some(@["contributor1"]),
+        files: PracticeExerciseFiles(
+          solution: @["darts.foo"],
+          test: @["test_darts.foo"],
+          example: @[".meta/example.foo"],
+          editor: @["extra_file.foo"]
+        ),
+        language_versions: ">=1.2.3",
+        test_runner: some(false),
+        blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
+        source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
+        source_url: "https://example.com"
+      )
+      const expected = """{
+        "authors": [
+          "author1"
+        ],
+        "contributors": [
+          "contributor1"
+        ],
+        "files": {
+          "solution": [
+            "darts.foo"
+          ],
+          "test": [
+            "test_darts.foo"
+          ],
+          "example": [
+            ".meta/example.foo"
+          ],
+          "editor": [
+            "extra_file.foo"
+          ]
+        },
+        "language_versions": ">=1.2.3",
+        "test_runner": false,
+        "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
+        "source": "Inspired by an exercise created by a professor Della Paolera in Argentina",
+        "source_url": "https://example.com"
+      }
+      """.dedent(6)
+      check:
+        exerciseConfig.pretty() == expected
+
+    test "test_runner: true is omitted":
+      const exerciseConfig = PracticeExerciseConfig(
+        test_runner: some(true)
+      )
+      const expected = """{
+        "authors": [],
+        "files": {
+          "solution": [],
+          "test": [],
+          "example": []
+        },
+        "blurb": ""
+      }
+      """.dedent(6)
+      check:
+        exerciseConfig.pretty() == expected
+
     proc serializeViaRoundtrip(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
       var j = e.toJson().parseJson()
       if j["contributors"].len == 0:
