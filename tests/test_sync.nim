@@ -1,6 +1,6 @@
-import std/[importutils, os, options, strformat, unittest]
-import pkg/parsetoml
-import "."/[exec, sync/sync_common]
+import std/[importutils, json, os, options, strformat, unittest]
+import pkg/[jsony, parsetoml]
+import "."/[exec, helpers, sync/sync_common]
 from "."/sync/sync_filepaths {.all.} import update
 from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
     metadataAreUpToDate, update
@@ -9,18 +9,18 @@ const
   testsDir = currentSourcePath().parentDir()
 
 proc testSyncCommon =
+  const trackDir = testsDir / ".test_elixir_track_repo"
+
+  # Setup: clone a track repo, and checkout a known state
+  setupExercismRepo("elixir", trackDir,
+                    "8447eaeb5ae8bdd0ae94383e6ec5bcfa21a7f993") # 2021-10-28
+
+  const conceptExercisesDir = joinPath(trackDir, "exercises", "concept")
+  const practiceExercisesDir = joinPath(trackDir, "exercises", "practice")
+  privateAccess(ConceptExerciseConfig)
+  privateAccess(PracticeExerciseConfig)
+
   suite "parseFile":
-    const trackDir = testsDir / ".test_elixir_track_repo"
-
-    # Setup: clone a track repo, and checkout a known state
-    setupExercismRepo("elixir", trackDir,
-                      "8447eaeb5ae8bdd0ae94383e6ec5bcfa21a7f993") # 2021-10-28
-
-    const conceptExercisesDir = joinPath(trackDir, "exercises", "concept")
-    const practiceExercisesDir = joinPath(trackDir, "exercises", "practice")
-    privateAccess(ConceptExerciseConfig)
-    privateAccess(PracticeExerciseConfig)
-
     test "with a Concept Exercise":
       const lasagnaDir = joinPath(conceptExercisesDir, "lasagna")
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
@@ -63,6 +63,45 @@ proc testSyncCommon =
       )
       let exerciseConfig = parseFile(dartsConfigPath, PracticeExerciseConfig)
       check exerciseConfig == expected
+
+  suite "pretty serialization":
+    proc serializeViaRoundtrip(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
+      var j = e.toJson().parseJson()
+      if j["contributors"].len == 0:
+        delete(j, "contributors")
+      if j["files"]["editor"].len == 0:
+        delete(j["files"], "editor")
+      when e is ConceptExerciseConfig:
+        let kind = j["forked_from"].kind
+        if kind == JNull or kind == JArray and j["forked_from"].len == 0:
+          delete(j, "forked_from")
+        if j["icon"].getStr().len == 0:
+          delete(j, "icon")
+      when e is PracticeExerciseConfig:
+        let kind = j["test_runner"].kind
+        if kind == JNull or kind == JBool and j["test_runner"].getBool():
+          delete(j, "test_runner")
+      for k in ["language_versions", "source", "source_url"]:
+        if j[k].getStr().len == 0:
+          delete(j, k)
+      result = j.pretty()
+      result.add '\n'
+
+    test "with every Elixir Concept Exercise":
+      for exerciseDir in getSortedSubdirs(conceptExercisesDir.Path):
+        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta",  "config.json")
+        let exerciseConfig = parseFile(exerciseConfigPath, ConceptExerciseConfig)
+        let ourSerialization = exerciseConfig.pretty()
+        let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
+        check ourSerialization == serializationViaRoundtrip
+
+    test "with every Elixir Practice Exercise":
+      for exerciseDir in getSortedSubdirs(practiceExercisesDir.Path):
+        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta",  "config.json")
+        let exerciseConfig = parseFile(exerciseConfigPath, PracticeExerciseConfig)
+        let ourSerialization = exerciseConfig.pretty()
+        let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
+        check ourSerialization == serializationViaRoundtrip
 
 proc testSyncFilepaths =
   suite "update":
