@@ -141,7 +141,7 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, when the track `config.json` file is not found (prints the expected output, and exits with 1)":
     test "-t foo":
       const expectedOutput = fmt"""
-        Error: cannot open: my_missing_directory/config.json
+        Error: cannot open: my_missing_directory{DirSep}config.json
       """.unindent()
       let cmd = &"{binaryPath} -t my_missing_directory sync -o -p {psDir}"
       execAndCheck(1, cmd, expectedOutput)

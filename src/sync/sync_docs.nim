@@ -25,11 +25,12 @@ proc getPsSourceContents(psSourcePath: string;
                          pssk: ProbSpecsSourceKind): string =
   ## Reads `psSourceContents`, but if `pssk == psskDesc`, a starting
   ## "# Description" header is replaced with an "# Instructions" header.
-  const descHeader = "# Description\n"
+  const descHeader = "# Description"
   result = readFile(psSourcePath)
 
-  if pssk == psskDesc and result.startsWith(descHeader):
-    const instrHeader = "# Instructions\n"
+  if pssk == psskDesc and result.startsWith(descHeader) and
+      result.len > descHeader.len and result[descHeader.len] in {'\n', '\r'}:
+    const instrHeader = "# Instructions"
     # Replace header.
     result.setLen result.len + instrHeader.len - descHeader.len
     for i in countdown(result.high, descHeader.len):
