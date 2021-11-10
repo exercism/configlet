@@ -68,23 +68,23 @@ proc testsForSync(binaryPath: static string) =
     footerSyncedTests = """
       Every exercise has up-to-date tests!""".unindent()
     bodyUnsyncedDocs = """
-      [warn] hamming: instructions.md is unsynced
-      [warn] yacht: instructions.md is unsynced""".unindent()
+      [warn] docs: instructions unsynced: hamming
+      [warn] docs: instructions unsynced: yacht""".unindent()
     bodyUnsyncedMetadata = """
-      [warn] acronym: metadata are unsynced
-      [warn] armstrong-numbers: metadata are unsynced
-      [warn] binary: metadata are unsynced
-      [warn] collatz-conjecture: metadata are unsynced
-      [warn] darts: metadata are unsynced
-      [warn] grade-school: metadata are unsynced
-      [warn] hello-world: metadata are unsynced
-      [warn] high-scores: metadata are unsynced
-      [warn] resistor-color: metadata are unsynced
-      [warn] reverse-string: metadata are unsynced
-      [warn] scale-generator: metadata are unsynced
-      [warn] twelve-days: metadata are unsynced
-      [warn] two-fer: metadata are unsynced
-      [warn] yacht: metadata are unsynced""".unindent()
+      [warn] metadata: unsynced: acronym
+      [warn] metadata: unsynced: armstrong-numbers
+      [warn] metadata: unsynced: binary
+      [warn] metadata: unsynced: collatz-conjecture
+      [warn] metadata: unsynced: darts
+      [warn] metadata: unsynced: grade-school
+      [warn] metadata: unsynced: hello-world
+      [warn] metadata: unsynced: high-scores
+      [warn] metadata: unsynced: resistor-color
+      [warn] metadata: unsynced: reverse-string
+      [warn] metadata: unsynced: scale-generator
+      [warn] metadata: unsynced: twelve-days
+      [warn] metadata: unsynced: two-fer
+      [warn] metadata: unsynced: yacht""".unindent()
     bodyUnsyncedTests = """
       [warn] anagram: missing 1 test case
              - detects two anagrams (03eb9bbe-8906-4ea0-84fa-ffe711b52c8b)
@@ -210,7 +210,7 @@ proc testsForSync(binaryPath: static string) =
     test "-e yacht --docs":
       const expectedOutput = fmt"""
         {header}
-        [warn] yacht: instructions.md is unsynced
+        [warn] docs: instructions unsynced: yacht
         {footerUnsyncedDocs}
       """.unindent()
       execAndCheck(1, &"{syncOffline} -e yacht --docs", expectedOutput)
@@ -218,7 +218,7 @@ proc testsForSync(binaryPath: static string) =
     test "-e darts --metadata":
       const expectedOutput = fmt"""
         {header}
-        [warn] darts: metadata are unsynced
+        [warn] metadata: unsynced: darts
         {footerUnsyncedMetadata}
       """.unindent()
       execAndCheck(1, &"{syncOffline} -e darts --metadata", expectedOutput)
@@ -255,8 +255,8 @@ proc testsForSync(binaryPath: static string) =
     test "-e yacht --docs --metadata":
       const expectedOutput = fmt"""
         {header}
-        [warn] yacht: instructions.md is unsynced
-        [warn] yacht: metadata are unsynced
+        [warn] docs: instructions unsynced: yacht
+        [warn] metadata: unsynced: yacht
         {footerUnsyncedDocs}
         {footerUnsyncedMetadata}
       """.unindent()
@@ -265,8 +265,8 @@ proc testsForSync(binaryPath: static string) =
     test "-e yacht":
       const expectedOutput = fmt"""
         {header}
-        [warn] yacht: instructions.md is unsynced
-        [warn] yacht: metadata are unsynced
+        [warn] docs: instructions unsynced: yacht
+        [warn] metadata: unsynced: yacht
         {footerUnsyncedDocs}
         {footerUnsyncedMetadata}
       """.unindent()
@@ -350,7 +350,7 @@ proc testsForSync(binaryPath: static string) =
     test "--metadata --yes -e diffie-hellman (missing `.meta` dir)":
       const expectedOutput = fmt"""
         {header}
-        [warn] diffie-hellman: the `.meta` directory is missing
+        [warn] metadata: missing .meta directory: diffie-hellman
         Updated the metadata for 1 Practice Exercise
         The `diffie-hellman` exercise has up-to-date metadata!
       """.unindent()
@@ -363,7 +363,7 @@ proc testsForSync(binaryPath: static string) =
     test "--metadata --yes -e diffie-hellman (missing `.meta/config.json`)":
       const expectedOutput = fmt"""
         {header}
-        [warn] diffie-hellman: the `.meta/config.json` file is missing
+        [warn] metadata: missing .meta/config.json file: diffie-hellman
         Updated the metadata for 1 Practice Exercise
         The `diffie-hellman` exercise has up-to-date metadata!
       """.unindent()
@@ -373,7 +373,7 @@ proc testsForSync(binaryPath: static string) =
 
     const expectedOutput = fmt"""
       {header}
-      [warn] diffie-hellman: metadata are unsynced
+      [warn] metadata: unsynced: diffie-hellman
       Updated the metadata for 1 Practice Exercise
       The `diffie-hellman` exercise has up-to-date metadata!
     """.unindent()
@@ -406,7 +406,7 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, with --update and --metadata (updates unsynced metadata for a given exercise, and exits with 0)":
     const expectedOutput = fmt"""
       {header}
-      [warn] darts: metadata are unsynced
+      [warn] metadata: unsynced: darts
       Updated the metadata for 1 Practice Exercise
       The `darts` exercise has up-to-date metadata!
     """.unindent()
