@@ -238,6 +238,17 @@ func addString(s: var string; key, val: string; isRequired = true,
     escapeJson(val, s)
     s.add ','
 
+func addBool(s: var string; key: string; val: bool; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its boolean `val` to `s`.
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson(key, s)
+  s.add ": "
+  if val:
+    s.add "true"
+  else:
+    s.add "false"
+  s.add ','
+
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
               indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
@@ -274,7 +285,7 @@ func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
     # `.meta/config.json` that we parsed, and had the value `false`.
     # The spec says that an omitted `test_runner` key implies the value `true`.
     if e.test_runner.isSome() and not e.test_runner.get():
-      result.addString("test_runner", "false") # Hack.
+      result.addBool("test_runner", false)
   result.addString("blurb", e.blurb)
   result.addString("source", e.source, isRequired = false)
   result.addString("source_url", e.source_url, isRequired = false)
