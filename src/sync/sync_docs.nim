@@ -62,7 +62,7 @@ proc addUnsyncedImpl(pairsToWrite: var seq[PathAndContents];
     if dirExists(docsDirPath): # e.g. /foo/zig/exercises/practice/bob/.docs
       logNormal(&"[warn] docs: {psskStr} missing: {slug}")
     else:
-      logNormal(&"[warn] docs: missing .meta directory: {slug}")
+      logNormal(&"[warn] docs: missing .docs directory: {slug}")
       if conf.action.update:
         createDir(docsDirPath)
     pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
