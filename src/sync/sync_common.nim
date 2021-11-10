@@ -258,11 +258,11 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   let inner = indentLevel + 1
   s.addArray("solution", val.solution, indentLevel = inner)
   s.addArray("test", val.test, indentLevel = inner)
-  s.addArray("editor", val.editor, isRequired = false, indentLevel = inner)
   when val is ConceptExerciseFiles:
     s.addArray("exemplar", val.exemplar, indentLevel = inner)
   when val is PracticeExerciseFiles:
     s.addArray("example", val.example, indentLevel = inner)
+  s.addArray("editor", val.editor, isRequired = false, indentLevel = inner)
   s.setLen s.len-1 # Remove comma.
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
