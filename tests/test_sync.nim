@@ -34,11 +34,11 @@ proc testSyncCommon =
           editor: @[]
         ),
         language_versions: ">=1.10",
+        forked_from: some(@["csharp/lucians-luscious-lasagna"]),
+        icon: "",
         blurb: "Learn about the basics of Elixir by following a lasagna recipe.",
         source: "",
-        source_url: "",
-        forked_from: some(@["csharp/lucians-luscious-lasagna"]),
-        icon: ""
+        source_url: ""
       )
       let exerciseConfig = parseFile(lasagnaConfigPath, ConceptExerciseConfig)
       check exerciseConfig == expected
@@ -56,10 +56,10 @@ proc testSyncCommon =
           editor: @[]
         ),
         language_versions: "",
+        test_runner: none(bool),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        source_url: "",
-        test_runner: none(bool)
+        source_url: ""
       )
       let exerciseConfig = parseFile(dartsConfigPath, PracticeExerciseConfig)
       check exerciseConfig == expected
@@ -448,10 +448,10 @@ proc testSyncMetadata =
           editor: @[]
         ),
         language_versions: "",
+        test_runner: none(bool),
         blurb: "",
         source: "",
-        source_url: "",
-        test_runner: none(bool)
+        source_url: ""
       )
       update(p, metadata)
       const expected = PracticeExerciseConfig(
@@ -464,11 +464,11 @@ proc testSyncMetadata =
           editor: @[]
         ),
         language_versions: "",
+        test_runner: none(bool),
         blurb: "This is a really good exercise.",
         source: "From a conversation with ee7.",
-        source_url: "https://example.com",
-        test_runner: none(bool)
-        )
+        source_url: "https://example.com"
+      )
       check:
         p == expected
         metadataAreUpToDate(p, metadata)
