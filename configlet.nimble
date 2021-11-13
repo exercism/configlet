@@ -8,10 +8,11 @@ bin           = @["configlet"]
 
 # Dependencies
 requires "nim >= 1.6.0"
-requires "parsetoml"
-requires "cligen"
-requires "uuids >= 0.1.11"
-requires "jsony >= 1.0.4"
+requires "parsetoml == 0.6.0"
+requires "cligen == 1.5.19"
+requires "uuids == 0.1.11"
+requires "isaac == 0.1.3"
+requires "jsony == 1.0.5"
 
 task test, "Runs the test suite":
   exec "nim r ./tests/all_tests.nim"
