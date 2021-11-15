@@ -377,10 +377,16 @@ For further information, see [action.yml](./action.yml).
 The following would be in a `.yml` file in `./.github/workflows/`
 
 ```yml
-name: Configlet CI
+name: Configlet
+
+permissions:
+  contents: read
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - main
   pull_request:
 
 jobs:
