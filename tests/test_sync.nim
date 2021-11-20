@@ -1,4 +1,4 @@
-import std/[importutils, json, os, options, strformat, strutils, unittest]
+import std/[importutils, json, os, options, strutils, unittest]
 import pkg/[jsony, parsetoml]
 import "."/[exec, helpers, sync/sync_common]
 from "."/sync/sync_filepaths {.all.} import update
@@ -406,27 +406,6 @@ proc testSyncMetadata =
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
-
-    # The below test will fail if the latest state of `problem-specifications`
-    # contains a `metadata.toml` file that we cannot parse.
-
-    # Checkout the latest `problem-specifications` commit. During CI, our clone
-    # of that repo is fresh (and also not a shallow clone) so this really does
-    # checkout the latest upstream ref. Locally, it may not.
-    setupExercismRepo("problem-specifications", psDir, "main")
-
-    test "can parse every `metadata.toml` file in `problem-specifications`":
-      # Check that we get the same `blurb`, `source`, and `source_url` as
-      # `pkg/parsetoml`, which passes a TOML parsing test suite.
-      for metadataPath in walkFiles(&"{psExercisesDir}/*/metadata.toml"):
-        let toml = parsetoml.parseFile(metadataPath)
-        let expected = UpstreamMetadata(
-          blurb: if toml.hasKey("blurb"): $toml["blurb"] else: "",
-          source: if toml.hasKey("source"): $toml["source"] else: "",
-          source_url: if toml.hasKey("source_url"): $toml["source_url"] else: ""
-        )
-        let metadata = parseMetadataToml(metadataPath)
-        check metadata == expected
 
   suite "update and metadataAreUpToDate":
     privateAccess(UpstreamMetadata)
