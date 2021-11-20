@@ -12,11 +12,13 @@ proc validate(conf: Conf) =
   if conf.action.update:
     if conf.action.yes and skTests in conf.action.scope:
       let msg = fmt"""
-        '{list(optSyncYes)}' cannot be used when updating tests
+        '{list(optSyncYes)}' was provided to non-interactively update, but the tests updating mode is still 'choose'.
         You can either:
-        - remove '{list(optSyncYes)}'
+        - remove '{list(optSyncYes)}', and update by confirming prompts
         - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
-        If no syncing scope option is provided, configlet uses the full syncing scope""".unindent()
+        - or add '--tests include' or '--tests exclude' to non-interactively include/exclude missing tests
+        If no syncing scope option is provided, configlet uses the full syncing scope.
+        If no --tests value is provided, configlet uses the 'choose' mode.""".unindent()
       showError(msg)
     if not isatty(stdin):
       if not conf.action.yes:
