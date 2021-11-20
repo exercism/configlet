@@ -20,7 +20,7 @@ Options for sync:
   -u, --update                 Update unsynced docs, filepaths, metadata, and tests
   -y, --yes                    Auto-confirm every prompt for updating docs, filepaths, and metadata
       --docs                   Sync Practice Exercise .docs/introduction.md and .docs/instructions.md files
-      --filepaths              Sync all exercise .meta/config.json `files` values
+      --filepaths              Populate empty `files` values in Concept/Practice exercise .meta/config.json files
       --metadata               Sync Practice Exercise .meta/config.json metadata values
       --tests [mode]           Sync Practice Exercise .meta/tests.toml files.
                                The mode value specifies how missing tests are handled when using --update.

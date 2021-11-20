@@ -176,7 +176,7 @@ func genHelpText: string =
     optSyncUpdate: "Update unsynced docs, filepaths, metadata, and tests",
     optSyncYes: "Auto-confirm every prompt for updating docs, filepaths, and metadata",
     optSyncDocs: "Sync Practice Exercise .docs/introduction.md and .docs/instructions.md files",
-    optSyncFilepaths: "Sync all exercise .meta/config.json `files` values",
+    optSyncFilepaths: "Populate empty `files` values in Concept/Practice exercise .meta/config.json files",
     optSyncMetadata: "Sync Practice Exercise .meta/config.json metadata values",
     optSyncTests: &"Sync Practice Exercise .meta/tests.toml files.\n" &
                   &"{padding}The mode value specifies how missing tests are handled when using --update.\n" &
