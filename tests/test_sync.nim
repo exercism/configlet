@@ -282,7 +282,8 @@ proc testSyncCommon =
       check:
         exerciseConfig.pretty() == expected
 
-    proc serializeViaRoundtrip(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
+    proc serializeViaRoundtrip(e: ConceptExerciseConfig |
+                                  PracticeExerciseConfig): string =
       var j = e.toJson().parseJson()
       if j["contributors"].len == 0:
         delete(j, "contributors")
@@ -308,7 +309,7 @@ proc testSyncCommon =
 
     test "with every Elixir Concept Exercise":
       for exerciseDir in getSortedSubdirs(conceptExercisesDir.Path):
-        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta",  "config.json")
+        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, ConceptExerciseConfig)
         let ourSerialization = exerciseConfig.pretty()
         let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
@@ -316,7 +317,7 @@ proc testSyncCommon =
 
     test "with every Elixir Practice Exercise":
       for exerciseDir in getSortedSubdirs(practiceExercisesDir.Path):
-        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta",  "config.json")
+        let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, PracticeExerciseConfig)
         let ourSerialization = exerciseConfig.pretty()
         let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
