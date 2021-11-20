@@ -33,7 +33,8 @@ Global options:
   -h, --help                   Show this help message and exit
       --version                Show this tool's version information and exit
   -t, --track-dir <dir>        Specify a track directory to use instead of the current directory
-  -v, --verbosity <verbosity>  The verbosity of output. Allowed values: q[uiet], n[ormal], d[etailed]
+  -v, --verbosity <verbosity>  The verbosity of output.
+                               Allowed values: q[uiet], n[ormal], d[etailed] (default: normal)
 ```
 
 ## `configlet lint`
