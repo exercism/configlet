@@ -64,8 +64,6 @@ proc addUnsyncedImpl(pairsToWrite: var seq[PathAndContents];
       logNormal(&"[warn] docs: {psskStr} missing: {slug}")
     else:
       logNormal(&"[warn] docs: missing .docs directory: {slug}")
-      if conf.action.update:
-        createDir(docsDirPath)
     pairsToWrite.addAndIncl(trackDestPath, psSourceContents, seenUnsynced)
 
 func toPath(pssk: ProbSpecsSourceKind): string =
@@ -119,6 +117,7 @@ proc write(pairsToWrite: seq[PathAndContents]) =
   for pathAndContents in pairsToWrite:
     let path = pathAndContents.path
     doAssert lastPathPart(path) in [$psskInstr & ".md", $psskIntro & ".md"]
+    createDir path.parentDir()
     writeFile(path, pathAndContents.contents)
   let s = if pairsToWrite.len > 1: "s" else: ""
   logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")

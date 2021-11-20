@@ -125,8 +125,6 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
       logNormal(&"[warn] filepaths: missing .meta/config.json: {slug}")
     else:
       logNormal(&"[warn] filepaths: missing .meta directory: {slug}")
-      if conf.action.update:
-        createDir(metaDir)
     seenUnsynced.incl skFilepaths
     if conf.action.update:
       var exerciseConfig = ExerciseConfig(kind: exerciseKind)
@@ -136,12 +134,16 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
 
 proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
   for configPair in configPairs:
-    doAssert lastPathPart(configPair.path) == "config.json"
-    case configPair.exerciseConfig.kind
-    of ekConcept:
-      writeFile(configPair.path, configPair.exerciseConfig.c.pretty())
-    of ekPractice:
-      writeFile(configPair.path, configPair.exerciseConfig.p.pretty())
+    let path = configPair.path
+    doAssert lastPathPart(path) == "config.json"
+    createDir path.parentDir()
+    let contents =
+      case configPair.exerciseConfig.kind
+      of ekConcept:
+        configPair.exerciseConfig.c.pretty()
+      of ekPractice:
+        configPair.exerciseConfig.p.pretty()
+    writeFile(path, contents)
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")
 

@@ -116,8 +116,6 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
         logNormal(&"[warn] metadata: missing .meta/config.json file: {slug}")
       else:
         logNormal(&"[warn] metadata: missing .meta directory: {slug}")
-        if conf.action.update:
-          createDir(metaDir)
       seenUnsynced.incl skMetadata
       if conf.action.update:
         let upstreamMetadata = parseMetadataToml(psMetadataTomlPath)
@@ -131,8 +129,10 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
 proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
     let updatedJson = pretty(configPair.practiceExerciseConfig)
-    doAssert lastPathPart(configPair.path) == "config.json"
-    writeFile(configPair.path, updatedJson)
+    let path = configPair.path
+    doAssert lastPathPart(path) == "config.json"
+    createDir path.parentDir()
+    writeFile(path, updatedJson)
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the metadata for {configPairs.len} Practice Exercise{s}")
 
