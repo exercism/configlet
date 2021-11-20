@@ -73,28 +73,28 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
     writeBlankLines()
     sdSkipTest
 
-proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
-  case mode
-  of modeInclude:
+proc syncDecision(testCase: ExerciseTestCase, testsMode: TestsMode): SyncDecision =
+  case testsMode
+  of tmInclude:
     sdIncludeTest
-  of modeExclude:
+  of tmExclude:
     sdExcludeTest
-  of modeChoose:
+  of tmChoose:
     if testCase.reimplements.isNone():
       chooseRegularSyncDecision(testCase)
     else:
       chooseReimplementsSyncDecision(testCase)
 
 proc sync(exercise: Exercise, conf: Conf): Exercise =
-  let mode = conf.action.mode
+  let testsMode = conf.action.tests
   let numMissing = exercise.tests.missing.len
   let wording = if numMissing == 1: "test case" else: "test cases"
-  case mode
-  of modeInclude:
+  case testsMode
+  of tmInclude:
     logNormal(&"[info] {exercise.slug}: included {numMissing} missing {wording}")
-  of modeExclude:
+  of tmExclude:
     logNormal(&"[info] {exercise.slug}: excluded {numMissing} missing {wording}")
-  of modeChoose:
+  of tmChoose:
     logNormal(&"[warn] {exercise.slug}: missing {numMissing} {wording}")
 
   result = exercise
@@ -102,7 +102,7 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   for testCase in exercise.testCases:
     let uuid = testCase.uuid
     if uuid in exercise.tests.missing:
-      case syncDecision(testCase, mode)
+      case syncDecision(testCase, testsMode)
       of sdIncludeTest:
         result.tests.included.incl uuid
         result.tests.missing.excl uuid

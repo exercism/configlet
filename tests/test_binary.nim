@@ -567,27 +567,27 @@ proc testsForSync(binaryPath: static string) =
     let anagramTestsTomlPath = joinPath("exercises", "practice", "anagram",
                                         ".meta", "tests.toml")
 
-    test "-mi: includes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0, &"{syncOfflineUpdateTests} -e anagram -mi", expectedOutputAnagramInclude)
+    test "--tests include: includes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdateTests} include -e anagram", expectedOutputAnagramInclude)
     testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
 
-    test "-me: excludes a missing test case for a given exercise, and exits with 0":
-      execAndCheck(0, &"{syncOfflineUpdateTests} -e anagram -me", expectedOutputAnagramExclude)
+    test "--tests exclude: excludes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdateTests} exclude -e anagram", expectedOutputAnagramExclude)
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
-    test "-mc: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "y")
+    test "--tests choose: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "y")
     testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
 
-    test "-mc: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "n")
+    test "--tests choose: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "n")
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
-    test "-mc: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
-      execAndCheckExitCode(1, &"{syncOfflineUpdateTests} -e anagram -mc", inputStr = "s")
+    test "--tests choose: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
+      execAndCheckExitCode(1, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "s")
     testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
-    test "-mi: includes every missing test case when not specifying an exercise, and exits with 0":
+    test "--tests include: includes every missing test case when not specifying an exercise, and exits with 0":
       const expectedOutput = fmt"""
         {header}
         {headerUpdateTests}
@@ -603,7 +603,7 @@ proc testsForSync(binaryPath: static string) =
         [info] react: included 14 missing test cases
         {footerSyncedTests}
       """.unindent()
-      execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
+      execAndCheck(0, &"{syncOfflineUpdateTests} include", expectedOutput)
 
     const expectedDiffOutput = fmt"""
       --- exercises/practice/anagram/.meta/tests.toml
@@ -797,13 +797,13 @@ proc testsForSync(binaryPath: static string) =
       let diff = gitDiffConcise(trackDir)
       check diff == expectedDiffOutput
 
-    test "after updating tests, another tests update using -mi performs no changes, and exits with 0":
+    test "after updating tests, another tests update using --tests include performs no changes, and exits with 0":
       const expectedOutput = fmt"""
         {header}
         {headerUpdateTests}
         {footerSyncedTests}
       """.unindent()
-      execAndCheck(0, &"{syncOfflineUpdateTests} -mi", expectedOutput)
+      execAndCheck(0, &"{syncOfflineUpdateTests} include", expectedOutput)
 
     test "after updating only tests, a plain `sync` shows that only docs and metadata are unsynced, and exits with 1":
       const expectedOutput = fmt"""
@@ -967,10 +967,10 @@ proc main =
           exitCode == 1
 
   suite "invalid value":
-    for (option, badValue) in [("--mode", "foo"), ("--mode", "f"),
-                               ("-m", "foo"), ("-m", "f"),
-                               ("-m", "--update"), ("-m", "-u"),
-                               ("-m", "-mc"), ("-m", "--mode")]:
+    for (option, badValue) in [("--verbosity", "foo"), ("--verbosity", "f"),
+                               ("-v", "foo"), ("-v", "f"),
+                               ("-v", "--update"), ("-v", "-u"),
+                               ("-v", "-t=foo"), ("-v", "--verbosity")]:
       for sep in [" ", "=", ":"]:
         test &"{option}{sep}{badValue}":
           let (outp, exitCode) = execCmdEx(&"{binaryPath} sync {option}{sep}{badValue}")
@@ -980,7 +980,7 @@ proc main =
 
   suite "valid option given to wrong command":
     for (command, opt, val) in [("uuid", "-u", ""),
-                                ("uuid", "--mode", "choose"),
+                                ("uuid", "--tests", "choose"),
                                 ("sync", "-n", "10")]:
       test &"{command} {opt} {val}":
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {command} {opt} {val}")
@@ -999,7 +999,7 @@ proc main =
     for cmd in ["uuid -n5 sync",
                 "uuid -n5 sync -u",
                 "sync -u uuid",
-                "sync -u -mc -o uuid -n5"]:
+                "sync -u -o uuid -n5"]:
       test &"{cmd}":
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {cmd}")
         check:

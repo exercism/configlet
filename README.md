@@ -15,7 +15,6 @@ Commands:
 
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
-  -m, --mode <mode>            What to do with missing test cases. Allowed values: c[hoose], i[nclude], e[xclude]
   -p, --prob-specs-dir <dir>   Use this `problem-specifications` directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by `-p, --prob-specs-dir` is up to date
   -u, --update                 Update unsynced docs, filepaths, metadata, and tests
@@ -23,7 +22,9 @@ Options for sync:
       --docs                   Sync Practice Exercise .docs/introduction.md and .docs/instructions.md files
       --filepaths              Sync all exercise .meta/config.json `files` values
       --metadata               Sync Practice Exercise .meta/config.json metadata values
-      --tests                  Sync Practice Exercise .meta/tests.toml files
+      --tests [mode]           Sync Practice Exercise .meta/tests.toml files.
+                               The mode value specifies how missing tests are handled when using --update.
+                               Allowed values: c[hoose], i[nclude], e[xclude] (default: choose)
 
 Options for uuid:
   -n, --num <int>              Number of UUIDs to generate
