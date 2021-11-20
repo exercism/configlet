@@ -95,6 +95,27 @@ proc testSyncCommon =
       check:
         empty.pretty() == expected
 
+    test "Practice Exercise with `custom` key having value of the empty object":
+      let p = PracticeExerciseConfig(
+        authors: @["foo", "bar"],
+        custom: some(newJObject())
+      )
+      const expected = """{
+        "authors": [
+          "foo",
+          "bar"
+        ],
+        "files": {
+          "solution": [],
+          "test": [],
+          "example": []
+        },
+        "blurb": ""
+      }
+      """.dedent(6)
+      check:
+        p.pretty() == expected
+
     let customJson = """
       {
         "foo": true,

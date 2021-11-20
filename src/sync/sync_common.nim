@@ -271,17 +271,19 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   s.add "},"
 
 proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
-  s.addNewlineAndIndent(indentLevel)
-  escapeJson("custom", s)
-  s.add ':'
   case j.kind
   of JObject:
-    let pretty = j.pretty()
-    if pretty.len > 2:
+    if j.len > 0:
+      s.addNewlineAndIndent(indentLevel)
+      escapeJson("custom", s)
+      s.add ':'
+      let pretty = j.pretty()
       s.add " {\n"
-      s.add pretty[2 .. ^1].indent(2)
+      s.add pretty[2 .. ^1].indent(2) # no IndexError, as `j` is non-empty.
+    else:
+      s.setLen s.len-1 # Remove comma after previous value.
   else:
-    stderr.writeLine "The value of the `custom` key was not a JSON object:"
+    stderr.writeLine "The value of a `custom` key is not a JSON object:"
     stderr.writeLine j.pretty()
     quit 1
 
