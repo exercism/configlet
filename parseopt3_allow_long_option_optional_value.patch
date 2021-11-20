@@ -1,0 +1,24 @@
+diff --git a/parseopt3.nim b/parseopt3.nim
+index a865952..850d016 100644
+--- a/parseopt3.nim
++++ b/parseopt3.nim
+@@ -267,8 +267,17 @@ proc doLong(p: var OptParser) =
+     p.kind = cmdError
+     return
+   if p.pos < p.cmd.len:                 # Take opt arg from next param
+-    p.val = p.cmd[p.pos]
+-    p.pos += 1
++    # If the next parameter begins with `-`, parse it as an option, even when
++    # `longNoVal` is both non-empty and lacks the given long option.
++    # This allows a long option `foo` to have an optional value, supporting both
++    # of the below forms:
++    #   --foo val1 --bar val2
++    #   --foo --bar val2
++    # Without the below line, `--bar` is parsed as the value of `--foo` in the
++    # latter case.
++    if not p.cmd[p.pos].startsWith("-"):
++      p.val = p.cmd[p.pos]
++      p.pos += 1
+   elif p.longNoVal.len != 0:
+     p.val = ""
+     p.pos += 1
