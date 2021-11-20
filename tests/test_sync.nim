@@ -24,7 +24,7 @@ proc testSyncCommon =
     test "with a Concept Exercise":
       const lasagnaDir = joinPath(conceptExercisesDir, "lasagna")
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
-      const expected = ConceptExerciseConfig(
+      let expected = ConceptExerciseConfig(
         authors: @["neenjaw"],
         contributors: some(@["angelikatyborska"]),
         files: ConceptExerciseFiles(
@@ -46,7 +46,7 @@ proc testSyncCommon =
     test "with a Practice Exercise":
       const dartsDir = joinPath(practiceExercisesDir, "darts")
       const dartsConfigPath = joinPath(dartsDir, ".meta", "config.json")
-      const expected = PracticeExerciseConfig(
+      let expected = PracticeExerciseConfig(
         authors: @["jiegillet"],
         contributors: some(@["angelikatyborska"]),
         files: PracticeExerciseFiles(
@@ -66,7 +66,7 @@ proc testSyncCommon =
 
   suite "pretty serialization":
     test "empty Concept Exercise":
-      const empty = ConceptExerciseConfig()
+      let empty = ConceptExerciseConfig()
       const expected = """{
         "authors": [],
         "files": {
@@ -81,7 +81,7 @@ proc testSyncCommon =
         empty.pretty() == expected
 
     test "empty Practice Exercise":
-      const empty = PracticeExerciseConfig()
+      let empty = PracticeExerciseConfig()
       const expected = """{
         "authors": [],
         "files": {
@@ -95,8 +95,21 @@ proc testSyncCommon =
       check:
         empty.pretty() == expected
 
+    let customJson = """
+      {
+        "foo": true,
+        "bar": 7,
+        "baz": "hi",
+        "stuff": [1, 2, 3],
+        "my_object": {
+          "foo": false,
+          "bar": ["a", "b", "c"]
+        }
+      }
+    """.parseJson()
+
     test "populated Concept Exercise":
-      const exerciseConfig = ConceptExerciseConfig(
+      let exerciseConfig = ConceptExerciseConfig(
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: ConceptExerciseFiles(
@@ -110,7 +123,8 @@ proc testSyncCommon =
         icon: "myicon",
         blurb: "Learn about the basics of Foo by following a lasagna recipe.",
         source: "mysource",
-        source_url: "https://example.com"
+        source_url: "https://example.com",
+        custom: some(customJson)
       )
       const expected = """{
         "authors": [
@@ -140,14 +154,32 @@ proc testSyncCommon =
         "icon": "myicon",
         "blurb": "Learn about the basics of Foo by following a lasagna recipe.",
         "source": "mysource",
-        "source_url": "https://example.com"
+        "source_url": "https://example.com",
+        "custom": {
+          "foo": true,
+          "bar": 7,
+          "baz": "hi",
+          "stuff": [
+            1,
+            2,
+            3
+          ],
+          "my_object": {
+            "foo": false,
+            "bar": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        }
       }
       """.dedent(6)
       check:
         exerciseConfig.pretty() == expected
 
     test "populated Practice Exercise":
-      const exerciseConfig = PracticeExerciseConfig(
+      let exerciseConfig = PracticeExerciseConfig(
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: PracticeExerciseFiles(
@@ -160,7 +192,8 @@ proc testSyncCommon =
         test_runner: some(false),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        source_url: "https://example.com"
+        source_url: "https://example.com",
+        custom: some(customJson)
       )
       const expected = """{
         "authors": [
@@ -187,14 +220,32 @@ proc testSyncCommon =
         "test_runner": false,
         "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
         "source": "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        "source_url": "https://example.com"
+        "source_url": "https://example.com",
+        "custom": {
+          "foo": true,
+          "bar": 7,
+          "baz": "hi",
+          "stuff": [
+            1,
+            2,
+            3
+          ],
+          "my_object": {
+            "foo": false,
+            "bar": [
+              "a",
+              "b",
+              "c"
+            ]
+          }
+        }
       }
       """.dedent(6)
       check:
         exerciseConfig.pretty() == expected
 
     test "test_runner: true is omitted":
-      const exerciseConfig = PracticeExerciseConfig(
+      let exerciseConfig = PracticeExerciseConfig(
         test_runner: some(true)
       )
       const expected = """{
@@ -229,6 +280,8 @@ proc testSyncCommon =
       for k in ["language_versions", "source", "source_url"]:
         if j[k].getStr().len == 0:
           delete(j, k)
+      if j["custom"].kind == JNull:
+        delete(j, "custom")
       result = j.pretty()
       result.add '\n'
 
@@ -433,7 +486,7 @@ proc testSyncMetadata =
         source_url: ""
       )
       update(p, metadata)
-      const expected = PracticeExerciseConfig(
+      let expected = PracticeExerciseConfig(
         authors: @["foo"],
         contributors: some(@["foo"]),
         files: PracticeExerciseFiles(

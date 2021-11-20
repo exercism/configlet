@@ -110,6 +110,7 @@ type
   #     blurb*: string
   #     source*: string
   #     source_url*: string
+  #     custom*: Option[JsonNode]
   #
   # and parse with `jsony.fromJson` because the JSON does not actually contain a
   # `kind` key. Furthermore, the unique keys for Practice and Concept exercises
@@ -158,6 +159,7 @@ type
     blurb*: string
     source*: string
     source_url*: string
+    custom*: Option[JsonNode]
 
   PracticeExerciseConfig* = object
     authors: seq[string]
@@ -170,6 +172,7 @@ type
     blurb*: string
     source*: string
     source_url*: string
+    custom*: Option[JsonNode]
 
 {.pop.}
 
@@ -267,7 +270,22 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
-func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
+proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson("custom", s)
+  s.add ':'
+  case j.kind
+  of JObject:
+    let pretty = j.pretty()
+    if pretty.len > 2:
+      s.add " {\n"
+      s.add pretty[2 .. ^1].indent(2)
+  else:
+    stderr.writeLine "The value of the `custom` key was not a JSON object:"
+    stderr.writeLine j.pretty()
+    quit 1
+
+proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
   ## Serializes `e` as pretty-printed JSON.
   result = newStringOfCap(100)
   result.add '{'
@@ -289,5 +307,8 @@ func pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
   result.addString("blurb", e.blurb)
   result.addString("source", e.source, isRequired = false)
   result.addString("source_url", e.source_url, isRequired = false)
-  result.setLen result.len-1 # Remove comma.
+  if e.custom.isSome():
+    result.addCustom(e.custom.get())
+  else:
+    result.setLen result.len-1 # Remove comma.
   result.add "\n}\n"
