@@ -270,28 +270,22 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
-proc addObject(s: var string; key: string; j: JsonNode, indentLevel: int) =
-  ## Appends the pretty-printed JSON for a `key` and its JSON object value `j`
-  ## to `s`.
-  assert j.kind == JObject and j.len > 0
-  s.addNewlineAndIndent(indentLevel)
-  escapeJson(key, s)
-  s.add ": {"
-  s.addNewlineAndIndent(indentLevel)
-  let pretty = j.pretty()
-  for c in pretty.toOpenArray(2, pretty.high): # Omit the beginning "{\n".
-    if c == '\n':
-      s.addNewlineAndIndent(indentLevel)
-    else:
-      s.add c
-
 proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `custom` key and its JSON object
   ## value `j` to `s`.
   case j.kind
   of JObject:
     if j.len > 0:
-      s.addObject("custom", j, indentLevel)
+      s.addNewlineAndIndent(indentLevel)
+      escapeJson("custom", s)
+      s.add ": {"
+      s.addNewlineAndIndent(indentLevel)
+      let pretty = j.pretty()
+      for c in pretty.toOpenArray(2, pretty.high): # Omit the beginning "{\n".
+        if c == '\n':
+          s.addNewlineAndIndent(indentLevel)
+        else:
+          s.add c
     else:
       s.setLen s.len-1 # Remove comma after previous value.
   else:
