@@ -252,6 +252,11 @@ func addBool(s: var string; key: string; val: bool; indentLevel = 1) =
     s.add "false"
   s.add ','
 
+func removeComma(s: var string) =
+  ## Removes the final character from `s`, if that character is a comma.
+  if s[^1] == ',':
+    s.setLen s.len-1
+
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
               indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
@@ -266,7 +271,7 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   when val is PracticeExerciseFiles:
     s.addArray("example", val.example, indentLevel = inner)
   s.addArray("editor", val.editor, isRequired = false, indentLevel = inner)
-  s.setLen s.len-1 # Remove comma.
+  s.removeComma()
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
@@ -286,8 +291,6 @@ proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
           s.addNewlineAndIndent(indentLevel)
         else:
           s.add c
-    else:
-      s.setLen s.len-1 # Remove comma after previous value.
   else:
     stderr.writeLine "The value of a `custom` key is not a JSON object:"
     stderr.writeLine j.pretty()
@@ -317,6 +320,5 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
   result.addString("source_url", e.source_url, isRequired = false)
   if e.custom.isSome():
     result.addCustom(e.custom.get())
-  else:
-    result.setLen result.len-1 # Remove comma.
+  result.removeComma()
   result.add "\n}\n"
