@@ -279,16 +279,11 @@ proc addObject(s: var string; key: string; j: JsonNode, indentLevel: int) =
   s.add ": {"
   s.addNewlineAndIndent(indentLevel)
   let pretty = j.pretty()
-  # Omit opening brace and newline in `pretty`.
-  var i = 2
-  while i < pretty.len:
-    let c = pretty[i]
-    case c
-    of '\n':
+  for c in pretty.toOpenArray(2, pretty.high): # Omit the beginning "{\n".
+    if c == '\n':
       s.addNewlineAndIndent(indentLevel)
     else:
       s.add c
-    inc i
 
 proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `custom` key and its JSON object
