@@ -275,25 +275,25 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
-proc addCustom(s: var string; j: JsonNode, indentLevel = 1) =
-  ## Appends the pretty-printed JSON for a `custom` key and its JSON object
-  ## value `j` to `s`.
-  case j.kind
+proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its JSON object `val` to
+  ## `s`.
+  case val.kind
   of JObject:
-    if j.len > 0:
+    if val.len > 0:
       s.addNewlineAndIndent(indentLevel)
-      escapeJson("custom", s)
+      escapeJson(key, s)
       s.add ": {"
       s.addNewlineAndIndent(indentLevel)
-      let pretty = j.pretty()
+      let pretty = val.pretty()
       for c in pretty.toOpenArray(2, pretty.high): # Omit the beginning "{\n".
         if c == '\n':
           s.addNewlineAndIndent(indentLevel)
         else:
           s.add c
   else:
-    stderr.writeLine "The value of a `custom` key is not a JSON object:"
-    stderr.writeLine j.pretty()
+    stderr.writeLine &"The value of a `{key}` key is not a JSON object:"
+    stderr.writeLine val.pretty()
     quit 1
 
 proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
@@ -319,6 +319,6 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
   result.addString("source", e.source, isRequired = false)
   result.addString("source_url", e.source_url, isRequired = false)
   if e.custom.isSome():
-    result.addCustom(e.custom.get())
+    result.addObject("custom", e.custom.get())
   result.removeComma()
   result.add "\n}\n"
