@@ -283,10 +283,9 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
     if val.len > 0:
       s.addNewlineAndIndent(indentLevel)
       escapeJson(key, s)
-      s.add ": {"
-      s.addNewlineAndIndent(indentLevel)
+      s.add ": "
       let pretty = val.pretty()
-      for c in pretty.toOpenArray(2, pretty.high): # Omit the beginning "{\n".
+      for c in pretty:
         if c == '\n':
           s.addNewlineAndIndent(indentLevel)
         else:
