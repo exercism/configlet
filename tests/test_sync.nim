@@ -19,6 +19,8 @@ proc testSyncCommon =
   const practiceExercisesDir = joinPath(trackDir, "exercises", "practice")
   privateAccess(ConceptExerciseConfig)
   privateAccess(PracticeExerciseConfig)
+  privateAccess(ConceptExerciseFiles)
+  privateAccess(PracticeExerciseFiles)
 
   suite "parseFile":
     test "with a Concept Exercise":
@@ -26,11 +28,11 @@ proc testSyncCommon =
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
       let expected = ConceptExerciseConfig(
         originalKeyOrder: @[eckBlurb, eckAuthors, eckContributors, eckFiles,
-                            eckSolution, eckTest, eckExemplar,
                             eckForkedFrom, eckLanguageVersions],
         authors: @["neenjaw"],
         contributors: some(@["angelikatyborska"]),
         files: ConceptExerciseFiles(
+          originalKeyOrder: @[fkSolution, fkTest, fkExemplar],
           solution: @["lib/lasagna.ex"],
           test: @["test/lasagna_test.exs"],
           exemplar: @[".meta/exemplar.ex"],
@@ -50,11 +52,12 @@ proc testSyncCommon =
       const dartsDir = joinPath(practiceExercisesDir, "darts")
       const dartsConfigPath = joinPath(dartsDir, ".meta", "config.json")
       let expected = PracticeExerciseConfig(
-        originalKeyOrder: @[eckAuthors, eckContributors, eckFiles, eckExample,
-                            eckSolution, eckTest, eckBlurb, eckSource],
+        originalKeyOrder: @[eckAuthors, eckContributors, eckFiles, eckBlurb,
+                            eckSource],
         authors: @["jiegillet"],
         contributors: some(@["angelikatyborska"]),
         files: PracticeExerciseFiles(
+          originalKeyOrder: @[fkExample, fkSolution, fkTest],
           solution: @["lib/darts.ex"],
           test: @["test/darts_test.exs"],
           example: @[".meta/example.ex"],
@@ -293,6 +296,7 @@ proc testSyncCommon =
       delete(j, "originalKeyOrder")
       if j["contributors"].len == 0:
         delete(j, "contributors")
+      delete(j["files"], "originalKeyOrder")
       if j["files"]["editor"].len == 0:
         delete(j["files"], "editor")
       when e is ConceptExerciseConfig:

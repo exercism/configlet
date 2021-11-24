@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, os, parsejson, sets, streams, strformat, strutils]
+import std/[algorithm, json, options, os, sets, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
@@ -138,15 +138,9 @@ type
   # `.meta/config.json` file after we read it, but before parsing with `jsony`.
 
   ExerciseConfigKey* = enum
-    eckNone = "none"
     eckAuthors = "authors"
     eckContributors = "contributors"
     eckFiles = "files"
-    eckSolution = "solution"
-    eckTest = "test"
-    eckExemplar = "exemplar"
-    eckExample = "example"
-    eckEditor = "editor"
     eckLanguageVersions = "language_versions"
     eckForkedFrom = "forked_from"
     eckIcon = "icon"
@@ -156,13 +150,22 @@ type
     eckSourceUrl = "source_url"
     eckCustom = "custom"
 
+  FilesKey* = enum
+    fkSolution = "solution"
+    fkTest = "test"
+    fkExemplar = "exemplar"
+    fkExample = "example"
+    fkEditor = "editor"
+
   ConceptExerciseFiles* = object
+    originalKeyOrder: seq[FilesKey]
     solution*: seq[string]
     test*: seq[string]
     exemplar*: seq[string]
     editor*: seq[string]
 
   PracticeExerciseFiles* = object
+    originalKeyOrder: seq[FilesKey]
     solution*: seq[string]
     test*: seq[string]
     example*: seq[string]
@@ -202,30 +205,26 @@ func toHashSet(t: typedesc): HashSet[string] =
   for item in t:
     result.incl $item
 
-proc getJsonKeys(s, path: string): seq[ExerciseConfigKey] =
-  ## Returns a seq containing every JSON key name in `s`. `path` is used just
-  ## for error messages.
+func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: string) =
+  ## Appends `key` to `e.originalKeyOrder`.
+  ##
+  ## This proc does not rename anything, but it must be named `renameHook`.
+  ## It just so happens that this hook is convenient for the use case of saving
+  ## the key order, since it can access both the object being parsed and the key
+  ## name.
   const validKeys = toHashSet(ExerciseConfigKey)
-  var p: JsonParser
-  let ss = newStringStream(s)
-  p.open(ss, path)
-  try:
-    var exerciseConfigKey: ExerciseConfigKey
-    while true:
-      var tok = getTok(p)
-      case tok
-      of tkError, tkEof:
-        break
-      of tkString:
-        if p.a in validKeys:
-          exerciseConfigKey = parseEnum[ExerciseConfigKey](p.a)
-      of tkColon:
-        # On reaching a colon, the previous string is the key name.
-        result.add exerciseConfigKey
-      else:
-        discard
-  finally:
-    p.close()
+  if key in validKeys:
+    let eck = parseEnum[ExerciseConfigKey](key)
+    e.originalKeyOrder.add eck
+
+func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: string) =
+  ## Appends `key` to `f.originalKeyOrder`.
+  ##
+  ## As with our other `renameHook`, this proc does not actually rename anything.
+  const validKeys = toHashSet(FilesKey)
+  if key in validKeys:
+    let fk = parseEnum[FilesKey](key)
+    f.originalKeyOrder.add fk
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
@@ -238,9 +237,7 @@ proc parseFile*(path: string, T: typedesc): T =
       quit 1
   if contents.len > 0:
     try:
-      result = contents.fromJson(T)
-      when T is ConceptExerciseConfig or T is PracticeExerciseConfig:
-        result.originalKeyOrder = getJsonKeys(contents, path)
+      contents.fromJson(T)
     except jsony.JsonError:
       let jsonyMsg = getCurrentExceptionMsg()
       let details = tidyJsonyMessage(jsonyMsg, contents)
@@ -248,7 +245,7 @@ proc parseFile*(path: string, T: typedesc): T =
       stderr.writeLine msg
       quit 1
   else:
-    result = T()
+    T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
   ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
