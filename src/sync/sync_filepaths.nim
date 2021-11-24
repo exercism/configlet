@@ -140,9 +140,9 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
     let contents =
       case configPair.exerciseConfig.kind
       of ekConcept:
-        configPair.exerciseConfig.c.pretty()
+        configPair.exerciseConfig.c.pretty(prettyMode = pmSync)
       of ekPractice:
-        configPair.exerciseConfig.p.pretty()
+        configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
     writeFile(path, contents)
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")

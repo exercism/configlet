@@ -75,7 +75,8 @@ proc testSyncCommon =
   suite "pretty serialization":
     test "empty Concept Exercise":
       let empty = ConceptExerciseConfig()
-      const expected = """{
+      const expected = """
+      {
         "authors": [],
         "files": {
           "solution": [],
@@ -86,11 +87,12 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        empty.pretty() == expected
+        empty.pretty(pmSync) == expected
 
     test "empty Practice Exercise":
       let empty = PracticeExerciseConfig()
-      const expected = """{
+      const expected = """
+      {
         "authors": [],
         "files": {
           "solution": [],
@@ -101,10 +103,11 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        empty.pretty() == expected
+        empty.pretty(pmSync) == expected
 
     test "Practice Exercise with `custom` key having value of the empty object":
       let p = PracticeExerciseConfig(
+        originalKeyOrder: @[eckAuthors, eckCustom],
         authors: @["foo", "bar"],
         custom: some(newJObject())
       )
@@ -118,11 +121,12 @@ proc testSyncCommon =
           "test": [],
           "example": []
         },
-        "blurb": ""
+        "blurb": "",
+        "custom": {}
       }
       """.dedent(6)
       check:
-        p.pretty() == expected
+        p.pretty(pmSync) == expected
 
     let customJson = """
       {
@@ -139,9 +143,13 @@ proc testSyncCommon =
 
     test "populated Concept Exercise":
       let exerciseConfig = ConceptExerciseConfig(
+        originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
+                            eckLanguageVersions, eckForkedFrom, eckIcon,
+                            eckBlurb, eckSource, eckSourceUrl, eckCustom],
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: ConceptExerciseFiles(
+          originalKeyOrder: @[fkSolution, fkTest, fkExemplar, fkEditor],
           solution: @["lasagna.foo"],
           test: @["test_lasagna.foo"],
           exemplar: @[".meta/exemplar.foo"],
@@ -205,13 +213,17 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty() == expected
+        exerciseConfig.pretty(pmSync) == expected
 
     test "populated Practice Exercise":
       let exerciseConfig = PracticeExerciseConfig(
+        originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
+                            eckLanguageVersions, eckTestRunner,
+                            eckBlurb, eckSource, eckSourceUrl, eckCustom],
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: PracticeExerciseFiles(
+          originalKeyOrder: @[fkSolution, fkTest, fkExample, fkEditor],
           solution: @["darts.foo"],
           test: @["test_darts.foo"],
           example: @[".meta/example.foo"],
@@ -271,10 +283,11 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty() == expected
+        exerciseConfig.pretty(pmSync) == expected
 
-    test "test_runner: true is omitted":
+    test "test_runner: true is not omitted when not formatting":
       let exerciseConfig = PracticeExerciseConfig(
+        originalKeyOrder: @[eckTestRunner],
         test_runner: some(true)
       )
       const expected = """{
@@ -284,14 +297,15 @@ proc testSyncCommon =
           "test": [],
           "example": []
         },
+        "test_runner": true,
         "blurb": ""
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty() == expected
+        exerciseConfig.pretty(pmSync) == expected
 
-    proc serializeViaRoundtrip(e: ConceptExerciseConfig |
-                                  PracticeExerciseConfig): string =
+    proc formatViaRoundtrip(e: ConceptExerciseConfig |
+                               PracticeExerciseConfig): string =
       var j = e.toJson().parseJson()
       delete(j, "originalKeyOrder")
       if j["contributors"].len == 0:
@@ -317,21 +331,29 @@ proc testSyncCommon =
       result = j.pretty()
       result.add '\n'
 
+    proc stdlibSerialize(path: string): string =
+      var j = json.parseFile(path)
+      for key in j.keys():
+        if key == "title":
+          j.delete(key)
+      result = j.pretty()
+      result.add '\n'
+
     test "with every Elixir Concept Exercise":
       for exerciseDir in getSortedSubdirs(conceptExercisesDir.Path):
         let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, ConceptExerciseConfig)
-        let ourSerialization = exerciseConfig.pretty()
-        let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
-        check ourSerialization == serializationViaRoundtrip
+        let ourSerialization = exerciseConfig.pretty(pmSync)
+        let stdlibSerialization = stdlibSerialize(exerciseConfigPath)
+        check ourSerialization == stdlibSerialization
 
     test "with every Elixir Practice Exercise":
       for exerciseDir in getSortedSubdirs(practiceExercisesDir.Path):
         let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, PracticeExerciseConfig)
-        let ourSerialization = exerciseConfig.pretty()
-        let serializationViaRoundtrip = exerciseConfig.serializeViaRoundtrip()
-        check ourSerialization == serializationViaRoundtrip
+        let ourSerialization = exerciseConfig.pretty(pmSync)
+        let stdlibSerialization = stdlibSerialize(exerciseConfigPath)
+        check ourSerialization == stdlibSerialization
 
 proc testSyncFilepaths =
   suite "update":
@@ -519,6 +541,7 @@ proc testSyncMetadata =
       )
       update(p, metadata)
       let expected = PracticeExerciseConfig(
+        originalKeyOrder: @[eckBlurb, eckSource, eckSourceUrl],
         authors: @["foo"],
         contributors: some(@["foo"]),
         files: PracticeExerciseFiles(

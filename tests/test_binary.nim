@@ -414,7 +414,6 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/darts/.meta/config.json
       +++ exercises/practice/darts/.meta/config.json
       -  "blurb": "Write a function that returns the earned points in a single toss of a Darts game",
-      -  "contributors": [],
       +  "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
     """.unindent()
     let configPath = joinPath("exercises", "practice", "darts", ".meta", "config.json")
@@ -450,7 +449,6 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/darts/.meta/config.json
       +++ exercises/practice/darts/.meta/config.json
       -  "blurb": "Write a function that returns the earned points in a single toss of a Darts game",
-      -  "contributors": [],
       +  "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
       --- exercises/practice/grade-school/.meta/config.json
       +++ exercises/practice/grade-school/.meta/config.json
@@ -463,12 +461,10 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/high-scores/.meta/config.json
       +++ exercises/practice/high-scores/.meta/config.json
       -  "blurb": "Manage a player's High Score list",
-      -  "contributors": [],
       +  "blurb": "Manage a player's High Score list.",
       --- exercises/practice/resistor-color/.meta/config.json
       +++ exercises/practice/resistor-color/.meta/config.json
       -  "blurb": "Convert a resistor band's color to its numeric representation",
-      -  "contributors": [],
       +  "blurb": "Convert a resistor band's color to its numeric representation.",
       --- exercises/practice/reverse-string/.meta/config.json
       +++ exercises/practice/reverse-string/.meta/config.json
@@ -477,14 +473,10 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/scale-generator/.meta/config.json
       +++ exercises/practice/scale-generator/.meta/config.json
       -  "blurb": "Generate musical scales, given a starting note and a set of intervals. ",
-      -  "contributors": [],
-      -  }
-      +  },
-      +  "blurb": "Generate musical scales, given a starting note and a set of intervals."
+      +  "blurb": "Generate musical scales, given a starting note and a set of intervals.",
       --- exercises/practice/twelve-days/.meta/config.json
       +++ exercises/practice/twelve-days/.meta/config.json
       -  "blurb": "Output the lyrics to 'The Twelve Days of Christmas'",
-      -  "contributors": [],
       +  "blurb": "Output the lyrics to 'The Twelve Days of Christmas'.",
       --- exercises/practice/two-fer/.meta/config.json
       +++ exercises/practice/two-fer/.meta/config.json
@@ -493,7 +485,6 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/yacht/.meta/config.json
       +++ exercises/practice/yacht/.meta/config.json
       -  "blurb": "Score a single throw of dice in the game Yacht",
-      -  "contributors": [],
       +  "blurb": "Score a single throw of dice in the game Yacht.",
     """.unindent()
     let configPaths = joinPath("exercises", "practice", "*", ".meta", "config.json")

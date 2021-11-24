@@ -185,7 +185,7 @@ type
     custom*: Option[JsonNode]
 
   PracticeExerciseConfig* = object
-    originalKeyOrder: seq[ExerciseConfigKey]
+    originalKeyOrder*: seq[ExerciseConfigKey]
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
@@ -265,39 +265,32 @@ func addNewlineAndIndent(s: var string, indentLevel: int) =
     s.add ' '
 
 func addArray(s: var string; key: string; val: openArray[string];
-              isRequired = true, indentLevel = 1) =
+              indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `key` and its string array `val` to
   ## `s`.
-  ##
-  ## Does not append if both `isRequired` is `false` and `val` is empty.
-  if isRequired or val.len > 0:
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson(key, s)
+  s.add ": "
+  if val.len > 0:
+    s.add '['
+    let inner = indentLevel + 1
+    for i, item in val:
+      if i > 0:
+        s.add ','
+      s.addNewlineAndIndent(inner)
+      escapeJson(item, s)
     s.addNewlineAndIndent(indentLevel)
-    escapeJson(key, s)
-    s.add ": "
-    if val.len > 0:
-      s.add '['
-      let inner = indentLevel + 1
-      for i, item in val:
-        if i > 0:
-          s.add ','
-        s.addNewlineAndIndent(inner)
-        escapeJson(item, s)
-      s.addNewlineAndIndent(indentLevel)
-      s.add "],"
-    else:
-      s.add "[],"
+    s.add "],"
+  else:
+    s.add "[],"
 
-func addString(s: var string; key, val: string; isRequired = true,
-               indentLevel = 1) =
+func addString(s: var string; key, val: string; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `key` and its string `val` to `s`.
-  ##
-  ## Does not append if both `isRequired` is `false` and `val` is empty.
-  if isRequired or val.len > 0:
-    s.addNewlineAndIndent(indentLevel)
-    escapeJson(key, s)
-    s.add ": "
-    escapeJson(val, s)
-    s.add ','
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson(key, s)
+  s.add ": "
+  escapeJson(val, s)
+  s.add ','
 
 func addBool(s: var string; key: string; val: bool; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `key` and its boolean `val` to `s`.
@@ -315,20 +308,58 @@ func removeComma(s: var string) =
   if s[^1] == ',':
     s.setLen s.len-1
 
-func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles,
-              indentLevel = 1) =
+type
+  PrettyMode* = enum
+    pmSync
+    pmFormat
+
+func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
+                   prettyMode: PrettyMode): seq[FilesKey] =
+  let fkEx = when val is ConceptExerciseFiles: fkExemplar else: fkExample
+  if prettyMode == pmFormat or val.originalKeyOrder.len == 0:
+    result = @[fkSolution, fkTest, fkEx]
+    if fkEditor in val.originalKeyOrder:
+      result.add fkEditor
+  else:
+    result = val.originalKeyOrder
+    # If `solution` is missing, write it first.
+    if fkSolution notin result:
+      result.insert(fkSolution, 0)
+
+    # If `test` is missing, write it after `solution`.
+    if fkTest notin result:
+      let insertionIndex = result.find(fkSolution) + 1
+      result.insert(fkTest, insertionIndex)
+
+    # If `example` or `exemplar` are missing, write them after `test`.
+    if fkEx notin result:
+      let insertionIndex = result.find(fkTest) + 1
+      result.insert(fkEx, insertionIndex)
+
+func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
+              prettyMode: PrettyMode; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
   s.addNewlineAndIndent(indentLevel)
   escapeJson("files", s)
   s.add ": {"
+  let keys = filesKeyOrder(val, prettyMode)
   let inner = indentLevel + 1
-  s.addArray("solution", val.solution, indentLevel = inner)
-  s.addArray("test", val.test, indentLevel = inner)
-  when val is ConceptExerciseFiles:
-    s.addArray("exemplar", val.exemplar, indentLevel = inner)
-  when val is PracticeExerciseFiles:
-    s.addArray("example", val.example, indentLevel = inner)
-  s.addArray("editor", val.editor, isRequired = false, indentLevel = inner)
+
+  for key in keys:
+    case key
+    of fkSolution:
+      s.addArray("solution", val.solution, indentLevel = inner)
+    of fkTest:
+      s.addArray("test", val.test, indentLevel = inner)
+    of fkExemplar:
+      when val is ConceptExerciseFiles:
+        s.addArray("exemplar", val.exemplar, indentLevel = inner)
+    of fkExample:
+      when val is PracticeExerciseFiles:
+        s.addArray("example", val.example, indentLevel = inner)
+    of fkEditor:
+      s.addArray("editor", val.editor, indentLevel = inner)
+
   s.removeComma()
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
@@ -338,44 +369,129 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
   ## `s`.
   case val.kind
   of JObject:
-    if val.len > 0:
-      s.addNewlineAndIndent(indentLevel)
-      escapeJson(key, s)
-      s.add ": "
-      let pretty = val.pretty()
-      for c in pretty:
-        if c == '\n':
-          s.addNewlineAndIndent(indentLevel)
-        else:
-          s.add c
+    s.addNewlineAndIndent(indentLevel)
+    escapeJson(key, s)
+    s.add ": "
+    let pretty = val.pretty()
+    for c in pretty:
+      if c == '\n':
+        s.addNewlineAndIndent(indentLevel)
+      else:
+        s.add c
   else:
     stderr.writeLine &"The value of a `{key}` key is not a JSON object:"
     stderr.writeLine val.pretty()
     quit 1
 
-proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig): string =
-  ## Serializes `e` as pretty-printed JSON.
+func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConfigKey] =
+  if originalKeyOrder.len == 0:
+    return @[eckAuthors, eckFiles, eckBlurb]
+  else:
+    result = originalKeyOrder
+    # If `authors` is missing, write it first.
+    if eckAuthors notin result:
+      result.insert(eckAuthors, 0)
+
+    # If `files` is missing, write it after `contributors`, or `authors`.
+    if eckFiles notin result:
+      let insertionIndex = block:
+        let iContributors = result.find(eckContributors)
+        if iContributors > -1:
+          iContributors + 1
+        else:
+          result.find(eckAuthors) + 1
+      result.insert(eckFiles, insertionIndex)
+
+    # If `blurb` is missing, write it before `source`, `source_url`, or
+    # `custom`. If none of those exist, write `blurb` at the end.
+    if eckBlurb notin result:
+      let insertionIndex = block:
+        var i = -1
+        for item in [eckSource, eckSourceUrl, eckCustom]:
+          i = result.find(item)
+          if i > -1:
+            break
+        if i == -1:
+          i = result.len # Inserting at `len`, means "add at the end".
+        i
+      result.insert(eckBlurb, insertionIndex)
+
+func keyOrderForFmt(e: ConceptExerciseConfig |
+                       PracticeExerciseConfig): seq[ExerciseConfigKey] =
+  result = @[eckAuthors]
+  if e.contributors.isSome() and e.contributors.get().len > 0:
+    result.add eckContributors
+  result.add eckFiles
+  if e.language_versions.len > 0:
+    result.add eckLanguageVersions
+  when e is ConceptExerciseConfig:
+    if e.forked_from.isSome() and e.forked_from.get().len > 0:
+      result.add eckForkedFrom
+    if e.icon.len > 0:
+      result.add eckIcon
+  when e is PracticeExerciseConfig:
+    # Strips `"test_runner": true`.
+    if e.test_runner.isSome() and not e.test_runner.get():
+      result.add eckTestRunner
+  result.add eckBlurb
+  if e.source.len > 0:
+    result.add eckSource
+  if e.source_url.len > 0:
+    result.add eckSourceUrl
+  if e.custom.isSome() and e.custom.get().len > 0:
+    result.add eckCustom
+
+proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
+             prettyMode: PrettyMode): string =
+  ## Serializes `e` as pretty-printed JSON, using:
+  ## - the original key order if `prettyMode` is `pmSync`.
+  ## - the canonical key order if `prettyMode` is `pmFormat`.
+  ##
+  ## Note that `pmSync` creates required keys if they are missing. For
+  ## example, if an exercise `.meta/config.json` file is missing, or lacks a
+  ## `files` key, we create the `files` key even when syncing only metadata.
+  ## This is less "sync-like", but more ergonomic because the situation should
+  ## only occur when creating a new exercise (as `configlet lint` exits non-zero
+  ## if required keys are missing). This means that to create a blank
+  ## `.meta/config.json`, a user can run just
+  ##    $ configlet sync -uy --filepaths --metadata -e my-new-exercise
+  ## and not need to also run
+  ##    $ configlet fmt -e my-new-exercise
+  let keys =
+    case prettyMode
+    of pmSync:
+      keyOrderForSync(e.originalKeyOrder)
+    of pmFormat:
+      keyOrderForFmt(e)
+
   result = newStringOfCap(100)
   result.add '{'
-  result.addArray("authors", e.authors)
-  if e.contributors.isSome():
-    result.addArray("contributors", e.contributors.get(), isRequired = false)
-  result.addFiles(e.files)
-  result.addString("language_versions", e.language_versions, isRequired = false)
-  when e is ConceptExerciseConfig:
-    if e.forked_from.isSome():
-      result.addArray("forked_from", e.forked_from.get(), isRequired = false)
-    result.addString("icon", e.icon, isRequired = false)
-  when e is PracticeExerciseConfig:
-    # Keep the `test_runner` key only when it was present in the
-    # `.meta/config.json` that we parsed, and had the value `false`.
-    # The spec says that an omitted `test_runner` key implies the value `true`.
-    if e.test_runner.isSome() and not e.test_runner.get():
-      result.addBool("test_runner", false)
-  result.addString("blurb", e.blurb)
-  result.addString("source", e.source, isRequired = false)
-  result.addString("source_url", e.source_url, isRequired = false)
-  if e.custom.isSome():
-    result.addObject("custom", e.custom.get())
+  for key in keys:
+    case key
+    of eckAuthors:
+      result.addArray("authors", e.authors)
+    of eckContributors:
+      result.addArray("contributors", e.contributors.get())
+    of eckFiles:
+      result.addFiles(e.files, prettyMode)
+    of eckLanguageVersions:
+      result.addString("language_versions", e.language_versions)
+    of eckForkedFrom:
+      when e is ConceptExerciseConfig:
+        result.addArray("forked_from", e.forked_from.get())
+    of eckIcon:
+      when e is ConceptExerciseConfig:
+        result.addString("icon", e.icon)
+    of eckTestRunner:
+      when e is PracticeExerciseConfig:
+        result.addBool("test_runner", e.test_runner.get())
+    of eckBlurb:
+      result.addString("blurb", e.blurb)
+    of eckSource:
+      result.addString("source", e.source)
+    of eckSourceUrl:
+      result.addString("source_url", e.source_url)
+    of eckCustom:
+      result.addObject("custom", e.custom.get())
   result.removeComma()
   result.add "\n}\n"

@@ -43,6 +43,12 @@ func update(p: var PracticeExerciseConfig;
   p.blurb = upstreamMetadata.blurb
   p.source = upstreamMetadata.source
   p.source_url = upstreamMetadata.source_url
+  if upstreamMetadata.blurb.len > 0 and eckBlurb notin p.originalKeyOrder:
+    p.originalKeyOrder.add eckBlurb
+  if upstreamMetadata.source.len > 0 and eckSource notin p.originalKeyOrder:
+    p.originalKeyOrder.add eckSource
+  if upstreamMetadata.source_url.len > 0 and eckSourceUrl notin p.originalKeyOrder:
+    p.originalKeyOrder.add eckSourceUrl
 
 proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
                  conf: Conf; slug: Slug;
@@ -85,7 +91,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
 
 proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
-    let updatedJson = pretty(configPair.practiceExerciseConfig)
+    let updatedJson = pretty(configPair.practiceExerciseConfig, pmSync)
     let path = configPair.path
     doAssert lastPathPart(path) == "config.json"
     createDir path.parentDir()
