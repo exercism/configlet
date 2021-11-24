@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, os, sets, strformat, strutils]
+import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
@@ -200,10 +200,16 @@ type
 
 {.pop.}
 
-func toHashSet(t: typedesc): HashSet[string] =
-  result = initHashSet[string]()
-  for item in t:
-    result.incl $item
+func identity(s: string): string =
+  s
+
+func parseEnumWithoutNormalizing[T: enum](s: string): T =
+  ## Parses an enum `T`. This errors at compile-time if the given enum type
+  ## contains multiple fields with the same string value.
+  ##
+  ## Raises `ValueError` if `s` is not a string value of `T`. That is, unlike
+  ## `strutils.parseEnum`, no normalization is performed.
+  genEnumCaseStmt(T, s, default = nil, T.low.ord, T.high.ord, identity)
 
 func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: string) =
   ## Appends `key` to `e.originalKeyOrder`.
@@ -212,19 +218,21 @@ func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: s
   ## It just so happens that this hook is convenient for the use case of saving
   ## the key order, since it can access both the object being parsed and the key
   ## name.
-  const validKeys = toHashSet(ExerciseConfigKey)
-  if key in validKeys:
-    let eck = parseEnum[ExerciseConfigKey](key)
+  try:
+    let eck = parseEnumWithoutNormalizing[ExerciseConfigKey](key)
     e.originalKeyOrder.add eck
+  except ValueError:
+    discard
 
 func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: string) =
   ## Appends `key` to `f.originalKeyOrder`.
   ##
   ## As with our other `renameHook`, this proc does not actually rename anything.
-  const validKeys = toHashSet(FilesKey)
-  if key in validKeys:
-    let fk = parseEnum[FilesKey](key)
+  try:
+    let fk = parseEnumWithoutNormalizing[FilesKey](key)
     f.originalKeyOrder.add fk
+  except ValueError:
+    discard
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
