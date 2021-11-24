@@ -25,6 +25,9 @@ proc testSyncCommon =
       const lasagnaDir = joinPath(conceptExercisesDir, "lasagna")
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
       let expected = ConceptExerciseConfig(
+        originalKeyOrder: @["blurb", "authors", "contributors", "files",
+                            "solution", "test", "exemplar",
+                            "forked_from", "language_versions"],
         authors: @["neenjaw"],
         contributors: some(@["angelikatyborska"]),
         files: ConceptExerciseFiles(
@@ -47,6 +50,8 @@ proc testSyncCommon =
       const dartsDir = joinPath(practiceExercisesDir, "darts")
       const dartsConfigPath = joinPath(dartsDir, ".meta", "config.json")
       let expected = PracticeExerciseConfig(
+        originalKeyOrder: @["authors", "contributors", "files", "example",
+                            "solution", "test", "blurb", "source"],
         authors: @["jiegillet"],
         contributors: some(@["angelikatyborska"]),
         files: PracticeExerciseFiles(
@@ -285,6 +290,7 @@ proc testSyncCommon =
     proc serializeViaRoundtrip(e: ConceptExerciseConfig |
                                   PracticeExerciseConfig): string =
       var j = e.toJson().parseJson()
+      delete(j, "originalKeyOrder")
       if j["contributors"].len == 0:
         delete(j, "contributors")
       if j["files"]["editor"].len == 0:

@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, os, strformat, strutils]
+import std/[algorithm, json, options, os, parsejson, streams, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
@@ -150,6 +150,7 @@ type
     editor*: seq[string]
 
   ConceptExerciseConfig* = object
+    originalKeyOrder: seq[string]
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: ConceptExerciseFiles
@@ -162,6 +163,7 @@ type
     custom*: Option[JsonNode]
 
   PracticeExerciseConfig* = object
+    originalKeyOrder: seq[string]
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
@@ -176,6 +178,29 @@ type
 
 {.pop.}
 
+proc getJsonKeys(s, path: string): seq[string] =
+  ## Returns a seq containing every JSON key name in `s`. `path` is used just
+  ## for error messages.
+  var p: JsonParser
+  let ss = newStringStream(s)
+  p.open(ss, path)
+  try:
+    var stringVal = ""
+    while true:
+      var tok = getTok(p)
+      case tok
+      of tkError, tkEof:
+        break
+      of tkString:
+        stringVal = p.a
+      of tkColon:
+        # On reaching a colon, the previous string is the key name.
+        result.add stringVal
+      else:
+        discard
+  finally:
+    p.close()
+
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
   let contents =
@@ -187,7 +212,9 @@ proc parseFile*(path: string, T: typedesc): T =
       quit 1
   if contents.len > 0:
     try:
-      contents.fromJson(T)
+      result = contents.fromJson(T)
+      when T is ConceptExerciseConfig or T is PracticeExerciseConfig:
+        result.originalKeyOrder = getJsonKeys(contents, path)
     except jsony.JsonError:
       let jsonyMsg = getCurrentExceptionMsg()
       let details = tidyJsonyMessage(jsonyMsg, contents)
@@ -195,7 +222,7 @@ proc parseFile*(path: string, T: typedesc): T =
       stderr.writeLine msg
       quit 1
   else:
-    T()
+    result = T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
   ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
