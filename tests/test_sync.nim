@@ -25,9 +25,9 @@ proc testSyncCommon =
       const lasagnaDir = joinPath(conceptExercisesDir, "lasagna")
       const lasagnaConfigPath = joinPath(lasagnaDir, ".meta", "config.json")
       let expected = ConceptExerciseConfig(
-        originalKeyOrder: @["blurb", "authors", "contributors", "files",
-                            "solution", "test", "exemplar",
-                            "forked_from", "language_versions"],
+        originalKeyOrder: @[eckBlurb, eckAuthors, eckContributors, eckFiles,
+                            eckSolution, eckTest, eckExemplar,
+                            eckForkedFrom, eckLanguageVersions],
         authors: @["neenjaw"],
         contributors: some(@["angelikatyborska"]),
         files: ConceptExerciseFiles(
@@ -50,8 +50,8 @@ proc testSyncCommon =
       const dartsDir = joinPath(practiceExercisesDir, "darts")
       const dartsConfigPath = joinPath(dartsDir, ".meta", "config.json")
       let expected = PracticeExerciseConfig(
-        originalKeyOrder: @["authors", "contributors", "files", "example",
-                            "solution", "test", "blurb", "source"],
+        originalKeyOrder: @[eckAuthors, eckContributors, eckFiles, eckExample,
+                            eckSolution, eckTest, eckBlurb, eckSource],
         authors: @["jiegillet"],
         contributors: some(@["angelikatyborska"]),
         files: PracticeExerciseFiles(

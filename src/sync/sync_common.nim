@@ -1,4 +1,4 @@
-import std/[algorithm, json, options, os, parsejson, streams, strformat, strutils]
+import std/[algorithm, json, options, os, parsejson, sets, streams, strformat, strutils]
 import pkg/jsony
 import ".."/[cli, helpers, lint/validators]
 
@@ -137,6 +137,25 @@ type
   # Alternative hack: inject two `kind` key/value pairs into each exercise
   # `.meta/config.json` file after we read it, but before parsing with `jsony`.
 
+  ExerciseConfigKey* = enum
+    eckNone = "none"
+    eckAuthors = "authors"
+    eckContributors = "contributors"
+    eckFiles = "files"
+    eckSolution = "solution"
+    eckTest = "test"
+    eckExemplar = "exemplar"
+    eckExample = "example"
+    eckEditor = "editor"
+    eckLanguageVersions = "language_versions"
+    eckForkedFrom = "forked_from"
+    eckIcon = "icon"
+    eckTestRunner = "test_runner"
+    eckBlurb = "blurb"
+    eckSource = "source"
+    eckSourceUrl = "source_url"
+    eckCustom = "custom"
+
   ConceptExerciseFiles* = object
     solution*: seq[string]
     test*: seq[string]
@@ -150,7 +169,7 @@ type
     editor*: seq[string]
 
   ConceptExerciseConfig* = object
-    originalKeyOrder: seq[string]
+    originalKeyOrder: seq[ExerciseConfigKey]
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: ConceptExerciseFiles
@@ -163,7 +182,7 @@ type
     custom*: Option[JsonNode]
 
   PracticeExerciseConfig* = object
-    originalKeyOrder: seq[string]
+    originalKeyOrder: seq[ExerciseConfigKey]
     authors: seq[string]
     contributors: Option[seq[string]]
     files*: PracticeExerciseFiles
@@ -178,24 +197,31 @@ type
 
 {.pop.}
 
-proc getJsonKeys(s, path: string): seq[string] =
+func toHashSet(t: typedesc): HashSet[string] =
+  result = initHashSet[string]()
+  for item in t:
+    result.incl $item
+
+proc getJsonKeys(s, path: string): seq[ExerciseConfigKey] =
   ## Returns a seq containing every JSON key name in `s`. `path` is used just
   ## for error messages.
+  const validKeys = toHashSet(ExerciseConfigKey)
   var p: JsonParser
   let ss = newStringStream(s)
   p.open(ss, path)
   try:
-    var stringVal = ""
+    var exerciseConfigKey: ExerciseConfigKey
     while true:
       var tok = getTok(p)
       case tok
       of tkError, tkEof:
         break
       of tkString:
-        stringVal = p.a
+        if p.a in validKeys:
+          exerciseConfigKey = parseEnum[ExerciseConfigKey](p.a)
       of tkColon:
         # On reaching a colon, the previous string is the key name.
-        result.add stringVal
+        result.add exerciseConfigKey
       else:
         discard
   finally:
