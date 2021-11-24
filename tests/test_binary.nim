@@ -154,6 +154,32 @@ proc testsForSync(binaryPath: static string) =
       """.unindent()
       execAndCheck(1, &"{syncOffline} -e foo --docs", expectedOutput)
 
+  suite "sync, without --update, checking parseopt3 patch (--tests -e bob is parsed correctly)":
+    # With an unpatched cligen/parseopt3, we can only write `--tests` without a
+    # value if we write it at the end of the command line. For example, running
+    #     $ configlet sync --tests -e bob
+    # would produce
+    #     Error: invalid value for '--tests': '-e'
+    # This is because:
+    # - parseopt3 knows which options can take a value, and supports a value
+    #   starting with the `-` character. That is, it does not naively just
+    #   assume that every parameter starting with `-` is an option.
+    # - The `--tests` option is special amongst our options. It can take a value
+    #   of `choose|include|exclude`, because a separate `--tests-mode` option
+    #   seems overly verbose. But it makes sense for just `--tests` alone to
+    #   work, and do the same as `--tests choose`, because `--docs`,
+    #   `--filepaths` and `--metadata` all work (these options do not take a
+    #   value).
+    # As a workaround, we patch `parseopt3.nim` so that given a long option
+    # followed by a space and a parameter that begins with the `-` character,
+    # that parameter is always parsed as an option, not a value.
+    test "--tests -e bob":
+      const expectedOutput = fmt"""
+        {header}
+        The `bob` exercise has up-to-date tests!
+      """.unindent()
+      execAndCheck(0, &"{syncOffline} --tests -e bob", expectedOutput)
+
   suite "sync, without --update, for an up-to-date exercise (prints the expected output, and exits with 0)":
     test "-e bob --docs":
       const expectedOutput = fmt"""
