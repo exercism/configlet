@@ -37,6 +37,12 @@ type
     `concept`: seq[Slug]
     practice: seq[Slug]
 
+func init(T: typedesc, exercises: Exercises): T =
+  T(
+    `concept`: getSlugs(exercises.`concept`),
+    practice: getSlugs(exercises.practice)
+  )
+
 proc getSlugs(exercises: Exercises, conf: Conf,
               trackConfigPath: string): TrackExerciseSlugs =
   ## Returns the slugs of Concept Exercises and Practice Exercises in
@@ -44,10 +50,7 @@ proc getSlugs(exercises: Exercises, conf: Conf,
   ## that one slug if the given exercise was found on the track.
   ##
   ## If that exercise was not found, prints an error and exits.
-  result = TrackExerciseSlugs(
-    `concept`: getSlugs(exercises.`concept`),
-    practice: getSlugs(exercises.practice)
-  )
+  result = TrackExerciseSlugs.init(exercises)
   let userExercise = Slug(conf.action.exercise)
   if userExercise.len > 0:
     if userExercise in result.`concept`:
