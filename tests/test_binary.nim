@@ -593,15 +593,18 @@ proc testsForSync(binaryPath: static string) =
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "--tests choose: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "y")
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram",
+                           inputStr = "y")
     testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
 
     test "--tests choose: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
-      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "n")
+      execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram",
+                           inputStr = "n")
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "--tests choose: neither includes nor excludes a missing test case for a given exercise when the input is 's', and exits with 1":
-      execAndCheckExitCode(1, &"{syncOfflineUpdateTests} choose -e anagram", inputStr = "s")
+      execAndCheckExitCode(1, &"{syncOfflineUpdateTests} choose -e anagram",
+                           inputStr = "s")
     testDiffThenRestore(trackDir, expectedAnagramDiffStart & "\n", anagramTestsTomlPath)
 
     test "--tests include: includes every missing test case when not specifying an exercise, and exits with 0":
