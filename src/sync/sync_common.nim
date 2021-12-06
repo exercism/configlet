@@ -311,12 +311,12 @@ func removeComma(s: var string) =
 type
   PrettyMode* = enum
     pmSync
-    pmFormat
+    pmFmt
 
 func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
                    prettyMode: PrettyMode): seq[FilesKey] =
   let fkEx = when val is ConceptExerciseFiles: fkExemplar else: fkExample
-  if prettyMode == pmFormat or val.originalKeyOrder.len == 0:
+  if prettyMode == pmFmt or val.originalKeyOrder.len == 0:
     result = @[fkSolution, fkTest, fkEx]
     if fkEditor in val.originalKeyOrder:
       result.add fkEditor
@@ -445,7 +445,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
              prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
   ## - the original key order if `prettyMode` is `pmSync`.
-  ## - the canonical key order if `prettyMode` is `pmFormat`.
+  ## - the canonical key order if `prettyMode` is `pmFmt`.
   ##
   ## Note that `pmSync` creates required keys if they are missing. For
   ## example, if an exercise `.meta/config.json` file is missing, or lacks a
@@ -461,7 +461,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     case prettyMode
     of pmSync:
       keyOrderForSync(e.originalKeyOrder)
-    of pmFormat:
+    of pmFmt:
       keyOrderForFmt(e)
 
   result = newStringOfCap(100)
