@@ -131,7 +131,7 @@ func explain(syncKind: SyncKind): string =
 
 proc sync*(conf: Conf) =
   ## Checks/updates the data according to `conf`, and exits with 1 if we saw
-  ## data that is still unsynced.
+  ## data that are still unsynced.
   validate(conf)
 
   let seenUnsynced = syncImpl(conf)
