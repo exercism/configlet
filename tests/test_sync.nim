@@ -304,7 +304,7 @@ proc testSyncCommon =
       check:
         exerciseConfig.pretty(pmSync) == expected
 
-    proc formatViaRoundtrip(e: ConceptExerciseConfig |
+    func formatViaRoundtrip(e: ConceptExerciseConfig |
                                PracticeExerciseConfig): string =
       var j = e.toJson().parseJson()
       delete(j, "originalKeyOrder")

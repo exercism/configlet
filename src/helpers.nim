@@ -77,7 +77,7 @@ func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
       result.col = 0
     inc result.col
 
-proc tidyJsonyMessage*(jsonyMsg, fileContents: string): string =
+func tidyJsonyMessage*(jsonyMsg, fileContents: string): string =
   var jsonyMsgStart = ""
   var offset = -1
   # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
