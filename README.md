@@ -45,6 +45,84 @@ The `configlet lint` command is still under development. The list of currently i
 
 ## `configlet sync`
 
+A Practice Exercise on an Exercism track is often implemented from a specification in the [`exercism/problem-specifications`](https://github.com/exercism/problem-specifications) repo.
+
+Exercism deliberately requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
+Therefore configlet has a `sync` command, which can check that such Practice Exercises on a track are in sync with that upstream source, and can update them when updates are available.
+
+There are three kinds of data that can be updated from `problem-specifications`: documentation, metadata, and tests.
+There is also one kind of data that can be populated from the track-level `config.json` file: filepaths in exercise config files.
+
+We describe the checking and updating of these data kinds in individual sections below, but as a quick summary:
+- `configlet sync` only operates on exercises that exist in the track-level `config.json` file. Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, please add the exercise to the track-level `config.json` file first. If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
+- A plain `configlet sync` makes no changes to the track, and checks every data kind.
+- To operate only on certain data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
+- To interactively update files on the track, use the `--update` option.
+- To non-interactively update docs, filepaths, and metadata, on the track, use `--update --yes`.
+- To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
+- `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating. To write these files in a canonical form without syncing, you can use the upcoming `configlet fmt` command.
+
+Note that in `configlet` releases `4.0.0-alpha.34` and earlier, the `sync` command operated only on tests.
+
+### Docs
+
+A Practice Exercise that is derived from the `problem-specifications` repo must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
+
+To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
+
+```
+$ configlet sync --docs
+```
+
+To interactively update the docs for every Practice Exercise, add the `--update` option (or `-u` for short):
+
+```
+$ configlet sync --docs --update
+```
+
+To non-interactively update the docs for every Practice Exercise, add the `--yes` option (or `-y` for short):
+
+```
+$ configlet sync --docs --update --yes
+```
+
+To non-interactively update the docs for a single Practice Exercise, use the `--exercise` option (or `-e` for short). For example:
+
+```
+$ configlet sync --docs -uy -e prime-factors
+```
+
+### Metadata
+
+Every exercise on a track must have a `.meta/config.json` file.
+For a Practice Exercise that is derived from the `problem-specifications` repo, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
+
+To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
+
+```
+$ configlet sync --metadata
+```
+
+To interactively update the metadata for every Practice Exercise, add the `--update` option (or `-u` for short):
+
+```
+$ configlet sync --metadata --update
+```
+
+To non-interactively update the metadata for every Practice Exercise, add the `--yes` option (or `-y` for short):
+
+```
+$ configlet sync --metadata --update --yes
+```
+
+To non-interactively update the metadata for a single Practice Exercise, use the `--exercise` option (or `-e` for short). For example:
+
+```
+$ configlet sync --metadata -uy -e prime-factors
+```
+
+### Tests
+
 If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file. The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise. Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
 
 A `tests.toml` file has this format:
@@ -75,11 +153,66 @@ comment = "excluded because we don't want to add error handling to the exercise"
 
 In this case, the track has chosen to implement two of the three available tests. If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
-The `sync` command allows tracks to keep `tests.toml` files up to date. A plain `configlet sync` performs no changes, and just compares the tests specified in the `tests.toml` files against the tests that are defined in the exercise's canonical data - if there are tests defined only in the latter, it prints a summary and exits with a non-zero exit code.
+To check every Practice Exercise `tests.toml` file for available tests updates (exiting with a non-zero exit code if there is at least one test case that appears in the exercise's canonical data, but not in the `tests.toml`):
 
-To interactively update the `tests.toml` files, use `configlet sync --update`. For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
+```
+$ configlet sync --tests
+```
 
-The `configlet sync` command replaces the functionality of the older `canonical_data_syncer` application.
+To interactively update the `tests.toml` file for every Practice Exercise, add the `--update` option:
+
+```
+$ configlet sync --tests --update
+```
+
+For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
+Configlet writes an exercise's `tests.toml` file when the user has finished making choices for that exercise.
+This means that you can terminate configlet at a prompt (for example, by pressing Ctrl-C in the terminal) and only lose the syncing decisions for at most one exercise.
+
+To non-interactively include every unseen test case, use `--tests include`. For example, to do so for an exercise named `prime-factors`:
+
+```
+$ configlet sync --tests include -u -e prime-factors
+```
+
+Remember to actually implement these tests on the track!
+
+### Filepaths
+
+Finally, the `sync` command also handles "syncing" from a source that isn't `problem-specifications` - the track-level `config.json` file.
+Every Concept Exercise and Practice Exercise must have a `.meta/config.json` file with a `files` object that specifies the (relative) locations of the files that the exercise uses.
+Such filepaths usually follow a simple pattern, and so configlet can populate the exercise-level values from patterns in the `files` key of the track-level `config.json` file.
+
+To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that cannot be populated from the track-level `files` key):
+
+```
+$ configlet sync --filepaths
+```
+
+(Note that `configlet lint` will also produce an error when an exercise has a missing/empty `files` key.)
+
+To populate empty/missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
+
+```
+$ configlet sync --filepaths --update
+```
+
+To do this non-interactively and for a single exercise named `prime-factors`:
+
+```
+$ configlet sync --filepaths -uy -e prime-factors
+```
+
+### Using `sync` when adding a new exercise to a track
+
+The `sync` command is useful when adding a new exercise to a track. If you are adding a Practice Exercise named `foo` that exists in `problem-specifications`, one possible workflow is:
+1. Manually add an entry to the track-level `config.json` file for the exercise `foo`. This makes the exercise visible to `configlet sync`.
+1. Run `configlet sync --docs --filepaths --metadata -uy -e foo` to create the exercise's introduction, and a starter `.meta/config.json` file with populated `files`, `blurb`, and perhaps `source` and `source_url` values.
+1. Edit the exercise `.meta/config.json` file as desired. For example, add yourself to the `authors` array.
+1. Run `configlet sync --tests include -u -e foo` to create a `.meta/tests.toml` file with every test included.
+1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise will not implement.
+1. Implement the tests for the exercise to match those included in `.meta/tests.toml`.
+1. Add the other required files.
 
 ## `configlet uuid`
 
