@@ -214,10 +214,9 @@ func parseEnumWithoutNormalizing[T: enum](s: string): T =
 func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: string) =
   ## Appends `key` to `e.originalKeyOrder`.
   ##
-  ## This proc does not rename anything, but it must be named `renameHook`.
-  ## It just so happens that this hook is convenient for the use case of saving
-  ## the key order, since it can access both the object being parsed and the key
-  ## name.
+  ## This func does not rename anything, but it must be named `renameHook`.
+  ## It just turns out that this hook is convenient for recording the key order,
+  ## since it can access both the object being parsed and the key name.
   try:
     let eck = parseEnumWithoutNormalizing[ExerciseConfigKey](key)
     e.originalKeyOrder.add eck
@@ -227,7 +226,7 @@ func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: s
 func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: string) =
   ## Appends `key` to `f.originalKeyOrder`.
   ##
-  ## As with our other `renameHook`, this proc does not actually rename anything.
+  ## As with our other `renameHook`, this func does not actually rename anything.
   try:
     let fk = parseEnumWithoutNormalizing[FilesKey](key)
     f.originalKeyOrder.add fk
