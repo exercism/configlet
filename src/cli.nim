@@ -7,11 +7,6 @@ type
     verNormal = "normal"
     verDetailed = "detailed"
 
-  TestsMode* = enum
-    tmChoose = "choose"
-    tmInclude = "include"
-    tmExclude = "exclude"
-
   ActionKind* = enum
     actNil = "nil"
     actLint = "lint"
@@ -25,6 +20,11 @@ type
     skFilepaths = "filepaths"
     skMetadata = "metadata"
     skTests = "tests"
+
+  TestsMode* = enum
+    tmChoose = "choose"
+    tmInclude = "include"
+    tmExclude = "exclude"
 
   Action* = object
     case kind*: ActionKind
