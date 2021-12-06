@@ -415,31 +415,6 @@ func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConf
         i
       result.insert(eckBlurb, insertionIndex)
 
-func keyOrderForFmt(e: ConceptExerciseConfig |
-                       PracticeExerciseConfig): seq[ExerciseConfigKey] =
-  result = @[eckAuthors]
-  if e.contributors.isSome() and e.contributors.get().len > 0:
-    result.add eckContributors
-  result.add eckFiles
-  if e.language_versions.len > 0:
-    result.add eckLanguageVersions
-  when e is ConceptExerciseConfig:
-    if e.forked_from.isSome() and e.forked_from.get().len > 0:
-      result.add eckForkedFrom
-    if e.icon.len > 0:
-      result.add eckIcon
-  when e is PracticeExerciseConfig:
-    # Strips `"test_runner": true`.
-    if e.test_runner.isSome() and not e.test_runner.get():
-      result.add eckTestRunner
-  result.add eckBlurb
-  if e.source.len > 0:
-    result.add eckSource
-  if e.source_url.len > 0:
-    result.add eckSourceUrl
-  if e.custom.isSome() and e.custom.get().len > 0:
-    result.add eckCustom
-
 proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
              prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
@@ -461,7 +436,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of pmSync:
       keyOrderForSync(e.originalKeyOrder)
     of pmFmt:
-      keyOrderForFmt(e)
+      raise newException(ValueError, "not yet implemented")
 
   result = newStringOfCap(100)
   result.add '{'
