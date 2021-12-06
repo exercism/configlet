@@ -169,16 +169,16 @@ func genHelpText: string =
     optVerbosity: &"The verbosity of output.\n" &
                   &"{padding}{allowedValues(Verbosity)} (default: normal)",
     optSyncExercise: "Only operate on this exercise",
-    optSyncProbSpecsDir: "Use this `problem-specifications` directory, " &
+    optSyncProbSpecsDir: "Use this 'problem-specifications' directory, " &
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
-                    &"`{list(optSyncProbSpecsDir)}` is up to date",
+                    &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
     optSyncUpdate: "Update the seen data that are unsynced",
     optSyncYes: "Auto-confirm every prompt for updating docs, filepaths, and metadata",
-    optSyncDocs: "Sync Practice Exercise .docs/introduction.md and .docs/instructions.md files",
-    optSyncFilepaths: "Populate empty `files` values in Concept/Practice exercise .meta/config.json files",
-    optSyncMetadata: "Sync Practice Exercise .meta/config.json metadata values",
-    optSyncTests: &"Sync Practice Exercise .meta/tests.toml files.\n" &
+    optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
+    optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
+    optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
+    optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
                   &"{padding}The mode value specifies how missing tests are handled when using --update.\n" &
                   &"{padding}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to generate",
