@@ -1,5 +1,4 @@
 import std/[importutils, json, os, options, strutils, unittest]
-import pkg/[jsony, parsetoml]
 import "."/[exec, helpers, sync/sync_common]
 from "."/sync/sync_filepaths {.all.} import update
 from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
@@ -303,33 +302,6 @@ proc testSyncCommon =
       """.dedent(6)
       check:
         exerciseConfig.pretty(pmSync) == expected
-
-    func formatViaRoundtrip(e: ConceptExerciseConfig |
-                               PracticeExerciseConfig): string =
-      var j = e.toJson().parseJson()
-      delete(j, "originalKeyOrder")
-      if j["contributors"].len == 0:
-        delete(j, "contributors")
-      delete(j["files"], "originalKeyOrder")
-      if j["files"]["editor"].len == 0:
-        delete(j["files"], "editor")
-      when e is ConceptExerciseConfig:
-        let kind = j["forked_from"].kind
-        if kind == JNull or kind == JArray and j["forked_from"].len == 0:
-          delete(j, "forked_from")
-        if j["icon"].getStr().len == 0:
-          delete(j, "icon")
-      when e is PracticeExerciseConfig:
-        let kind = j["test_runner"].kind
-        if kind == JNull or kind == JBool and j["test_runner"].getBool():
-          delete(j, "test_runner")
-      for k in ["language_versions", "source", "source_url"]:
-        if j[k].getStr().len == 0:
-          delete(j, k)
-      if j["custom"].kind == JNull:
-        delete(j, "custom")
-      result = j.pretty()
-      result.add '\n'
 
     proc stdlibSerialize(path: string): string =
       var j = json.parseFile(path)
