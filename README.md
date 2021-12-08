@@ -11,7 +11,13 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  fmt, lint, sync, uuid, generate, info
+  fmt       Format the exercise 'meta/config.json' files
+  lint      Check the track configuration for correctness
+  sync      Check or update Practice Exercise docs, metadata, and tests from 'problem-specifications'.
+            Check or populate missing 'files' values for Concept/Practice Exercises from the track 'config.json'.
+  uuid      Output new (version 4) UUIDs, suitable for the value of a 'uuid' key
+  generate  Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
+  info      Print some information about the track
 
 Options for fmt:
   -e, --exercise <slug>        Only operate on this exercise

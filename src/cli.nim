@@ -169,8 +169,27 @@ func genHelpText: string =
       result.syntax[opt] = optText
       result.maxLen = max(result.maxLen, optText.len)
 
+  func getLongestActionLen: int =
+    result = -1
+    for actionKind in ActionKind:
+      result = max(result, actionKind.`$`.len)
+
+  const longestActionLen = getLongestActionLen()
+  const paddingAction = repeat(' ', longestActionLen + 4)
+
+  const actionDescriptions: array[ActionKind, string] = [
+    actNil: "",
+    actFmt: "Format the exercise 'meta/config.json' files",
+    actLint: "Check the track configuration for correctness",
+    actSync: "Check or update Practice Exercise docs, metadata, and tests from 'problem-specifications'.\n" &
+             &"{paddingAction}Check or populate missing 'files' values for Concept/Practice Exercises from the track 'config.json'.",
+    actUuid: "Output new (version 4) UUIDs, suitable for the value of a 'uuid' key",
+    actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
+    actInfo: "Print some information about the track",
+  ]
+
   const (syntax, maxLen) = genSyntaxStrings()
-  const padding = repeat(' ', maxLen)
+  const paddingOpt = repeat(' ', maxLen)
 
   # For some options that are common between commands, we want different
   # descriptions in the help message. But we currently use `parseEnum` to parse
@@ -184,7 +203,7 @@ func genHelpText: string =
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
-                  &"{padding}{allowedValues(Verbosity)} (default: normal)",
+                  &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
@@ -196,18 +215,16 @@ func genHelpText: string =
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
     optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
-                  &"{padding}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
-                  &"{padding}{allowedValues(TestsMode)} (default: choose)",
+                  &"{paddingOpt}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
+                  &"{paddingOpt}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
-  result = "Commands:\n  "
+  result = "Commands:\n"
 
   for action in ActionKind:
     if action != actNil:
-      result &= $action & ", "
-  setLen(result, result.len - 2)
-  result &= "\n"
+      result &= &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
