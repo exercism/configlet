@@ -2,11 +2,6 @@ import std/[os, parseutils, strformat, strutils, terminal]
 import pkg/cligen/parseopt3
 
 type
-  Verbosity* = enum
-    verQuiet = "quiet"
-    verNormal = "normal"
-    verDetailed = "detailed"
-
   ActionKind* = enum
     actNil = "nil"
     actFmt = "fmt"
@@ -48,6 +43,11 @@ type
       tests*: TestsMode
     of actUuid:
       num*: int
+
+  Verbosity* = enum
+    verQuiet = "quiet"
+    verNormal = "normal"
+    verDetailed = "detailed"
 
   Conf* = object
     action*: Action
