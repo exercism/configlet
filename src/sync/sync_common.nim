@@ -216,7 +216,23 @@ func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: s
   ##
   ## This func does not rename anything, but it must be named `renameHook`.
   ## It just turns out that this hook is convenient for recording the key order,
-  ## since it can access both the object being parsed and the key name.
+  ## since it can access both the object being parsed and the key name - we
+  ## don't need to redefine the whole `parseHook`.
+  ##
+  ## We want to record the key order so that `configlet sync` can write the
+  ## keys in the same order that it saw them, so we can minimize noise in diffs
+  ## and PRs. To instead format the JSON files without syncing, the user will
+  ## be able to run `configlet fmt`.
+  ##
+  ## With this func, we record the original key order as we do a single pass to
+  ## parse the JSON, even though jsony tries not compromise on speed, and
+  ## therefore:
+  ## - does not keep track of the key order
+  ## - and directly populates a strongly typed object (whose fields are in a
+  ##   fixed order), minimizing intermediate allocations
+  ##
+  ## This is more efficient and elegant than doing a second pass to get the key
+  ## order, or parsing into `JsonNode` and checking types after parse-time.
   try:
     let eck = parseEnumWithoutNormalizing[ExerciseConfigKey](key)
     e.originalKeyOrder.add eck
