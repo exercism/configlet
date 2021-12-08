@@ -10,11 +10,11 @@ type
   ActionKind* = enum
     actNil = "nil"
     actFmt = "fmt"
+    actGenerate = "generate"
+    actInfo = "info"
     actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
-    actGenerate = "generate"
-    actInfo = "info"
 
   SyncKind* = enum
     skDocs = "docs"
@@ -38,6 +38,10 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
+    of actGenerate:
+      discard
+    of actInfo:
+      discard
     of actLint:
       discard
     of actSync:
@@ -50,10 +54,6 @@ type
       tests*: TestsMode
     of actUuid:
       num*: int
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
 
   Conf* = object
     action*: Action
@@ -180,12 +180,12 @@ func genHelpText: string =
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
     actFmt: "Format the exercise 'meta/config.json' files",
+    actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
+    actInfo: "Print some information about the track",
     actLint: "Check the track configuration for correctness",
     actSync: "Check or update Practice Exercise docs, metadata, and tests from 'problem-specifications'.\n" &
              &"{paddingAction}Check or populate missing 'files' values for Concept/Practice Exercises from the track 'config.json'.",
     actUuid: "Output new (version 4) UUIDs, suitable for the value of a 'uuid' key",
-    actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
-    actInfo: "Print some information about the track",
   ]
 
   const (syntax, maxLen) = genSyntaxStrings()
@@ -326,16 +326,16 @@ func initAction*(actionKind: ActionKind, probSpecsDir = "",
     Action(kind: actionKind)
   of actFmt:
     Action(kind: actionKind)
+  of actGenerate:
+    Action(kind: actionKind)
+  of actInfo:
+    Action(kind: actionKind)
   of actLint:
     Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
   of actUuid:
     Action(kind: actionKind, num: 1)
-  of actGenerate:
-    Action(kind: actionKind)
-  of actInfo:
-    Action(kind: actionKind)
 
 func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
                verbosity = verNormal): Conf =
@@ -464,6 +464,10 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(yesFmt, true)
       else:
         discard
+    of actGenerate:
+      discard
+    of actInfo:
+      discard
     of actLint:
       discard
     of actSync:
@@ -497,10 +501,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(num, num)
       else:
         discard
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
 
   if not isGlobalOpt and not isActionOpt:
     case conf.action.kind
@@ -530,5 +530,5 @@ proc processCmdLine*: Conf =
     # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-  of actFmt, actLint, actUuid, actGenerate, actInfo:
+  of actFmt, actGenerate, actInfo, actLint, actUuid:
     discard
