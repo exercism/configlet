@@ -64,19 +64,19 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
   uniqueCond and genCond(solution) and genCond(test) and genCond(editor)
 
 type
-  ExerciseConfig = object
+  ExerciseConfig* = object
     case kind: ExerciseKind
     of ekConcept:
-      c: ConceptExerciseConfig
+      c*: ConceptExerciseConfig
     of ekPractice:
-      p: PracticeExerciseConfig
+      p*: PracticeExerciseConfig
 
   PathAndUpdatedExerciseConfig = object
     path: string
     exerciseConfig: ExerciseConfig
 
-proc init(T: typedesc[ExerciseConfig], kind: ExerciseKind,
-          trackExerciseConfigPath: string): T =
+proc init*(T: typedesc[ExerciseConfig], kind: ExerciseKind,
+           trackExerciseConfigPath: string): T =
   case kind
   of ekConcept: T(
     kind: kind,

@@ -1,0 +1,103 @@
+import std/[os, strformat, strutils]
+import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync]
+
+type
+  PathAndFormattedExerciseConfig = object
+    path: string
+    formattedExerciseConfig: string
+
+iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
+                        trackExercisesDir: string): (ExerciseKind, string) =
+  ## Yields the `.meta/config.json` path for each exercise in
+  ## `trackExerciseSlugs` in `trackExercisesDir`.
+  for exerciseKind in [ekConcept, ekPractice]:
+    let slugs =
+      case exerciseKind
+      of ekConcept: trackExerciseSlugs.`concept`
+      of ekPractice: trackExerciseSlugs.practice
+    var trackExerciseConfigPath =
+      case exerciseKind
+      of ekConcept: trackExercisesDir / "concept"
+      of ekPractice: trackExercisesDir / "practice"
+    normalizePathEnd(trackExerciseConfigPath, trailingSep = true)
+    let startLen = trackExerciseConfigPath.len
+
+    for slug in slugs:
+      trackExerciseConfigPath.truncateAndAdd(startLen, slug)
+      trackExerciseConfigPath.addExerciseConfigPath()
+      yield (exerciseKind, trackExerciseConfigPath)
+
+proc formatFile(exerciseKind: ExerciseKind,
+                configPath: string): string =
+  ## Parses the `.meta/config.json` file at `configPath` and returns it in the
+  ## canonical form.
+  let exerciseConfig = ExerciseConfig.init(exerciseKind, configPath)
+  case exerciseKind
+  of ekConcept:
+    pretty(exerciseConfig.c, pmFmt)
+  of ekPractice:
+    pretty(exerciseConfig.p, pmFmt)
+
+proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
+             trackExercisesDir: string): seq[PathAndFormattedExerciseConfig] =
+  ## Reads the `.meta/config.json` file for every slug in `trackExerciseSlugs`
+  ## in `trackExerciseDir`.
+  ##
+  ## Returns a seq of (path, formatted config) objects containing every exercise
+  ## config that is not already formatted.
+  for (exerciseKind, configPath) in getConfigPaths(trackExerciseSlugs,
+                                                   trackExercisesDir):
+    let formatted = formatFile(exerciseKind, configPath)
+    # TODO: remove duplicate `readFile`.
+    if not fileExists(configPath) or readFile(configPath) != formatted:
+      logNormal(&"Not formatted: {configPath}")
+      result.add PathAndFormattedExerciseConfig(
+        path: configPath,
+        formattedExerciseConfig: formatted
+      )
+
+proc userSaysYes: bool =
+  ## Asks the user if they want to format files, and returns `true` if they
+  ## confirm.
+  while true:
+    stderr.write &"Format the above exercise configs ([y]es/[n]o)? "
+    case stdin.readLine().toLowerAscii()
+    of "y", "yes":
+      return true
+    of "n", "no":
+      return false
+    else:
+      stderr.writeLine "Unrecognized response. Please answer [y]es or [n]o."
+
+proc writeFormatted(prettyPairs: seq[PathAndFormattedExerciseConfig]) =
+  for prettyPair in prettyPairs:
+    let path = prettyPair.path
+    doAssert lastPathPart(path) == "config.json"
+    createDir path.parentDir()
+    logDetailed(&"Writing formatted: {path}")
+    writeFile(path, prettyPair.formattedExerciseConfig)
+  let s = if prettyPairs.len > 1: "s" else: ""
+  logNormal(&"Formatted the exercise config for {prettyPairs.len} exercise{s}")
+
+proc fmt*(conf: Conf) =
+  ## Prints a list of `.meta/config.json` paths in `conf.trackDir` where the
+  ## config file is missing or not in the canonical form, and formats them if
+  ## the user confirms.
+  let trackConfigPath = conf.trackDir / "config.json"
+  let trackConfig = parseFile(trackConfigPath, TrackConfig)
+  let trackExerciseSlugs = TrackExerciseSlugs.init(trackConfig.exercises)
+
+  logNormal(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
+            &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
+            trackConfigPath)
+  logNormal("Looking for exercises that lack a formatted '.meta/config.json' " &
+            "file...")
+
+  let trackExercisesDir = conf.trackDir / "exercises"
+  let pairs = fmtImpl(trackExerciseSlugs, trackExercisesDir)
+
+  if pairs.len > 0:
+    if userSaysYes():
+      writeFormatted(pairs)
+  else:
+    logNormal("Every exercise config is already formatted!")

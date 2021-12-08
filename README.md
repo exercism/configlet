@@ -11,7 +11,7 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  lint, sync, uuid, generate, info
+  fmt, lint, sync, uuid, generate, info
 
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
@@ -61,7 +61,7 @@ We describe the checking and updating of these data kinds in individual sections
 - To non-interactively update docs, filepaths, and metadata on the track, use `--update --yes`.
 - To non-interactively include every unseen test for a given exercise, use e.g. `--update --tests include --exercise prime-factors`.
 - To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
-- Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating. To write these files in a canonical form without syncing, please use the upcoming `configlet fmt` command. However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they are missing. This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
+- Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating. To write these files in a canonical form without syncing, please use the `configlet fmt` command. However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they are missing. This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
 - `configlet sync` removes keys that are not in the spec. Custom key/value pairs are still supported: they must be written inside a JSON object named `custom`.
 - The exit code is 0 when all the seen data are synced when configlet exits, and 1 otherwise.
 
@@ -218,6 +218,55 @@ The `sync` command is useful when adding a new exercise to a track. If you are a
 1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise will not implement.
 1. Implement the tests for the exercise to match those included in `.meta/tests.toml`.
 1. Add the other required files.
+
+## `configlet fmt`
+
+Every Concept Exercise and Practice Exercise on an Exercism track must have a `.meta/config.json` file.
+
+To rewrite every exercise config file in the canonical form, run:
+
+```
+$ configlet fmt
+```
+
+This will print a list of paths for which there is not already a formatted exercise `.meta/config.json` file, and write the formatted files if you confirm.
+
+"Formatting" or "rewriting in the canonical form" means:
+
+- Write the key/value pairs in the canonical order.
+
+- Use two spaces for indentation, and use a separate line for each item in a JSON array/object.
+
+- Strip key/value pairs for keys that are optional and have empty values.
+  For example, `contributors: []` is removed.
+
+- Strip `test_runner: true` for Practice Exercise config files.
+  This is an optional key - the spec says that an omitted `test_runner` key implies the value `true`.
+
+- When there is more than one key/value pair with the same name, keep only the final one.
+
+The canonical order is:
+
+```
+- authors
+- [contributors]
+- files
+  - solution
+  - test
+  - exemplar           (Concept Exercises only)
+  - example            (Practice Exercises only)
+  - [editor]
+- [language_versions]
+- [forked_from]        (Concept Exercises only)
+- [icon]               (Concept Exercises only)
+- [test_runner]        (Practice Exercises only)
+- blurb
+- [source]
+- [source_url]
+- [custom]
+```
+
+where the square brackets indicate that the enclosed key is optional.
 
 ## `configlet uuid`
 

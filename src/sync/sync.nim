@@ -33,11 +33,11 @@ proc validate(conf: Conf) =
           showError(msg)
 
 type
-  TrackExerciseSlugs = object
-    `concept`: seq[Slug]
-    practice: seq[Slug]
+  TrackExerciseSlugs* = object
+    `concept`*: seq[Slug]
+    practice*: seq[Slug]
 
-func init(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
+func init*(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
   T(
     `concept`: getSlugs(exercises.`concept`),
     practice: getSlugs(exercises.practice)

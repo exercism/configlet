@@ -9,6 +9,7 @@ type
 
   ActionKind* = enum
     actNil = "nil"
+    actFmt = "fmt"
     actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
@@ -29,6 +30,8 @@ type
   Action* = object
     case kind*: ActionKind
     of actNil:
+      discard
+    of actFmt:
       discard
     of actLint:
       discard
@@ -194,7 +197,7 @@ func genHelpText: string =
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actLint, actGenerate, actInfo}:
+    if actionKind notin {actNil, actFmt, actLint, actGenerate, actInfo}:
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
@@ -273,6 +276,8 @@ func initAction*(actionKind: ActionKind, probSpecsDir = "",
   case actionKind
   of actNil:
     Action(kind: actionKind)
+  of actFmt:
+    Action(kind: actionKind)
   of actLint:
     Action(kind: actionKind)
   of actSync:
@@ -301,7 +306,10 @@ proc parseActionKind(key: string): ActionKind =
   try:
     result = parseEnum[ActionKind](keyNormalized)
   except ValueError:
-    showError(&"invalid command: '{key}'")
+    if keyNormalized == "format": # Silently accept `configlet format`.
+      result = actFmt
+    else:
+      showError(&"invalid command: '{key}'")
 
 func normalizeOption(s: string): string =
   ## Returns the string `s`, but converted to lowercase and without '_' or '-'.
@@ -398,6 +406,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     case conf.action.kind
     of actNil:
       discard
+    of actFmt:
+      discard
     of actLint:
       discard
     of actSync:
@@ -464,5 +474,5 @@ proc processCmdLine*: Conf =
     # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-  of actLint, actUuid, actGenerate, actInfo:
+  of actFmt, actLint, actUuid, actGenerate, actInfo:
     discard
