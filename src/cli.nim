@@ -113,10 +113,10 @@ func camelToKebab(s: string): string =
   result = newStringOfCap(s.len + 2)
   for c in s:
     if c in {'A'..'Z'}:
-      result &= '-'
-      result &= toLowerAscii(c)
+      result.add '-'
+      result.add toLowerAscii(c)
     else:
-      result &= c
+      result.add c
 
 func list*(opt: Opt): string =
   if short[opt] == '_':
@@ -131,8 +131,8 @@ func genHelpText: string =
     ## Returns a string that describes the allowed values for an enum `T`.
     result = "Allowed values: "
     for val in T:
-      result &= &"{($val)[0]}"
-      result &= &"[{($val)[1 .. ^1]}], "
+      result.add &"{($val)[0]}"
+      result.add &"[{($val)[1 .. ^1]}], "
     setLen(result, result.len - 2)
 
   func genSyntaxStrings: tuple[syntax: array[Opt, string], maxLen: int] =
@@ -218,18 +218,18 @@ func genHelpText: string =
 
   for action in ActionKind:
     if action != actNil:
-      result &= &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
+      result.add &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
     if actionKind notin {actNil, actLint, actGenerate, actInfo}:
-      result &= &"\nOptions for {actionKind}:\n"
+      result.add &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
@@ -250,13 +250,13 @@ func genHelpText: string =
               &"Auto-confirm the prompt from --{$optFmtSyncUpdate}"
             else:
               descriptions[opt]
-          result &= alignLeft(syntax[opt], maxLen) & desc & "\n"
+          result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
-  result &= &"\nGlobal options:\n"
+  result.add &"\nGlobal options:\n"
   for opt in Opt:
     if opt notin optSeen:
-      result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+      result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
