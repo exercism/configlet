@@ -29,7 +29,7 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil:
+    of actNil, actGenerate, actInfo, actLint:
       discard
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
@@ -38,12 +38,6 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
-    of actLint:
-      discard
     of actSync:
       exercise*: string
       probSpecsDir*: string
@@ -322,15 +316,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
 func initAction*(actionKind: ActionKind, probSpecsDir = "",
                  scope: set[SyncKind] = {}): Action =
   case actionKind
-  of actNil:
-    Action(kind: actionKind)
-  of actFmt:
-    Action(kind: actionKind)
-  of actGenerate:
-    Action(kind: actionKind)
-  of actInfo:
-    Action(kind: actionKind)
-  of actLint:
+  of actNil, actFmt, actGenerate, actInfo, actLint:
     Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
@@ -452,7 +438,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil:
+    of actNil, actGenerate, actInfo, actLint:
       discard
     of actFmt:
       case opt
@@ -464,12 +450,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(yesFmt, true)
       else:
         discard
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
-    of actLint:
-      discard
     of actSync:
       case opt
       of optFmtSyncExercise:
@@ -526,9 +506,9 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
+  of actFmt, actGenerate, actInfo, actLint, actUuid:
+    discard
   of actSync:
     # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-  of actFmt, actGenerate, actInfo, actLint, actUuid:
-    discard
