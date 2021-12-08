@@ -55,12 +55,15 @@ There is also one kind of data that can be populated from the track-level `confi
 
 We describe the checking and updating of these data kinds in individual sections below, but as a quick summary:
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file. Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, please add the exercise to the track-level `config.json` file first. If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
-- A plain `configlet sync` makes no changes to the track, and checks every data kind.
-- To operate only on certain data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
-- To interactively update files on the track, use the `--update` option.
-- To non-interactively update docs, filepaths, and metadata, on the track, use `--update --yes`.
+- A plain `configlet sync` makes no changes to the track, and checks every data kind for every exercise.
+- To operate on a subset of data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
+- To interactively update data on the track, use the `--update` option.
+- To non-interactively update docs, filepaths, and metadata on the track, use `--update --yes`.
+- To non-interactively include every unseen test for a given exercise, use e.g. `--update --tests include --exercise prime-factors`.
 - To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
-- `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating. To write these files in a canonical form without syncing, you can use the upcoming `configlet fmt` command.
+- Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating. To write these files in a canonical form without syncing, please use the upcoming `configlet fmt` command. However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they are missing. This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
+- `configlet sync` removes keys that are not in the spec. Custom key/value pairs are still supported: they must be written inside a JSON object named `custom`.
+- The exit code is 0 when all the seen data are synced when configlet exits, and 1 otherwise.
 
 Note that in `configlet` releases `4.0.0-alpha.34` and earlier, the `sync` command operated only on tests.
 
@@ -207,7 +210,7 @@ $ configlet sync --filepaths -uy -e prime-factors
 
 The `sync` command is useful when adding a new exercise to a track. If you are adding a Practice Exercise named `foo` that exists in `problem-specifications`, one possible workflow is:
 1. Manually add an entry to the track-level `config.json` file for the exercise `foo`. This makes the exercise visible to `configlet sync`.
-1. Run `configlet sync --docs --filepaths --metadata -uy -e foo` to create the exercise's introduction, and a starter `.meta/config.json` file with populated `files`, `blurb`, and perhaps `source` and `source_url` values.
+1. Run `configlet sync --docs --filepaths --metadata -uy -e foo` to create the exercise's documentation, and a starter `.meta/config.json` file with populated `files`, `blurb`, and perhaps `source` and `source_url` values.
 1. Edit the exercise `.meta/config.json` file as desired. For example, add yourself to the `authors` array.
 1. Run `configlet sync --tests include -u -e foo` to create a `.meta/tests.toml` file with every test included.
 1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise will not implement.
