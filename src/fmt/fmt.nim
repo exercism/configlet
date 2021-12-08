@@ -85,11 +85,10 @@ proc fmt*(conf: Conf) =
   ## the user confirms.
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
-  let trackExerciseSlugs = TrackExerciseSlugs.init(trackConfig.exercises)
-
-  logNormal(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
-            &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
+  logNormal(&"Found {trackConfig.exercises.`concept`.len} Concept Exercises " &
+            &"and {trackConfig.exercises.practice.len} Practice Exercises in " &
             trackConfigPath)
+  let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   logNormal("Looking for exercises that lack a formatted '.meta/config.json' " &
             "file...")
 
@@ -97,7 +96,13 @@ proc fmt*(conf: Conf) =
   let pairs = fmtImpl(trackExerciseSlugs, trackExercisesDir)
 
   if pairs.len > 0:
-    if userSaysYes():
+    if conf.action.yesFmt or userSaysYes():
       writeFormatted(pairs)
   else:
-    logNormal("Every exercise config is already formatted!")
+    let userExercise = conf.action.exerciseFmt
+    let wording =
+      if userExercise.len > 0:
+        &"The `{userExercise}`"
+      else:
+        "Every"
+    logNormal(&"{wording} exercise config is already formatted!")

@@ -13,6 +13,10 @@ Usage:
 Commands:
   fmt, lint, sync, uuid, generate, info
 
+Options for fmt:
+  -e, --exercise <slug>        Only operate on this exercise
+  -y, --yes                    Format without prompting for confirmation
+
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
   -p, --prob-specs-dir <dir>   Use this 'problem-specifications' directory, rather than cloning temporarily

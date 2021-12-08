@@ -32,7 +32,11 @@ type
     of actNil:
       discard
     of actFmt:
-      discard
+      # We can't name these fields `exercise` and `yes` because we use those
+      # names in `actSync`, and Nim doesn't yet support duplicate field names in
+      # object variants.
+      exerciseFmt*: string
+      yesFmt*: bool
     of actLint:
       discard
     of actSync:
@@ -62,12 +66,14 @@ type
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
 
+    # Options for both `fmt` and `sync`
+    optFmtSyncExercise = "exercise"
+    optFmtSyncYes = "yes"
+
     # Options for `sync`
-    optSyncExercise = "exercise"
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     optSyncUpdate = "update"
-    optSyncYes = "yes"
     # Scope to sync
     optSyncDocs = "docs"
     optSyncFilepaths = "filepaths"
@@ -90,8 +96,8 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate, optSyncYes,
-               optSyncDocs, optSyncFilepaths, optSyncMetadata}
+  optsNoVal = {optHelp, optVersion, optFmtSyncYes, optSyncOffline,
+               optSyncUpdate, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -144,7 +150,7 @@ func genHelpText: string =
         case opt
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
-        of optSyncExercise: "slug"
+        of optFmtSyncExercise: "slug"
         of optSyncTests: "mode"
         of optSyncProbSpecsDir: "dir"
         of optUuidNum: "int"
@@ -171,13 +177,13 @@ func genHelpText: string =
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
                   &"{padding}{allowedValues(Verbosity)} (default: normal)",
-    optSyncExercise: "Only operate on this exercise",
+    optFmtSyncExercise: "Only operate on this exercise",
+    optFmtSyncYes: &"Auto-confirm prompts from --{$optSyncUpdate} for updating docs, filepaths, and metadata",
     optSyncProbSpecsDir: "Use this 'problem-specifications' directory, " &
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
                     &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
     optSyncUpdate: "Prompt to update the seen data that are unsynced",
-    optSyncYes: &"Auto-confirm prompts from --{$optSyncUpdate} for updating docs, filepaths, and metadata",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -197,7 +203,7 @@ func genHelpText: string =
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actFmt, actLint, actGenerate, actInfo}:
+    if actionKind notin {actNil, actLint, actGenerate, actInfo}:
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
@@ -207,8 +213,20 @@ func genHelpText: string =
             result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
-          let opt = parseEnum[Opt](key)
-          result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+          let opt =
+            case key
+            of "exerciseFmt":
+              optFmtSyncExercise
+            of "yesFmt":
+              optFmtSyncYes
+            else:
+              parseEnum[Opt](key)
+          let desc =
+            if opt == optFmtSyncYes and actionKind == actFmt:
+              "Format without prompting for confirmation"
+            else:
+              descriptions[opt]
+          result &= alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
   result &= &"\nGlobal options:\n"
@@ -407,13 +425,23 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     of actNil:
       discard
     of actFmt:
-      discard
+      case opt
+      of optFmtSyncExercise:
+        conf.action.exerciseFmt = val
+        isActionOpt = true
+      of optFmtSyncYes:
+        conf.action.yesFmt = true
+        isActionOpt = true
+      else:
+        discard
     of actLint:
       discard
     of actSync:
       case opt
-      of optSyncExercise:
+      of optFmtSyncExercise:
         setActionOpt(exercise, val)
+      of optFmtSyncYes:
+        setActionOpt(yes, true)
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
@@ -423,8 +451,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(offline, true)
       of optSyncUpdate:
         setActionOpt(update, true)
-      of optSyncYes:
-        setActionOpt(yes, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:
         conf.action.scope.incl parseEnum[SyncKind]($opt)
         isActionOpt = true
