@@ -1,4 +1,6 @@
-# Last updated: 2021-09-28T05:00:00Z
+# Last updated: 2021-12-09T05:00:00Z
+
+[with-canonical-data]
 accumulate
 acronym
 affine-cipher
@@ -8,9 +10,7 @@ alphametics
 anagram
 armstrong-numbers
 atbash-cipher
-bank-account
 beer-song
-binary
 binary-search
 binary-search-tree
 bob
@@ -22,7 +22,6 @@ clock
 collatz-conjecture
 complex-numbers
 connect
-counter
 crypto-square
 custom-set
 darts
@@ -31,8 +30,6 @@ difference-of-squares
 diffie-hellman
 dnd-character
 dominoes
-dot-dsl
-error-handling
 etl
 flatten-array
 food-chain
@@ -43,9 +40,7 @@ grade-school
 grains
 grep
 hamming
-hangman
 hello-world
-hexadecimal
 high-scores
 house
 isbn-verifier
@@ -54,8 +49,6 @@ kindergarten-garden
 knapsack
 largest-series-product
 leap
-ledger
-lens-person
 linked-list
 list-ops
 luhn
@@ -66,19 +59,14 @@ meetup
 micro-blog
 minesweeper
 nth-prime
-nucleotide-codons
 nucleotide-count
 ocr-numbers
-octal
-paasio
 palindrome-products
 pangram
-parallel-letter-frequency
 pascals-triangle
 perfect-numbers
 phone-number
 pig-latin
-point-mutations
 poker
 pov
 prime-factors
@@ -97,7 +85,6 @@ resistor-color-trio
 rest-api
 reverse-string
 rna-transcription
-robot-name
 robot-simulator
 roman-numerals
 rotational-cipher
@@ -112,18 +99,14 @@ series
 sgf-parsing
 sieve
 simple-cipher
-simple-linked-list
 space-age
 spiral-matrix
 square-root
-strain
 sublist
 sum-of-multiples
 tournament
 transpose
-tree-building
 triangle
-trinary
 twelve-days
 two-bucket
 two-fer
@@ -134,3 +117,26 @@ wordy
 yacht
 zebra-puzzle
 zipper
+
+[no-canonical-data]
+bank-account
+dot-dsl
+error-handling
+hangman
+ledger
+lens-person
+paasio
+parallel-letter-frequency
+robot-name
+simple-linked-list
+strain
+tree-building
+
+[deprecated]
+binary
+counter
+hexadecimal
+nucleotide-codons
+octal
+point-mutations
+trinary
