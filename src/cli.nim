@@ -427,11 +427,9 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     of actFmt:
       case opt
       of optFmtSyncExercise:
-        conf.action.exerciseFmt = val
-        isActionOpt = true
+        setActionOpt(exerciseFmt, val)
       of optFmtSyncYes:
-        conf.action.yesFmt = true
-        isActionOpt = true
+        setActionOpt(yesFmt, true)
       else:
         discard
     of actLint:
