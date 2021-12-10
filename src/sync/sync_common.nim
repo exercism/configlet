@@ -448,7 +448,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of pmSync:
       keyOrderForSync(e.originalKeyOrder)
 
-  result = newStringOfCap(100)
+  result = newStringOfCap(1000)
   result.add '{'
   for key in keys:
     case key
