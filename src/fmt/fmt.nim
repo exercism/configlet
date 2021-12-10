@@ -96,8 +96,13 @@ proc fmt*(conf: Conf) =
   let pairs = fmtImpl(trackExerciseSlugs, trackExercisesDir)
 
   if pairs.len > 0:
-    if conf.action.yesFmt or userSaysYes():
-      writeFormatted(pairs)
+    if conf.action.updateFmt:
+      if conf.action.yesFmt or userSaysYes():
+        writeFormatted(pairs)
+      else:
+        quit 1
+    else:
+      quit 1
   else:
     let userExercise = conf.action.exerciseFmt
     let wording =

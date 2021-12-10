@@ -15,7 +15,8 @@ Commands:
 
 Options for fmt:
   -e, --exercise <slug>        Only operate on this exercise
-  -y, --yes                    Format without prompting for confirmation
+  -u, --update                 Prompt to write formatted files
+  -y, --yes                    Auto-confirm the prompt from --update
 
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
@@ -226,14 +227,34 @@ The `sync` command is useful when adding a new exercise to a track. If you are a
 ## `configlet fmt`
 
 Every Concept Exercise and Practice Exercise on an Exercism track must have a `.meta/config.json` file.
+To ensure that each of these files is in the canonical form, you can use the `configlet fmt` command.
 
-To rewrite every exercise config file in the canonical form, run:
+A plain `configlet fmt` makes no changes to the track, and checks the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
+
+To print a list of paths for which there is not already a formatted exercise `.meta/config.json` file (exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
 
 ```
 $ configlet fmt
 ```
 
-This will print a list of paths for which there is not already a formatted exercise `.meta/config.json` file, and write the formatted files if you confirm.
+To be prompted to write formatted config files, add the `--update` option (or `-u` for short):
+
+```
+$ configlet fmt --update
+```
+
+To non-interactively write the formatted config files, add the `--yes` option (or `-y` for short):
+
+```
+$ configlet fmt --update --yes
+```
+
+To operate on a single exercise, use the `--exercise` option (or `-e` for short).
+For example, to non-interactively write the formatted config file for the `prime-factors` exercise:
+
+```
+$ configlet fmt -uy -e prime-factors
+```
 
 "Formatting" or "rewriting in the canonical form" means:
 
