@@ -56,11 +56,12 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
         formattedExerciseConfig: formatted
       )
 
-proc userSaysYes: bool =
+proc userSaysYes(userExercise: string): bool =
   ## Asks the user if they want to format files, and returns `true` if they
   ## confirm.
+  let s = if userExercise.len > 0: "" else: "s"
   while true:
-    stderr.write &"Format the above exercise configs ([y]es/[n]o)? "
+    stderr.write &"Format the above exercise config{s} ([y]es/[n]o)? "
     case stdin.readLine().toLowerAscii()
     of "y", "yes":
       return true
@@ -95,16 +96,16 @@ proc fmt*(conf: Conf) =
   let trackExercisesDir = conf.trackDir / "exercises"
   let pairs = fmtImpl(trackExerciseSlugs, trackExercisesDir)
 
+  let userExercise = conf.action.exerciseFmt
   if pairs.len > 0:
     if conf.action.updateFmt:
-      if conf.action.yesFmt or userSaysYes():
+      if conf.action.yesFmt or userSaysYes(userExercise):
         writeFormatted(pairs)
       else:
         quit 1
     else:
       quit 1
   else:
-    let userExercise = conf.action.exerciseFmt
     let wording =
       if userExercise.len > 0:
         &"The `{userExercise}`"
