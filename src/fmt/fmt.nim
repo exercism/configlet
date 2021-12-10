@@ -39,18 +39,24 @@ proc formatFile(exerciseKind: ExerciseKind,
     pretty(exerciseConfig.p, pmFmt)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
-             trackExercisesDir: string): seq[PathAndFormattedExerciseConfig] =
+             trackDir: string): seq[PathAndFormattedExerciseConfig] =
   ## Reads the `.meta/config.json` file for every slug in `trackExerciseSlugs`
   ## in `trackExerciseDir`.
   ##
   ## Returns a seq of (path, formatted config) objects containing every exercise
   ## config that is not already formatted.
+  let trackExercisesDir = trackDir / "exercises"
+  var seenUnformatted = false
   for (exerciseKind, configPath) in getConfigPaths(trackExerciseSlugs,
                                                    trackExercisesDir):
     let formatted = formatFile(exerciseKind, configPath)
     # TODO: remove duplicate `readFile`.
     if not fileExists(configPath) or readFile(configPath) != formatted:
-      logNormal(&"Not formatted: {configPath}")
+      if not seenUnformatted:
+        logNormal(&"The below paths are relative to '{trackExercisesDir}'")
+      seenUnformatted = true
+      let configPathRelative = relativePath(configPath, trackExercisesDir)
+      logNormal(&"Not formatted: {configPathRelative}")
       result.add PathAndFormattedExerciseConfig(
         path: configPath,
         formattedExerciseConfig: formatted
@@ -93,8 +99,7 @@ proc fmt*(conf: Conf) =
   logNormal("Looking for exercises that lack a formatted '.meta/config.json' " &
             "file...")
 
-  let trackExercisesDir = conf.trackDir / "exercises"
-  let pairs = fmtImpl(trackExerciseSlugs, trackExercisesDir)
+  let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
 
   let userExercise = conf.action.exerciseFmt
   if pairs.len > 0:
