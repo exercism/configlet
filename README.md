@@ -17,8 +17,8 @@ Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
   -p, --prob-specs-dir <dir>   Use this 'problem-specifications' directory, rather than cloning temporarily
   -o, --offline                Do not check that the directory specified by --prob-specs-dir is up to date
-  -u, --update                 Update the seen data that are unsynced
-  -y, --yes                    Auto-confirm every prompt for updating docs, filepaths, and metadata
+  -u, --update                 Prompt to update the seen data that are unsynced
+  -y, --yes                    Auto-confirm prompts from --update for updating docs, filepaths, and metadata
       --docs                   Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files
       --filepaths              Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files
       --metadata               Sync Practice Exercise '.meta/config.json' metadata values

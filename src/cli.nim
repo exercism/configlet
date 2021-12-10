@@ -173,8 +173,8 @@ func genHelpText: string =
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
                     &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
-    optSyncUpdate: "Update the seen data that are unsynced",
-    optSyncYes: "Auto-confirm every prompt for updating docs, filepaths, and metadata",
+    optSyncUpdate: "Prompt to update the seen data that are unsynced",
+    optSyncYes: &"Auto-confirm prompts from --{$optSyncUpdate} for updating docs, filepaths, and metadata",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
