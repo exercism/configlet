@@ -293,6 +293,12 @@ The canonical order is:
 
 where the square brackets indicate that the enclosed key is optional.
 
+Note that `configlet fmt` only operates on exercises that exist in the track-level `config.json` file.
+Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file, please add the exercise to the track-level `config.json` file first.
+If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
+
+The exit code is 0 when every seen exercise has a formatted `.meta/config.json` file when configlet exits, and 1 otherwise.
+
 ## `configlet uuid`
 
 Each exercise and concept has a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), which must only appear once across all of Exercism. It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must match the below regular expression:
