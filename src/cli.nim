@@ -171,6 +171,13 @@ func genHelpText: string =
   const (syntax, maxLen) = genSyntaxStrings()
   const padding = repeat(' ', maxLen)
 
+  # For some options that are common between commands, we want different
+  # descriptions in the help message. But we currently use `parseEnum` to parse
+  # a user-provided option, and so `Opt` can't have e.g. separate `optSyncYes`
+  # and `optFmtYes` values with the same string value of "yes".
+  # We define most of the option descriptions below. For the options that are
+  # common to both `sync` and `fmt`, we set the `sync` descriptions here and
+  # set the `fmt` ones later.
   const descriptions: array[Opt, string] = [
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
@@ -221,6 +228,7 @@ func genHelpText: string =
               optFmtSyncYes
             else:
               parseEnum[Opt](key)
+          # Set the description for `fmt` options.
           let desc =
             if opt == optFmtSyncYes and actionKind == actFmt:
               "Format without prompting for confirmation"
