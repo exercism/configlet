@@ -53,9 +53,9 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
     # TODO: remove duplicate `readFile`.
     if not fileExists(configPath) or readFile(configPath) != formatted:
       if not seenUnformatted:
-        logNormal(&"The below paths are relative to '{trackExercisesDir}'")
+        logNormal(&"The below paths are relative to '{trackDir}'")
       seenUnformatted = true
-      let configPathRelative = relativePath(configPath, trackExercisesDir)
+      let configPathRelative = relativePath(configPath, trackDir)
       logNormal(&"Not formatted: {configPathRelative}")
       result.add PathAndFormattedExerciseConfig(
         path: configPath,
