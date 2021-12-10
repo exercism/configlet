@@ -179,7 +179,7 @@ func genHelpText: string =
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
     optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
-                  &"{padding}The mode value specifies how missing tests are handled when using --update.\n" &
+                  &"{padding}The mode value specifies how missing tests are handled when using --{$optSyncUpdate}.\n" &
                   &"{padding}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to generate",
   ]
