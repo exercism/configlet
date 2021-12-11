@@ -397,7 +397,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Fetch configlet
-      uses: exercism/github-actions/configlet-ci@main
+      uses: exercism/configlet@main
 
     - name: Configlet linter
       uses: configlet lint
