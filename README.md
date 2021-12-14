@@ -89,7 +89,8 @@ To non-interactively update the docs for every Practice Exercise, add the `--yes
 $ configlet sync --docs --update --yes
 ```
 
-To non-interactively update the docs for a single Practice Exercise, use the `--exercise` option (or `-e` for short). For example:
+To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
+For example, to non-interactively update the docs for the `prime-factors` exercise:
 
 ```
 $ configlet sync --docs -uy -e prime-factors
@@ -118,7 +119,8 @@ To non-interactively update the metadata for every Practice Exercise, add the `-
 $ configlet sync --metadata --update --yes
 ```
 
-To non-interactively update the metadata for a single Practice Exercise, use the `--exercise` option (or `-e` for short). For example:
+To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
+For example, to non-interactively update the metadata for the `prime-factors` exercise:
 
 ```
 $ configlet sync --metadata -uy -e prime-factors
