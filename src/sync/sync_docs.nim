@@ -139,6 +139,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
   ## Includes `skDocs` in `seenUnsynced` if there are still such unsynced files
   ## afterwards.
   var pairsToWrite = newSeq[PathAndContents]()
+  # Optimization: allocate only one string for the upstream paths, and one
+  # string for the paths on the track.
   var psSourcePath = normalizePathEnd(psExercisesDir, trailingSep = true)
   let psStartLen = psSourcePath.len
   var trackDestPath = normalizePathEnd(trackPracticeExercisesDir, trailingSep = true)

@@ -175,6 +175,7 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
       case exerciseKind
       of ekConcept: conceptExerciseSlugs
       of ekPractice: practiceExerciseSlugs
+    # Optimization: allocate only one string for the `.meta/config.json` paths.
     var trackExerciseConfigPath =
       case exerciseKind
       of ekConcept: trackConceptExercisesDir

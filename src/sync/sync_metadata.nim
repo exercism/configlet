@@ -114,10 +114,10 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   ## Includes `skMetadata` in `seenUnsynced` if there are still such unsynced
   ## files afterwards.
   var configPairs = newSeq[PathAndUpdatedConfig]()
-  # Allocate only one string for the upstream `metadata.toml` path, and one
-  # string for the exercise `.meta/config.json` path on the track.
-  # Otherwise, something like 20% of the execution time of an
-  # offline `configlet sync --metadata` is spent in `joinPath`.
+  # Optimization: allocate only one string for the upstream `metadata.toml`
+  # paths, and one string for `.meta/config.json` paths on the track.
+  # Everything else is fast enough that, otherwise, about 20% of the execution
+  # time of an offline `configlet sync --metadata` is spent in `joinPath`.
   var psMetadataTomlPath = normalizePathEnd(psExercisesDir, trailingSep = true)
   let startLenPsPath = psMetadataTomlPath.len
   var trackExerciseConfigPath = normalizePathEnd(trackPracticeExercisesDir,
