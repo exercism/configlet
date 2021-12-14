@@ -1,4 +1,4 @@
-import std/[os, strformat]
+import std/[os, strformat, strutils]
 import pkg/parsetoml
 import ".."/[cli, logger]
 import "."/sync_common
@@ -93,7 +93,7 @@ proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
     let updatedJson = pretty(configPair.practiceExerciseConfig, pmSync)
     let path = configPair.path
-    doAssert lastPathPart(path) == "config.json"
+    doAssert path.endsWith(&".meta{DirSep}config.json")
     createDir path.parentDir()
     writeFile(path, updatedJson)
   let s = if configPairs.len > 1: "s" else: ""

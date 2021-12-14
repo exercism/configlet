@@ -116,7 +116,9 @@ proc write(pairsToWrite: seq[PathAndContents]) =
   ## Writes to each `item.path` with `item.contents`.
   for pathAndContents in pairsToWrite:
     let path = pathAndContents.path
-    doAssert lastPathPart(path) in [$psskInstr & ".md", $psskIntro & ".md"]
+    const instrSuffix = &".docs{DirSep}{psskInstr}.md"
+    const introSuffix = &".docs{DirSep}{psskIntro}.md"
+    doAssert path.endsWith(instrSuffix) or path.endsWith(introSuffix)
     createDir path.parentDir()
     writeFile(path, pathAndContents.contents)
   let s = if pairsToWrite.len > 1: "s" else: ""

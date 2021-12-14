@@ -135,7 +135,7 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
 proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
   for configPair in configPairs:
     let path = configPair.path
-    doAssert lastPathPart(path) == "config.json"
+    doAssert path.endsWith(&".meta{DirSep}config.json")
     createDir path.parentDir()
     let contents =
       case configPair.exerciseConfig.kind
