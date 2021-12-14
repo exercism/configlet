@@ -64,7 +64,8 @@ func `$`*(slug: Slug): string {.borrow.}
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   ## Truncates `s` to `truncateLen`, then appends `slug`.
-  assert truncateLen <= s.len and s[truncateLen-1] == DirSep
+  when not defined(release):
+    assert truncateLen <= s.len and s[truncateLen-1] == DirSep
   s.setLen truncateLen
   s.add slug.string
 
