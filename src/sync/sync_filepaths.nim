@@ -135,15 +135,18 @@ proc addUnsyncedFilepaths(configPairs: var seq[PathAndUpdatedExerciseConfig],
 proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
   for configPair in configPairs:
     let path = configPair.path
-    doAssert path.endsWith(&".meta{DirSep}config.json")
-    createDir path.parentDir()
-    let contents =
-      case configPair.exerciseConfig.kind
-      of ekConcept:
-        configPair.exerciseConfig.c.pretty(prettyMode = pmSync)
-      of ekPractice:
-        configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
-    writeFile(path, contents)
+    if path.endsWith(&".meta{DirSep}config.json"):
+      createDir path.parentDir()
+      let contents =
+        case configPair.exerciseConfig.kind
+        of ekConcept:
+          configPair.exerciseConfig.c.pretty(prettyMode = pmSync)
+        of ekPractice:
+          configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
+      writeFile(path, contents)
+    else:
+      stderr.writeLine &"Unexpected path before writing: {path}"
+      quit 1
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")
 

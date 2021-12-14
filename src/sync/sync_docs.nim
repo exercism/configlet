@@ -118,9 +118,12 @@ proc write(pairsToWrite: seq[PathAndContents]) =
     let path = pathAndContents.path
     const instrSuffix = &".docs{DirSep}{psskInstr}.md"
     const introSuffix = &".docs{DirSep}{psskIntro}.md"
-    doAssert path.endsWith(instrSuffix) or path.endsWith(introSuffix)
-    createDir path.parentDir()
-    writeFile(path, pathAndContents.contents)
+    if path.endsWith(instrSuffix) or path.endsWith(introSuffix):
+      createDir path.parentDir()
+      writeFile(path, pathAndContents.contents)
+    else:
+      stderr.writeLine &"Unexpected path before writing: {path}"
+      quit 1
   let s = if pairsToWrite.len > 1: "s" else: ""
   logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")
 

@@ -93,9 +93,12 @@ proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
     let updatedJson = pretty(configPair.practiceExerciseConfig, pmSync)
     let path = configPair.path
-    doAssert path.endsWith(&".meta{DirSep}config.json")
-    createDir path.parentDir()
-    writeFile(path, updatedJson)
+    if path.endsWith(&".meta{DirSep}config.json"):
+      createDir path.parentDir()
+      writeFile(path, updatedJson)
+    else:
+      stderr.writeLine &"Unexpected path before writing: {path}"
+      quit 1
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the metadata for {configPairs.len} Practice Exercise{s}")
 
