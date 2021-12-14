@@ -37,7 +37,7 @@ type
     `concept`: seq[Slug]
     practice: seq[Slug]
 
-func init(T: typedesc, exercises: Exercises): T =
+func init(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
   T(
     `concept`: getSlugs(exercises.`concept`),
     practice: getSlugs(exercises.practice)

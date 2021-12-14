@@ -75,7 +75,8 @@ type
     path: string
     exerciseConfig: ExerciseConfig
 
-proc init(T: typedesc, kind: ExerciseKind, trackExerciseConfigPath: string): T =
+proc init(T: typedesc[ExerciseConfig], kind: ExerciseKind,
+          trackExerciseConfigPath: string): T =
   case kind
   of ekConcept: T(
     kind: kind,
