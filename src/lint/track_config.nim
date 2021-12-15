@@ -1,4 +1,4 @@
-import std/[json, os, sets, strformat, strscans, strutils, tables]
+import std/[json, os, sets, strformat, strutils, tables]
 import pkg/jsony
 import ".."/[cli, helpers]
 import "."/validators
@@ -297,28 +297,9 @@ type
     exercises*: Exercises
     concepts*: Concepts
 
-func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
-  ## Returns the line and column number corresponding to the `offset` in `s`.
-  result = (1, 1)
-  for i, c in s:
-    if i == offset:
-      break
-    elif c == '\n':
-      inc result.line
-      result.col = 0
-    inc result.col
-
 proc tidyJsonyErrorMsg(trackConfigContents: string): string =
   let jsonyMsg = getCurrentExceptionMsg()
-  var jsonyMsgStart = ""
-  var offset = -1
-  # See https://github.com/treeform/jsony/blob/33c3daa/src/jsony.nim#L25-L27
-  let details =
-    if jsonyMsg.scanf("$* At offset: $i$.", jsonyMsgStart, offset):
-      let (line, col) = toLineAndCol(trackConfigContents, offset)
-      &"({line}, {col}): {jsonyMsgStart}"
-    else:
-      &": {jsonyMsg}"
+  let details = tidyJsonyMessage(jsonyMsg, trackConfigContents)
   const bugNotice = """
     --------------------------------------------------------------------------------
     THIS IS A CONFIGLET BUG. PLEASE REPORT IT.

@@ -1,6 +1,23 @@
 import std/[options, sets, strformat, strutils]
 import ".."/[cli, logger]
-import "."/exercises
+import "."/[exercises, probspecs]
+
+proc checkTests*(seenUnsynced: var set[SyncKind], exercises: seq[Exercise]) =
+  for exercise in exercises:
+    let numMissing = exercise.tests.missing.len
+    let wording = if numMissing == 1: "test case" else: "test cases"
+
+    case exercise.status()
+    of exOutOfSync:
+      seenUnsynced.incl skTests
+      logNormal(&"[warn] {exercise.slug}: missing {numMissing} {wording}")
+      for testCase in exercise.testCases:
+        if testCase.uuid in exercise.tests.missing:
+          logNormal(&"       - {testCase.description} ({testCase.uuid})")
+    of exInSync:
+      logDetailed(&"[skip] {exercise.slug}: tests are up to date")
+    of exNoCanonicalData:
+      logDetailed(&"[skip] {exercise.slug}: does not have canonical data")
 
 type
   SyncDecision = enum
@@ -56,28 +73,28 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
     writeBlankLines()
     sdSkipTest
 
-proc syncDecision(testCase: ExerciseTestCase, mode: Mode): SyncDecision =
-  case mode
-  of modeInclude:
+proc syncDecision(testCase: ExerciseTestCase, testsMode: TestsMode): SyncDecision =
+  case testsMode
+  of tmInclude:
     sdIncludeTest
-  of modeExclude:
+  of tmExclude:
     sdExcludeTest
-  of modeChoose:
+  of tmChoose:
     if testCase.reimplements.isNone():
       chooseRegularSyncDecision(testCase)
     else:
       chooseReimplementsSyncDecision(testCase)
 
 proc sync(exercise: Exercise, conf: Conf): Exercise =
-  let mode = conf.action.mode
+  let testsMode = conf.action.tests
   let numMissing = exercise.tests.missing.len
   let wording = if numMissing == 1: "test case" else: "test cases"
-  case mode
-  of modeInclude:
+  case testsMode
+  of tmInclude:
     logNormal(&"[info] {exercise.slug}: included {numMissing} missing {wording}")
-  of modeExclude:
+  of tmExclude:
     logNormal(&"[info] {exercise.slug}: excluded {numMissing} missing {wording}")
-  of modeChoose:
+  of tmChoose:
     logNormal(&"[warn] {exercise.slug}: missing {numMissing} {wording}")
 
   result = exercise
@@ -85,7 +102,7 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   for testCase in exercise.testCases:
     let uuid = testCase.uuid
     if uuid in exercise.tests.missing:
-      case syncDecision(testCase, mode)
+      case syncDecision(testCase, testsMode)
       of sdIncludeTest:
         result.tests.included.incl uuid
         result.tests.missing.excl uuid
@@ -103,31 +120,31 @@ proc sync(exercise: Exercise, conf: Conf): Exercise =
   writeTestsToml(result, conf.trackDir)
 
 proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
-  ## Syncs the given `exercises` if it has missing tests, and returns `true` if
-  ## it is up-to-date afterwards.
+  ## Syncs the given `exercise` if it has missing tests, and returns `true` if
+  ## it is up to date afterwards.
   case exercise.status()
   of exOutOfSync:
     let syncedExercise = sync(exercise, conf)
     syncedExercise.status() == exInSync
   of exInSync:
-    logDetailed(&"[skip] {exercise.slug} is up-to-date")
+    logDetailed(&"[skip] {exercise.slug} tests are up to date")
     true
   of exNoCanonicalData:
     logDetailed(&"[skip] {exercise.slug} does not have canonical data")
     true
 
-proc update*(conf: Conf) =
-  logNormal("Syncing exercises...")
+proc updateTests*(seenUnsynced: var set[SyncKind], conf: Conf,
+                  exercises: seq[Exercise]) =
+  logNormal("Updating tests...")
 
   var everyExerciseIsSynced = true
-  for exercise in findExercises(conf):
+
+  for exercise in exercises:
     let isExerciseSynced = syncIfNeeded(exercise, conf)
     if not isExerciseSynced:
       everyExerciseIsSynced = false
 
   if everyExerciseIsSynced:
-    logNormal("All exercises are synced!")
-    quit(QuitSuccess)
+    seenUnsynced.excl skTests
   else:
-    logNormal("[warn] some exercises are still missing test cases")
-    quit(QuitFailure)
+    seenUnsynced.incl skTests

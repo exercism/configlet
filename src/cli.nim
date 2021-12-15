@@ -7,11 +7,6 @@ type
     verNormal = "normal"
     verDetailed = "detailed"
 
-  Mode* = enum
-    modeChoose = "choose"
-    modeInclude = "include"
-    modeExclude = "exclude"
-
   ActionKind* = enum
     actNil = "nil"
     actLint = "lint"
@@ -19,6 +14,17 @@ type
     actUuid = "uuid"
     actGenerate = "generate"
     actInfo = "info"
+
+  SyncKind* = enum
+    skDocs = "docs"
+    skFilepaths = "filepaths"
+    skMetadata = "metadata"
+    skTests = "tests"
+
+  TestsMode* = enum
+    tmChoose = "choose"
+    tmInclude = "include"
+    tmExclude = "exclude"
 
   Action* = object
     case kind*: ActionKind
@@ -28,10 +34,12 @@ type
       discard
     of actSync:
       exercise*: string
-      mode*: Mode
       probSpecsDir*: string
       offline*: bool
       update*: bool
+      yes*: bool
+      scope*: set[SyncKind]
+      tests*: TestsMode
     of actUuid:
       num*: int
     of actGenerate:
@@ -44,23 +52,34 @@ type
     trackDir*: string
     verbosity*: Verbosity
 
-  Opt = enum
+  Opt* = enum
+    # Global options
     optHelp = "help"
     optVersion = "version"
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
+
+    # Options for `sync`
     optSyncExercise = "exercise"
-    optSyncMode = "mode"
     optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     optSyncUpdate = "update"
+    optSyncYes = "yes"
+    # Scope to sync
+    optSyncDocs = "docs"
+    optSyncFilepaths = "filepaths"
+    optSyncMetadata = "metadata"
+    optSyncTests = "tests"
+
+    # Options for `uuid`
     optUuidNum = "num"
 
 func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
-    if opt == optVersion:
-      result[opt] = '_' # No short option for `--version`
+    if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
+               optSyncTests}:
+      result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
 
@@ -68,7 +87,8 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate}
+  optsNoVal = {optHelp, optVersion, optSyncOffline, optSyncUpdate, optSyncYes,
+               optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -94,7 +114,7 @@ func camelToKebab(s: string): string =
     else:
       result &= c
 
-func list(opt: Opt): string =
+func list*(opt: Opt): string =
   if short[opt] == '_':
     &"    --{camelToKebab($opt)}"
   else:
@@ -122,30 +142,45 @@ func genHelpText: string =
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
         of optSyncExercise: "slug"
-        of optSyncMode: "mode"
+        of optSyncTests: "mode"
         of optSyncProbSpecsDir: "dir"
         of optUuidNum: "int"
         else: ""
 
-      let paramText = if paramName.len > 0: &" <{paramName}>" else: ""
+      let paramText =
+        if paramName.len > 0:
+          if opt == optSyncTests:
+            &" [{paramName}]" # Mode argument is optional. Default is `choose`.
+          else:
+            &" <{paramName}>"
+        else:
+          ""
       let optText = &"  {opt.list}{paramText}  "
       result.syntax[opt] = optText
       result.maxLen = max(result.maxLen, optText.len)
 
   const (syntax, maxLen) = genSyntaxStrings()
+  const padding = repeat(' ', maxLen)
 
   const descriptions: array[Opt, string] = [
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
-    optVerbosity: &"The verbosity of output. {allowedValues(Verbosity)}",
-    optSyncExercise: "Only sync this exercise",
-    optSyncMode: &"What to do with missing test cases. {allowedValues(Mode)}",
-    optSyncProbSpecsDir: "Use this `problem-specifications` directory, " &
+    optVerbosity: &"The verbosity of output.\n" &
+                  &"{padding}{allowedValues(Verbosity)} (default: normal)",
+    optSyncExercise: "Only operate on this exercise",
+    optSyncProbSpecsDir: "Use this 'problem-specifications' directory, " &
                          "rather than cloning temporarily",
     optSyncOffline: "Do not check that the directory specified by " &
-                    &"`{list(optSyncProbSpecsDir)}` is up-to-date",
-    optSyncUpdate: "Prompt the user to include, exclude, or skip any missing tests",
+                    &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
+    optSyncUpdate: "Prompt to update the seen data that are unsynced",
+    optSyncYes: &"Auto-confirm prompts from --{$optSyncUpdate} for updating docs, filepaths, and metadata",
+    optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
+    optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
+    optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
+    optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
+                  &"{padding}The mode value specifies how missing tests are handled when using --{$optSyncUpdate}.\n" &
+                  &"{padding}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
@@ -163,7 +198,12 @@ func genHelpText: string =
       result &= &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
-        if key != "kind":
+        if key == "scope":
+          for syncKind in {skDocs, skFilepaths, skMetadata}:
+            let opt = parseEnum[Opt]($syncKind)
+            result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            optSeen.incl opt
+        elif key != "kind":
           let opt = parseEnum[Opt](key)
           result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
           optSeen.incl opt
@@ -228,14 +268,15 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-func initAction*(actionKind: ActionKind, probSpecsDir = ""): Action =
+func initAction*(actionKind: ActionKind, probSpecsDir = "",
+                 scope: set[SyncKind] = {}): Action =
   case actionKind
   of actNil:
     Action(kind: actionKind)
   of actLint:
     Action(kind: actionKind)
   of actSync:
-    Action(kind: actionKind, probSpecsDir: probSpecsDir)
+    Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
   of actUuid:
     Action(kind: actionKind, num: 1)
   of actGenerate:
@@ -291,7 +332,7 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
         break
   try:
     result = parseEnum[Opt](keyNormalized) # `parseEnum` does not normalize for `-`.
-    if val.len == 0 and result notin optsNoVal:
+    if val.len == 0 and result notin optsNoVal and result != optSyncTests:
       showError(&"{formatOpt(kind, key)} was given without a value")
   except ValueError:
     showError(&"invalid option: {formatOpt(kind, key)}")
@@ -301,6 +342,9 @@ proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
   ## comparsion.
   ##
   ## Exits with an error if `key` cannot be parsed as a value of `T`.
+  when T is TestsMode:
+    if val.len == 0:
+      return tmChoose
   var valNormalized = toLowerAscii(val)
   # Convert a valid single-letter abbreviation to the string value of the enum.
   if valNormalized.len == 1:
@@ -360,14 +404,20 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       case opt
       of optSyncExercise:
         setActionOpt(exercise, val)
-      of optSyncMode:
-        setActionOpt(mode, parseVal[Mode](kind, key, val))
+      of optSyncTests:
+        setActionOpt(tests, parseVal[TestsMode](kind, key, val))
+        conf.action.scope.incl skTests
       of optSyncProbSpecsDir:
         setActionOpt(probSpecsDir, val)
       of optSyncOffline:
         setActionOpt(offline, true)
       of optSyncUpdate:
         setActionOpt(update, true)
+      of optSyncYes:
+        setActionOpt(yes, true)
+      of optSyncDocs, optSyncMetadata, optSyncFilepaths:
+        conf.action.scope.incl parseEnum[SyncKind]($opt)
+        isActionOpt = true
       else:
         discard
     of actUuid:
@@ -410,15 +460,9 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
-  of actLint:
-    discard
   of actSync:
-    if result.action.offline and result.action.probSpecsDir.len == 0:
-      showError(&"'{list(optSyncOffline)}' was given without passing " &
-                &"'{list(optSyncProbSpecsDir)}'")
-  of actUuid:
-    discard
-  of actGenerate:
-    discard
-  of actInfo:
+    # If the user does not specify a syncing scope, operate on all data kinds.
+    if result.action.scope.len == 0:
+      result.action.scope = {SyncKind.low .. SyncKind.high}
+  of actLint, actUuid, actGenerate, actInfo:
     discard
