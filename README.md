@@ -226,12 +226,25 @@ The `sync` command is useful when adding a new exercise to a track. If you are a
 
 ## `configlet fmt`
 
-Every Concept Exercise and Practice Exercise on an Exercism track must have a `.meta/config.json` file.
-To ensure that each of these files is in the canonical form, you can use the `configlet fmt` command.
+An Exercism track repo has many JSON files, including:
 
-A plain `configlet fmt` makes no changes to the track, and checks the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
+- The track `config.json` file.
 
-To print a list of paths for which there is not already a formatted exercise `.meta/config.json` file (exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
+- For each concept, a `.meta/config.json` and `links.json` file.
+
+- For each Concept Exercise or Practice Exercise, a `.meta/config.json` file.
+
+These files are more readable if they have a consistent formatting Exercism-wide,
+and so configlet has a `fmt` command for rewriting a track's JSON files in a canonical form.
+
+The `fmt` command currently only operates on the exercise `.meta/config.json` files,
+but it is likely to operate on all the track JSON files in the future.
+
+A plain `configlet fmt` makes no changes to the track,
+and checks the formatting of the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
+
+To print a list of paths for which there is not already a formatted exercise `.meta/config.json` file
+(exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
 
 ```
 $ configlet fmt
@@ -256,21 +269,23 @@ For example, to non-interactively write the formatted config file for the `prime
 $ configlet fmt -uy -e prime-factors
 ```
 
-"Formatting" or "rewriting in the canonical form" means:
+When writing JSON files, `configlet fmt` will:
 
 - Write the key/value pairs in the canonical order.
 
-- Use two spaces for indentation, and use a separate line for each item in a JSON array/object.
+- Use two spaces for indentation.
 
-- Strip key/value pairs for keys that are optional and have empty values.
-  For example, `contributors: []` is removed.
+- Use a separate line for each item in a JSON array, and each key in a JSON object.
 
-- Strip `test_runner: true` for Practice Exercise config files.
+- Remove key/value pairs for keys that are optional and have empty values.
+  For example, `"source": ""` is removed.
+
+- Remove `"test_runner": true` from Practice Exercise config files.
   This is an optional key - the spec says that an omitted `test_runner` key implies the value `true`.
 
-- When there is more than one key/value pair with the same name, keep only the final one.
+- When a JSON object has more than one key/value pair with some key name, keep only the final one.
 
-The canonical order is:
+The canonical key order for an exercise `.meta/config.json` file is:
 
 ```
 - authors
@@ -294,7 +309,8 @@ The canonical order is:
 where the square brackets indicate that the enclosed key is optional.
 
 Note that `configlet fmt` only operates on exercises that exist in the track-level `config.json` file.
-Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file, please add the exercise to the track-level `config.json` file first.
+Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file,
+please add the exercise to the track-level `config.json` file first.
 If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
 
 The exit code is 0 when every seen exercise has a formatted `.meta/config.json` file when configlet exits, and 1 otherwise.
