@@ -2,11 +2,6 @@ import std/[os, parseutils, strformat, strutils, terminal]
 import pkg/cligen/parseopt3
 
 type
-  Verbosity* = enum
-    verQuiet = "quiet"
-    verNormal = "normal"
-    verDetailed = "detailed"
-
   ActionKind* = enum
     actNil = "nil"
     actFmt = "fmt"
@@ -29,7 +24,7 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil:
+    of actNil, actGenerate, actInfo, actLint:
       discard
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
@@ -38,12 +33,6 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
-    of actLint:
-      discard
     of actSync:
       exercise*: string
       probSpecsDir*: string
@@ -54,6 +43,11 @@ type
       tests*: TestsMode
     of actUuid:
       num*: int
+
+  Verbosity* = enum
+    verQuiet = "quiet"
+    verNormal = "normal"
+    verDetailed = "detailed"
 
   Conf* = object
     action*: Action
@@ -119,10 +113,10 @@ func camelToKebab(s: string): string =
   result = newStringOfCap(s.len + 2)
   for c in s:
     if c in {'A'..'Z'}:
-      result &= '-'
-      result &= toLowerAscii(c)
+      result.add '-'
+      result.add toLowerAscii(c)
     else:
-      result &= c
+      result.add c
 
 func list*(opt: Opt): string =
   if short[opt] == '_':
@@ -137,8 +131,8 @@ func genHelpText: string =
     ## Returns a string that describes the allowed values for an enum `T`.
     result = "Allowed values: "
     for val in T:
-      result &= &"{($val)[0]}"
-      result &= &"[{($val)[1 .. ^1]}], "
+      result.add &"{($val)[0]}"
+      result.add &"[{($val)[1 .. ^1]}], "
     setLen(result, result.len - 2)
 
   func genSyntaxStrings: tuple[syntax: array[Opt, string], maxLen: int] =
@@ -224,18 +218,18 @@ func genHelpText: string =
 
   for action in ActionKind:
     if action != actNil:
-      result &= &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
+      result.add &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
     if actionKind notin {actNil, actLint, actGenerate, actInfo}:
-      result &= &"\nOptions for {actionKind}:\n"
+      result.add &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
@@ -256,13 +250,13 @@ func genHelpText: string =
               &"Auto-confirm the prompt from --{$optFmtSyncUpdate}"
             else:
               descriptions[opt]
-          result &= alignLeft(syntax[opt], maxLen) & desc & "\n"
+          result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
-  result &= &"\nGlobal options:\n"
+  result.add &"\nGlobal options:\n"
   for opt in Opt:
     if opt notin optSeen:
-      result &= alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+      result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
@@ -322,15 +316,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
 func initAction*(actionKind: ActionKind, probSpecsDir = "",
                  scope: set[SyncKind] = {}): Action =
   case actionKind
-  of actNil:
-    Action(kind: actionKind)
-  of actFmt:
-    Action(kind: actionKind)
-  of actGenerate:
-    Action(kind: actionKind)
-  of actInfo:
-    Action(kind: actionKind)
-  of actLint:
+  of actNil, actFmt, actGenerate, actInfo, actLint:
     Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
@@ -452,7 +438,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil:
+    of actNil, actGenerate, actInfo, actLint:
       discard
     of actFmt:
       case opt
@@ -464,12 +450,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(yesFmt, true)
       else:
         discard
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
-    of actLint:
-      discard
     of actSync:
       case opt
       of optFmtSyncExercise:
@@ -526,9 +506,9 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
+  of actFmt, actGenerate, actInfo, actLint, actUuid:
+    discard
   of actSync:
     # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-  of actFmt, actGenerate, actInfo, actLint, actUuid:
-    discard
