@@ -337,8 +337,8 @@ proc parseActionKind(key: string): ActionKind =
   try:
     result = parseEnum[ActionKind](keyNormalized)
   except ValueError:
-    if keyNormalized == "format": # Silently accept `configlet format`.
-      result = actFmt
+    if keyNormalized == "format":
+      showError(&"invalid command: '{key}'\nDid you mean 'fmt'?")
     else:
       showError(&"invalid command: '{key}'")
 
