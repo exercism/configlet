@@ -1,5 +1,6 @@
 import "."/[
   test_binary,
+  test_fmt,
   test_json,
   test_lint,
   test_probspecs,

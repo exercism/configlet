@@ -225,8 +225,8 @@ func renameHook*(e: var (ConceptExerciseConfig | PracticeExerciseConfig); key: s
   ##
   ## We want to record the key order so that `configlet sync` can write the
   ## keys in the same order that it saw them, so we can minimize noise in diffs
-  ## and PRs. To instead format the JSON files without syncing, the user will
-  ## be able to run `configlet fmt`.
+  ## and PRs. To instead format the JSON files without syncing, the user should
+  ## run `configlet fmt`.
   ##
   ## With this func, we record the original key order as we do a single pass to
   ## parse the JSON, even though jsony tries not compromise on speed, and
@@ -330,12 +330,15 @@ func removeComma(s: var string) =
 type
   PrettyMode* = enum
     pmSync
+    pmFmt
 
 func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
                    prettyMode: PrettyMode): seq[FilesKey] =
   let fkEx = when val is ConceptExerciseFiles: fkExemplar else: fkExample
-  if val.originalKeyOrder.len == 0:
+  if prettyMode == pmFmt or val.originalKeyOrder.len == 0:
     result = @[fkSolution, fkTest, fkEx]
+    if prettyMode == pmFmt and val.editor.len > 0:
+      result.add fkEditor
   else:
     result = val.originalKeyOrder
     # If `solution` is missing, write it first.
@@ -432,10 +435,36 @@ func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConf
         i
       result.insert(eckBlurb, insertionIndex)
 
+func keyOrderForFmt(e: ConceptExerciseConfig |
+                       PracticeExerciseConfig): seq[ExerciseConfigKey] =
+  result = @[eckAuthors]
+  if e.contributors.isSome() and e.contributors.get().len > 0:
+    result.add eckContributors
+  result.add eckFiles
+  if e.language_versions.len > 0:
+    result.add eckLanguageVersions
+  when e is ConceptExerciseConfig:
+    if e.forked_from.isSome() and e.forked_from.get().len > 0:
+      result.add eckForkedFrom
+    if e.icon.len > 0:
+      result.add eckIcon
+  when e is PracticeExerciseConfig:
+    # Strips `"test_runner": true`.
+    if e.test_runner.isSome() and not e.test_runner.get():
+      result.add eckTestRunner
+  result.add eckBlurb
+  if e.source.len > 0:
+    result.add eckSource
+  if e.source_url.len > 0:
+    result.add eckSourceUrl
+  if e.custom.isSome() and e.custom.get().len > 0:
+    result.add eckCustom
+
 proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
              prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
   ## - the original key order if `prettyMode` is `pmSync`.
+  ## - the canonical key order if `prettyMode` is `pmFmt`.
   ##
   ## Note that `pmSync` creates required keys if they are missing. For
   ## example, if an exercise `.meta/config.json` file is missing, or lacks a
@@ -451,6 +480,8 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     case prettyMode
     of pmSync:
       keyOrderForSync(e.originalKeyOrder)
+    of pmFmt:
+      keyOrderForFmt(e)
 
   result = newStringOfCap(1000)
   result.add '{'

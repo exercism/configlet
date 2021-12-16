@@ -12,9 +12,9 @@ proc validate(conf: Conf) =
   if conf.action.update:
     if conf.action.yes and skTests in conf.action.scope:
       let msg = fmt"""
-        '{list(optSyncYes)}' was provided to non-interactively update, but the tests updating mode is still 'choose'.
+        '{list(optFmtSyncYes)}' was provided to non-interactively update, but the tests updating mode is still 'choose'.
         You can either:
-        - remove '{list(optSyncYes)}', and update by confirming prompts
+        - remove '{list(optFmtSyncYes)}', and update by confirming prompts
         - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
         - or add '--tests include' or '--tests exclude' to non-interactively include/exclude missing tests
         If no syncing scope option is provided, configlet uses the full syncing scope.
@@ -33,25 +33,32 @@ proc validate(conf: Conf) =
           showError(msg)
 
 type
-  TrackExerciseSlugs = object
-    `concept`: seq[Slug]
-    practice: seq[Slug]
+  TrackExerciseSlugs* = object
+    `concept`*: seq[Slug]
+    practice*: seq[Slug]
 
-func init(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
+func init*(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
   T(
     `concept`: getSlugs(exercises.`concept`),
     practice: getSlugs(exercises.practice)
   )
 
-proc getSlugs(exercises: Exercises, conf: Conf,
-              trackConfigPath: string): TrackExerciseSlugs =
+proc getSlugs*(exercises: Exercises, conf: Conf,
+               trackConfigPath: string): TrackExerciseSlugs =
   ## Returns the slugs of Concept Exercises and Practice Exercises in
-  ## `exercises`. If `conf.action.exercise` has a non-zero length, returns only
-  ## that one slug if the given exercise was found on the track.
+  ## `exercises`. If `conf.action.exercise(Fmt)` has a non-zero length, returns
+  ## only that one slug if the given exercise was found on the track.
   ##
   ## If that exercise was not found, prints an error and exits.
   result = TrackExerciseSlugs.init(exercises)
-  let userExercise = Slug(conf.action.exercise)
+  let userExercise =
+    case conf.action.kind
+    of actFmt:
+      Slug(conf.action.exerciseFmt)
+    of actSync:
+      Slug(conf.action.exercise)
+    else:
+      Slug("")
   if userExercise.len > 0:
     if userExercise in result.`concept`:
       result.`concept` = @[userExercise]
