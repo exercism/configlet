@@ -10,11 +10,11 @@ type
   ActionKind* = enum
     actNil = "nil"
     actFmt = "fmt"
+    actGenerate = "generate"
+    actInfo = "info"
     actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
-    actGenerate = "generate"
-    actInfo = "info"
 
   SyncKind* = enum
     skDocs = "docs"
@@ -38,6 +38,10 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
+    of actGenerate:
+      discard
+    of actInfo:
+      discard
     of actLint:
       discard
     of actSync:
@@ -50,10 +54,6 @@ type
       tests*: TestsMode
     of actUuid:
       num*: int
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
 
   Conf* = object
     action*: Action
@@ -169,8 +169,27 @@ func genHelpText: string =
       result.syntax[opt] = optText
       result.maxLen = max(result.maxLen, optText.len)
 
+  func getLongestActionLen: int =
+    result = -1
+    for actionKind in ActionKind:
+      result = max(result, actionKind.`$`.len)
+
+  const longestActionLen = getLongestActionLen()
+  const paddingAction = repeat(' ', longestActionLen + 4)
+
+  const actionDescriptions: array[ActionKind, string] = [
+    actNil: "",
+    actFmt: "Format the exercise 'meta/config.json' files",
+    actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
+    actInfo: "Print some information about the track",
+    actLint: "Check the track configuration for correctness",
+    actSync: "Check or update Practice Exercise docs, metadata, and tests from 'problem-specifications'.\n" &
+             &"{paddingAction}Check or populate missing 'files' values for Concept/Practice Exercises from the track 'config.json'.",
+    actUuid: "Output new (version 4) UUIDs, suitable for the value of a 'uuid' key",
+  ]
+
   const (syntax, maxLen) = genSyntaxStrings()
-  const padding = repeat(' ', maxLen)
+  const paddingOpt = repeat(' ', maxLen)
 
   # For some options that are common between commands, we want different
   # descriptions in the help message. But we currently use `parseEnum` to parse
@@ -184,7 +203,7 @@ func genHelpText: string =
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
-                  &"{padding}{allowedValues(Verbosity)} (default: normal)",
+                  &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
@@ -196,18 +215,16 @@ func genHelpText: string =
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
     optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
-                  &"{padding}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
-                  &"{padding}{allowedValues(TestsMode)} (default: choose)",
+                  &"{paddingOpt}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
+                  &"{paddingOpt}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to generate",
   ]
 
-  result = "Commands:\n  "
+  result = "Commands:\n"
 
   for action in ActionKind:
     if action != actNil:
-      result &= $action & ", "
-  setLen(result, result.len - 2)
-  result &= "\n"
+      result &= &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
 
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
@@ -309,16 +326,16 @@ func initAction*(actionKind: ActionKind, probSpecsDir = "",
     Action(kind: actionKind)
   of actFmt:
     Action(kind: actionKind)
+  of actGenerate:
+    Action(kind: actionKind)
+  of actInfo:
+    Action(kind: actionKind)
   of actLint:
     Action(kind: actionKind)
   of actSync:
     Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
   of actUuid:
     Action(kind: actionKind, num: 1)
-  of actGenerate:
-    Action(kind: actionKind)
-  of actInfo:
-    Action(kind: actionKind)
 
 func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
                verbosity = verNormal): Conf =
@@ -447,6 +464,10 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(yesFmt, true)
       else:
         discard
+    of actGenerate:
+      discard
+    of actInfo:
+      discard
     of actLint:
       discard
     of actSync:
@@ -480,10 +501,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(num, num)
       else:
         discard
-    of actGenerate:
-      discard
-    of actInfo:
-      discard
 
   if not isGlobalOpt and not isActionOpt:
     case conf.action.kind
@@ -513,5 +530,5 @@ proc processCmdLine*: Conf =
     # If the user does not specify a syncing scope, operate on all data kinds.
     if result.action.scope.len == 0:
       result.action.scope = {SyncKind.low .. SyncKind.high}
-  of actFmt, actLint, actUuid, actGenerate, actInfo:
+  of actFmt, actGenerate, actInfo, actLint, actUuid:
     discard
