@@ -1,5 +1,5 @@
 # This file is minimally adapted from this version in the Nim standard library:
-# https://github.com/nim-lang/Nim/blob/58080525a1dc/lib/pure/json.nim
+# https://github.com/nim-lang/Nim/blob/fce89cb60a34/lib/pure/json.nim
 # The standard library version is lenient: it silently allows a trailing comma.
 # The below version is stricter: it raises a `JsonParsingError` for a trailing
 # comma.
@@ -454,7 +454,7 @@ macro `%*`*(x: untyped): untyped =
   ## `%` for every element.
   result = toJsonImpl(x)
 
-proc `==`*(a, b: JsonNode): bool =
+proc `==`*(a, b: JsonNode): bool {.noSideEffect.} =
   ## Check two nodes for equality
   if a.isNil:
     if b.isNil: return true
@@ -481,12 +481,16 @@ proc `==`*(a, b: JsonNode): bool =
       if a.fields.len != b.fields.len: return false
       for key, val in a.fields:
         if not b.fields.hasKey(key): return false
-        if b.fields[key] != val: return false
+        when defined(nimHasEffectsOf):
+          {.noSideEffect.}:
+            if b.fields[key] != val: return false
+        else:
+          if b.fields[key] != val: return false
       result = true
 
 proc hash*(n: OrderedTable[string, JsonNode]): Hash {.noSideEffect.}
 
-proc hash*(n: JsonNode): Hash =
+proc hash*(n: JsonNode): Hash {.noSideEffect.} =
   ## Compute the hash for a JSON node
   case n.kind
   of JArray:
