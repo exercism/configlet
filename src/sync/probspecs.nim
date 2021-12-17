@@ -121,17 +121,16 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
-    if not conf.action.offline:
-      # Find the name of the remote that points to upstream. Don't assume the
-      # remote is called 'upstream'.
-      # Exit if the repo has no remote that points to upstream.
-      const upstreamHost = "github.com"
-      const upstreamLocation = "exercism/problem-specifications"
-      let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
+    # Find the name of the remote that points to upstream. Don't assume the
+    # remote is called 'upstream'.
+    # Exit if the repo has no remote that points to upstream.
+    const upstreamHost = "github.com"
+    const upstreamLocation = "exercism/problem-specifications"
+    let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
+    if not conf.action.offline:
       # For now, just exit with an error if the HEAD is not up-to-date with
       # upstream, even if it's possible to do a fast-forward merge.
-
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                        &"failed to fetch `{mainBranchName}` in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
