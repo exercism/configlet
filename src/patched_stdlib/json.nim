@@ -1,5 +1,5 @@
 # This file is minimally adapted from this version in the Nim standard library:
-# https://github.com/nim-lang/Nim/blob/fce89cb60a34/lib/pure/json.nim
+# https://github.com/nim-lang/Nim/blob/c17baaefbcff/lib/pure/json.nim
 # The standard library version is lenient: it silently allows a trailing comma.
 # The below version is stricter: it raises a `JsonParsingError` for a trailing
 # comma.
@@ -218,6 +218,8 @@ type
       fields*: OrderedTable[string, JsonNode]
     of JArray:
       elems*: seq[JsonNode]
+
+const DepthLimit = 1000
 
 proc newJString*(s: string): JsonNode =
   ## Creates a new `JString JsonNode`.
@@ -866,7 +868,7 @@ iterator mpairs*(node: var JsonNode): tuple[key: string, val: var JsonNode] =
   for key, val in mpairs(node.fields):
     yield (key, val)
 
-proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
+proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool, depth = 0): JsonNode =
   ## Parses JSON from a JSON Parser `p`.
   case p.tok
   of tkString:
@@ -902,6 +904,8 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
     result = newJNull()
     discard getTok(p)
   of tkCurlyLe:
+    if depth > DepthLimit:
+      raiseParseErr(p, "}")
     result = newJObject()
     discard getTok(p)
     while p.tok != tkCurlyRi:
@@ -910,7 +914,7 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
       var key = p.a
       discard getTok(p)
       eat(p, tkColon)
-      var val = parseJson(p, rawIntegers, rawFloats)
+      var val = parseJson(p, rawIntegers, rawFloats, depth+1)
       result[key] = val
       if p.tok != tkComma: break
       discard getTok(p)
@@ -919,10 +923,12 @@ proc parseJson(p: var JsonParser; rawIntegers, rawFloats: bool): JsonNode =
         raiseParseErr(p, "found trailing comma. } or key/value pair")
     eat(p, tkCurlyRi)
   of tkBracketLe:
+    if depth > DepthLimit:
+      raiseParseErr(p, "]")
     result = newJArray()
     discard getTok(p)
     while p.tok != tkBracketRi:
-      result.add(parseJson(p, rawIntegers, rawFloats))
+      result.add(parseJson(p, rawIntegers, rawFloats, depth+1))
       if p.tok != tkComma: break
       discard getTok(p)
       # Raise `JsonParsingError` for a trailing comma, unlike `std/json`
