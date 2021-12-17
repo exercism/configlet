@@ -111,6 +111,8 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
     showError("the given problem-specifications directory does not exist: " &
               &"'{probSpecsDir}'")
 
+  # Validate the `problem-specifications` repo without checking the ref of the
+  # root commit, allowing the `--prob-specs-dir` location to be a shallow clone.
   withDir probSpecsDir.string:
     # Exit if the given directory is not a git repo.
     discard gitCheck(0, ["rev-parse"], "the given problem-specifications " &
