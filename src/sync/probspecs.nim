@@ -100,7 +100,7 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
             &"the given problem-specifications directory: '{probSpecsDir}'")
 
 proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
-  ## Raises an error if the given `probSpecsRepo` is not a valid
+  ## Raises an error if the given `probSpecsDir` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
