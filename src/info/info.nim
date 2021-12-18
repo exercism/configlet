@@ -109,11 +109,11 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      probSpecsSlugs: HashSet[string]): string =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
-  result = show(unimplementedProbSpecsSlugs,
-      &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
-       "`exercism/problem-specifications` that are neither implemented, nor " &
-       "deprecated upstream, nor in the track config " &
-       "`exercises.foregone` array:")
+  let msg =
+    &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
+     "`exercism/problem-specifications` that are neither implemented,\n" &
+     "nor deprecated upstream, nor in the track config `exercises.foregone` array:"
+  result = show(unimplementedProbSpecsSlugs, msg)
   stripLineEnd(result)
 
 func count(exercises: seq[ConceptExercise] |
