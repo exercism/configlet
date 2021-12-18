@@ -1,22 +1,41 @@
-import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
+import std/[algorithm, os, sequtils, sets, strformat, strscans, strutils,
+            terminal]
 import ".."/[cli, lint/track_config]
 
-proc toHashSetOfLines(path: static string): HashSet[string] =
-  ## Reads the file at `path` at compile-time, and returns a `HashSet` of every
-  ## line that is both:
-  ## - non-empty, and
-  ## - does not begin with the '#' character
-  result = initHashSet[string]()
+type
+  ProbSpecsExercises = object
+    withCanonicalData: HashSet[string]
+    withoutCanonicalData: HashSet[string]
+    deprecated: HashSet[string]
+
+proc getPsExercises(path: static string): ProbSpecsExercises =
+  ## Reads the slugs file at `path` at compile-time, and returns an object
+  ## containing every exercise in `exercism/problem-specifications`, grouped by
+  ## kind.
   let contents = staticRead(path)
+  var header: string
+  result = ProbSpecsExercises()
   for line in contents.splitLines():
     if line.len > 0:
       if line[0] != '#':
-        result.incl line
+        if line.scanf("[$+]$.", header):
+          discard
+        else:
+          case header
+          of "with-canonical-data":
+            result.withCanonicalData.incl line
+          of "without-canonical-data":
+            result.withoutCanonicalData.incl line
+          of "deprecated":
+            result.deprecated.incl line
+          else:
+            doAssert false
 
 proc getProbSpecsSlugs: HashSet[string] =
   # TODO: automatically update this at build-time?
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_slugs.txt"
-  result = toHashSetOfLines(slugsPath)
+  let psExercises = getPsExercises(slugsPath)
+  result = psExercises.withCanonicalData + psExercises.withoutCanonicalData
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the `slug` of every concept in `concepts`.
@@ -90,10 +109,12 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      probSpecsSlugs: HashSet[string]): string =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
   let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
-  result = show(unimplementedProbSpecsSlugs,
-      &"There are {unimplementedProbSpecsSlugs.len} exercises from " &
-       "`exercism/problem-specifications` that are neither implemented nor " &
-       "in the track config `exercises.foregone` array:")
+  let msg =
+    &"There are {unimplementedProbSpecsSlugs.len} non-deprecated exercises " &
+     "in `exercism/problem-specifications` that\n" &
+     "are both unimplemented and not in the track config `exercises.foregone` array:"
+  result = show(unimplementedProbSpecsSlugs, msg)
+
   stripLineEnd(result)
 
 func count(exercises: seq[ConceptExercise] |
