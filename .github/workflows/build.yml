@@ -34,7 +34,7 @@ jobs:
         with:
           fetch-depth: 0 # Allows using `git log` to set initial release notes.
 
-      - name: On Linux, install musl
+      - name: On Linux, install Zig
         if: matrix.os == 'linux'
         run: ./.github/bin/linux-install-build-tools
 

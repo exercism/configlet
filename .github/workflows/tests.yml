@@ -37,7 +37,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 
-      - name: On Linux, install musl
+      - name: On Linux, install Zig
         if: matrix.os == 'linux'
         run: ./.github/bin/linux-install-build-tools
 
