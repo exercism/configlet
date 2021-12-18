@@ -1,4 +1,4 @@
-import std/[algorithm, os, strscans, sequtils, sets, strformat, strutils,
+import std/[algorithm, os, sequtils, sets, strformat, strscans, strutils,
             terminal]
 import ".."/[cli, lint/track_config]
 
