@@ -118,7 +118,7 @@ yacht
 zebra-puzzle
 zipper
 
-[no-canonical-data]
+[without-canonical-data]
 bank-account
 dot-dsl
 error-handling

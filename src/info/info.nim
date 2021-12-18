@@ -5,7 +5,7 @@ import ".."/[cli, lint/track_config]
 type
   ProbSpecsExercises = object
     withCanonicalData: HashSet[string]
-    noCanonicalData: HashSet[string]
+    withoutCanonicalData: HashSet[string]
     deprecated: HashSet[string]
 
 proc getPsExercises(path: static string): ProbSpecsExercises =
@@ -24,8 +24,8 @@ proc getPsExercises(path: static string): ProbSpecsExercises =
           case header
           of "with-canonical-data":
             result.withCanonicalData.incl line
-          of "no-canonical-data":
-            result.noCanonicalData.incl line
+          of "without-canonical-data":
+            result.withoutCanonicalData.incl line
           of "deprecated":
             result.deprecated.incl line
           else:
@@ -35,7 +35,7 @@ proc getProbSpecsSlugs: HashSet[string] =
   # TODO: automatically update this at build-time?
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_slugs.txt"
   let psExercises = getPsExercises(slugsPath)
-  result = psExercises.withCanonicalData + psExercises.noCanonicalData
+  result = psExercises.withCanonicalData + psExercises.withoutCanonicalData
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the `slug` of every concept in `concepts`.
