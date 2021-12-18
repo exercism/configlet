@@ -1,4 +1,5 @@
 # Last updated: 2021-12-18T05:00:00Z
+# problem-specifications commit: ba9e4ed606f1ecb4206e1ee48471a37999cdc0cf
 
 [with-canonical-data]
 accumulate
