@@ -25,3 +25,10 @@ task test, "Runs the test suite":
   if not fileExists("nimble.paths"):
     exec "nimble setup"
   exec "nim r ./tests/all_tests.nim"
+
+# Strip the binary when it is produced by `zig cc`.
+when defined(linux):
+  after build:
+    if existsEnv("GITHUB_ACTIONS") and findExe("zigcc").len > 0:
+      echo "stripping binary..."
+      exec "strip -s ./configlet"
