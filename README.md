@@ -368,4 +368,4 @@ Running one of these scripts downloads the latest version of configlet to the `b
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/exercism/configlet.
+Bug reports and pull requests are welcome on GitHub at <https://github.com/exercism/configlet>.
