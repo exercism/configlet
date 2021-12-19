@@ -1,5 +1,5 @@
-import std/[algorithm, os, sequtils, sets, strformat, strscans, strutils,
-            terminal]
+import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
+import pkg/jsony
 import ".."/[cli, lint/track_config]
 
 type
@@ -8,33 +8,22 @@ type
     withoutCanonicalData: HashSet[string]
     deprecated: HashSet[string]
 
-proc getPsExercises(path: static string): ProbSpecsExercises =
+  ProbSpecsState = object
+    lastUpdated: string
+    problemSpecificationsCommitRef: string
+    exercises: ProbSpecsExercises
+
+proc getPsState(path: static string): ProbSpecsState =
   ## Reads the slugs file at `path` at compile-time, and returns an object
   ## containing every exercise in `exercism/problem-specifications`, grouped by
   ## kind.
   let contents = staticRead(path)
-  var header: string
-  result = ProbSpecsExercises()
-  for line in contents.splitLines():
-    if line.len > 0:
-      if line[0] != '#':
-        if line.scanf("[$+]$.", header):
-          discard
-        else:
-          case header
-          of "with-canonical-data":
-            result.withCanonicalData.incl line
-          of "without-canonical-data":
-            result.withoutCanonicalData.incl line
-          of "deprecated":
-            result.deprecated.incl line
-          else:
-            doAssert false
+  contents.fromJson(ProbSpecsState)
 
 proc getProbSpecsSlugs: HashSet[string] =
   # TODO: automatically update this at build-time?
-  const slugsPath = currentSourcePath().parentDir() / "prob_specs_slugs.txt"
-  let psExercises = getPsExercises(slugsPath)
+  const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
+  let psExercises = getPsState(slugsPath).exercises
   result = psExercises.withCanonicalData + psExercises.withoutCanonicalData
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
