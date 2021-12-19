@@ -427,7 +427,7 @@ proc checkForCycle(prerequisitesByConcept: Table[string, seq[string]];
   if hadCycle:
     return
 
-  let updatedPrereqPath = prereqPath & @[currentConcept]
+  let updatedPrereqPath = prereqPath & currentConcept
   if currentConcept in prereqPath:
     var formattedCycle = &"{q updatedPrereqPath[0]} depends on {q updatedPrereqPath[1]}"
     for i in 1..prereqPath.high:
