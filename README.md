@@ -65,6 +65,7 @@ There are three kinds of data that can be updated from `problem-specifications`:
 There is also one kind of data that can be populated from the track-level `config.json` file: filepaths in exercise config files.
 
 We describe the checking and updating of these data kinds in individual sections below, but as a quick summary:
+
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file. Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, please add the exercise to the track-level `config.json` file first. If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
 - A plain `configlet sync` makes no changes to the track, and checks every data kind for every exercise.
 - To operate on a subset of data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
@@ -222,6 +223,7 @@ configlet sync --filepaths -uy -e prime-factors
 ### Using `sync` when adding a new exercise to a track
 
 The `sync` command is useful when adding a new exercise to a track. If you are adding a Practice Exercise named `foo` that exists in `problem-specifications`, one possible workflow is:
+
 1. Manually add an entry to the track-level `config.json` file for the exercise `foo`. This makes the exercise visible to `configlet sync`.
 1. Run `configlet sync --docs --filepaths --metadata -uy -e foo` to create the exercise's documentation, and a starter `.meta/config.json` file with populated `files`, `blurb`, and perhaps `source` and `source_url` values.
 1. Edit the exercise `.meta/config.json` file as desired. For example, add yourself to the `authors` array.
