@@ -6,7 +6,7 @@ This is a development version of Configlet for use with v3 of Exercism.
 
 The application is a single binary and can be used as follows:
 
-```
+```text
 Usage:
   configlet [global-options] <command> [command-options]
 
@@ -84,26 +84,26 @@ A Practice Exercise that is derived from the `problem-specifications` repo must 
 
 To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
 
-```
+```shell
 configlet sync --docs
 ```
 
 To interactively update the docs for every Practice Exercise, add the `--update` option (or `-u` for short):
 
-```
+```shell
 configlet sync --docs --update
 ```
 
 To non-interactively update the docs for every Practice Exercise, add the `--yes` option (or `-y` for short):
 
-```
+```shell
 configlet sync --docs --update --yes
 ```
 
 To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively update the docs for the `prime-factors` exercise:
 
-```
+```shell
 configlet sync --docs -uy -e prime-factors
 ```
 
@@ -114,26 +114,26 @@ For a Practice Exercise that is derived from the `problem-specifications` repo, 
 
 To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
 
-```
+```shell
 configlet sync --metadata
 ```
 
 To interactively update the metadata for every Practice Exercise, add the `--update` option (or `-u` for short):
 
-```
+```shell
 configlet sync --metadata --update
 ```
 
 To non-interactively update the metadata for every Practice Exercise, add the `--yes` option (or `-y` for short):
 
-```
+```shell
 configlet sync --metadata --update --yes
 ```
 
 To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively update the metadata for the `prime-factors` exercise:
 
-```
+```shell
 configlet sync --metadata -uy -e prime-factors
 ```
 
@@ -171,13 +171,13 @@ In this case, the track has chosen to implement two of the three available tests
 
 To check every Practice Exercise `tests.toml` file for available tests updates (exiting with a non-zero exit code if there is at least one test case that appears in the exercise's canonical data, but not in the `tests.toml`):
 
-```
+```shell
 configlet sync --tests
 ```
 
 To interactively update the `tests.toml` file for every Practice Exercise, add the `--update` option:
 
-```
+```shell
 configlet sync --tests --update
 ```
 
@@ -187,7 +187,7 @@ This means that you can terminate configlet at a prompt (for example, by pressin
 
 To non-interactively include every unseen test case, use `--tests include`. For example, to do so for an exercise named `prime-factors`:
 
-```
+```shell
 configlet sync --tests include -u -e prime-factors
 ```
 
@@ -201,7 +201,7 @@ Such filepaths usually follow a simple pattern, and so configlet can populate th
 
 To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that cannot be populated from the track-level `files` key):
 
-```
+```shell
 configlet sync --filepaths
 ```
 
@@ -209,13 +209,13 @@ configlet sync --filepaths
 
 To populate empty/missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
 
-```
+```shell
 configlet sync --filepaths --update
 ```
 
 To do this non-interactively and for a single exercise named `prime-factors`:
 
-```
+```shell
 configlet sync --filepaths -uy -e prime-factors
 ```
 
@@ -252,26 +252,26 @@ and checks the formatting of the `.meta/config.json` file for every Concept Exer
 To print a list of paths for which there is not already a formatted exercise `.meta/config.json` file
 (exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
 
-```
+```shell
 configlet fmt
 ```
 
 To be prompted to write formatted config files, add the `--update` option (or `-u` for short):
 
-```
+```shell
 configlet fmt --update
 ```
 
 To non-interactively write the formatted config files, add the `--yes` option (or `-y` for short):
 
-```
+```shell
 configlet fmt --update --yes
 ```
 
 To operate on a single exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively write the formatted config file for the `prime-factors` exercise:
 
-```
+```shell
 configlet fmt -uy -e prime-factors
 ```
 
@@ -293,7 +293,7 @@ When writing JSON files, `configlet fmt` will:
 
 The canonical key order for an exercise `.meta/config.json` file is:
 
-```
+```text
 - authors
 - [contributors]
 - files
@@ -325,13 +325,13 @@ The exit code is 0 when every seen exercise has a formatted `.meta/config.json` 
 
 Each exercise and concept has a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), which must only appear once across all of Exercism. It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must match the below regular expression:
 
-```
+```text
 ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
 ```
 
 You can run `configlet uuid` to output a new, appropriate UUID. There is also the `-n, --num` option for outputting multiple new UUIDs:
 
-```
+```console
 $ configlet uuid --num 5
 3823f890-be49-4700-baac-e19de8fda76f
 c12309a2-8bd6-4b9c-a511-e1ee4083f492
@@ -346,13 +346,13 @@ Each concept exercise and concept have an `introduction.md` file. If you want th
 
 Concept placeholders must use the following format:
 
-```
+```text
 %{concept:<slug>}
 ```
 
 For example, if the track has a concept named `floating-point-numbers` then an `introduction.md.tpl` file can contain:
 
-```
+```text
 %{concept:floating-point-numbers}
 ```
 
