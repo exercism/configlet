@@ -85,26 +85,26 @@ A Practice Exercise that is derived from the `problem-specifications` repo must 
 To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
 
 ```
-$ configlet sync --docs
+configlet sync --docs
 ```
 
 To interactively update the docs for every Practice Exercise, add the `--update` option (or `-u` for short):
 
 ```
-$ configlet sync --docs --update
+configlet sync --docs --update
 ```
 
 To non-interactively update the docs for every Practice Exercise, add the `--yes` option (or `-y` for short):
 
 ```
-$ configlet sync --docs --update --yes
+configlet sync --docs --update --yes
 ```
 
 To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively update the docs for the `prime-factors` exercise:
 
 ```
-$ configlet sync --docs -uy -e prime-factors
+configlet sync --docs -uy -e prime-factors
 ```
 
 ### Metadata
@@ -115,26 +115,26 @@ For a Practice Exercise that is derived from the `problem-specifications` repo, 
 To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
 
 ```
-$ configlet sync --metadata
+configlet sync --metadata
 ```
 
 To interactively update the metadata for every Practice Exercise, add the `--update` option (or `-u` for short):
 
 ```
-$ configlet sync --metadata --update
+configlet sync --metadata --update
 ```
 
 To non-interactively update the metadata for every Practice Exercise, add the `--yes` option (or `-y` for short):
 
 ```
-$ configlet sync --metadata --update --yes
+configlet sync --metadata --update --yes
 ```
 
 To operate on a single Practice Exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively update the metadata for the `prime-factors` exercise:
 
 ```
-$ configlet sync --metadata -uy -e prime-factors
+configlet sync --metadata -uy -e prime-factors
 ```
 
 ### Tests
@@ -172,13 +172,13 @@ In this case, the track has chosen to implement two of the three available tests
 To check every Practice Exercise `tests.toml` file for available tests updates (exiting with a non-zero exit code if there is at least one test case that appears in the exercise's canonical data, but not in the `tests.toml`):
 
 ```
-$ configlet sync --tests
+configlet sync --tests
 ```
 
 To interactively update the `tests.toml` file for every Practice Exercise, add the `--update` option:
 
 ```
-$ configlet sync --tests --update
+configlet sync --tests --update
 ```
 
 For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
@@ -188,7 +188,7 @@ This means that you can terminate configlet at a prompt (for example, by pressin
 To non-interactively include every unseen test case, use `--tests include`. For example, to do so for an exercise named `prime-factors`:
 
 ```
-$ configlet sync --tests include -u -e prime-factors
+configlet sync --tests include -u -e prime-factors
 ```
 
 Remember to actually implement these tests on the track!
@@ -202,7 +202,7 @@ Such filepaths usually follow a simple pattern, and so configlet can populate th
 To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that cannot be populated from the track-level `files` key):
 
 ```
-$ configlet sync --filepaths
+configlet sync --filepaths
 ```
 
 (Note that `configlet lint` will also produce an error when an exercise has a missing/empty `files` key.)
@@ -210,13 +210,13 @@ $ configlet sync --filepaths
 To populate empty/missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
 
 ```
-$ configlet sync --filepaths --update
+configlet sync --filepaths --update
 ```
 
 To do this non-interactively and for a single exercise named `prime-factors`:
 
 ```
-$ configlet sync --filepaths -uy -e prime-factors
+configlet sync --filepaths -uy -e prime-factors
 ```
 
 ### Using `sync` when adding a new exercise to a track
@@ -253,26 +253,26 @@ To print a list of paths for which there is not already a formatted exercise `.m
 (exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
 
 ```
-$ configlet fmt
+configlet fmt
 ```
 
 To be prompted to write formatted config files, add the `--update` option (or `-u` for short):
 
 ```
-$ configlet fmt --update
+configlet fmt --update
 ```
 
 To non-interactively write the formatted config files, add the `--yes` option (or `-y` for short):
 
 ```
-$ configlet fmt --update --yes
+configlet fmt --update --yes
 ```
 
 To operate on a single exercise, use the `--exercise` option (or `-e` for short).
 For example, to non-interactively write the formatted config file for the `prime-factors` exercise:
 
 ```
-$ configlet fmt -uy -e prime-factors
+configlet fmt -uy -e prime-factors
 ```
 
 When writing JSON files, `configlet fmt` will:
