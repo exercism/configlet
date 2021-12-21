@@ -30,5 +30,6 @@ task test, "Runs the test suite":
 when defined(linux):
   after build:
     if existsEnv("GITHUB_ACTIONS") and findExe("zigcc").len > 0:
+      exec "readelf -p .comment ./configlet"
       echo "stripping binary..."
-      exec "strip -s ./configlet"
+      exec "strip -s -R .comment ./configlet"
