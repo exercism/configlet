@@ -56,6 +56,6 @@ For more information on resolving the problems, please see the documentation:
     echo ""
     const msg = """
       Configlet produced at least one warning.
-      These warnings will become errors in a future configlet release (in January 2022).
+      These warnings might become errors in a future configlet release.
       For more information, please see the documentation:""".unindent()
     warn(msg, url, doubleFinalNewline = false)
