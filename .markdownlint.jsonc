@@ -1,0 +1,5 @@
+// For information on configuring markdownlint, see:
+// https://github.com/DavidAnson/markdownlint
+{
+    "MD013": false // Disables errors for long lines.
+}
