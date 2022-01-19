@@ -8,6 +8,8 @@ type
 
   ProbSpecsTestCase* = distinct JsonNode
 
+  ProbSpecsTestCases = seq[ProbSpecsTestCase]
+
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
 proc removeDir*(dir: ProbSpecsDir, checkDir = false) {.borrow.}
@@ -36,7 +38,7 @@ func isReimplementation*(testCase: ProbSpecsTestCase): bool =
 proc reimplements*(testCase: ProbSpecsTestCase): string =
   testCase["reimplements"].getStr()
 
-proc initProbSpecsTestCases(node: JsonNode, prefix = ""): seq[ProbSpecsTestCase] =
+proc init(T: typedesc[ProbSpecsTestCases], node: JsonNode, prefix = ""): T =
   ## Returns a seq of every individual test case in `node` (flattening). We
   ## alter each `description` value to indicate any nesting, which is OK because
   ## we only use the `description` for writing `tests.toml`.
@@ -52,7 +54,7 @@ proc initProbSpecsTestCases(node: JsonNode, prefix = ""): seq[ProbSpecsTestCase]
       else:
         prefix
     for childNode in node["cases"].getElems():
-      result.add initProbSpecsTestCases(childNode, prefix)
+      result.add ProbSpecsTestCases.init(childNode, prefix)
 
 proc grainsWorkaround(grainsPath: string): JsonNode =
   ## Parses the canonical data file for `grains`, replacing the too-large
@@ -63,17 +65,17 @@ proc grainsWorkaround(grainsPath: string): JsonNode =
     ("184467440737095516", "184467440737095516.0"))
   result = parseJson(sanitised)
 
-proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): seq[ProbSpecsTestCase] =
+proc parseProbSpecsTestCases(probSpecsExerciseDir: ProbSpecsExerciseDir): ProbSpecsTestCases =
   ## Parses the `canonical-data.json` file for the given exercise, and returns
   ## a seq of, essentially, the JsonNode for each test.
   let canonicalJsonPath = canonicalDataFile(probSpecsExerciseDir)
   if slug(probSpecsExerciseDir) == "grains":
-    canonicalJsonPath.grainsWorkaround().initProbSpecsTestCases()
+    ProbSpecsTestCases.init(canonicalJsonPath.grainsWorkaround())
   else:
-    canonicalJsonPath.parseFile().initProbSpecsTestCases()
+    ProbSpecsTestCases.init(canonicalJsonPath.parseFile())
 
 proc getCanonicalTests*(probSpecsDir: ProbSpecsDir,
-                        slug: string): seq[ProbSpecsTestCase] =
+                        slug: string): ProbSpecsTestCases =
   ## Returns a seq of the canonical tests for the exercise `slug` in
   ## `probSpecsDir`.
   let probSpecsExerciseDir = joinPath(probSpecsDir.string, "exercises",
