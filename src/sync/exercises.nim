@@ -24,16 +24,17 @@ type
     tests*: ExerciseTests
     testCases*: seq[ExerciseTestCase]
 
-func initExerciseTests: ExerciseTests =
-  ExerciseTests(
+func init(T: typedesc[ExerciseTests]): T =
+  T(
     included: initHashSet[string](),
     excluded: initHashSet[string](),
     missing: initHashSet[string](),
   )
 
-proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
-                       probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
-  result = initExerciseTests()
+proc init(T: typedesc[ExerciseTests],
+          practiceExerciseTests: PracticeExerciseTests,
+          probSpecsTestCases: seq[ProbSpecsTestCase]): T =
+  result = ExerciseTests.init()
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
     if uuid in practiceExerciseTests.included:
@@ -85,13 +86,13 @@ iterator findExercises*(conf: Conf, probSpecsDir: ProbSpecsDir): Exercise {.inli
       let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
       yield Exercise(
         slug: practiceExercise.slug,
-        tests: initExerciseTests(practiceExercise.tests, testCases),
+        tests: ExerciseTests.init(practiceExercise.tests, testCases),
         testCases: initExerciseTestCases(testCases),
       )
     else:
       yield Exercise(
         slug: practiceExercise.slug,
-        tests: initExerciseTests(),
+        tests: ExerciseTests.init(),
         testCases: @[],
       )
 
