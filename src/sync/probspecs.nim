@@ -145,11 +145,11 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
         showError("the given problem-specifications directory is not " &
                   &"up-to-date: '{probSpecsDir}'")
 
-proc initProbSpecsDir*(conf: Conf): ProbSpecsDir =
+proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
   if conf.action.probSpecsDir.len > 0:
-    result = ProbSpecsDir(conf.action.probSpecsDir)
+    result = T(conf.action.probSpecsDir)
     validate(result, conf)
   else:
-    result = ProbSpecsDir(getCurrentDir() / ".problem-specifications")
+    result = T(getCurrentDir() / ".problem-specifications")
     removeDir(result)
     cloneExercismRepo("problem-specifications", result.string, shallow = true)

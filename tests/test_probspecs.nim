@@ -32,7 +32,7 @@ proc main =
 
       let action = Action.init(actSync, probSpecsPath)
       let conf = Conf.init(action)
-      let probSpecsDir = initProbSpecsDir(conf)
+      let probSpecsDir = ProbSpecsDir.init(conf)
       let probSpecsExercises = getProbSpecsExercises(probSpecsDir)
 
       test "can return the exercises":
