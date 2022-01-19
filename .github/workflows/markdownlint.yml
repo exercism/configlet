@@ -1,0 +1,16 @@
+name: markdownlint
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  markdownlint:
+    name: Lint markdown files
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ec3a7ce113134d7a93b817d10a8272cb61118579 # 2.4.0
+
+      - name: Run markdownlint
+        uses: DavidAnson/markdownlint-cli2-action@75ca8bd12ca0eba81ae8ebdb07b6609632c2e025 # 4.0.0
+        with:
+          globs: "**/*.md"
