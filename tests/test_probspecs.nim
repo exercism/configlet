@@ -31,7 +31,7 @@ proc main =
         of psExisting: existingDir
 
       let action = Action.init(actSync, probSpecsPath)
-      let conf = initConf(action)
+      let conf = Conf.init(action)
       let probSpecsDir = initProbSpecsDir(conf)
       let probSpecsExercises = getProbSpecsExercises(probSpecsDir)
 

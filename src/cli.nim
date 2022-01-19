@@ -323,9 +323,9 @@ func init*(T: typedesc[Action], actionKind: ActionKind, probSpecsDir = "",
   of actUuid:
     T(kind: actionKind, num: 1)
 
-func initConf*(action = Action.init(actNil), trackDir = getCurrentDir(),
-               verbosity = verNormal): Conf =
-  result = Conf(
+func init*(T: typedesc[Conf], action = Action.init(actNil),
+           trackDir = getCurrentDir(), verbosity = verNormal): T =
+  T(
     action: action,
     trackDir: trackDir,
     verbosity: verbosity,
@@ -403,7 +403,7 @@ proc handleArgument(conf: var Conf; kind: CmdLineKind; key: string) =
   if conf.action.kind == actNil:
     let actionKind = parseActionKind(key)
     let action = Action.init(actionKind)
-    conf = initConf(action, conf.trackDir, conf.verbosity)
+    conf = Conf.init(action, conf.trackDir, conf.verbosity)
   else:
     showError(&"invalid argument for command '{conf.action.kind}': '{key}'")
 
@@ -491,7 +491,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
                 &"{formatOpt(kind, key)}")
 
 proc processCmdLine*: Conf =
-  result = initConf()
+  result = Conf.init()
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind
