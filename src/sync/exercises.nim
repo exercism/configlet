@@ -46,8 +46,8 @@ proc init(T: typedesc[ExerciseTests],
     else:
       result.missing.incl uuid
 
-proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
-  ExerciseTestCase(
+proc new(T: typedesc[ExerciseTestCase], testCase: ProbSpecsTestCase): T =
+  T(
     uuid: uuid(testCase),
     description: description(testCase),
     json: testCase,
@@ -68,7 +68,7 @@ proc init(T: typedesc[ExerciseTestCases],
   var hasReimplementation = false
 
   for i, testCase in testCases:
-    result[i] = newExerciseTestCase(testCase)
+    result[i] = ExerciseTestCase.new(testCase)
     if testCase.isReimplementation():
       hasReimplementation = true
 
