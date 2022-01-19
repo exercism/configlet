@@ -30,7 +30,7 @@ proc main =
         of psFresh: ""
         of psExisting: existingDir
 
-      let action = initAction(actSync, probSpecsPath)
+      let action = Action.init(actSync, probSpecsPath)
       let conf = initConf(action)
       let probSpecsDir = initProbSpecsDir(conf)
       let probSpecsExercises = getProbSpecsExercises(probSpecsDir)
