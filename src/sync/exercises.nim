@@ -35,7 +35,7 @@ func init(T: typedesc[ExerciseTests]): T =
 
 proc init(T: typedesc[ExerciseTests],
           practiceExerciseTests: PracticeExerciseTests,
-          probSpecsTestCases: seq[ProbSpecsTestCase]): T =
+          probSpecsTestCases: ProbSpecsTestCases): T =
   result = ExerciseTests.init()
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
@@ -53,7 +53,7 @@ proc new(T: typedesc[ExerciseTestCase], testCase: ProbSpecsTestCase): T =
     json: testCase,
   )
 
-proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
+proc getReimplementations(testCases: ProbSpecsTestCases): Table[string, string] =
   for testCase in testCases:
     if testCase.isReimplementation():
       result[testCase.uuid()] = testCase.reimplements()
@@ -62,8 +62,7 @@ func uuidToTestCase(testCases: ExerciseTestCases): Table[string, ExerciseTestCas
   for testCase in testCases:
     result[testCase.uuid] = testCase
 
-proc init(T: typedesc[ExerciseTestCases],
-          testCases: seq[ProbSpecsTestCase]): T =
+proc init(T: typedesc[ExerciseTestCases], testCases: ProbSpecsTestCases): T =
   result = newSeq[ExerciseTestCase](testCases.len)
   var hasReimplementation = false
 

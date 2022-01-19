@@ -8,7 +8,7 @@ type
 
   ProbSpecsTestCase* = distinct JsonNode
 
-  ProbSpecsTestCases = seq[ProbSpecsTestCase]
+  ProbSpecsTestCases* = seq[ProbSpecsTestCase]
 
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
