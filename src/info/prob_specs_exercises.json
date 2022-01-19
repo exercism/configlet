@@ -1,9 +1,8 @@
 {
-  "last_updated": "2021-12-18T05:00:00Z",
-  "problem_specifications_commit_ref": "ba9e4ed606f1ecb4206e1ee48471a37999cdc0cf",
+  "last_updated": "2022-01-17T05:00:00Z",
+  "problem_specifications_commit_ref": "574c14b34021cddca5e34f53c1326fafb80d28d8",
   "exercises": {
     "with_canonical_data": [
-      "accumulate",
       "acronym",
       "affine-cipher",
       "all-your-base",
@@ -135,6 +134,7 @@
       "tree-building"
     ],
     "deprecated": [
+      "accumulate",
       "binary",
       "counter",
       "hexadecimal",
