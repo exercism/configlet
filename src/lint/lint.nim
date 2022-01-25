@@ -22,9 +22,10 @@ proc allChecksPass(trackDir: Path): bool =
   result = allTrue(checks)
 
 proc lint*(conf: Conf) =
-  echo "The lint command is under development.\n" &
-       "Please re-run this command regularly to see if your track passes " &
-       "the latest linting rules.\n"
+  echo """
+    The lint command is under development.
+    Please re-run this command regularly to see if your track passes the latest linting rules.
+  """.unindent()
 
   let trackDir = Path(conf.trackDir)
 
@@ -32,24 +33,24 @@ proc lint*(conf: Conf) =
 
   if allChecksPass(trackDir):
     echo """
-Basic linting finished successfully:
-- config.json exists and is valid JSON
-- config.json has these valid fields:
-    language, slug, active, blurb, version, status, online_editor, key_features, tags
-- Every concept has the required .md files
-- Every concept has a valid links.json file
-- Every concept has a valid .meta/config.json file
-- Every concept exercise has the required .md files
-- Every concept exercise has a valid .meta/config.json file
-- Every practice exercise has the required .md files
-- Every practice exercise has a valid .meta/config.json file
-- Required track docs are present
-- Required shared exercise docs are present"""
+      Basic linting finished successfully:
+      - config.json exists and is valid JSON
+      - config.json has these valid fields:
+          language, slug, active, blurb, version, status, online_editor, key_features, tags
+      - Every concept has the required .md files
+      - Every concept has a valid links.json file
+      - Every concept has a valid .meta/config.json file
+      - Every concept exercise has the required .md files
+      - Every concept exercise has a valid .meta/config.json file
+      - Every practice exercise has the required .md files
+      - Every practice exercise has a valid .meta/config.json file
+      - Required track docs are present
+      - Required shared exercise docs are present""".dedent()
   else:
-    echo &"""
-Configlet detected at least one problem.
-For more information on resolving the problems, please see the documentation:
-{url}"""
+    echo fmt"""
+      Configlet detected at least one problem.
+      For more information on resolving the problems, please see the documentation:
+      {url}""".unindent()
     quit(1)
 
   if printedWarning:
