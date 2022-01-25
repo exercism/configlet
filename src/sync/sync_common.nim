@@ -490,20 +490,23 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckAuthors:
       result.addArray("authors", e.authors)
     of eckContributors:
-      result.addArray("contributors", e.contributors.get())
+      if e.contributors.isSome():
+        result.addArray("contributors", e.contributors.get())
     of eckFiles:
       result.addFiles(e.files, prettyMode)
     of eckLanguageVersions:
       result.addString("language_versions", e.language_versions)
     of eckForkedFrom:
       when e is ConceptExerciseConfig:
-        result.addArray("forked_from", e.forked_from.get())
+        if e.forked_from.isSome():
+          result.addArray("forked_from", e.forked_from.get())
     of eckIcon:
       when e is ConceptExerciseConfig:
         result.addString("icon", e.icon)
     of eckTestRunner:
       when e is PracticeExerciseConfig:
-        result.addBool("test_runner", e.test_runner.get())
+        if e.test_runner.isSome():
+          result.addBool("test_runner", e.test_runner.get())
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:
@@ -511,6 +514,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckSourceUrl:
       result.addString("source_url", e.source_url)
     of eckCustom:
-      result.addObject("custom", e.custom.get())
+      if e.custom.isSome():
+        result.addObject("custom", e.custom.get())
   result.removeComma()
   result.add "\n}\n"

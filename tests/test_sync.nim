@@ -303,6 +303,24 @@ proc testSyncCommon =
       check:
         exerciseConfig.pretty(pmSync) == expected
 
+    test "pretty: can use `pmSync` when an optional key has the value `null`":
+      let exerciseConfig = PracticeExerciseConfig(
+        originalKeyOrder: @[eckContributors],
+        contributors: none(seq[string])
+      )
+      const expected = """{
+        "authors": [],
+        "files": {
+          "solution": [],
+          "test": [],
+          "example": []
+        },
+        "blurb": ""
+      }
+      """.dedent(6)
+      check:
+        exerciseConfig.pretty(pmSync) == expected
+
     proc stdlibSerialize(path: string): string =
       var j = json.parseFile(path)
       for key in j.keys():
