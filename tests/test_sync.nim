@@ -310,6 +310,7 @@ proc testSyncCommon =
       )
       const expected = """{
         "authors": [],
+        "contributors": null,
         "files": {
           "solution": [],
           "test": [],

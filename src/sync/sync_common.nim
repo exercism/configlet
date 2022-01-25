@@ -303,6 +303,12 @@ func addArray(s: var string; key: string; val: openArray[string];
   else:
     s.add "[],"
 
+func addNull(s: var string; key: string; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its null value to `s`.
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson(key, s)
+  s.add ": null,"
+
 func addString(s: var string; key, val: string; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `key` and its string `val` to `s`.
   s.addNewlineAndIndent(indentLevel)
@@ -492,6 +498,8 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckContributors:
       if e.contributors.isSome():
         result.addArray("contributors", e.contributors.get())
+      else:
+        result.addNull("contributors")
     of eckFiles:
       result.addFiles(e.files, prettyMode)
     of eckLanguageVersions:
@@ -500,6 +508,8 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
       when e is ConceptExerciseConfig:
         if e.forked_from.isSome():
           result.addArray("forked_from", e.forked_from.get())
+        else:
+          result.addNull("forked_from")
     of eckIcon:
       when e is ConceptExerciseConfig:
         result.addString("icon", e.icon)
@@ -507,6 +517,8 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
       when e is PracticeExerciseConfig:
         if e.test_runner.isSome():
           result.addBool("test_runner", e.test_runner.get())
+        else:
+          result.addNull("test_runner")
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:
@@ -516,5 +528,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckCustom:
       if e.custom.isSome():
         result.addObject("custom", e.custom.get())
+      else:
+        result.addNull("custom")
   result.removeComma()
   result.add "\n}\n"
