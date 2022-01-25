@@ -24,7 +24,8 @@ proc allChecksPass(trackDir: Path): bool =
 proc lint*(conf: Conf) =
   echo """
     The lint command is under development.
-    Please re-run this command regularly to see if your track passes the latest linting rules.
+    To check your track using the latest linting rules,
+    please regularly update configlet and re-run this command.
   """.unindent()
 
   let trackDir = Path(conf.trackDir)
