@@ -46,17 +46,16 @@ proc lint*(conf: Conf) =
       - Every practice exercise has a valid .meta/config.json file
       - Required track docs are present
       - Required shared exercise docs are present""".dedent()
+    if printedWarning:
+      echo ""
+      const msg = """
+        Configlet produced at least one warning.
+        These warnings might become errors in a future configlet release.
+        For more information, please see the documentation:""".unindent()
+      warn(msg, url, doubleFinalNewline = false)
   else:
     echo fmt"""
       Configlet detected at least one problem.
       For more information on resolving the problems, please see the documentation:
       {url}""".unindent()
     quit(1)
-
-  if printedWarning:
-    echo ""
-    const msg = """
-      Configlet produced at least one warning.
-      These warnings might become errors in a future configlet release.
-      For more information, please see the documentation:""".unindent()
-    warn(msg, url, doubleFinalNewline = false)
