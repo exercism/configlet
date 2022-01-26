@@ -1050,6 +1050,13 @@ proc main =
         for line in outp.strip.splitLines:
           check line.isUuidV4
 
+  suite "README":
+    test "README contains help message":
+      let (outp, _) = execCmdEx(&"{binaryPath} --help")
+      let readmeContents = readFile(repoRootDir / "README.md")
+      check:
+        outp in readmeContents
+
   testsForSync(binaryPath)
 
   testsForGenerate(binaryPath)
