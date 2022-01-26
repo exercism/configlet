@@ -222,12 +222,17 @@ func genHelpText: string =
     if actionKind != actNil:
       result.add &"  {alignLeft($actionKind, longestActionLen)}  {actionDescriptions[actionKind]}\n"
 
+  func countFields(o: object): int =
+    result = 0
+    for _ in o.fields():
+      inc result
+
   # Add descriptions for command options.
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind in {actFmt, actSync, actUuid}:
+    let action = Action(kind: actionKind)
+    if action.countFields() > 1: # True when the command takes an option.
       result.add &"\nOptions for {actionKind}:\n"
-      let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
