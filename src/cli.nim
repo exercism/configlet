@@ -193,7 +193,7 @@ func genHelpText: string =
   # We define most of the option descriptions below. For the options that are
   # common to both `sync` and `fmt`, we set the `sync` descriptions here and
   # set the `fmt` ones later.
-  const descriptions: array[Opt, string] = [
+  const optionDescriptions: array[Opt, string] = [
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
@@ -232,7 +232,7 @@ func genHelpText: string =
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
@@ -252,7 +252,7 @@ func genHelpText: string =
             elif actionKind == actFmt and opt == optFmtSyncYes:
               &"Auto-confirm the prompt from --{$optFmtSyncUpdate}"
             else:
-              descriptions[opt]
+              optionDescriptions[opt]
           result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
@@ -260,7 +260,7 @@ func genHelpText: string =
   result.add &"\nGlobal options:\n"
   for opt in Opt:
     if opt notin optSeen:
-      result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+      result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
