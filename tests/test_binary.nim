@@ -1052,8 +1052,10 @@ proc main =
 
   suite "README":
     test "README contains help message":
-      let (outp, _) = execCmdEx(&"{binaryPath} --help")
+      var (outp, _) = execCmdEx(&"{binaryPath} --help")
       let readmeContents = readFile(repoRootDir / "README.md")
+      when defined(windows):
+        outp = outp.replace("configlet.exe", "configlet")
       check:
         outp in readmeContents
 
