@@ -125,7 +125,8 @@ func list*(opt: Opt): string =
     &"-{short[opt]}, --{camelToKebab($opt)}"
 
 func genHelpText: string =
-  ## Returns a string that lists all the CLI options.
+  ## Generates a string that describes every configlet command and option, to be
+  ## shown in the `configlet --help` message.
 
   func allowedValues(T: typedesc[enum]): string =
     ## Returns a string that describes the allowed values for an enum `T`.
@@ -216,10 +217,12 @@ func genHelpText: string =
 
   result = "Commands:\n"
 
+  # Add descriptions for commands.
   for action in ActionKind:
     if action != actNil:
       result.add &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
 
+  # Add descriptions for command options.
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
     if actionKind notin {actNil, actLint, actGenerate, actInfo}:
@@ -253,6 +256,7 @@ func genHelpText: string =
           result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
+  # Add descriptions for global options.
   result.add &"\nGlobal options:\n"
   for opt in Opt:
     if opt notin optSeen:
