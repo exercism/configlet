@@ -225,7 +225,7 @@ func genHelpText: string =
   # Add descriptions for command options.
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actLint, actGenerate, actInfo}:
+    if actionKind in {actFmt, actSync, actUuid}:
       result.add &"\nOptions for {actionKind}:\n"
       let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
