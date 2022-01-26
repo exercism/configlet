@@ -1050,14 +1050,13 @@ proc main =
         for line in outp.strip.splitLines:
           check line.isUuidV4
 
-  suite "README":
-    test "README contains help message":
-      var (outp, _) = execCmdEx(&"{binaryPath} --help")
-      let readmeContents = readFile(repoRootDir / "README.md")
-      when defined(windows):
-        outp = outp.replace("configlet.exe", "configlet")
-      check:
-        outp in readmeContents
+  when not defined(windows): # Ignore differences due to ".exe" and line endings.
+    suite "README":
+      test "README contains help message":
+        let (outp, _) = execCmdEx(&"{binaryPath} --help")
+        let readmeContents = readFile(repoRootDir / "README.md")
+        check:
+          outp in readmeContents
 
   testsForSync(binaryPath)
 
