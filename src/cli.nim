@@ -218,9 +218,9 @@ func genHelpText: string =
   result = "Commands:\n"
 
   # Add descriptions for commands.
-  for action in ActionKind:
-    if action != actNil:
-      result.add &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
+  for actionKind in ActionKind:
+    if actionKind != actNil:
+      result.add &"  {alignLeft($actionKind, longestActionLen)}  {actionDescriptions[actionKind]}\n"
 
   # Add descriptions for command options.
   var optSeen: set[Opt] = {}
