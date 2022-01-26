@@ -910,7 +910,7 @@ proc main =
       else: ""
     binaryName = &"configlet{binaryExt}"
     binaryPath = repoRootDir / binaryName
-    helpStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+    usageStart = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
   if not defined(skipBuild):
     let args =
@@ -925,7 +925,7 @@ proc main =
     test "help":
       let (outp, exitCode) = execCmdEx(&"{binaryPath} help")
       check:
-        outp.startsWith(helpStart)
+        outp.contains(usageStart)
         exitCode == 0
 
   suite "help as an option":
@@ -933,7 +933,7 @@ proc main =
       test goodHelp:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
-          outp.startsWith(helpStart)
+          outp.contains(usageStart)
           exitCode == 0
 
   suite "help via normalization":
@@ -941,7 +941,7 @@ proc main =
       test goodHelp:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
-          outp.startsWith(helpStart)
+          outp.contains(usageStart)
           exitCode == 0
 
   suite "help is always printed if present":
@@ -949,7 +949,7 @@ proc main =
       test goodHelp:
         let (outp, exitCode) = execCmdEx(&"{binaryPath} {goodHelp}")
         check:
-          outp.startsWith(helpStart)
+          outp.contains(usageStart)
           exitCode == 0
 
   suite "invalid command":
@@ -1052,11 +1052,12 @@ proc main =
 
   when not defined(windows): # Ignore differences due to ".exe" and line endings.
     suite "README":
-      test "README contains help message":
+      test "README contains usage message":
         let (outp, _) = execCmdEx(&"{binaryPath} --help")
         let readmeContents = readFile(repoRootDir / "README.md")
+        let usage = outp[outp.find("Usage")..^1]
         check:
-          outp in readmeContents
+          usage in readmeContents
 
   testsForSync(binaryPath)
 

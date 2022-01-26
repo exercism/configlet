@@ -217,6 +217,9 @@ func genHelpText: string =
   const binaryExt = when defined(windows): ".exe" else: ""
 
   result = fmt"""
+    configlet {configletVersion}
+    The official tool for managing Exercism language track repositories.
+
     Usage:
       configlet{binaryExt} [global-options] <command> [command-options]
 
