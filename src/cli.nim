@@ -211,7 +211,7 @@ func genHelpText: string =
     optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
                   &"{paddingOpt}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
                   &"{paddingOpt}{allowedValues(TestsMode)} (default: choose)",
-    optUuidNum: "Number of UUIDs to generate",
+    optUuidNum: "Number of UUIDs to output",
   ]
 
   result = "Commands:\n"

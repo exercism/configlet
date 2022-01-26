@@ -38,7 +38,7 @@ Options for sync:
                                Allowed values: c[hoose], i[nclude], e[xclude] (default: choose)
 
 Options for uuid:
-  -n, --num <int>              Number of UUIDs to generate
+  -n, --num <int>              Number of UUIDs to output
 
 Global options:
   -h, --help                   Show this help message and exit
