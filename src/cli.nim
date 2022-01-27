@@ -214,7 +214,14 @@ func genHelpText: string =
     optUuidNum: "Number of UUIDs to output",
   ]
 
-  result = "Commands:\n"
+  const binaryExt = when defined(windows): ".exe" else: ""
+
+  result = fmt"""
+    Usage:
+      configlet{binaryExt} [global-options] <command> [command-options]
+
+    Commands:
+  """.dedent(4)
 
   for action in ActionKind:
     if action != actNil:
@@ -261,11 +268,7 @@ func genHelpText: string =
 
 proc showHelp(exitCode: range[0..255] = 0) =
   const helpText = genHelpText()
-  let appName = extractFilename(getAppFilename())
-  let usage = "Usage:\n" &
-              &"  {appName} [global-options] <command> [command-options]\n"
   let f = if exitCode == 0: stdout else: stderr
-  f.writeLine usage
   f.writeLine helpText
   if f == stdout:
     f.flushFile()
