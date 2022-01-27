@@ -328,19 +328,19 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-func initAction*(actionKind: ActionKind, probSpecsDir = "",
-                 scope: set[SyncKind] = {}): Action =
+func init*(T: typedesc[Action], actionKind: ActionKind, probSpecsDir = "",
+           scope: set[SyncKind] = {}): T =
   case actionKind
   of actNil, actFmt, actGenerate, actInfo, actLint:
-    Action(kind: actionKind)
+    T(kind: actionKind)
   of actSync:
-    Action(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
+    T(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
   of actUuid:
-    Action(kind: actionKind, num: 1)
+    T(kind: actionKind, num: 1)
 
-func initConf*(action = initAction(actNil), trackDir = getCurrentDir(),
-               verbosity = verNormal): Conf =
-  result = Conf(
+func init*(T: typedesc[Conf], action = Action.init(actNil),
+           trackDir = getCurrentDir(), verbosity = verNormal): T =
+  T(
     action: action,
     trackDir: trackDir,
     verbosity: verbosity,
@@ -417,8 +417,8 @@ proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
 proc handleArgument(conf: var Conf; kind: CmdLineKind; key: string) =
   if conf.action.kind == actNil:
     let actionKind = parseActionKind(key)
-    let action = initAction(actionKind)
-    conf = initConf(action, conf.trackDir, conf.verbosity)
+    let action = Action.init(actionKind)
+    conf = Conf.init(action, conf.trackDir, conf.verbosity)
   else:
     showError(&"invalid argument for command '{conf.action.kind}': '{key}'")
 
@@ -506,7 +506,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
                 &"{formatOpt(kind, key)}")
 
 proc processCmdLine*: Conf =
-  result = initConf()
+  result = Conf.init()
 
   for kind, key, val in getopt(shortNoVal = shortNoVal, longNoVal = longNoVal):
     case kind

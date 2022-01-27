@@ -91,7 +91,7 @@ proc syncImpl(conf: Conf): set[SyncKind] =
     if conf.action.scope == {skFilepaths}:
       ProbSpecsDir("this_will_not_be_used")
     else:
-      initProbSpecsDir(conf)
+      ProbSpecsDir.init(conf)
 
   try:
     let psExercisesDir = probSpecsDir / "exercises"

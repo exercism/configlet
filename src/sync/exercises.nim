@@ -11,6 +11,8 @@ type
     json*: ProbSpecsTestCase
     reimplements*: Option[ExerciseTestCase]
 
+  ExerciseTestCases = seq[ExerciseTestCase]
+
   ExerciseTests* {.requiresInit.} = object
     included*: HashSet[string]
     excluded*: HashSet[string]
@@ -22,18 +24,19 @@ type
   Exercise* {.requiresInit.} = object
     slug*: PracticeExerciseSlug
     tests*: ExerciseTests
-    testCases*: seq[ExerciseTestCase]
+    testCases*: ExerciseTestCases
 
-func initExerciseTests: ExerciseTests =
-  ExerciseTests(
+func init(T: typedesc[ExerciseTests]): T =
+  T(
     included: initHashSet[string](),
     excluded: initHashSet[string](),
     missing: initHashSet[string](),
   )
 
-proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
-                       probSpecsTestCases: seq[ProbSpecsTestCase]): ExerciseTests =
-  result = initExerciseTests()
+proc init(T: typedesc[ExerciseTests],
+          practiceExerciseTests: PracticeExerciseTests,
+          probSpecsTestCases: ProbSpecsTestCases): T =
+  result = ExerciseTests.init()
   for testCase in probSpecsTestCases:
     let uuid = uuid(testCase)
     if uuid in practiceExerciseTests.included:
@@ -43,28 +46,28 @@ proc initExerciseTests(practiceExerciseTests: PracticeExerciseTests,
     else:
       result.missing.incl uuid
 
-proc newExerciseTestCase(testCase: ProbSpecsTestCase): ExerciseTestCase =
-  ExerciseTestCase(
+proc new(T: typedesc[ExerciseTestCase], testCase: ProbSpecsTestCase): T =
+  T(
     uuid: uuid(testCase),
     description: description(testCase),
     json: testCase,
   )
 
-proc getReimplementations(testCases: seq[ProbSpecsTestCase]): Table[string, string] =
+proc getReimplementations(testCases: ProbSpecsTestCases): Table[string, string] =
   for testCase in testCases:
     if testCase.isReimplementation():
       result[testCase.uuid()] = testCase.reimplements()
 
-func uuidToTestCase(testCases: seq[ExerciseTestCase]): Table[string, ExerciseTestCase] =
+func uuidToTestCase(testCases: ExerciseTestCases): Table[string, ExerciseTestCase] =
   for testCase in testCases:
     result[testCase.uuid] = testCase
 
-proc initExerciseTestCases(testCases: seq[ProbSpecsTestCase]): seq[ExerciseTestCase] =
+proc init(T: typedesc[ExerciseTestCases], testCases: ProbSpecsTestCases): T =
   result = newSeq[ExerciseTestCase](testCases.len)
   var hasReimplementation = false
 
   for i, testCase in testCases:
-    result[i] = newExerciseTestCase(testCase)
+    result[i] = ExerciseTestCase.new(testCase)
     if testCase.isReimplementation():
       hasReimplementation = true
 
@@ -85,13 +88,13 @@ iterator findExercises*(conf: Conf, probSpecsDir: ProbSpecsDir): Exercise {.inli
       let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
       yield Exercise(
         slug: practiceExercise.slug,
-        tests: initExerciseTests(practiceExercise.tests, testCases),
-        testCases: initExerciseTestCases(testCases),
+        tests: ExerciseTests.init(practiceExercise.tests, testCases),
+        testCases: ExerciseTestCases.init(testCases),
       )
     else:
       yield Exercise(
         slug: practiceExercise.slug,
-        tests: initExerciseTests(),
+        tests: ExerciseTests.init(),
         testCases: @[],
       )
 

@@ -54,16 +54,16 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
 
   sort result
 
-func initPracticeExerciseTests: PracticeExerciseTests =
-  PracticeExerciseTests(
+func init(T: typedesc[PracticeExerciseTests]): T =
+  T(
     included: initHashSet[string](),
     excluded: initHashSet[string](),
   )
 
-proc initPracticeExerciseTests(testsPath: string): PracticeExerciseTests =
+proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
   ## Parses the `tests.toml` file at `testsPath` and returns HashSets of the
   ## included and excluded test case UUIDs.
-  result = initPracticeExerciseTests()
+  result = PracticeExerciseTests.init()
   if fileExists(testsPath):
     let tests = parsetoml.parseFile(testsPath)
 
@@ -96,10 +96,10 @@ iterator findPracticeExercises*(conf: Conf): PracticeExercise {.inline.} =
         let testsPath = testsPath(trackDir, slug)
         yield PracticeExercise(
           slug: slug,
-          tests: initPracticeExerciseTests(testsPath),
+          tests: PracticeExerciseTests.init(testsPath),
         )
       else:
         yield PracticeExercise(
           slug: slug,
-          tests: initPracticeExerciseTests(),
+          tests: PracticeExerciseTests.init(),
         )

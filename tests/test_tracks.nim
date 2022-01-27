@@ -12,7 +12,7 @@ proc main =
                       "736245965db724cafc5ec8e9dcae83c850b7c5a8") # 2021-10-22
 
     let conf = Conf(
-      action: initAction(actSync, scope = {skTests}),
+      action: Action.init(actSync, scope = {skTests}),
       trackDir: trackDir,
     )
     let practiceExercises = toSeq findPracticeExercises(conf)
