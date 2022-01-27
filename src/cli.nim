@@ -125,7 +125,8 @@ func list*(opt: Opt): string =
     &"-{short[opt]}, --{camelToKebab($opt)}"
 
 func genHelpText: string =
-  ## Returns a string that lists all the CLI options.
+  ## Generates a string that describes every configlet command and option, to be
+  ## shown in the `configlet --help` message.
 
   func allowedValues(T: typedesc[enum]): string =
     ## Returns a string that describes the allowed values for an enum `T`.
@@ -192,7 +193,7 @@ func genHelpText: string =
   # We define most of the option descriptions below. For the options that are
   # common to both `sync` and `fmt`, we set the `sync` descriptions here and
   # set the `fmt` ones later.
-  const descriptions: array[Opt, string] = [
+  const optionDescriptions: array[Opt, string] = [
     optHelp: "Show this help message and exit",
     optVersion: "Show this tool's version information and exit",
     optTrackDir: "Specify a track directory to use instead of the current directory",
@@ -226,20 +227,27 @@ func genHelpText: string =
     Commands:
   """.dedent(4)
 
-  for action in ActionKind:
-    if action != actNil:
-      result.add &"  {alignLeft($action, longestActionLen)}  {actionDescriptions[action]}\n"
+  # Add descriptions for commands.
+  for actionKind in ActionKind:
+    if actionKind != actNil:
+      result.add &"  {alignLeft($actionKind, longestActionLen)}  {actionDescriptions[actionKind]}\n"
 
+  func countFields(o: object): int =
+    result = 0
+    for _ in o.fields():
+      inc result
+
+  # Add descriptions for command options.
   var optSeen: set[Opt] = {}
   for actionKind in ActionKind:
-    if actionKind notin {actNil, actLint, actGenerate, actInfo}:
+    let action = Action(kind: actionKind)
+    if action.countFields() > 1: # True when the command takes an option.
       result.add &"\nOptions for {actionKind}:\n"
-      let action = Action(kind: actionKind)
       for key, val in fieldPairs(action):
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
@@ -259,14 +267,15 @@ func genHelpText: string =
             elif actionKind == actFmt and opt == optFmtSyncYes:
               &"Auto-confirm the prompt from --{$optFmtSyncUpdate}"
             else:
-              descriptions[opt]
+              optionDescriptions[opt]
           result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
           optSeen.incl opt
 
+  # Add descriptions for global options.
   result.add &"\nGlobal options:\n"
   for opt in Opt:
     if opt notin optSeen:
-      result.add alignLeft(syntax[opt], maxLen) & descriptions[opt] & "\n"
+      result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
