@@ -1,6 +1,6 @@
 # Configlet for Exercism v3
 
-This is a development version of Configlet for use with v3 of Exercism.
+The official tool for managing Exercism language track repositories.
 
 ## Usage
 
