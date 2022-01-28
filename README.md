@@ -1,4 +1,4 @@
-# Configlet for Exercism v3
+# Configlet
 
 The official tool for managing Exercism language track repositories.
 
