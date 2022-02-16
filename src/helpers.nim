@@ -25,7 +25,7 @@ proc getSortedSubdirs*(dir: Path): seq[Path] =
       result.add Path(path)
   sort result
 
-proc setFalseAndPrint*(b: var bool; description: string; path: Path) =
+proc setFalseAndPrint*(b: var bool; description: string; path: Path, annotation = "") =
   ## Sets `b` to `false` and writes a message to stdout containing `description`
   ## and `path`.
   b = false
@@ -35,6 +35,11 @@ proc setFalseAndPrint*(b: var bool; description: string; path: Path) =
   else:
     stdout.writeLine(descriptionPrefix)
   stdout.writeLine(path.string)
+  if annotation.len > 0:
+    if colorStdout:
+      stdout.styledWriteLine(fgYellow, annotation)
+    else:
+      stdout.writeLine(descriptionPrefix, annotation)
   stdout.write "\n"
 
 var printedWarning* = false
