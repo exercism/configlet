@@ -30,7 +30,7 @@ proc lint*(conf: Conf) =
 
   let trackDir = Path(conf.trackDir)
 
-  const url = "https://github.com/exercism/docs/blob/main/building/configlet/lint.md"
+  const url = "https://exercism.org/docs/building/configlet/lint"
 
   if allChecksPass(trackDir):
     echo """
