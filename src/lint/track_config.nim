@@ -228,8 +228,14 @@ const tags = [
 ].toHashSet()
 
 proc hasValidTags(data: JsonNode; path: Path): bool =
+  const errorAnnotation = """
+    Tracks are annotated with tags to allow searching for tracks with certain tags.
+    Tags must be chosen from our list of supported tags.
+    Tags should be selected based on the general usage of their language.
+    For more information on tags and the list of supported tags see:
+    https://exercism.org/docs/building/tracks/config-json#h-tags""".unindent()
   result = hasArrayOfStrings(data, "tags", path, allowed = tags,
-                             uniqueValues = true)
+                             uniqueValues = true, errorAnnotation = errorAnnotation)
 
 proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
   ## Returns `true` if `data` passes the first round of checks for a track-level
