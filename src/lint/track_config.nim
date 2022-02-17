@@ -175,17 +175,52 @@ const keyFeatureIcons = [
 ].toHashSet()
 
 proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
+  const iconErrorAnnotation = """
+    A key feature's `icon` is shown for the feature when presented on the website.
+    The icon must be chosen from our list of supported icons:
+    https://exercism.org/docs/building/tracks/icons#h-key-feature-icons
+    You can choose any icon that you think fits, regardless of its name.
+
+    For more information on key features see:
+    https://exercism.org/docs/building/tracks/config-json#h-key-features""".unindent()
+
+  const titleErrorAnnotation = """
+    A key feature's `title` is a concise header for the key feature.
+    As little technical jargon as possible should be used.
+    Its length must be <= 25 and Markdown is not supported.
+
+    For more information on key features see:
+    https://exercism.org/docs/building/tracks/config-json#h-key-features""".unindent()
+
+  const contentErrorAnnotation = """
+    A key feature's `content` is a description of the key feature.
+    Its length must be <= 100 and Markdown is not supported.
+
+    For more information on key features see:
+    https://exercism.org/docs/building/tracks/config-json#h-key-features""".unindent()
+ 
   if isObject(data, context, path):
     let checks = [
-      hasString(data, "icon", path, context, allowed = keyFeatureIcons),
-      hasString(data, "title", path, context, maxLen = 25),
-      hasString(data, "content", path, context, maxLen = 100),
+      hasString(data, "icon", path, context, allowed = keyFeatureIcons,
+                errorAnnotation = iconErrorAnnotation),
+      hasString(data, "title", path, context, maxLen = 25,
+                errorAnnotation = titleErrorAnnotation),
+      hasString(data, "content", path, context, maxLen = 100,
+                errorAnnotation = contentErrorAnnotation),
     ]
     result = allTrue(checks)
 
 proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
+  const errorAnnotation = """
+    The key features succinctly describe the most important features
+    of the language to promote the language to potential students.
+    Exactly 6 key features must be specified.
+
+    For more information on key features see:
+    https://exercism.org/docs/building/tracks/config-json#h-key-features""".unindent()
   result = hasArrayOf(data, "key_features", path, isValidKeyFeature,
-                      isRequired = false, allowedLength = 6..6)
+                      isRequired = false, allowedLength = 6..6,
+                      errorAnnotation = errorAnnotation)
 
 const tags = [
   "paradigm/declarative",
