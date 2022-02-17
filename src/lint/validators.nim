@@ -300,7 +300,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
               &"A {format(context, key)} value is {q s}, which is not a " &
               &"valid file pattern. Allowed placeholders are: {placeholders}"
             result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-        if not hasValidRuneLength(s, key, path, context, maxLen):
+        if not hasValidRuneLength(s, key, path, context, maxLen, errorAnnotation = errorAnnotation):
           result = false
       else:
         let msg =
