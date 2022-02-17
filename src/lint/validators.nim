@@ -229,7 +229,6 @@ func list(a: SomeSet[string]; prefix = ""; suffix = ""): string =
       result.add ", and "
 
 var seenUuids = initHashSet[string](250)
-var seenFilePatterns = initHashSet[string](250)
 
 proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
@@ -282,11 +281,6 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                "lowercased version 4 UUID"
             result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
         elif checkIsFilesPattern:
-          if seenFilePatterns.containsOrIncl(s):
-            let msg =
-              &"A {format(context, key)} value is {q s}, which is not a unique " &
-               "`files` entry"
-            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
           if isFilesPattern(s):
             if "%{" in s and "}" notin s:
               let msg =

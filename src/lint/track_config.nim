@@ -293,7 +293,16 @@ type
 
   Concepts* = seq[Concept]
 
+  FilePatterns* = object
+    solution*: seq[string]
+    test*: seq[string]
+    example*: seq[string]
+    exemplar*: seq[string]
+    editor*: seq[string]
+
   TrackConfig* = object
+    slug*: string
+    files*: FilePatterns
     exercises*: Exercises
     concepts*: Concepts
 
@@ -655,6 +664,32 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                  "but there is an implemented exercise with that slug"
       b.setFalseAndPrint(msg, path)
 
+proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
+                              b: var bool; path: Path) =
+  const uniqueFilePatternCombinations = [
+    ("solution", "test"),
+    ("solution", "example"),
+    ("solution", "exemplar"),
+    ("solution", "editor"),
+    ("test", "example"),
+    ("test", "exemplar"),
+    ("test", "editor"),
+    ("editor", "example"),
+    ("editor", "exemplar"),    
+  ]
+
+  var seenFilePatterns = initTable[string, HashSet[string]](250)
+  for key, patterns in filePatterns.fieldPairs:
+    seenFilePatterns[key] = patterns.toHashSet
+
+  for (key1, key2) in uniqueFilePatternCombinations:
+    let duplicatePatterns = seenFilePatterns[key1] * seenFilePatterns[key2]
+    for duplicatePattern in duplicatePatterns:
+      let msg =
+        &"The values in the `files.{key1}` and `files.{key2}` keys must not overlap, " &
+        &"but the {q duplicatePattern} value appears in both"
+      b.setFalseAndPrint(msg, path)
+
 proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   ## Returns `true` if `trackConfigContents` satisfies some checks.
   ##
@@ -684,6 +719,7 @@ proc satisfiesSecondPass(trackConfigContents: string; path: Path): bool =
   checkExercisesPCP(conceptExercises, result, path)
   checkExercisesPCP(practiceExercises, result, path)
   checkExerciseSlugsAndForegone(exercises, result, path)
+  checkFilePatternsOverlap(trackConfig.files, trackConfig.slug, result, path)
 
 proc getExerciseSlugs(data: JsonNode; k: string): HashSet[string] =
   result = initHashSet[string]()
