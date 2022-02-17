@@ -37,30 +37,32 @@ func format*(context, key: string): string =
     q(key)
 
 proc hasKey(data: JsonNode; key: string; path: Path; context: string;
-            isRequired: bool): bool =
+            isRequired: bool; errorAnnotation = ""): bool =
   ## Returns true if `data` contains the key `key`. Otherwise, returns false
   ## and, if `isRequired` is true, prints an error message.
   if data.hasKey(key):
     result = true
   elif isRequired:
-    result.setFalseAndPrint(&"The {format(context, key)} key is missing", path)
+    result.setFalseAndPrint(&"The {format(context, key)} key is missing", path,
+                             annotation = errorAnnotation)
 
-proc isObject*(data: JsonNode; key: string; path: Path; context = ""): bool =
+proc isObject*(data: JsonNode; key: string; path: Path; context = "";
+               errorAnnotation = ""): bool =
   if data.kind == JObject:
     result = true
   else:
     result.setFalseAndPrint(&"The value of {format(context, key)} is not an object",
-                            path)
+                            path, annotation = errorAnnotation)
 
 proc hasObject*(data: JsonNode; key: string; path: Path; context = "";
-                isRequired = true): bool =
+                isRequired = true; errorAnnotation = ""): bool =
   if data.hasKey(key, path, context, isRequired):
-    result = isObject(data[key], key, path)
+    result = isObject(data[key], key, path, errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
 proc hasValidRuneLength(s, key: string; path: Path; context: string;
-                        maxLen: int): bool =
+                        maxLen: int; errorAnnotation = ""): bool =
   ## Returns true if `s` has a rune length that does not exceed `maxLen`.
   result = true
   if s.len > maxLen:
@@ -71,7 +73,7 @@ proc hasValidRuneLength(s, key: string; path: Path; context: string;
       let msg = &"The value of {format(context, key)} that starts with " &
                 &"{q sTrunc}... is {sRuneLen} characters, but it must not " &
                 &"exceed {maxLen} characters"
-      result.setFalseAndPrint(msg, path)
+      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
 
 proc isUrlLike(s: string): bool =
   ## Returns true if `s` starts with `https://`, `http://` or `www`.
@@ -233,7 +235,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
                checkIsUuid = false; isInArray = false;
-               checkIsFilesPattern = false): bool =
+               checkIsFilesPattern = false; errorAnnotation = ""): bool =
   result = true
   case data.kind
   of JString:
@@ -250,11 +252,12 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             $allowed
           else:
             "the allowed values"
-        result.setFalseAndPrint(msgStart & msgEnd, path)
+        result.setFalseAndPrint(msgStart & msgEnd, path,
+                                annotation = errorAnnotation)
     elif checkIsUrlLike:
       if not isUrlLike(s):
         let msg = &"The {q key} value is {q s}, but it must be a valid URL"
-        result.setFalseAndPrint(msg, path)
+        result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
     elif s.len > 0:
       if not isEmptyOrWhitespace(s):
         if checkIsKebab:
@@ -266,24 +269,24 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
               else:
                 &"The {format(context, key)} value is {q s}, but it must be " &
                  "a lowercase and kebab-case string"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
         elif checkIsUuid:
           if seenUuids.containsOrIncl(s):
             let msg =
               &"A {format(context, key)} value is {q s}, which is not unique " &
                "on the track"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
           if not isUuidV4(s):
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
                "lowercased version 4 UUID"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
         elif checkIsFilesPattern:
           if seenFilePatterns.containsOrIncl(s):
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a unique " &
                "`files` entry"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
           if isFilesPattern(s):
             if "%{" in s and "}" notin s:
               let msg =
@@ -296,7 +299,7 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             let msg =
               &"A {format(context, key)} value is {q s}, which is not a " &
               &"valid file pattern. Allowed placeholders are: {placeholders}"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
         if not hasValidRuneLength(s, key, path, context, maxLen):
           result = false
       else:
@@ -305,34 +308,36 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
             &"The {format(context, key)} array contains a whitespace-only string"
           else:
             &"The value of {format(context, key)} is a whitespace-only string"
-        result.setFalseAndPrint(msg, path)
+        result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
     else:
       let msg =
         if isInArray:
           &"The {format(context, key)} array contains a zero-length string"
         else:
           &"The value of {format(context, key)} is a zero-length string"
-      result.setFalseAndPrint(msg, path)
+      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
-                               "but it must be a string", path)
+                               "but it must be a string", path,
+                               annotation = errorAnnotation)
   else:
     let msg =
       if isInArray:
         &"The {format(context, key)} array contains a non-string: {q $data}"
       else:
         &"The value of {format(context, key)} is {q $data}, but it must be a string"
-    result.setFalseAndPrint(msg, path)
+    result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
 
 proc hasString*(data: JsonNode; key: string; path: Path; context = "";
                 isRequired = true; allowed = emptySetOfStrings;
                 checkIsUrlLike = false; maxLen = int.high;
-                checkIsKebab = false; checkIsUuid = false): bool =
+                checkIsKebab = false; checkIsUuid = false;
+                errorAnnotation = ""): bool =
   if data.hasKey(key, path, context, isRequired):
     result = isString(data[key], key, path, context, isRequired, allowed,
                       checkIsUrlLike, maxLen, checkIsKebab = checkIsKebab,
-                      checkIsUuid = checkIsUuid)
+                      checkIsUuid = checkIsUuid, errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
@@ -344,7 +349,8 @@ proc isArrayOfStrings*(data: JsonNode;
                        allowed: HashSet[string];
                        allowedArrayLen: Slice;
                        checkIsKebab: bool;
-                       checkIsFilesPattern: bool): bool =
+                       checkIsFilesPattern: bool;
+                       errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
   ##   non-empty, non-blank strings.
@@ -362,14 +368,15 @@ proc isArrayOfStrings*(data: JsonNode;
           if not isString(item, context, path, "", isRequired, allowed,
                           checkIsKebab = checkIsKebab,
                           checkIsFilesPattern = checkIsFilesPattern,
-                          isInArray = true):
+                          isInArray = true,
+                          errorAnnotation = errorAnnotation):
             result = false
           elif uniqueValues:
             let itemStr = item.getStr()
             if processedItems.containsOrIncl(itemStr):
               let msg = &"The {q context} array contains duplicate " &
                         &"{q itemStr} values"
-              result.setFalseAndPrint(msg, path)
+              result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
       else:
         let msgStart = &"The {q context} array has length {arrayLen}, " &
                         "but it must have length "
@@ -378,17 +385,17 @@ proc isArrayOfStrings*(data: JsonNode;
             &"of exactly {allowedArrayLen.a}"
           else:
             &"between {allowedArrayLen.a} and {allowedArrayLen.b} (inclusive)"
-        result.setFalseAndPrint(msgStart & msgEnd, path)
+        result.setFalseAndPrint(msgStart & msgEnd, path, annotation = errorAnnotation)
     elif isRequired:
       if 0 notin allowedArrayLen:
-        result.setFalseAndPrint(&"The {q context} array is empty", path)
+        result.setFalseAndPrint(&"The {q context} array is empty", path, annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {q context} is " &
-                              &"{qNull}, but it must be an array", path)
+                              &"{qNull}, but it must be an array", path, annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {q context} is " &
-                             "not an array", path)
+                             "not an array", path, annotation = errorAnnotation)
 
 proc hasArrayOfStrings*(data: JsonNode;
                         key: string;
@@ -399,7 +406,8 @@ proc hasArrayOfStrings*(data: JsonNode;
                         allowed = emptySetOfStrings;
                         allowedArrayLen = 1..int.high;
                         checkIsKebab = false;
-                        checkIsFilesPattern = false): bool =
+                        checkIsFilesPattern = false;
+                        errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
@@ -408,7 +416,8 @@ proc hasArrayOfStrings*(data: JsonNode;
     result = isArrayOfStrings(data[key], contextAndKey, path, isRequired,
                               uniqueValues, allowed, allowedArrayLen,
                               checkIsKebab = checkIsKebab,
-                              checkIsFilesPattern = checkIsFilesPattern)
+                              checkIsFilesPattern = checkIsFilesPattern,
+                              errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
@@ -416,7 +425,8 @@ proc hasArrayOfFiles*(data: JsonNode;
                       key: string;
                       path: Path;
                       context = "";
-                      relativeToPath: Path): bool =
+                      relativeToPath: Path;                      
+                      errorAnnotation = ""): bool =
   if hasArrayOfStrings(data, key, path, context):
     result = true
     var processedItems = initHashSet[string](data[key].len)
@@ -429,11 +439,11 @@ proc hasArrayOfFiles*(data: JsonNode;
         if processedItems.containsOrIncl(itemStr):
           let msg = &"The {q context} array contains duplicate " &
                     &"{q itemStr} values"
-          result.setFalseAndPrint(msg, path)
+          result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
       else:
         let msg = &"The {q context} array contains value " &
                   &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
-        result.setFalseAndPrint(msg, path)
+        result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
 
 type
   ItemCall = proc(data: JsonNode; context: string; path: Path): bool {.nimcall.}
@@ -443,7 +453,8 @@ proc isArrayOf*(data: JsonNode;
                 path: Path;
                 call: ItemCall;
                 isRequired = true;
-                allowedLength: Slice): bool =
+                allowedLength: Slice;
+                errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedLength`, and `call` returns
   ##   true for each of its items.
@@ -466,17 +477,21 @@ proc isArrayOf*(data: JsonNode;
             &"of exactly {allowedLength.a}"
           else:
             &"between {allowedLength.a} and {allowedLength.b} (inclusive)"
-        result.setFalseAndPrint(msgStart & msgEnd, path)
+        result.setFalseAndPrint(msgStart & msgEnd, path,
+                                annotation = errorAnnotation)
 
     elif isRequired:
       if 0 notin allowedLength:
-        result.setFalseAndPrint(&"Array is empty: {q context}", path)
+        result.setFalseAndPrint(&"Array is empty: {q context}", path,
+                                 annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {q context} is {qNull}, " &
-                               "but it must be an array", path)
+                               "but it must be an array", path,
+                               annotation = errorAnnotation)
   else:
-    result.setFalseAndPrint(&"The value of {q context} is not an array", path)
+    result.setFalseAndPrint(&"The value of {q context} is not an array", path,
+                             annotation = errorAnnotation)
 
 proc hasArrayOf*(data: JsonNode;
                  key: string;
@@ -484,19 +499,20 @@ proc hasArrayOf*(data: JsonNode;
                  call: ItemCall;
                  context = "";
                  isRequired = true;
-                 allowedLength: Slice = 1..int.high): bool =
+                 allowedLength: Slice = 1..int.high;
+                 errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOf` returns true for `data[key]`.
   ## - `data` lacks the key `key` and `isRequired` is false.
   if data.hasKey(key, path, context, isRequired):
     let contextAndKey = joinWithDot(context, key)
     result = isArrayOf(data[key], contextAndKey, path, call, isRequired,
-                       allowedLength)
+                       allowedLength, errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
 proc isBoolean*(data: JsonNode; key: string; path: Path; context: string;
-                isRequired = true): bool =
+                isRequired = true; errorAnnotation = ""): bool =
   result = true
   case data.kind
   of JBool:
@@ -504,20 +520,23 @@ proc isBoolean*(data: JsonNode; key: string; path: Path; context: string;
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
-                               "but it must be a bool", path)
+                               "but it must be a bool", path,
+                               annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
-                             "but it must be a bool", path)
+                             "but it must be a bool", path,
+                             annotation = errorAnnotation)
 
 proc hasBoolean*(data: JsonNode; key: string; path: Path; context = "";
-                 isRequired = true): bool =
+                 isRequired = true; errorAnnotation = ""): bool =
   if data.hasKey(key, path, context, isRequired):
-    result = isBoolean(data[key], key, path, context, isRequired)
+    result = isBoolean(data[key], key, path, context, isRequired,
+                       errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
 proc isInteger*(data: JsonNode; key: string; path: Path; context: string;
-                isRequired = true; allowed: Slice): bool =
+                isRequired = true; allowed: Slice; errorAnnotation = ""): bool =
   result = true
   case data.kind
   of JInt:
@@ -529,25 +548,28 @@ proc isInteger*(data: JsonNode; key: string; path: Path; context: string;
           &"{allowed.a}"
         else:
           &"between {allowed.a} and {allowed.b} (inclusive)"
-      result.setFalseAndPrint(msgStart & msgEnd, path)
+      result.setFalseAndPrint(msgStart & msgEnd, path, annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
-                               "but it must be an integer", path)
+                               "but it must be an integer", path,
+                                annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
-                             "but it must be an integer", path)
+                             "but it must be an integer", path,
+                             annotation = errorAnnotation)
 
 proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
-                 isRequired = true; allowed: Slice): bool =
+                 isRequired = true; allowed: Slice; errorAnnotation = ""): bool =
   if data.hasKey(key, path, context, isRequired):
-    result = isInteger(data[key], key, path, context, isRequired, allowed)
+    result = isInteger(data[key], key, path, context, isRequired, allowed,
+                       errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
 proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
              isRequired = true; requirePositive: bool;
-             decimalPlaces: int): bool =
+             decimalPlaces: int; errorAnnotation = ""): bool =
   result = true
   case data.kind
   of JFloat:
@@ -572,31 +594,33 @@ proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
             let msg = &"The value of {format(context, key)} is {s}, but it " &
                       &"must have exactly {decimalPlaces} {wording} after " &
                        "the decimal point"
-            result.setFalseAndPrint(msg, path)
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
           return
       let msg = &"The value of {format(context, key)} doesn't look like a float"
-      result.setFalseAndPrint(msg, path)
+      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
-                               "but it must be a float", path)
+                               "but it must be a float", path,
+                               annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
-                             "but it must be a float", path)
+                             "but it must be a float", path,
+                             annotation = errorAnnotation)
 
 proc hasFloat*(data: JsonNode; key: static string; path: Path; context = "";
                isRequired = true; requirePositive: bool;
-               decimalPlaces: int): bool =
+               decimalPlaces: int; errorAnnotation = ""): bool =
   if data.hasKey(key, path, context, isRequired):
     result = isFloat(data[key], key, path, context, isRequired, requirePositive,
-                     decimalPlaces)
+                     decimalPlaces, errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
 
 proc parseJson(s: Stream; filename: Path; rawIntegers = false;
                rawFloats = false): JsonNode {.borrow.}
 
-proc dirContains*(dir: Path; files: openArray[string]): bool =
+proc dirContains*(dir: Path; files: openArray[string]; errorAnnotation = ""): bool =
   ## Returns `true` if every file in `files` exists in `dir`.
   result = true
 
@@ -604,11 +628,11 @@ proc dirContains*(dir: Path; files: openArray[string]): bool =
     for file in files:
       let path = dir / file
       if not fileExists(path):
-        result.setFalseAndPrint("Missing file", path)
+        result.setFalseAndPrint("Missing file", path, annotation = errorAnnotation)
   else:
-    result.setFalseAndPrint("Missing directory", dir)
+    result.setFalseAndPrint("Missing directory", dir, annotation = errorAnnotation)
 
-proc subdirsContain*(dir: Path; files: openArray[string]): bool =
+proc subdirsContain*(dir: Path; files: openArray[string]; errorAnnotation = ""): bool =
   ## Returns `true` if every file in `files` exists in every subdirectory of
   ## `dir`.
   ##
@@ -620,10 +644,10 @@ proc subdirsContain*(dir: Path; files: openArray[string]): bool =
       for file in files:
         let path = subdir / file
         if not fileExists(path):
-          result.setFalseAndPrint("Missing file", path)
+          result.setFalseAndPrint("Missing file", path, annotation = errorAnnotation)
 
 proc parseJsonFile*(path: Path; b: var bool;
-                    allowEmptyArray = false): JsonNode =
+                    allowEmptyArray = false; errorAnnotation = ""): JsonNode =
   ## Parses the file at `path` and returns the resultant JsonNode.
   ##
   ## Sets `b` to false if unsuccessful.
@@ -642,6 +666,6 @@ proc parseJsonFile*(path: Path; b: var bool;
           &""", but must contain at least the empty array, {q "[]"}"""
         else:
           ""
-      b.setFalseAndPrint("File is empty" & msg, path)
+      b.setFalseAndPrint("File is empty" & msg, path, annotation = errorAnnotation)
   else:
-    b.setFalseAndPrint("Missing file", path)
+    b.setFalseAndPrint("Missing file", path, annotation = errorAnnotation)
