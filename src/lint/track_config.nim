@@ -666,6 +666,7 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
 
 proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
                               b: var bool; path: Path) =
+  const overlappingSolutionTestTrackSlugs = ["d", "plsql"]
   const uniqueFilePatternCombinations = [
     ("solution", "test"),
     ("solution", "example"),
@@ -683,6 +684,9 @@ proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
     seenFilePatterns[key] = patterns.toHashSet
 
   for (key1, key2) in uniqueFilePatternCombinations:
+    if key1 == "solution" and key2 == "test" and trackSlug in overlappingSolutionTestTrackSlugs:
+      continue
+
     let duplicatePatterns = seenFilePatterns[key1] * seenFilePatterns[key2]
     for duplicatePattern in duplicatePatterns:
       let msg =
