@@ -9,7 +9,7 @@ srcDir        = "src"
 bin           = @["configlet"]
 
 # Dependencies
-requires "nim >= 1.6.2"
+requires "nim >= 1.6.4"
 requires "cligen#b962cf8bc0be847cbc1b4f77952775de765e9689"    # 1.5.19 (2021-09-13)
 requires "jsony#eb63a326b7f16537764c090f8859eb2451ad8d4d"     # 1.1.1  (2021-11-16)
 requires "parsetoml#9cdeb3f65fd10302da157db8a8bac5c42f055249" # 0.6.0  (2021-06-07)
