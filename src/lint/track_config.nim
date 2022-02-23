@@ -741,21 +741,29 @@ proc getConceptSlugs(data: JsonNode): HashSet[string] =
           if slugStr.len > 0:
             result.incl slugStr
 
-proc checkConceptDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
-                                      b: var bool; path: Path) =
+proc checkConceptDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
+                                             b: var bool; path: Path) =
   ## Sets `b` to `false` if there is a concept directory that is
-  ## not a concept `slug` in `data`.
+  ## not a concept `slug` in `data` or vice versa.
   let conceptSlugs = getConceptSlugs(data)
-  if conceptSlugs.len > 0:
-    let conceptsDir = trackDir / "concepts"
-    if dirExists(conceptsDir):
-      for conceptDir in getSortedSubdirs(conceptsDir):
-        let dirSlug = lastPathPart(conceptDir.string)
-        if dirSlug notin conceptSlugs:
-          let msg = &"{q $conceptsDir} contains a directory named {q dirSlug}, " &
-                    &"which is not a `slug` in the concepts array. " &
-                     "Please add the concept to that array"
-          b.setFalseAndPrint(msg, path)
+  let conceptsDir = trackDir / "concepts"
+  var conceptDirSlugs = initHashSet[string]()
+
+  if dirExists(conceptsDir):
+    for conceptDir in getSortedSubdirs(conceptsDir):
+      conceptDirSlugs.incl lastPathPart(conceptDir.string)
+
+  for conceptSlug in conceptDirSlugs - conceptSlugs:
+    let msg = &"{q $conceptsDir} contains a directory named {q conceptSlug}, " &
+              &"which is not a `slug` in the concepts array. " &
+               "Please add the concept to that array"
+    b.setFalseAndPrint(msg, path)
+
+  for conceptSlug in conceptSlugs - conceptDirSlugs:
+    let conceptDir = conceptsDir / conceptSlug
+    let msg = &"The {q conceptSlug} concept is missing its required files. " &
+              &"Please create the {q $conceptDir} directory with its required files"
+    b.setFalseAndPrint(msg, path)
 
 proc isTrackConfigValid*(trackDir: Path): bool =
   result = true
@@ -772,4 +780,4 @@ proc isTrackConfigValid*(trackDir: Path): bool =
 
   if j != nil:
     checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
-    checkConceptDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
+    checkConceptDirsAndTrackConfigAreInSync(trackDir, j, result, trackConfigPath)
