@@ -704,24 +704,33 @@ proc getExerciseSlugs(data: JsonNode; k: string): HashSet[string] =
           if slugStr.len > 0:
             result.incl slugStr
 
-proc checkExerciseDirsAreInTrackConfig(trackDir: Path; data: JsonNode;
-                                       b: var bool; path: Path) =
+proc checkExerciseDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
+                                              b: var bool; path: Path) =
   ## Sets `b` to `false` if there is an exercise directory that is
-  ## not an exercise `slug` in `data`.
+  ## not an exercise `slug` in `data` and vice versa.
   for exerciseKind in ["concept", "practice"]:
-    let exerciseSlugs = getExerciseSlugs(data, exerciseKind)
-    if exerciseSlugs.len > 0:
-      let exercisesDir = trackDir / "exercises" / exerciseKind
-      if dirExists(exercisesDir):
-        for exerciseDir in getSortedSubdirs(exercisesDir):
-          let dirSlug = lastPathPart(exerciseDir.string)
-          if dirSlug notin exerciseSlugs:
-            let msg = &"{q $exercisesDir} contains a directory named {q dirSlug}, " &
-                      &"which is not a `slug` in the array of {exerciseKind} " &
-                       "exercises. Please add the exercise to that array. " &
-                       "If the exercise is not ready to be shown on the " &
-                       "website, please set its `status` value to \"wip\""
-            b.setFalseAndPrint(msg, path)
+    let exerciseSlugs = getExerciseSlugs(data, exerciseKind)    
+    let exercisesDir = trackDir / "exercises" / exerciseKind
+    var exerciseDirSlugs = initHashSet[string]()
+
+    if dirExists(exercisesDir):
+      for exerciseDir in getSortedSubdirs(exercisesDir):
+        exerciseDirSlugs.incl lastPathPart(exerciseDir.string)
+
+    for exerciseSlug in exerciseDirSlugs - exerciseSlugs:
+      let msg = &"{q $exercisesDir} contains a directory named {q exerciseSlug}, " &
+                &"which is not a `slug` in the array of {exerciseKind} " &
+                  "exercises. Please add the exercise to that array. " &
+                  "If the exercise is not ready to be shown on the " &
+                  "website, please set its `status` value to \"wip\""
+      b.setFalseAndPrint(msg, path)
+
+    for exerciseSlug in exerciseSlugs - exerciseDirSlugs:
+      let exerciseDir = exercisesDir / exerciseSlug
+      let msg = &"The {q exerciseSlug} {exerciseKind} exercise is missing its " &
+                &"required files. Please create the {q $exerciseDir} directory with " &
+                "its required files"
+      b.setFalseAndPrint(msg, path)
 
 proc getConceptSlugs(data: JsonNode): HashSet[string] =
   result = initHashSet[string]()
@@ -779,5 +788,5 @@ proc isTrackConfigValid*(trackDir: Path): bool =
     result = satisfiesSecondPass(trackConfigContents, trackConfigPath)
 
   if j != nil:
-    checkExerciseDirsAreInTrackConfig(trackDir, j, result, trackConfigPath)
+    checkExerciseDirsAndTrackConfigAreInSync(trackDir, j, result, trackConfigPath)
     checkConceptDirsAndTrackConfigAreInSync(trackDir, j, result, trackConfigPath)
