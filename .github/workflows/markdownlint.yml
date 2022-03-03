@@ -11,6 +11,6 @@ jobs:
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846 # 2.4.0
 
       - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@b3c3b40b95c18bfa5363f6821764398c7149ad04 # 5.0.0
+        uses: DavidAnson/markdownlint-cli2-action@744f913a124058ee903768d3adb92a4847e5d132 # 5.1.0
         with:
           globs: "**/*.md"
