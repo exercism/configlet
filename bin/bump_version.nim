@@ -80,14 +80,12 @@ proc getGitHubRemoteName(owner, repo: static string): string =
       return remoteName
   error(&"there is no remote that points to '{url}'")
 
-proc isSaneRepoState: bool =
-  ## Returns `true` if all of these are satisfied:
+proc checkRepoState =
+  ## Raises `BumpError` if any of these is not satisfied:
   ## - There are no changes in the working directory.
   ## - We can switch to the `main` branch.
   ## - We can pull the `main` branch from upstream.
   ## - The local `main` branch is even with upstream.
-  ##
-  ## Otherwise, raises `BumpError`.
   discard execAndCheck(GitDiff, ["--quiet"],
                        "working directory has unstaged changes")
   discard execAndCheck(GitDiff, ["--quiet", "--cached"],
@@ -101,9 +99,7 @@ proc isSaneRepoState: bool =
   discard execAndCheck(GitPull, [remoteName, "main"])
   let localCommitRef = execAndCheck(GitRevParse, ["main"])
   let upstreamCommitRef = execAndCheck(GitRevParse, [&"{remoteName}/main"])
-  if localCommitRef == upstreamCommitRef:
-    result = true
-  else:
+  if localCommitRef != upstreamCommitRef:
     error("local `main` is ahead of upstream")
 
 type
@@ -254,9 +250,9 @@ proc promptToCreatePR(bumpedVersion: Version) =
 
 proc main =
   try:
-    if isSaneRepoState():
-      let bumpedVersion = bumpAndCommit()
-      promptToCreatePR(bumpedVersion)
+    checkRepoState()
+    let bumpedVersion = bumpAndCommit()
+    promptToCreatePR(bumpedVersion)
   except BumpQuit:
     let msg = getCurrentExceptionMsg()
     stderr.writeLine msg
