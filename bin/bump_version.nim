@@ -15,10 +15,10 @@
 import std/[os, osproc, strformat, strscans, strutils]
 
 type
-  BumpError = object of CatchableError
+  BumpError* = object of CatchableError
   BumpQuit = object of CatchableError
 
-proc error(msg: string) =
+proc error*(msg: string) =
   ## Raises a `BumpError`.
   raise newException(BumpError, msg)
 
@@ -27,7 +27,7 @@ proc exit0(msg: string) =
   raise newException(BumpQuit, msg)
 
 type
-  Command = enum
+  Command* = enum
     GitAdd = "git add"
     GitBranch = "git branch"
     GitCheckout = "git checkout"
@@ -40,6 +40,7 @@ type
     GitPush = "git push"
     GitRemote = "git remote"
     GitRevParse = "git rev-parse"
+    GitTag = "git tag"
     GhPr = "gh pr"
 
 proc exec(command: Command; args: openArray[string] = []): (string, int) =
@@ -52,8 +53,8 @@ proc exec(command: Command; args: openArray[string] = []): (string, int) =
     cmd.add quoteShell(arg)
   result = execCmdEx(cmd)
 
-proc execAndCheck(command: Command; args: openArray[string] = [];
-                  errorMsg = ""): string =
+proc execAndCheck*(command: Command; args: openArray[string] = [];
+                   errorMsg = ""): string =
   ## Runs the given command with `args` and returns the output (without a final
   ## newline).
   ##
@@ -69,7 +70,7 @@ proc execAndCheck(command: Command; args: openArray[string] = [];
       error(&"""the exit code was non-zero: {command} {args.join(" ")}""")
   stripLineEnd result
 
-proc getGitHubRemoteName(owner, repo: static string): string =
+proc getGitHubRemoteName*(owner, repo: static string): string =
   ## Returns the name of the remote that points to `github.com/owner/repo`.
   ##
   ## Raises `BumpError` if there is no such remote.
@@ -82,7 +83,7 @@ proc getGitHubRemoteName(owner, repo: static string): string =
       return remoteName
   error(&"there is no remote that points to '{url}'")
 
-proc checkRepoState =
+proc checkRepoState* =
   ## Raises `BumpError` if any of these is not satisfied:
   ## - There are no changes in the working directory.
   ## - We can switch to the `main` branch.
