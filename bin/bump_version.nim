@@ -2,16 +2,16 @@
 
 ## Running this file will:
 ## 1. Switch to the `main` branch, if there are no uncommitted changes (exiting
-##    otherwise)
-## 2. Pull the upstream `main` branch from github.com/exercism/configlet
-## 3. Check that the local `main` is not ahead of upstream
-## 4. Create and switch to a new git branch named like `release-x.y.z`
+##    otherwise).
+## 2. Pull the upstream `main` branch from github.com/exercism/configlet.
+## 3. Check that the local `main` is not ahead of upstream.
+## 4. Create and switch to a new git branch named like `release-x.y.z`.
 ## 5. Increment the version in `configlet.version` if it exists, otherwise in
 ##    the Nimble file (the former is required to support pre-release version
-##    strings like `4.0.0-alpha.36`)
-## 6. Commit the change
-## 7. If `gh` is installed, prompt the user to push to GitHub and create the PR
-## 8. Switch back to the `main` branch
+##    strings like `4.0.0-alpha.36`).
+## 6. Commit the change.
+## 7. If `gh` is installed, prompt the user to push to GitHub and create the PR.
+## 8. Switch back to the `main` branch.
 import std/[os, osproc, strformat, strscans, strutils]
 
 type
@@ -82,8 +82,8 @@ proc getGitHubRemoteName(owner, repo: static string): string =
 
 proc isSaneRepoState: bool =
   ## Returns `true` if all of these are satisfied:
-  ## - There are no changes in the working directory
-  ## - We can switch to the `main` branch
+  ## - There are no changes in the working directory.
+  ## - We can switch to the `main` branch.
   ## - We can pull the `main` branch from upstream.
   ## - The local `main` branch is even with upstream.
   ##
@@ -218,7 +218,7 @@ proc genPrBody: string =
   for line in commits.splitLines():
     result.add "- "
     # TODO: Avoid linking to many PRs due to contents of parentheses in
-    # for example 'foo(abc): do bar (#123)'
+    # for example 'foo(abc): do bar (#123)'.
     let (isMatch, lineStart, prNum) = line.scanTuple("$+ (#$i)$.")
     if isMatch:
       result.add lineStart
