@@ -233,7 +233,8 @@ proc promptToCreatePR(bumpedVersion: Version) =
       case stdin.readLine().toLowerAscii()
       of "y", "yes":
         let remote = getGitHubRemoteName("exercism", "configlet")
-        discard execAndCheck(GitPush, ["-u", remote, &"release-{bumpedVersion}"])
+        discard execAndCheck(GitPush,
+                             ["-u", remote, &"release-{bumpedVersion}"])
         let body = genPrBody()
         echo execAndCheck(GhPr,
                           ["create",
