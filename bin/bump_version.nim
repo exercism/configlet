@@ -72,7 +72,7 @@ proc execAndCheck(command: Command; args: openArray[string] = [];
 proc getGitHubRemoteName(owner, repo: static string): string =
   ## Returns the name of the remote in that points to `github.com/owner/repo`.
   ##
-  ## Exits with an error if there is no such remote.
+  ## Raises `BumpError` if there is no such remote.
   let remotes = execAndCheck(GitRemote, ["-v"])
   const url = &"github.com/{owner}/{repo}"
   for line in remotes.splitLines():
