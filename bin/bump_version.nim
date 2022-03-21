@@ -213,12 +213,12 @@ proc genPrBody: string =
   let commits = execAndCheck(GitLog, ["--oneline", &"{previousTag}..main"])
   for line in commits.splitLines():
     result.add "- "
-    # TODO: Avoid linking to many PRs due to contents of parentheses in
-    # for example 'foo(abc): do bar (#123)'.
+    # Tweak commit titles as dependabot does, linking PRs indirectly. This
+    # avoids noisy linking of referenced PRs.
     let (isMatch, lineStart, prNum) = line.scanTuple("$+ (#$i)$.")
     if isMatch:
       result.add lineStart
-      result.add &" ([#{prNum}](https://github.com/exercism/configlet/pull/{prNum}))"
+      result.add &" ([#{prNum}](https://github-redirect.dependabot.com/exercism/configlet/pull/{prNum}))"
     else:
       result.add line
     result.add '\n'
