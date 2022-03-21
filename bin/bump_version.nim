@@ -68,7 +68,7 @@ proc execAndCheck(command: Command; args: openArray[string] = [];
   stripLineEnd result
 
 proc getGitHubRemoteName(owner, repo: static string): string =
-  ## Returns the name of the remote in that points to `github.com/owner/repo`.
+  ## Returns the name of the remote that points to `github.com/owner/repo`.
   ##
   ## Raises `BumpError` if there is no such remote.
   let remotes = execAndCheck(GitRemote, ["-v"])
