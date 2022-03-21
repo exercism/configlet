@@ -19,14 +19,12 @@ type
   BumpQuit = object of CatchableError
 
 proc error(msg: string) =
-  ## Prints `msg` and raises a `BumpError`.
-  stderr.writeLine &"Error: {msg}"
-  raise newException(BumpError, "")
+  ## Raises a `BumpError`.
+  raise newException(BumpError, msg)
 
 proc exit0(msg: string) =
-  ## Prints `msg` and raises a `BumpQuit`.
-  stderr.writeLine msg
-  raise newException(BumpQuit, "")
+  ## Raises a `BumpQuit`.
+  raise newException(BumpQuit, msg)
 
 type
   Command = enum
@@ -260,8 +258,12 @@ proc main =
       let bumpedVersion = bumpAndCommit()
       promptToCreatePR(bumpedVersion)
   except BumpQuit:
+    let msg = getCurrentExceptionMsg()
+    stderr.writeLine msg
     return
   except BumpError:
+    let msg = getCurrentExceptionMsg()
+    stderr.writeLine &"Error: {msg}"
     quit 1
 
 when isMainModule:
