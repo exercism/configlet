@@ -4,7 +4,7 @@
 ## 1. Switch to the `main` branch, if there are no uncommitted changes (exiting
 ##    otherwise).
 ## 2. Pull the upstream `main` branch from github.com/exercism/configlet.
-## 3. Check that the local `main` is not ahead of upstream.
+## 3. Check that the local `main` branch is not ahead of upstream.
 ## 4. Create and switch to a new git branch named like `release-x.y.z`.
 ## 5. Increment the version in `configlet.version` if it exists, otherwise in
 ##    the Nimble file (the former is required to support pre-release version
