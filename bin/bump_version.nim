@@ -100,7 +100,7 @@ proc checkRepoState =
   let localCommitRef = execAndCheck(GitRevParse, ["main"])
   let upstreamCommitRef = execAndCheck(GitRevParse, [&"{remoteName}/main"])
   if localCommitRef != upstreamCommitRef:
-    error("local `main` branch is ahead of upstream")
+    error("local 'main' branch is ahead of upstream")
 
 type
   Version {.requiresInit.} = object
