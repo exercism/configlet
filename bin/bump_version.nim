@@ -47,6 +47,8 @@ proc exec(command: Command; args: openArray[string] = []): (string, int) =
   var cmd = $command
   for arg in args:
     cmd.add ' '
+    # Use `quoteShell` for each `arg`, because `execCmdEx` calls `startProcess`
+    # with the `poEvalCmd` option.
     cmd.add quoteShell(arg)
   result = execCmdEx(cmd)
 
