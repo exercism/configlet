@@ -23,11 +23,13 @@ proc checkRepoIsInPreTagState: string =
       error(&"the commit has already been tagged: {existingTag}")
     result = version
   else:
-    error(&"the most recent commit on branch 'main' is not a release commit:\n    {commitTitle}")
+    error("the most recent commit on branch 'main' is not a release commit:\n" &
+          &"    {commitTitle}")
 
 proc promptToTagAndPush(version: string) =
   while true:
-    stderr.write "tag the current commit and push the tag to exercism/configlet? ([y]es/[n]o) "
+    stderr.write "Tag the latest commit on the 'main' branch and push the " &
+                 "tag to exercism/configlet? ([y]es/[n]o) "
     case stdin.readLine().toLowerAscii()
     of "y", "yes":
       discard execAndCheck(GitTag, ["-a", "-m", version, version])
