@@ -32,19 +32,29 @@ proc promptToTagAndPush(version: string) =
                  "tag to exercism/configlet? ([y]es/[n]o) "
     case stdin.readLine().toLowerAscii()
     of "y", "yes":
-      discard execAndCheck(GitTag, ["-a", "-m", version, version])
       let remote = getGitHubRemoteName("exercism", "configlet")
-      discard execAndCheck(GitPush, [remote, version])
-      echo &"Successfully pushed tag for {version}"
-      echo """
-        Remaining steps to release:
-        1. Edit the release notes to contain the list of user-facing changes,
-           separating by features and bug fixes.
-        2. Wait for every build job to finish.
-        3. Check that CI is green.
-        4. Un-draft the release.
-      """.unindent()
-      return
+      discard execAndCheck(GitTag, ["-a", "-m", version, version])
+      try:
+        discard execAndCheck(GitPush, [remote, version])
+        echo &"Successfully pushed tag for {version}"
+        echo """
+          Remaining steps to release:
+          1. Edit the release notes to contain the list of user-facing changes,
+            separating by features and bug fixes.
+          2. Wait for every build job to finish.
+          3. Check that CI is green.
+          4. Un-draft the release.
+        """.unindent()
+        return
+      except BumpError:
+        # Delete the newly-added tag if we could not push, so we do not end in
+        # an intermediate state. The script either successfully tags and pushes,
+        # or returns us to the initial state.
+        echo "Failed to push the tag. Deleting it."
+        echo "Please check your network connection, and that you have write " &
+             "access to exercism/configlet, then re-run this script."
+        discard execAndCheck(GitTag, ["-d", version])
+        raise
     of "n", "no":
       return
     else:
