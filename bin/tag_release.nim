@@ -17,7 +17,7 @@ proc getVersionFromLatestCommitMessage: string =
   ##
   ## Raises `BumpError` if the repo does not have a valid pre-tagging state.
   checkRepoState()
-  let commitTitle = execAndCheck(GitLog, ["-n1", "--format='%s'"])
+  let commitTitle = execAndCheck(GitLog, ["-n1", "--format=%s"])
   let (isMatch, version, _) = commitTitle.scanTuple("release: $+ (#$i)$.")
   if isMatch:
     let existingTag = execAndCheck(GitTag, ["--points-at"])
