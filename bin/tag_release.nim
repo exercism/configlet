@@ -38,15 +38,14 @@ proc promptToTagAndPush(version: string) =
       discard execAndCheck(GitTag, ["-a", "-m", version, version])
       try:
         discard execAndCheck(GitPush, [remote, version])
-        echo &"Successfully pushed tag for {version}"
+        echo &"Successfully pushed tag for {version}\n"
         echo """
           Remaining steps to release:
           1. Edit the release notes to contain the list of user-facing changes,
-            separating by features and bug fixes.
+             separating by features and bug fixes.
           2. Wait for every build job to finish.
           3. Check that CI is green.
-          4. Un-draft the release.
-        """.unindent()
+          4. Un-draft the release.""".dedent()
         return
       except BumpError:
         # Delete the newly-added tag if we could not push, so we do not end in
