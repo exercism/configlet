@@ -49,7 +49,7 @@ proc promptToTagAndPush(version: string) =
       except BumpError:
         # Delete the newly-added tag if we could not push, so we do not end in
         # an intermediate state. The script either successfully tags and pushes,
-        # or returns us to the initial state.
+        # or returns us to the untagged state.
         echo "Failed to push the tag. Deleting it."
         echo "Please check your network connection, and that you have write " &
              "access to exercism/configlet, then re-run this script."
