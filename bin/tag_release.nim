@@ -12,8 +12,10 @@
 import std/[strformat, strscans, strutils]
 import "."/bump_version
 
-proc checkRepoIsInPreTagState: string =
+proc getVersionFromLatestCommitMessage: string =
   ## Returns the to-be-tagged version.
+  ##
+  ## Raises `BumpError` if the repo does not have a valid pre-tagging state.
   checkRepoState()
   let commitTitle = execAndCheck(GitLog, ["-n1", "--format='%s'"])
   let (isMatch, version, _) = commitTitle.scanTuple("release: $+ (#$i)$.")
@@ -62,7 +64,7 @@ proc promptToTagAndPush(version: string) =
 
 proc main =
   try:
-    let bumpedVersion = checkRepoIsInPreTagState()
+    let bumpedVersion = getVersionFromLatestCommitMessage()
     promptToTagAndPush(bumpedVersion)
   except BumpError:
     let msg = getCurrentExceptionMsg()
