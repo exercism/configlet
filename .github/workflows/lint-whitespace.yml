@@ -1,0 +1,19 @@
+name: Lint whitespace
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  lintwhitespace:
+    name: Check for trailing whitespace and missing final newline
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+
+      - name: Check for trailing whitespace
+        shell: bash
+        run: if git grep -Ir '[[:blank:]]$'; then exit 1; fi
+
+      - name: Check for missing final newlines
+        shell: bash
+        run: git grep --cached -Il '' | xargs -L1 bash -c 'if test "$(tail -c 1 "$0")"; then echo "No new line at end of $0"; exit 1; fi'
