@@ -419,7 +419,7 @@ proc hasArrayOfFiles*(data: JsonNode;
                       key: string;
                       path: Path;
                       context = "";
-                      relativeToPath: Path;                      
+                      relativeToPath: Path;
                       errorAnnotation = ""): bool =
   if hasArrayOfStrings(data, key, path, context):
     result = true

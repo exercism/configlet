@@ -198,7 +198,7 @@ proc isValidKeyFeature(data: JsonNode; context: string; path: Path): bool =
 
     For more information on key features see:
     https://exercism.org/docs/building/tracks/config-json#h-key-features""".unindent()
- 
+
   if isObject(data, context, path):
     let checks = [
       hasString(data, "icon", path, context, allowed = keyFeatureIcons,
@@ -717,7 +717,7 @@ proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
     ("test", "exemplar"),
     ("test", "editor"),
     ("editor", "example"),
-    ("editor", "exemplar"),    
+    ("editor", "exemplar"),
   ]
 
   var seenFilePatterns = initTable[string, HashSet[string]](250)
@@ -790,7 +790,7 @@ proc checkExerciseDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
   ## Sets `b` to `false` if there is an exercise directory that is
   ## not an exercise `slug` in `data` and vice versa.
   for exerciseKind in ["concept", "practice"]:
-    let exerciseSlugs = getExerciseSlugs(data, exerciseKind)    
+    let exerciseSlugs = getExerciseSlugs(data, exerciseKind)
     let exercisesDir = trackDir / "exercises" / exerciseKind
     var exerciseDirSlugs = initHashSet[string]()
 
