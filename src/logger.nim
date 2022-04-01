@@ -8,7 +8,8 @@ func levelThreshold(verbosity: Verbosity): Level =
   of verDetailed: lvlInfo
 
 proc setupLogging*(conf: Conf) =
-  let consoleLogger = newConsoleLogger(levelThreshold = levelThreshold(conf.verbosity), fmtStr = "")
+  let consoleLogger = newConsoleLogger(levelThreshold = levelThreshold(conf.verbosity),
+                                       fmtStr = "")
   addHandler(consoleLogger)
 
 proc logNormal*(conf: varargs[string]) =
