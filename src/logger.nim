@@ -12,8 +12,8 @@ proc setupLogging*(conf: Conf) =
                                        fmtStr = "")
   addHandler(consoleLogger)
 
-proc logNormal*(msgs: varargs[string]) =
+template logNormal*(msgs: varargs[string]) =
   notice(msgs)
 
-proc logDetailed*(msgs: varargs[string]) =
+template logDetailed*(msgs: varargs[string]) =
   info(msgs)
