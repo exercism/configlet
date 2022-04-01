@@ -12,7 +12,8 @@ type
 
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
-proc removeDir*(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc createDir(dir: ProbSpecsDir) {.borrow.}
+proc parentDir(path: ProbSpecsDir): string {.borrow.}
 proc `/`*(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
@@ -154,6 +155,9 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     result = T(conf.action.probSpecsDir)
     validate(result, conf)
   else:
-    result = T(getCurrentDir() / ".problem-specifications")
-    removeDir(result)
-    cloneExercismRepo("problem-specifications", result.string, shallow = true)
+    result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
+    if dirExists(result):
+      validate(result, conf)
+    else:
+      createDir result.parentDir()
+      cloneExercismRepo("problem-specifications", result.string, shallow = false)
