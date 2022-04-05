@@ -154,6 +154,13 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
   if conf.action.probSpecsDir.len > 0:
     result = T(conf.action.probSpecsDir)
     validate(result, conf)
+  elif conf.action.offline:
+    let msg = fmt"""
+      Error: --offline was passed, but there is no cached problem-specifications
+      repo at '{result}'
+      Please run without --offline once.""".unindent()
+    stderr.writeLine msg
+    quit 1
   else:
     result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
     if dirExists(result):
