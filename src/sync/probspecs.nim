@@ -145,9 +145,9 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                        &"failed to checkout '{mainBranchName}' in the cached " &
                        &"problem-specifications directory: '{probSpecsDir}'")
 
-      # Find the name of the remote that points to upstream. Don't assume the
-      # remote is called 'upstream'.
-      # Exit if the repo has no remote that points to upstream.
+      # Find the name of the remote that points to exercism/problem-specifications.
+      # Don't assume the remote is named 'origin'.
+      # Exit if the repo has no such remote.
       const upstreamHost = "github.com"
       const upstreamLocation = "exercism/problem-specifications"
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
