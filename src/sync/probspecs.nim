@@ -159,5 +159,9 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     if dirExists(result):
       validate(result, conf)
     else:
-      createDir result.parentDir()
+      try:
+        createDir result.parentDir()
+      except IOError, OSError:
+        stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
+        quit 1
       cloneExercismRepo("problem-specifications", result.string, shallow = false)
