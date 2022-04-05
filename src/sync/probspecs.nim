@@ -155,7 +155,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
       # `fetch` and `merge` separately, for better error messages.
       logNormal(&"Running 'git pull' in cached problem-specifications dir...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
-                       &"failed to fetch `{mainBranchName}` in " &
+                       &"failed to fetch '{mainBranchName}' in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
 
       discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
