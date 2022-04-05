@@ -26,8 +26,7 @@ Options for fmt:
 
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
-  -p, --prob-specs-dir <dir>   Use this 'problem-specifications' directory, rather than cloning temporarily
-  -o, --offline                Do not check that the directory specified by --prob-specs-dir is up to date
+  -o, --offline                Do not check that the cached 'problem-specifications' directory is up to date
   -u, --update                 Prompt to update the seen data that are unsynced
   -y, --yes                    Auto-confirm prompts from --update for updating docs, filepaths, and metadata
       --docs                   Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files
@@ -46,6 +45,7 @@ Global options:
   -t, --track-dir <dir>        Specify a track directory to use instead of the current directory
   -v, --verbosity <verbosity>  The verbosity of output.
                                Allowed values: q[uiet], n[ormal], d[etailed] (default: normal)
+
 ```
 
 ## `configlet lint`

@@ -93,7 +93,7 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
   ##
   ## Exits with an error if there is no such remote.
   # There's probably a better way to do this than parsing `git remote -v`.
-  let msg = "could not run `git remote -v` in the given " &
+  let msg = "could not run `git remote -v` in the cached " &
             &"problem-specifications directory: '{probSpecsDir}'"
   let remotes = gitCheck(0, ["remote", "-v"], msg)
   var remoteName, remoteUrl: string
@@ -102,29 +102,24 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
     if remoteUrl.contains(host) and remoteUrl.contains(location):
       return remoteName
   showError(&"there is no remote that points to '{location}' at '{host}' in " &
-            &"the given problem-specifications directory: '{probSpecsDir}'")
+            &"the cached problem-specifications directory: '{probSpecsDir}'")
 
 proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
   ## Raises an error if the given `probSpecsDir` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
-  logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
-
-  # Exit if the given directory does not exist.
-  if not dirExists(probSpecsDir):
-    showError("the given problem-specifications directory does not exist: " &
-              &"'{probSpecsDir}'")
+  logDetailed(&"Using cached problem-specifications dir: {probSpecsDir}")
 
   # Validate the `problem-specifications` repo without checking the ref of the
   # root commit, allowing the `--prob-specs-dir` location to be a shallow clone.
   withDir probSpecsDir.string:
     # Exit if the given directory is not a git repo.
-    discard gitCheck(0, ["rev-parse"], "the given problem-specifications " &
+    discard gitCheck(0, ["rev-parse"], "the cached problem-specifications " &
                      &"directory is not a git repository: '{probSpecsDir}'")
 
     # Exit if the working directory is not clean (allowing untracked files).
-    discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the given " &
+    discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the cached " &
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
@@ -147,12 +142,12 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
       let revHead = gitCheck(0, ["rev-parse", "HEAD"])
       let revUpstream = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
       if revHead != revUpstream:
-        showError("the given problem-specifications directory is not " &
+        showError("the cached problem-specifications directory is not " &
                   &"up-to-date: '{probSpecsDir}'")
 
 proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
-  if conf.action.probSpecsDir.len > 0:
-    result = T(conf.action.probSpecsDir)
+  result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
+  if dirExists(result):
     validate(result, conf)
   elif conf.action.offline:
     let msg = fmt"""
@@ -162,13 +157,9 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     stderr.writeLine msg
     quit 1
   else:
-    result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
-    if dirExists(result):
-      validate(result, conf)
-    else:
-      try:
-        createDir result.parentDir()
-      except IOError, OSError:
-        stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
-        quit 1
-      cloneExercismRepo("problem-specifications", result.string, shallow = false)
+    try:
+      createDir result.parentDir()
+    except IOError, OSError:
+      stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
+      quit 1
+    cloneExercismRepo("problem-specifications", result.string, shallow = false)

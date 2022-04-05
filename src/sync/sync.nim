@@ -6,9 +6,6 @@ import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
 proc validate(conf: Conf) =
   ## Exits with an error message if the given `conf` contains an invalid
   ## combination of options.
-  if conf.action.offline and conf.action.probSpecsDir.len == 0:
-    showError(&"'{list(optSyncOffline)}' was given without passing " &
-              &"'{list(optSyncProbSpecsDir)}'")
   if conf.action.update:
     if conf.action.yes and skTests in conf.action.scope:
       let msg = fmt"""

@@ -35,7 +35,6 @@ type
       yesFmt*: bool
     of actSync:
       exercise*: string
-      probSpecsDir*: string
       offline*: bool
       update*: bool
       yes*: bool
@@ -67,7 +66,6 @@ type
     optFmtSyncYes = "yes"
 
     # Options for `sync`
-    optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     # Scope to sync
     optSyncDocs = "docs"
@@ -148,7 +146,6 @@ func genHelpText: string =
         of optVerbosity: "verbosity"
         of optFmtSyncExercise: "slug"
         of optSyncTests: "mode"
-        of optSyncProbSpecsDir: "dir"
         of optUuidNum: "int"
         else: ""
 
@@ -202,10 +199,7 @@ func genHelpText: string =
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optSyncProbSpecsDir: "Use this 'problem-specifications' directory, " &
-                         "rather than cloning temporarily",
-    optSyncOffline: "Do not check that the directory specified by " &
-                    &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
+    optSyncOffline: "Do not check that the cached 'problem-specifications' directory is up to date",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -328,13 +322,13 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-func init*(T: typedesc[Action], actionKind: ActionKind, probSpecsDir = "",
+func init*(T: typedesc[Action], actionKind: ActionKind,
            scope: set[SyncKind] = {}): T =
   case actionKind
   of actNil, actFmt, actGenerate, actInfo, actLint:
     T(kind: actionKind)
   of actSync:
-    T(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
+    T(kind: actionKind, scope: scope)
   of actUuid:
     T(kind: actionKind, num: 1)
 
@@ -476,8 +470,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
-      of optSyncProbSpecsDir:
-        setActionOpt(probSpecsDir, val)
       of optSyncOffline:
         setActionOpt(offline, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:
