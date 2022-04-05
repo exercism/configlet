@@ -136,20 +136,15 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
     let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
     if not conf.action.offline:
-      # For now, just exit with an error if the HEAD is not up-to-date with
-      # upstream, even if it's possible to do a fast-forward merge.
+      # `fetch` and `merge` separately, for better error messages.
       logNormal(&"Running 'git pull' in cached problem-specifications dir...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                        &"failed to fetch `{mainBranchName}` in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
 
-      # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
-      # with `upstream/main`.
-      let revHead = gitCheck(0, ["rev-parse", "HEAD"])
-      let revUpstream = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
-      if revHead != revUpstream:
-        showError("the cached problem-specifications directory is not " &
-                  &"up-to-date: '{probSpecsDir}'")
+      discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
+                       &"failed to merge '{mainBranchName}' in " &
+                       &"problem-specifications directory: '{probSpecsDir}'")
 
 proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
   result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
