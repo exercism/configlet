@@ -111,12 +111,17 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
 
   logDetailed(&"Using cached problem-specifications dir: {probSpecsDir}")
 
-  # Validate the `problem-specifications` repo without checking the ref of the
-  # root commit, allowing the `--prob-specs-dir` location to be a shallow clone.
   withDir probSpecsDir.string:
-    # Exit if the given directory is not a git repo.
-    discard gitCheck(0, ["rev-parse"], "the cached problem-specifications " &
-                     &"directory is not a git repository: '{probSpecsDir}'")
+    # Validate the `problem-specifications` repo by checking the ref of the root
+    # commit. Don't support a shallow clone.
+    let rootCommitRef = gitCheck(0, ["rev-list", "--max-parents=0", "HEAD"],
+                                 "the directory at the cached " &
+                                 "problem-specifications location is not a " &
+                                 &"git repository: '{probSpecsDir}'")
+
+    if rootCommitRef != "8ba81069dab8e96a53630f3e51446487b6ec9212\n":
+      showError("the git repo at the cached problem-specifications location " &
+                &"has an unexpected initial commit: '{probSpecsDir}'")
 
     # Exit if the working directory is not clean (allowing untracked files).
     discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the cached " &
