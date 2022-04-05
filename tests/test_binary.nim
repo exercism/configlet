@@ -51,7 +51,8 @@ proc testsForSync(binaryPath: static string) =
                     "736245965db724cafc5ec8e9dcae83c850b7c5a8") # 2021-10-22
 
   const
-    syncOffline = &"{binaryPath} -t {trackDir} sync -o"
+    syncBase = &"{binaryPath} -t {trackDir} sync"
+    syncOffline = &"{syncBase} -o"
     syncOfflineUpdate = &"{syncOffline} --update"
     syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
@@ -841,6 +842,25 @@ proc testsForSync(binaryPath: static string) =
 
   # Don't leave cached prob-specs dir in detached HEAD state.
   check git(["-C", psDir, "checkout", "main"]).exitCode == 0
+
+  if existsEnv("CI"):
+    suite "sync, without --offline":
+      test "can pull changes into cached prob-specs":
+        # Reset local `main` to a previous commit.
+        check git(["-C", psDir, "reset", "--hard",
+                  "0eda2318cb5622532e498559255c8fe141c9d07f"]).exitCode == 0
+
+        # Perform a sync without `--offline`.
+        execAndCheckExitCode(1, syncBase)
+
+        # Check that local HEAD and `main` point to same commit as `origin/main`.
+        let upstreamLatestRef = gitCheck(0, ["-C", psDir, "rev-parse",
+                                            "origin/main"])
+        let localHead = gitCheck(0, ["-C", psDir, "rev-parse", "HEAD"])
+        let localMain = gitCheck(0, ["-C", psDir, "rev-parse", "main"])
+        check:
+          upstreamLatestRef == localHead
+          upstreamLatestRef == localMain
 
 proc prepareIntroductionFiles(trackDir, header, placeholder: string;
                               removeIntro: bool) =
