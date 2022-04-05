@@ -133,6 +133,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
     if not conf.action.offline:
       # For now, just exit with an error if the HEAD is not up-to-date with
       # upstream, even if it's possible to do a fast-forward merge.
+      logNormal(&"Running 'git pull' in cached problem-specifications dir...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                        &"failed to fetch `{mainBranchName}` in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
