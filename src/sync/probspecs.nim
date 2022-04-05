@@ -128,14 +128,14 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
-    # Find the name of the remote that points to upstream. Don't assume the
-    # remote is called 'upstream'.
-    # Exit if the repo has no remote that points to upstream.
-    const upstreamHost = "github.com"
-    const upstreamLocation = "exercism/problem-specifications"
-    let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
-
     if not conf.action.offline:
+      # Find the name of the remote that points to upstream. Don't assume the
+      # remote is called 'upstream'.
+      # Exit if the repo has no remote that points to upstream.
+      const upstreamHost = "github.com"
+      const upstreamLocation = "exercism/problem-specifications"
+      let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
+
       # `fetch` and `merge` separately, for better error messages.
       logNormal(&"Running 'git pull' in cached problem-specifications dir...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
