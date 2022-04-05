@@ -81,7 +81,6 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
               &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
                trackConfigPath)
-  logNormal("Checking exercises...")
 
   # Don't clone problem-specifications if only `--filepaths` is given
   let probSpecsDir =
@@ -93,6 +92,8 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   let psExercisesDir = probSpecsDir / "exercises"
   let trackExercisesDir = conf.trackDir / "exercises"
   let trackPracticeExercisesDir = trackExercisesDir / "practice"
+
+  logNormal("Checking exercises...")
 
   for syncKind in conf.action.scope:
     case syncKind
