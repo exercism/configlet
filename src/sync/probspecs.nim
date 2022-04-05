@@ -128,7 +128,23 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
-    if not conf.action.offline:
+    if conf.action.offline:
+      # Don't checkout `main` when `--offline` was passed, because:
+      # 1. The current tests of the configlet executable require that
+      #    `configlet sync --offline` does not alter the state of the cached
+      #    prob-specs repo.
+      # 2. It allows a power user to manually checkout an older commit in the
+      #    cached repo, which can help with making some atomic commits.
+      discard gitCheck(0, ["merge-base", "--is-ancestor", "HEAD", mainBranchName],
+                      &"the checked-out commit is not on the '{mainBranchName}'" &
+                      &"branch: '{probSpecsDir}'")
+    else:
+      # Checkout `main`. Like the above, don't allow a power user to sync from a
+      # prob-specs state that hasn't been merged to upstream `main`.
+      discard gitCheck(0, ["checkout", mainBranchName],
+                       &"failed to checkout '{mainBranchName}' in the cached " &
+                       &"problem-specifications directory: '{probSpecsDir}'")
+
       # Find the name of the remote that points to upstream. Don't assume the
       # remote is called 'upstream'.
       # Exit if the repo has no remote that points to upstream.
