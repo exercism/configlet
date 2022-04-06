@@ -12,7 +12,7 @@ jobs:
 
       - name: Check for trailing whitespace
         shell: bash
-        run: if git grep -Ir '[[:blank:]]$'; then exit 1; fi
+        run: if git grep --cached -Ir '[[:blank:]]$'; then exit 1; fi
 
       - name: Check for missing final newlines
         shell: bash
