@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+repo_root=$(git rev-parse --show-toplevel)
+cd "${repo_root}" || exit
+exit_status=0
+
+# Check for trailing whitespace.
+if git grep --cached -Ir '[[:blank:]]$'; then
+  exit_status=1
+fi
+
+# Check for missing final newline.
+for file in $(git grep --cached -Il ''); do
+  if [ "$(tail -c 1 "${file}" | wc -l)" -eq 0 ]; then
+    echo "No newline at end of file: ${file}"
+    exit_status=1
+  fi
+done
+
+# Check for multiple final newlines.
+if rg -l --multiline '\n\n\z'; then
+  exit_status=1
+fi
+
+exit "${exit_status}"

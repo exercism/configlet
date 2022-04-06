@@ -4,22 +4,11 @@ on: [push, pull_request, workflow_dispatch]
 
 jobs:
   lint_whitespace:
-    name: Check for trailing whitespace and missing final newline
+    name: Lint whitespace
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
 
-      - name: Check for trailing whitespace
-        shell: bash
-        run: if git grep --cached -Ir '[[:blank:]]$'; then exit 1; fi
-
-      - name: Check that every file has a final newline
-        shell: bash
-        run: >
-          git grep -z --cached -Il ''
-          | xargs -0 -L1 bash -c 'if test "$(tail -c 1 "$0")"; then echo "No newline at end of $0"; exit 1; fi'
-
-      - name: Check that no file has multiple final newlines
-        shell: bash
-        run: if rg -l --multiline '\n\n\z'; then exit 1; fi
+      - name: Check that every file has no trailing whitespace, and exactly one final newline
+        run: ./.github/bin/lint-whitespace
