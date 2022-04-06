@@ -18,8 +18,13 @@ for file in $(git grep --cached -Il ''); do
 done
 
 # Check for multiple final newlines.
-if rg -l --multiline '\n\n\z'; then
+if type rg > /dev/null; then
+  if rg -l --multiline '\n\n\z'; then
+    exit_status=1
+  fi
+else
   exit_status=1
+  echo 'rg is not installed'
 fi
 
 exit "${exit_status}"
