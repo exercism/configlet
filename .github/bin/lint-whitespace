@@ -5,7 +5,7 @@ cd "${repo_root}" || exit
 exit_status=0
 
 # Check that each git-tracked plaintext file has no trailing whitespace.
-if git grep --cached -Ir '[[:blank:]]$'; then
+if git grep --cached -I '[[:blank:]]$'; then
   exit_status=1
 fi
 
