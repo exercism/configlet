@@ -14,6 +14,6 @@ jobs:
         shell: bash
         run: if git grep --cached -Ir '[[:blank:]]$'; then exit 1; fi
 
-      - name: Check for missing final newlines
+      - name: Check that every file has a final newline
         shell: bash
         run: git grep --cached -Il '' | xargs -L1 bash -c 'if test "$(tail -c 1 "$0")"; then echo "No new line at end of $0"; exit 1; fi'
