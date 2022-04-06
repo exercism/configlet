@@ -19,3 +19,7 @@ jobs:
         run: >
           git grep -z --cached -Il ''
           | xargs -0 -L1 bash -c 'if test "$(tail -c 1 "$0")"; then echo "No newline at end of $0"; exit 1; fi'
+
+      - name: Check that no file has multiple final newlines
+        shell: bash
+        run: if rg -l --multiline '\n\n\z'; then exit 1; fi
