@@ -9,22 +9,15 @@ if git grep --cached -Ir '[[:blank:]]$'; then
   exit_status=1
 fi
 
-# Check for missing final newline.
+# Check for exactly one final newline.
 for file in $(git grep --cached -Il ''); do
   if [ "$(tail -c 1 "${file}" | wc -l)" -eq 0 ]; then
     echo "No newline at end of file: ${file}"
     exit_status=1
-  fi
-done
-
-# Check for multiple final newlines.
-if type rg > /dev/null; then
-  if rg -l --multiline '\n\n\z'; then
+  elif [ "$(tail -c 2 "${file}" | wc -l)" -eq 2 ]; then
+    echo "Multiple newlines at end of file: ${file}"
     exit_status=1
   fi
-else
-  exit_status=1
-  echo 'rg is not installed'
-fi
+done
 
 exit "${exit_status}"
