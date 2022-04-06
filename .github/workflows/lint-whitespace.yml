@@ -3,7 +3,7 @@ name: Lint whitespace
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  lintwhitespace:
+  lint_whitespace:
     name: Check for trailing whitespace and missing final newline
     runs-on: ubuntu-20.04
     steps:
