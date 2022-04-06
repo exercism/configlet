@@ -10,7 +10,7 @@ if git grep --cached -I '[[:blank:]]$'; then
 fi
 
 # Check that each git-tracked plaintext file has one final newline.
-for file in $(git grep --cached -Il ''); do
+for file in $(git grep --cached -I --files-with-matches ''); do
   if [ "$(tail -c 1 "${file}" | wc -l)" -eq 0 ]; then
     echo "No newline at end of file: ${file}"
     exit_status=1
