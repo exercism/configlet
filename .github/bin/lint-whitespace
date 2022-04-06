@@ -4,12 +4,12 @@ repo_root=$(git rev-parse --show-toplevel)
 cd "${repo_root}" || exit
 exit_status=0
 
-# Check for trailing whitespace.
+# Check that each git-tracked plaintext file has no trailing whitespace.
 if git grep --cached -Ir '[[:blank:]]$'; then
   exit_status=1
 fi
 
-# Check for exactly one final newline.
+# Check that each git-tracked plaintext file has one final newline.
 for file in $(git grep --cached -Il ''); do
   if [ "$(tail -c 1 "${file}" | wc -l)" -eq 0 ]; then
     echo "No newline at end of file: ${file}"
