@@ -8,7 +8,7 @@ proc main =
 
   let conf = processCmdLine()
 
-  setupLogging(conf)
+  setupLogging(conf.verbosity)
 
   case conf.action.kind
   of actNil:

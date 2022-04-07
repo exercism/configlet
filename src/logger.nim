@@ -1,18 +1,19 @@
 import std/logging
 import "."/cli
 
-func levelThreshold(verbosity: Verbosity): Level =
+func toLevel(verbosity: Verbosity): Level =
   case verbosity
   of verQuiet: lvlNone
   of verNormal: lvlNotice
   of verDetailed: lvlInfo
 
-proc setupLogging*(conf: Conf) =
-  let consoleLogger = newConsoleLogger(levelThreshold = levelThreshold(conf.verbosity), fmtStr = "")
+proc setupLogging*(verbosity: Verbosity) =
+  let consoleLogger = newConsoleLogger(levelThreshold = toLevel(verbosity),
+                                       fmtStr = "")
   addHandler(consoleLogger)
 
-proc logNormal*(conf: varargs[string]) =
-  notice(conf)
+template logNormal*(msgs: varargs[string]) =
+  notice(msgs)
 
-proc logDetailed*(conf: varargs[string]) =
-  info(conf)
+template logDetailed*(msgs: varargs[string]) =
+  info(msgs)
