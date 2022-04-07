@@ -33,7 +33,7 @@ before build:
   # we can't `import cligen/parseopt3` and check the parsing directly.
   # Instead, let's just hash the file and run `git apply` conditionally.
   # First, get the path to `parseopt3.nim` in the `cligen` package.
-  let (output, exitCode) = gorgeEx("nimble path cligen")
+  let (output, exitCode) = gorgeEx("nimble --silent path cligen")
   if exitCode == 0:
     let parseopt3Path = joinPath(output.strip(), "cligen", "parseopt3.nim")
     if fileExists(parseopt3Path):
@@ -45,9 +45,10 @@ before build:
         echo "Trying to patch parseopt3..."
         echo "Found " & parseopt3Path
         let patchPath = thisDir() / "parseopt3_allow_long_option_optional_value.patch"
-        let parseopt3Dir = parseopt3Path.parentDir()
+        # `--directory` value must be relative to the repo root.
+        let parseopt3Dir = relativePath(parseopt3Path.parentDir(), thisDir())
         # Apply the patch.
-        let cmd = "git -C " & parseopt3Dir & " apply --verbose " & patchPath
+        let cmd = "git apply --verbose --directory " & parseopt3Dir & " " & patchPath
         let (outp, exitCode) = gorgeEx(cmd)
         echo outp
         if exitCode != 0:
