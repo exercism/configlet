@@ -1,0 +1,14 @@
+name: Lint whitespace
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  lint_whitespace:
+    name: Lint whitespace
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+
+      - name: Check that every file has no trailing whitespace, and exactly one final newline
+        run: ./.github/bin/lint-whitespace
