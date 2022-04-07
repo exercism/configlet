@@ -1,5 +1,8 @@
 #!/usr/bin/env sh
 
+# Change directory to the repo root, so that `git grep`:
+# - Operates on the whole repo, even if this script is called from a subdirectory.
+# - Outputs paths relative to the repo root.
 repo_root="$(git rev-parse --show-toplevel)"
 cd "${repo_root}" || exit
 exit_status=0
