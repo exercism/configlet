@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 
-repo_root=$(git rev-parse --show-toplevel)
+repo_root="$(git rev-parse --show-toplevel)"
 cd "${repo_root}" || exit
 exit_status=0
 
 # Check that each git-tracked plaintext file has no trailing whitespace.
-trailing_whitespace=$(git grep --cached -I '[[:blank:]]$')
+trailing_whitespace="$(git grep --cached -I '[[:blank:]]$')"
 if [ -n "${trailing_whitespace}" ]; then
   echo "There is trailing whitespace on the below lines:"
   echo "${trailing_whitespace}"
