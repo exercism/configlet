@@ -6,9 +6,6 @@ import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
 proc validate(conf: Conf) =
   ## Exits with an error message if the given `conf` contains an invalid
   ## combination of options.
-  if conf.action.offline and conf.action.probSpecsDir.len == 0:
-    showError(&"'{list(optSyncOffline)}' was given without passing " &
-              &"'{list(optSyncProbSpecsDir)}'")
   if conf.action.update:
     if conf.action.yes and skTests in conf.action.scope:
       let msg = fmt"""
@@ -84,7 +81,6 @@ proc syncImpl(conf: Conf): set[SyncKind] =
   logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
               &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
                trackConfigPath)
-  logNormal("Checking exercises...")
 
   # Don't clone problem-specifications if only `--filepaths` is given
   let probSpecsDir =
@@ -93,41 +89,38 @@ proc syncImpl(conf: Conf): set[SyncKind] =
     else:
       ProbSpecsDir.init(conf)
 
-  try:
-    let psExercisesDir = probSpecsDir / "exercises"
-    let trackExercisesDir = conf.trackDir / "exercises"
-    let trackPracticeExercisesDir = trackExercisesDir / "practice"
+  let psExercisesDir = probSpecsDir / "exercises"
+  let trackExercisesDir = conf.trackDir / "exercises"
+  let trackPracticeExercisesDir = trackExercisesDir / "practice"
 
-    for syncKind in conf.action.scope:
-      case syncKind
-      # Check/update docs
-      of skDocs:
-        checkOrUpdateDocs(result, conf, trackExerciseSlugs.practice,
-                          trackPracticeExercisesDir, psExercisesDir)
+  logNormal("Checking exercises...")
 
-      # Check/update metadata
-      of skMetadata:
-        checkOrUpdateMetadata(result, conf, trackExerciseSlugs.practice,
-                              trackPracticeExercisesDir, psExercisesDir)
+  for syncKind in conf.action.scope:
+    case syncKind
+    # Check/update docs
+    of skDocs:
+      checkOrUpdateDocs(result, conf, trackExerciseSlugs.practice,
+                        trackPracticeExercisesDir, psExercisesDir)
 
-      # Check/update filepaths
-      of skFilepaths:
-        let trackConceptExercisesDir = trackExercisesDir / "concept"
-        checkOrUpdateFilepaths(result, conf, trackExerciseSlugs.`concept`,
-                               trackExerciseSlugs.practice, trackConfig.files,
-                               trackPracticeExercisesDir, trackConceptExercisesDir)
+    # Check/update metadata
+    of skMetadata:
+      checkOrUpdateMetadata(result, conf, trackExerciseSlugs.practice,
+                            trackPracticeExercisesDir, psExercisesDir)
 
-      # Check/update tests
-      of skTests:
-        let exercises = toSeq findExercises(conf, probSpecsDir)
-        if conf.action.update:
-          updateTests(result, conf, exercises)
-        else:
-          checkTests(result, exercises)
+    # Check/update filepaths
+    of skFilepaths:
+      let trackConceptExercisesDir = trackExercisesDir / "concept"
+      checkOrUpdateFilepaths(result, conf, trackExerciseSlugs.`concept`,
+                              trackExerciseSlugs.practice, trackConfig.files,
+                              trackPracticeExercisesDir, trackConceptExercisesDir)
 
-  finally:
-    if conf.action.probSpecsDir.len == 0 and conf.action.scope != {skFilepaths}:
-      removeDir(probSpecsDir)
+    # Check/update tests
+    of skTests:
+      let exercises = toSeq findExercises(conf, probSpecsDir)
+      if conf.action.update:
+        updateTests(result, conf, exercises)
+      else:
+        checkTests(result, exercises)
 
 func explain(syncKind: SyncKind): string =
   case syncKind

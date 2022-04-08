@@ -2,11 +2,6 @@
 import std/[json, os, strformat, tables, unittest]
 import "."/[cli, exec, sync/probspecs]
 
-type
-  ProblemSpecsDir = enum
-    psFresh = "fresh clone"
-    psExisting = "existing dir (simulate the `--prob-specs-dir` option)"
-
 proc getProbSpecsExercises(probSpecsDir: ProbSpecsDir): Table[string,
     seq[ProbSpecsTestCase]] =
   ## Returns a Table containing the slug and corresponding canonical tests for
@@ -17,20 +12,12 @@ proc getProbSpecsExercises(probSpecsDir: ProbSpecsDir): Table[string,
     result[slug] = getCanonicalTests(probSpecsDir, slug)
 
 proc main =
-  let existingDir = getTempDir() / "test_probspecs_problem-specifications"
-  removeDir(existingDir)
+  let psDir = getCacheDir() / "exercism" / "configlet" / "problem-specifications"
+  removeDir psDir
 
-  for ps in ProblemSpecsDir:
-    suite &"getCanonicalTests: {ps}":
-      if ps == psExisting:
-        cloneExercismRepo("problem-specifications", existingDir, shallow = true)
-
-      let probSpecsPath =
-        case ps
-        of psFresh: ""
-        of psExisting: existingDir
-
-      let action = Action.init(actSync, probSpecsPath)
+  for psCacheKind in ["no cache", "cache exists"]:
+    suite &"getCanonicalTests: {psCacheKind}":
+      let action = Action.init(actSync)
       let conf = Conf.init(action)
       let probSpecsDir = ProbSpecsDir.init(conf)
       let probSpecsExercises = getProbSpecsExercises(probSpecsDir)
@@ -81,9 +68,6 @@ proc main =
 
         check:
           firstTestCase == firstTestCaseExpected
-
-  removeDir(existingDir)
-  removeDir(".problem-specifications")
 
 main()
 {.used.}

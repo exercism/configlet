@@ -35,7 +35,6 @@ type
       yesFmt*: bool
     of actSync:
       exercise*: string
-      probSpecsDir*: string
       offline*: bool
       update*: bool
       yes*: bool
@@ -67,7 +66,6 @@ type
     optFmtSyncYes = "yes"
 
     # Options for `sync`
-    optSyncProbSpecsDir = "probSpecsDir"
     optSyncOffline = "offline"
     # Scope to sync
     optSyncDocs = "docs"
@@ -148,7 +146,6 @@ func genHelpText: string =
         of optVerbosity: "verbosity"
         of optFmtSyncExercise: "slug"
         of optSyncTests: "mode"
-        of optSyncProbSpecsDir: "dir"
         of optUuidNum: "int"
         else: ""
 
@@ -200,12 +197,9 @@ func genHelpText: string =
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optFmtSyncExercise: "Only operate on this exercise",
-    optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
+    optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optSyncProbSpecsDir: "Use this 'problem-specifications' directory, " &
-                         "rather than cloning temporarily",
-    optSyncOffline: "Do not check that the directory specified by " &
-                    &"--{camelToKebab($optSyncProbSpecsDir)} is up to date",
+    optSyncOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -328,13 +322,13 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
     else:
       &"'{prefix}{key}'"
 
-func init*(T: typedesc[Action], actionKind: ActionKind, probSpecsDir = "",
+func init*(T: typedesc[Action], actionKind: ActionKind,
            scope: set[SyncKind] = {}): T =
   case actionKind
   of actNil, actFmt, actGenerate, actInfo, actLint:
     T(kind: actionKind)
   of actSync:
-    T(kind: actionKind, probSpecsDir: probSpecsDir, scope: scope)
+    T(kind: actionKind, scope: scope)
   of actUuid:
     T(kind: actionKind, num: 1)
 
@@ -392,6 +386,15 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
     if val.len == 0 and result notin optsNoVal and result != optSyncTests:
       showError(&"{formatOpt(kind, key)} was given without a value")
   except ValueError:
+    if keyNormalized in ["p", "probspecsdir"]:
+      const msg = """
+        The --prob-specs-dir option was removed in configlet 4.0.0-beta.1 (April 2022).
+        A plain `configlet sync` now caches the cloned problem-specifications in your
+        user's cache directory - there is no longer an option to configure the location.
+        Performing an offline sync now requires only one option (--offline), but you
+        must first run a `configlet sync` command without --offline at least once on
+        your machine.""".unindent()
+      stderr.writeLine msg
     showError(&"invalid option: {formatOpt(kind, key)}")
 
 proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
@@ -476,8 +479,6 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
-      of optSyncProbSpecsDir:
-        setActionOpt(probSpecsDir, val)
       of optSyncOffline:
         setActionOpt(offline, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:

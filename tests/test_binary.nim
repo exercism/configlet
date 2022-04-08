@@ -1,5 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/[exec, lint/validators]
+import "."/[exec, helpers, lint/validators, sync/probspecs]
 
 const
   testsDir = currentSourcePath().parentDir()
@@ -39,7 +39,7 @@ template checkNoDiff(trackDir: string) =
   check gitDiffExitCode(trackDir) == 0
 
 proc testsForSync(binaryPath: static string) =
-  const psDir = testsDir / ".test_problem_specifications"
+  const psDir = getCacheDir() / "exercism" / "configlet" / "problem-specifications"
   const trackDir = testsDir / ".test_nim_track_repo"
 
   # Setup: clone the problem-specifications repo, and checkout a known state
@@ -51,7 +51,8 @@ proc testsForSync(binaryPath: static string) =
                     "736245965db724cafc5ec8e9dcae83c850b7c5a8") # 2021-10-22
 
   const
-    syncOffline = &"{binaryPath} -t {trackDir} sync -o -p {psDir}"
+    syncBase = &"{binaryPath} -t {trackDir} sync"
+    syncOffline = &"{syncBase} -o"
     syncOfflineUpdate = &"{syncOffline} --update"
     syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
@@ -143,7 +144,7 @@ proc testsForSync(binaryPath: static string) =
       const expectedOutput = fmt"""
         Error: cannot open: my_missing_directory{DirSep}config.json
       """.unindent()
-      let cmd = &"{binaryPath} -t my_missing_directory sync -o -p {psDir}"
+      let cmd = &"{binaryPath} -t my_missing_directory sync -o"
       execAndCheck(1, cmd, expectedOutput)
 
   suite "sync, for an exercise that does not exist (prints the expected output, and exits with 1)":
@@ -839,6 +840,38 @@ proc testsForSync(binaryPath: static string) =
       let diff = gitDiffConcise(trackDir)
       check diff == expectedDiffOutput
 
+  # Don't leave cached prob-specs dir in detached HEAD state.
+  check git(["-C", psDir, "checkout", "main"]).exitCode == 0
+
+  suite "sync, without --offline":
+    test "can pull changes into cached prob-specs":
+      # Reset local `main` to a previous commit.
+      check git(["-C", psDir, "reset", "--hard",
+                 "0eda2318cb5622532e498559255c8fe141c9d07f"]).exitCode == 0
+
+      # Perform a sync without `--offline`.
+      execAndCheckExitCode(1, syncBase)
+
+      # Check that local HEAD and `main` point to same commit as the upstream `main`.
+      const mainBranchName = "main"
+      const upstreamHost = "github.com"
+      const upstreamLocation = "exercism/problem-specifications"
+      let probSpecsDir = ProbSpecsDir(psDir) # Don't use `init` (it performs extra setup).
+      let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
+      withDir psDir:
+        let upstreamLatestRef = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
+        let localHead = gitCheck(0, ["rev-parse", "HEAD"])
+        let localMain = gitCheck(0, ["rev-parse", mainBranchName])
+        check:
+          upstreamLatestRef == localHead
+          upstreamLatestRef == localMain
+
+        # Return the local `main` to previous state, even if the sync failed
+        # (for example, due to no network connection).
+        discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
+                         &"failed to merge '{mainBranchName}' in " &
+                         &"problem-specifications directory: '{probSpecsDir}'")
+
 proc prepareIntroductionFiles(trackDir, header, placeholder: string;
                               removeIntro: bool) =
   # Writes an `introduction.md.tpl` file for the `bird-count` Concept Exercise,
@@ -1033,14 +1066,6 @@ proc main =
       check:
         outp.scanf("$i.$i.$i", major, minor, patch)
         exitCode == 0
-
-  suite "offline":
-    for offline in ["--offline", "-o"]:
-      test &"requires --prob-specs-dir: {offline}":
-        let (outp, exitCode) = execCmdEx(&"{binaryPath} sync {offline}")
-        check:
-          outp.contains("'-o, --offline' was given without passing '-p, --prob-specs-dir'")
-          exitCode == 1
 
   suite "uuid":
     for cmd in ["uuid", "uuid -n 100", &"uuid -vq -n {repeat('9', 50)}"]:

@@ -12,7 +12,8 @@ type
 
 proc `$`(dir: ProbSpecsDir): string {.borrow.}
 proc dirExists(dir: ProbSpecsDir): bool {.borrow.}
-proc removeDir*(dir: ProbSpecsDir, checkDir = false) {.borrow.}
+proc createDir(dir: ProbSpecsDir) {.borrow.}
+proc parentDir(path: ProbSpecsDir): string {.borrow.}
 proc `/`*(head: ProbSpecsDir, tail: string): string {.borrow.}
 proc `/`(head: ProbSpecsExerciseDir, tail: string): string {.borrow.}
 proc lastPathPart(path: ProbSpecsExerciseDir): string {.borrow.}
@@ -85,75 +86,101 @@ proc getCanonicalTests*(probSpecsDir: ProbSpecsDir,
   if fileExists(probSpecsExerciseDir.canonicalDataFile()):
     result = parseProbSpecsTestCases(probSpecsExerciseDir)
 
-proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
-                     host, location: string): string =
+proc getNameOfRemote*(probSpecsDir: ProbSpecsDir;
+                      host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
   ## at `host`.
   ##
   ## Exits with an error if there is no such remote.
   # There's probably a better way to do this than parsing `git remote -v`.
-  let msg = "could not run `git remote -v` in the given " &
+  let msg = "could not run `git remote -v` in the cached " &
             &"problem-specifications directory: '{probSpecsDir}'"
-  let remotes = gitCheck(0, ["remote", "-v"], msg)
+  let remotes = gitCheck(0, ["-C", probSpecsDir.string, "remote", "-v"], msg)
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
     if remoteUrl.contains(host) and remoteUrl.contains(location):
       return remoteName
   showError(&"there is no remote that points to '{location}' at '{host}' in " &
-            &"the given problem-specifications directory: '{probSpecsDir}'")
+            &"the cached problem-specifications directory: '{probSpecsDir}'")
 
 proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
   ## Raises an error if the given `probSpecsDir` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
-  logDetailed(&"Using user-provided problem-specifications dir: {probSpecsDir}")
+  logDetailed(&"Using cached 'problem-specifications' dir: {probSpecsDir}")
 
-  # Exit if the given directory does not exist.
-  if not dirExists(probSpecsDir):
-    showError("the given problem-specifications directory does not exist: " &
-              &"'{probSpecsDir}'")
-
-  # Validate the `problem-specifications` repo without checking the ref of the
-  # root commit, allowing the `--prob-specs-dir` location to be a shallow clone.
   withDir probSpecsDir.string:
-    # Exit if the given directory is not a git repo.
-    discard gitCheck(0, ["rev-parse"], "the given problem-specifications " &
-                     &"directory is not a git repository: '{probSpecsDir}'")
+    # Validate the `problem-specifications` repo by checking the ref of the root
+    # commit. Don't support a shallow clone.
+    let rootCommitRef = gitCheck(0, ["rev-list", "--max-parents=0", "HEAD"],
+                                 "the directory at the cached " &
+                                 "problem-specifications location is not a " &
+                                 &"git repository: '{probSpecsDir}'")
+
+    if rootCommitRef != "8ba81069dab8e96a53630f3e51446487b6ec9212\n":
+      showError("the git repo at the cached problem-specifications location " &
+                &"has an unexpected initial commit: '{probSpecsDir}'")
 
     # Exit if the working directory is not clean (allowing untracked files).
-    discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the given " &
+    discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the cached " &
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
-    # Find the name of the remote that points to upstream. Don't assume the
-    # remote is called 'upstream'.
-    # Exit if the repo has no remote that points to upstream.
-    const upstreamHost = "github.com"
-    const upstreamLocation = "exercism/problem-specifications"
-    let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
-
-    if not conf.action.offline:
-      # For now, just exit with an error if the HEAD is not up-to-date with
-      # upstream, even if it's possible to do a fast-forward merge.
-      discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
-                       &"failed to fetch `{mainBranchName}` in " &
+    if conf.action.offline:
+      # Don't checkout `main` when `--offline` was passed, because:
+      # 1. The current tests of the configlet executable require that
+      #    `configlet sync --offline` does not alter the state of the cached
+      #    prob-specs repo.
+      # 2. It allows a power user to manually checkout an older commit in the
+      #    cached repo, which can help with making some atomic commits.
+      discard gitCheck(0, ["merge-base", "--is-ancestor", "HEAD", mainBranchName],
+                      &"the checked-out commit is not on the '{mainBranchName}'" &
+                      &"branch: '{probSpecsDir}'")
+    else:
+      # Checkout `main`. Like the above, don't allow a power user to sync from a
+      # prob-specs state that hasn't been merged to upstream `main`.
+      discard gitCheck(0, ["checkout", mainBranchName],
+                       &"failed to checkout '{mainBranchName}' in the cached " &
                        &"problem-specifications directory: '{probSpecsDir}'")
 
-      # Allow HEAD to be on a non-`main` branch, as long as it's up-to-date
-      # with `upstream/main`.
-      let revHead = gitCheck(0, ["rev-parse", "HEAD"])
-      let revUpstream = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
-      if revHead != revUpstream:
-        showError("the given problem-specifications directory is not " &
-                  &"up-to-date: '{probSpecsDir}'")
+      # Find the name of the remote that points to exercism/problem-specifications.
+      # Don't assume the remote is named 'origin'.
+      # Exit if the repo has no such remote.
+      const upstreamHost = "github.com"
+      const upstreamLocation = "exercism/problem-specifications"
+      let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
+
+      # `fetch` and `merge` separately, for better error messages.
+      logNormal(&"Updating cached 'problem-specifications' data...")
+      discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
+                       &"failed to fetch '{mainBranchName}' in " &
+                       &"problem-specifications directory: '{probSpecsDir}'")
+
+      discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
+                       &"failed to merge '{mainBranchName}' in " &
+                       &"problem-specifications directory: '{probSpecsDir}'")
 
 proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
-  if conf.action.probSpecsDir.len > 0:
-    result = T(conf.action.probSpecsDir)
+  result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
+  if dirExists(result):
     validate(result, conf)
+  elif conf.action.offline:
+    let msg = fmt"""
+      Error: --offline was passed, but there is no cached 'problem-specifications' repo at:
+        '{result}'
+      Please run once without --offline to clone 'problem-specifications' to that location.
+
+      If you currently have no (or limited) network connectivity, but you do have a local
+      'problem-specifications' elsewhere, you can copy it to the above location and then
+      use it with --offline.""".unindent()
+    stderr.writeLine msg
+    quit 1
   else:
-    result = T(getCurrentDir() / ".problem-specifications")
-    removeDir(result)
-    cloneExercismRepo("problem-specifications", result.string, shallow = true)
+    try:
+      createDir result.parentDir()
+    except IOError, OSError:
+      stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
+      quit 1
+    cloneExercismRepo("problem-specifications", result.string, shallow = false)
