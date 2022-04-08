@@ -109,7 +109,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
   ## `problem-specifications` repo that is up-to-date with upstream.
   const mainBranchName = "main"
 
-  logDetailed(&"Using cached problem-specifications dir: {probSpecsDir}")
+  logDetailed(&"Using cached 'problem-specifications' dir: {probSpecsDir}")
 
   withDir probSpecsDir.string:
     # Validate the `problem-specifications` repo by checking the ref of the root
@@ -153,7 +153,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
       # `fetch` and `merge` separately, for better error messages.
-      logNormal(&"Updating cached problem-specifications data...")
+      logNormal(&"Updating cached 'problem-specifications' data...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                        &"failed to fetch '{mainBranchName}' in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
