@@ -170,7 +170,11 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     let msg = fmt"""
       Error: --offline was passed, but there is no cached 'problem-specifications' repo at:
         '{result}'
-      Please run once without --offline to clone 'problem-specifications' to that location.""".unindent()
+      Please run once without --offline to clone 'problem-specifications' to that location.
+
+      If you currently have no (or limited) network connectivity, but you do have a local
+      'problem-specifications' elsewhere, you can copy it to the above location and then
+      use it with --offline.""".unindent()
     stderr.writeLine msg
     quit 1
   else:
