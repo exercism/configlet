@@ -81,11 +81,12 @@ proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
   ##
   ## Quits if the clone is unsuccessful.
   let url = &"https://github.com/exercism/{repoName}/"
-  let args =
+  let args = block:
+    var res = @["clone"]
     if shallow:
-      @["clone", "--depth", "1", "--", url, dest]
-    else:
-      @["clone", "--", url, dest]
+      res.add ["--depth", "1"]
+    res.add ["--", url, dest]
+    res
   stderr.write &"Cloning {url}... "
   let (outp, exitCode) = git(args)
   if exitCode == 0:
