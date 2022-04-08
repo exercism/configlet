@@ -389,11 +389,11 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
     if keyNormalized in ["p", "probspecsdir"]:
       const msg = """
         The --prob-specs-dir option was removed in configlet 4.0.0-beta.1 (April 2022).
-        A plain `configlet sync` now caches the cloned problem-specifications locally at
-        a fixed location - there is no longer an option to configure the prob-specs location.
-        This means that you can use --offline without specifying the prob-specs location,
-        as long as you have run a `configlet sync` command without --offline at least once
-        on your machine.""".unindent()
+        A plain `configlet sync` now caches the cloned problem-specifications in your
+        user's cache directory - there is no longer an option to configure the location.
+        Performing an offline sync now requires only one option (--offline), but you
+        must first run a `configlet sync` command without --offline at least once on
+        your machine.""".unindent()
       stderr.writeLine msg
     showError(&"invalid option: {formatOpt(kind, key)}")
 
