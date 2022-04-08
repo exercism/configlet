@@ -75,9 +75,11 @@ proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
   ## Otherwise, prints the output and `msg`, then raises `OSError`.
   result = execAndCheck(expectedExitCode, "git", args, msg = msg)
 
-proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
+proc cloneExercismRepo*(repoName, dest: string; shallow = false;
+                        singleBranch = true) =
   ## Clones the Exercism repo named `repoName` to `dest`. Performs a shallow
-  ## clone if `shallow` is `true`.
+  ## clone if `shallow` is `true`, and clones only the default branch if
+  ## `singleBranch` is `true`.
   ##
   ## Quits if the clone is unsuccessful.
   let url = &"https://github.com/exercism/{repoName}/"
@@ -85,6 +87,8 @@ proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
     var res = @["clone"]
     if shallow:
       res.add ["--depth", "1"]
+    if singleBranch:
+      res.add ["--single-branch"]
     res.add ["--", url, dest]
     res
   stderr.write &"Cloning {url}... "
