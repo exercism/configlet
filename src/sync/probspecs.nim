@@ -86,8 +86,8 @@ proc getCanonicalTests*(probSpecsDir: ProbSpecsDir,
   if fileExists(probSpecsExerciseDir.canonicalDataFile()):
     result = parseProbSpecsTestCases(probSpecsExerciseDir)
 
-proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
-                     host, location: string): string =
+proc getNameOfRemote*(probSpecsDir: ProbSpecsDir;
+                      host, location: string): string =
   ## Returns the name of the remote in `probSpecsDir` that points to `location`
   ## at `host`.
   ##
@@ -95,7 +95,7 @@ proc getNameOfRemote(probSpecsDir: ProbSpecsDir;
   # There's probably a better way to do this than parsing `git remote -v`.
   let msg = "could not run `git remote -v` in the cached " &
             &"problem-specifications directory: '{probSpecsDir}'"
-  let remotes = gitCheck(0, ["remote", "-v"], msg)
+  let remotes = gitCheck(0, ["-C", probSpecsDir.string, "remote", "-v"], msg)
   var remoteName, remoteUrl: string
   for line in remotes.splitLines():
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)

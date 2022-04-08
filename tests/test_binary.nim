@@ -1,5 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/[exec, lint/validators]
+import "."/[exec, helpers, lint/validators, sync/probspecs]
 
 const
   testsDir = currentSourcePath().parentDir()
@@ -843,24 +843,34 @@ proc testsForSync(binaryPath: static string) =
   # Don't leave cached prob-specs dir in detached HEAD state.
   check git(["-C", psDir, "checkout", "main"]).exitCode == 0
 
-  if existsEnv("CI"):
-    suite "sync, without --offline":
-      test "can pull changes into cached prob-specs":
-        # Reset local `main` to a previous commit.
-        check git(["-C", psDir, "reset", "--hard",
-                  "0eda2318cb5622532e498559255c8fe141c9d07f"]).exitCode == 0
+  suite "sync, without --offline":
+    test "can pull changes into cached prob-specs":
+      # Reset local `main` to a previous commit.
+      check git(["-C", psDir, "reset", "--hard",
+                 "0eda2318cb5622532e498559255c8fe141c9d07f"]).exitCode == 0
 
-        # Perform a sync without `--offline`.
-        execAndCheckExitCode(1, syncBase)
+      # Perform a sync without `--offline`.
+      execAndCheckExitCode(1, syncBase)
 
-        # Check that local HEAD and `main` point to same commit as `origin/main`.
-        let upstreamLatestRef = gitCheck(0, ["-C", psDir, "rev-parse",
-                                            "origin/main"])
-        let localHead = gitCheck(0, ["-C", psDir, "rev-parse", "HEAD"])
-        let localMain = gitCheck(0, ["-C", psDir, "rev-parse", "main"])
+      # Check that local HEAD and `main` point to same commit as the upstream `main`.
+      const mainBranchName = "main"
+      const upstreamHost = "github.com"
+      const upstreamLocation = "exercism/problem-specifications"
+      let probSpecsDir = ProbSpecsDir(psDir) # Don't use `init` (it performs extra setup).
+      let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
+      withDir psDir:
+        let upstreamLatestRef = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
+        let localHead = gitCheck(0, ["rev-parse", "HEAD"])
+        let localMain = gitCheck(0, ["rev-parse", mainBranchName])
         check:
           upstreamLatestRef == localHead
           upstreamLatestRef == localMain
+
+        # Return the local `main` to previous state, even if the sync failed
+        # (for example, due to no network connection).
+        discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
+                         &"failed to merge '{mainBranchName}' in " &
+                         &"problem-specifications directory: '{probSpecsDir}'")
 
 proc prepareIntroductionFiles(trackDir, header, placeholder: string;
                               removeIntro: bool) =
