@@ -199,7 +199,7 @@ func genHelpText: string =
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optSyncOffline: "Do not check that the cached 'problem-specifications' directory is up to date",
+    optSyncOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
