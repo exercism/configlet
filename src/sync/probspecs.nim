@@ -168,9 +168,9 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     validate(result, conf)
   elif conf.action.offline:
     let msg = fmt"""
-      Error: --offline was passed, but there is no cached problem-specifications
-      repo at '{result}'
-      Please run without --offline once.""".unindent()
+      Error: --offline was passed, but there is no cached 'problem-specifications' repo at:
+        '{result}'
+      Please run once without --offline to clone 'problem-specifications' to that location.""".unindent()
     stderr.writeLine msg
     quit 1
   else:
