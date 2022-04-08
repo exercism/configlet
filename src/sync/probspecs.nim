@@ -153,7 +153,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
       # `fetch` and `merge` separately, for better error messages.
-      logNormal(&"Running 'git pull' in cached problem-specifications dir...")
+      logNormal(&"Updating cached problem-specifications data...")
       discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                        &"failed to fetch '{mainBranchName}' in " &
                        &"problem-specifications directory: '{probSpecsDir}'")
