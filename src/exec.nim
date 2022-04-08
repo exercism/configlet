@@ -76,26 +76,24 @@ proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
   result = execAndCheck(expectedExitCode, "git", args, msg = msg)
 
 proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
-  ## If there is no directory at `dest`, clones the Exercism repo named
-  ## `repoName` to `dest`. Performs a shallow clone if `shallow` is `true`.
+  ## Clones the Exercism repo named `repoName` to `dest`. Performs a shallow
+  ## clone if `shallow` is `true`.
   ##
-  ## Quits if the directory does not already exist and the clone is
-  ## unsuccessful.
-  if not dirExists(dest):
-    let url = &"https://github.com/exercism/{repoName}/"
-    let args =
-      if shallow:
-        @["clone", "--depth", "1", "--", url, dest]
-      else:
-        @["clone", "--", url, dest]
-    stderr.write &"Cloning {url}... "
-    let (outp, exitCode) = git(args)
-    if exitCode == 0:
-      stderr.writeLine "success"
+  ## Quits if the clone is unsuccessful.
+  let url = &"https://github.com/exercism/{repoName}/"
+  let args =
+    if shallow:
+      @["clone", "--depth", "1", "--", url, dest]
     else:
-      stderr.writeLine "failure"
-      stderr.writeLine outp
-      quit 1
+      @["clone", "--", url, dest]
+  stderr.write &"Cloning {url}... "
+  let (outp, exitCode) = git(args)
+  if exitCode == 0:
+    stderr.writeLine "success"
+  else:
+    stderr.writeLine "failure"
+    stderr.writeLine outp
+    quit 1
 
 proc gitCheckout(dir, hash: string) =
   ## Checkout `hash` in the git repo at `dir`, discarding changes to the working
@@ -110,7 +108,8 @@ proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## `repoName` to `dest`.
   ##
   ## Then checkout the given `hash` in `dest`.
-  cloneExercismRepo(repoName, dest, shallow)
+  if not dirExists(dest):
+    cloneExercismRepo(repoName, dest, shallow)
   gitCheckout(dest, hash)
 
 func conciseDiff(s: string): string =
