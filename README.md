@@ -27,7 +27,7 @@ Options for fmt:
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
   -o, --offline                Do not update the cached 'problem-specifications' data
-  -u, --update                 Prompt to update the seen data that are unsynced
+  -u, --update                 Prompt to update the seen track data that are unsynced
   -y, --yes                    Auto-confirm prompts from --update for updating docs, filepaths, and metadata
       --docs                   Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files
       --filepaths              Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files

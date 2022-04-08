@@ -197,7 +197,7 @@ func genHelpText: string =
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optFmtSyncExercise: "Only operate on this exercise",
-    optFmtSyncUpdate: "Prompt to update the seen data that are unsynced",
+    optFmtSyncUpdate: "Prompt to update the seen track data that are unsynced",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
     optSyncOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
