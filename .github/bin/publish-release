@@ -3,6 +3,7 @@
 build_tag="$(echo "${REF}" | cut -d'/' -f3)"
 
 if ! gh release view "${build_tag}"; then
-  gh release create --draft "${build_tag}"
+  gh release create --draft "${build_tag}" "${ARTIFACT_FILE}"
+else
+  gh release upload "${build_tag}" "${ARTIFACT_FILE}"
 fi
-gh release upload "${build_tag}" "${ARTIFACT_FILE}"
