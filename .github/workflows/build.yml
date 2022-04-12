@@ -61,3 +61,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REF: ${{ github.ref }}
+
+  checksums:
+    needs: [build]
+    runs-on: ubuntu-20.04
+    name: Upload checksums file
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@a12a3943b4bdde767164f792f33f40b04645d846
+
+      - name: Upload checksums file
+        run: ./.github/bin/upload-checksums-file
