@@ -75,27 +75,30 @@ proc gitCheck*(expectedExitCode: int; args: openArray[string] = [];
   ## Otherwise, prints the output and `msg`, then raises `OSError`.
   result = execAndCheck(expectedExitCode, "git", args, msg = msg)
 
-proc cloneExercismRepo*(repoName, dest: string; shallow = false) =
-  ## If there is no directory at `dest`, clones the Exercism repo named
-  ## `repoName` to `dest`. Performs a shallow clone if `shallow` is `true`.
+proc cloneExercismRepo*(repoName, dest: string; shallow = false;
+                        singleBranch = true) =
+  ## Clones the Exercism repo named `repoName` to `dest`. Performs a shallow
+  ## clone if `shallow` is `true`, and clones only the default branch if
+  ## `singleBranch` is `true`.
   ##
-  ## Quits if the directory does not already exist and the clone is
-  ## unsuccessful.
-  if not dirExists(dest):
-    let url = &"https://github.com/exercism/{repoName}/"
-    let args =
-      if shallow:
-        @["clone", "--depth", "1", "--", url, dest]
-      else:
-        @["clone", "--", url, dest]
-    stderr.write &"Cloning {url}... "
-    let (outp, exitCode) = git(args)
-    if exitCode == 0:
-      stderr.writeLine "success"
-    else:
-      stderr.writeLine "failure"
-      stderr.writeLine outp
-      quit 1
+  ## Quits if the clone is unsuccessful.
+  let url = &"https://github.com/exercism/{repoName}/"
+  let args = block:
+    var res = @["clone"]
+    if shallow:
+      res.add ["--depth", "1"]
+    if singleBranch:
+      res.add ["--single-branch"]
+    res.add ["--", url, dest]
+    res
+  stderr.write &"Cloning {url}... "
+  let (outp, exitCode) = git(args)
+  if exitCode == 0:
+    stderr.writeLine "success"
+  else:
+    stderr.writeLine "failure"
+    stderr.writeLine outp
+    quit 1
 
 proc gitCheckout(dir, hash: string) =
   ## Checkout `hash` in the git repo at `dir`, discarding changes to the working
@@ -110,7 +113,8 @@ proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## `repoName` to `dest`.
   ##
   ## Then checkout the given `hash` in `dest`.
-  cloneExercismRepo(repoName, dest, shallow)
+  if not dirExists(dest):
+    cloneExercismRepo(repoName, dest, shallow)
   gitCheckout(dest, hash)
 
 func conciseDiff(s: string): string =
