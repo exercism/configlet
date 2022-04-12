@@ -72,3 +72,6 @@ jobs:
 
       - name: Upload checksums file
         run: ./.github/bin/upload-checksums-file
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ github.ref }}
