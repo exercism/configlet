@@ -446,17 +446,17 @@ proc testSyncFilepaths =
 
 proc testSyncMetadata =
   suite "parseMetadataToml":
-    const psDir = testsDir / ".test_problem_specifications"
+    let psDir = getCacheDir() / "exercism" / "configlet" / "problem-specifications"
 
     # Setup: clone the problem-specifications repo, and checkout a known state
     setupExercismRepo("problem-specifications", psDir,
                       "7b395a76b22bbd2d2f471dbf60eb3872e6906632") # 2021-10-30
 
     privateAccess(UpstreamMetadata)
-    const psExercisesDir = joinPath(psDir, "exercises")
+    let psExercisesDir = joinPath(psDir, "exercises")
 
     test "with only `blurb`":
-      const metadataPath = joinPath(psExercisesDir, "all-your-base", "metadata.toml")
+      let metadataPath = joinPath(psExercisesDir, "all-your-base", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Convert a number, represented as a sequence of digits in one base, to any other base.",
         source: "",
@@ -466,7 +466,7 @@ proc testSyncMetadata =
       check metadata == expected
 
     test "with only `blurb` and `source`":
-      const metadataPath = joinPath(psExercisesDir, "darts", "metadata.toml")
+      let metadataPath = joinPath(psExercisesDir, "darts", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
@@ -476,7 +476,7 @@ proc testSyncMetadata =
       check metadata == expected
 
     test "with only `blurb` and `source_url` (and quote escaping)":
-      const metadataPath = joinPath(psExercisesDir, "two-fer", "metadata.toml")
+      let metadataPath = joinPath(psExercisesDir, "two-fer", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: """Create a sentence of the form "One for X, one for me.".""",
         source: "",
@@ -486,7 +486,7 @@ proc testSyncMetadata =
       check metadata == expected
 
     test "with `blurb`, `source`, and `source_url`":
-      const metadataPath = joinPath(psExercisesDir, "collatz-conjecture", "metadata.toml")
+      let metadataPath = joinPath(psExercisesDir, "collatz-conjecture", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Calculate the number of steps to reach 1 using the Collatz conjecture.",
         source: "An unsolved problem in mathematics named after mathematician Lothar Collatz",
@@ -496,7 +496,7 @@ proc testSyncMetadata =
       check metadata == expected
 
     test "with `blurb`, `source`, and `source_url`, and extra `title`":
-      const metadataPath = joinPath(psExercisesDir, "etl", "metadata.toml")
+      let metadataPath = joinPath(psExercisesDir, "etl", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "We are going to do the `Transform` step of an Extract-Transform-Load.",
         source: "The Jumpstart Lab team",
@@ -504,6 +504,9 @@ proc testSyncMetadata =
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
+
+    # Don't leave cached prob-specs dir in detached HEAD state.
+    check git(["-C", psDir, "checkout", "main"]).exitCode == 0
 
   suite "update and metadataAreUpToDate":
     privateAccess(UpstreamMetadata)
