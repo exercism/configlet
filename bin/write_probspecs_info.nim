@@ -59,15 +59,20 @@ proc init(T: typedesc[ProbSpecsState], probSpecsDir: string): T =
 
 proc main =
   const repoRootDir = currentSourcePath().parentDir().parentDir()
-  const probSpecsDir = repoRootDir.parentDir() / "problem-specifications"
+  const probSpecsDir = getCacheDir() / "exercism" / "configlet" / "problem-specifications"
   if dirExists(probSpecsDir):
     let jsonContents = ProbSpecsState.init(probSpecsDir).toJson().parseJson().pretty()
     const jsonOutputPath = repoRootDir / "src" / "info" / "prob_specs_exercises.json"
     writeFile(jsonOutputPath, jsonContents & "\n")
     echo &"Wrote updated data to '{jsonOutputPath}'"
   else:
-    stderr.writeLine "This script requires a problem-specifications " &
-                     "directory at this location:\n" & probSpecsDir
+    let msg = fmt"""
+      Missing problem-specifications directory at this location:
+      {probSpecsDir}
+
+      Please run `configlet sync` to set up the problem-specifications cache.
+      """.unindent()
+    stderr.writeLine msg
     quit 1
 
 when isMainModule:
