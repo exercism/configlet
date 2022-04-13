@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+set -e
+
+build_tag="$(echo "${REF}" | cut -d'/' -f3)"
+
+# Download every release asset
+download_dir="releases/${build_tag}"
+gh release download "${build_tag}" --dir "${download_dir}"
+
+# Write checksums file
+cd "${download_dir}" || exit
+checksums_file="configlet_${build_tag}_checksums_sha256.txt"
+sha256sum -- * > "${checksums_file}"
+
+# Upload checksums file
+gh release upload "${build_tag}" "${checksums_file}"
