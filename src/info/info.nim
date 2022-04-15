@@ -92,6 +92,26 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
+proc show(unimplementedSlugs: HashSet[string],
+          probSpecsExercises: ProbSpecsExercises, header: string): string =
+  ## Returns a string containing a colorized (when appropriate) `header`, and
+  ## then the elements of `unimplementedSlugs` in alphabetical order, indicating
+  ## the slugs that lack canonical data.
+  result = header(header)
+  result.add "(\"NC\" means the exercise lacks canonical data)\n"
+  if unimplementedSlugs.len > 0:
+    var elements = toSeq(unimplementedSlugs)
+    sort elements
+    for item in elements:
+      if item in probSpecsExercises.withoutCanonicalData:
+        result.add "NC"
+      else:
+        result.add "  "
+      result.add &"  {item}\n"
+  else:
+    result.add "none\n"
+  result.add "\n"
+
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
                                      probSpecsExercises: ProbSpecsExercises): string =
@@ -103,7 +123,7 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
     &"There are {unimplementedProbSpecsSlugs.len} non-deprecated exercises " &
      "in `exercism/problem-specifications` that\n" &
      "are both unimplemented and not in the track config `exercises.foregone` array:"
-  result = show(unimplementedProbSpecsSlugs, msg)
+  result = show(unimplementedProbSpecsSlugs, probSpecsExercises, msg)
 
   stripLineEnd(result)
 
