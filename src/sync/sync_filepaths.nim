@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
 import pkg/jsony
-import ".."/[cli, logger]
+import ".."/[cli, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
 func replace(slug: Slug, sub: char, by: char): string {.borrow.}

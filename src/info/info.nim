@@ -1,6 +1,6 @@
 import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
 import pkg/jsony
-import ".."/[cli, lint/track_config]
+import ".."/[cli, lint/track_config, types_track_config]
 
 type
   ProbSpecsExercises = object
@@ -90,7 +90,7 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
 func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   result = initHashSet[string](practiceExercises.len)
   for practiceExercise in practiceExercises:
-    result.incl practiceExercise.slug
+    result.incl $practiceExercise.slug
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
