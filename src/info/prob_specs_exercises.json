@@ -1,6 +1,6 @@
 {
-  "last_updated": "2022-04-12T08:44:56Z",
-  "problem_specifications_commit_ref": "32100ab469e31d3dc6060823797a5584e9c2c954",
+  "last_updated": "2022-04-15T10:59:32Z",
+  "problem_specifications_commit_ref": "7cd0ab13d2f1158633c5d7f551fe2160ba7280c1",
   "exercises": {
     "with_canonical_data": [
       "acronym",
@@ -46,6 +46,7 @@
       "house",
       "isbn-verifier",
       "isogram",
+      "killer-sudoku-helper",
       "kindergarten-garden",
       "knapsack",
       "largest-series-product",
