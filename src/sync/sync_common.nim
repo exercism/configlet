@@ -1,6 +1,6 @@
 import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils]
 import pkg/jsony
-import ".."/[cli,helpers, lint/validators, types_exercise_config, types_track_config]
+import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
   ## Asks the user if they want to sync the given `syncKind`, and returns `true`
