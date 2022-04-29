@@ -34,6 +34,7 @@ type
     exemplar*: seq[string]
     example*: seq[string]
     editor*: seq[string]
+    invalidator*: seq[string]
 
   TrackConfig* = object
     exercises*: Exercises
@@ -160,6 +161,7 @@ type
     fkExemplar = "exemplar"
     fkExample = "example"
     fkEditor = "editor"
+    fkInvalidator = "invalidator"
 
   ConceptExerciseFiles* = object
     originalKeyOrder: seq[FilesKey]
@@ -167,6 +169,7 @@ type
     test*: seq[string]
     exemplar*: seq[string]
     editor*: seq[string]
+    invalidator*: seq[string]
 
   PracticeExerciseFiles* = object
     originalKeyOrder: seq[FilesKey]
@@ -174,6 +177,7 @@ type
     test*: seq[string]
     example*: seq[string]
     editor*: seq[string]
+    invalidator*: seq[string]
 
   ConceptExerciseConfig* = object
     originalKeyOrder: seq[ExerciseConfigKey]
@@ -345,6 +349,8 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
     result = @[fkSolution, fkTest, fkEx]
     if prettyMode == pmFmt and val.editor.len > 0:
       result.add fkEditor
+    if prettyMode == pmFmt and val.invalidator.len > 0:
+      result.add fkInvalidator
   else:
     result = val.originalKeyOrder
     # If `solution` is missing, write it first.
@@ -365,6 +371,10 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
     if fkEditor notin result and val.editor.len > 0:
       let insertionIndex = result.find(fkEx) + 1
       result.insert(fkEditor, insertionIndex)
+
+    # If `invalidator` is missing and not empty, write it after `editor`.
+    if fkInvalidator notin result and val.invalidator.len > 0:
+      result.add fkInvalidator
 
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
               prettyMode: PrettyMode; indentLevel = 1) =
@@ -389,6 +399,8 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
         s.addArray("example", val.example, indentLevel = inner)
     of fkEditor:
       s.addArray("editor", val.editor, indentLevel = inner)
+    of fkInvalidator:
+      s.addArray("invalidator", val.invalidator, indentLevel = inner)
 
   s.removeComma()
   s.addNewlineAndIndent(indentLevel)

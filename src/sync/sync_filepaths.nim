@@ -44,6 +44,7 @@ func update(f: var (ConceptExerciseFiles | PracticeExerciseFiles),
   update(f.solution, patterns.solution, slug)
   update(f.test, patterns.test, slug)
   update(f.editor, patterns.editor, slug)
+  update(f.invalidator, patterns.invalidator, slug)
   when f is ConceptExerciseFiles:
     update(f.exemplar, patterns.exemplar, slug)
   when f is PracticeExerciseFiles:
@@ -61,7 +62,7 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
       genCond(exemplar)
     else:
       genCond(example)
-  uniqueCond and genCond(solution) and genCond(test) and genCond(editor)
+  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and genCond(invalidator)
 
 type
   ExerciseConfig* = object
@@ -161,8 +162,8 @@ proc checkOrUpdateFilepaths*(seenUnsynced: var set[SyncKind];
   ## Prints a message for each track exercise that:
   ## - lacks a `.meta/config.json` file
   ## - or has a `.meta/config.json` file with an missing/empty
-  ##   `files.solution|test|editor|example|exemplar` array, when that value has
-  ##   a pattern defined in the track-level `config.json` file.
+  ##   `files.solution|test|editor|invalidator|example|exemplar` array, when
+  ##   that value has a pattern defined in the track-level `config.json` file.
   ##
   ## Populates those values if `--update` was passed and the user confirms.
   ##
