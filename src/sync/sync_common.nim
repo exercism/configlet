@@ -36,7 +36,6 @@ func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
   sort result
 
 func len*(slug: Slug): int {.borrow.}
-func `$`*(slug: Slug): string {.borrow.}
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   ## Truncates `s` to `truncateLen`, then appends `slug`.

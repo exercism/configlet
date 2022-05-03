@@ -1,9 +1,6 @@
 import std/[json, os, sets, strformat, strutils, tables]
-import pkg/jsony
-import ".."/[cli, helpers, types_track_config]
+import ".."/[helpers, types_track_config]
 import "."/validators
-
-func `$`*(slug: Slug): string {.borrow.}
 
 proc hasValidStatus(data: JsonNode; path: Path): bool =
   const k = "status"
@@ -298,35 +295,6 @@ proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
       hasValidTags(data, path),
     ]
     result = allTrue(checks)
-
-proc tidyJsonyErrorMsg(trackConfigContents: string): string =
-  let jsonyMsg = getCurrentExceptionMsg()
-  let details = tidyJsonyMessage(jsonyMsg, trackConfigContents)
-  const bugNotice = """
-    --------------------------------------------------------------------------------
-    THIS IS A CONFIGLET BUG. PLEASE REPORT IT.
-
-    The JSON parsing error above should not occur - it indicates a bug in configlet!
-
-    If you are seeing this, please open an issue in this repo:
-    https://github.com/exercism/configlet
-
-    Please include:
-    - a copy of the error message above
-    - the contents of the track `config.json` file at the time `configlet lint` ran
-
-    Thank you.
-    --------------------------------------------------------------------------------
-  """.unindent()
-  result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
-
-proc init*(T: typedesc[TrackConfig]; trackConfigContents: string): T =
-  ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
-  try:
-    result = fromJson(trackConfigContents, TrackConfig)
-  except jsony.JsonError:
-    let msg = tidyJsonyErrorMsg(trackConfigContents)
-    showError(msg)
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track

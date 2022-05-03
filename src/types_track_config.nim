@@ -1,4 +1,6 @@
 import std/sets
+import pkg/jsony
+import "."/[cli, helpers]
 
 type
   Slug* = distinct string ## A `slug` value in a track `config.json` file is a kebab-case string.
@@ -54,3 +56,13 @@ type
   ExerciseKind* = enum
     ekConcept = "concept"
     ekPractice = "practice"
+
+func `$`*(slug: Slug): string {.borrow.}
+
+proc init*(T: typedesc[TrackConfig]; trackConfigContents: string): T =
+  ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
+  try:
+    result = fromJson(trackConfigContents, TrackConfig)
+  except jsony.JsonError:
+    let msg = tidyJsonyErrorMsg(trackConfigContents)
+    showError(msg)

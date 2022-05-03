@@ -1,6 +1,6 @@
 import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
 import pkg/jsony
-import ".."/[cli, lint/track_config, types_track_config]
+import ".."/[cli, types_track_config]
 
 type
   ProbSpecsExercises = object
