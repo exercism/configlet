@@ -361,6 +361,11 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
       let insertionIndex = result.find(fkTest) + 1
       result.insert(fkEx, insertionIndex)
 
+    # If `editor` is missing and not empty, write it after `example`/`exemplar`.
+    if fkEditor notin result and val.editor.len > 0:
+      let insertionIndex = result.find(fkEx) + 1
+      result.insert(fkEditor, insertionIndex)
+
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
               prettyMode: PrettyMode; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
