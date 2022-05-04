@@ -47,6 +47,9 @@ proc hasValidFiles(data: JsonNode; path: Path): bool =
         hasArrayOfStrings(data[f], "editor", path, context = f,
                           uniqueValues = true, isRequired = false,
                           checkIsFilesPattern = true),
+        hasArrayOfStrings(data[f], "invalidator", path, context = f,
+                          uniqueValues = true, isRequired = false,
+                          checkIsFilesPattern = true),
       ]
       result = allTrue(checks)
   else:
