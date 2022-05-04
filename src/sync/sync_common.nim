@@ -363,7 +363,8 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
 
     # If `editor` is missing and not empty, write it after `example`/`exemplar`.
     if fkEditor notin result and val.editor.len > 0:
-      result.add fkEditor
+      let insertionIndex = result.find(fkEx) + 1
+      result.insert(fkEditor, insertionIndex)
 
 func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
               prettyMode: PrettyMode; indentLevel = 1) =
