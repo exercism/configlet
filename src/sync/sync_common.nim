@@ -129,6 +129,7 @@ type
   #     solution*: seq[string]
   #     test*: seq[string]
   #     editor*: seq[string]
+  #     invalidator*: seq[string]
   #     case kind*: ExerciseKind
   #     of ekConcept:
   #       exemplar*: seq[string]
