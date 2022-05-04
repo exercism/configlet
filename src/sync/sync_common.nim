@@ -372,7 +372,7 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
       let insertionIndex = result.find(fkEx) + 1
       result.insert(fkEditor, insertionIndex)
 
-    # If `invalidator` is missing and not empty, write it after `editor`.
+    # If `invalidator` is missing and not empty, write it at the end.
     if fkInvalidator notin result and val.invalidator.len > 0:
       result.add fkInvalidator
 
