@@ -36,9 +36,9 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: Install Nim
-        uses: jiro4989/setup-nim-action@dae95c07ab8ffdf736af17d2214f926877e28ad8
+        uses: iffy/install-nim@09ef2b9c32a667d88097c8db32158a90a56165d1
         with:
-          nim-version: "1.6.4"
+          version: "binary:1.6.4"
 
       - name: Install musl on Linux
         if: matrix.target.os == 'linux'
