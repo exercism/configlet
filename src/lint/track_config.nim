@@ -47,6 +47,9 @@ proc hasValidFiles(data: JsonNode; path: Path): bool =
         hasArrayOfStrings(data[f], "editor", path, context = f,
                           uniqueValues = true, isRequired = false,
                           checkIsFilesPattern = true),
+        hasArrayOfStrings(data[f], "invalidator", path, context = f,
+                          uniqueValues = true, isRequired = false,
+                          checkIsFilesPattern = true),
       ]
       result = allTrue(checks)
   else:
@@ -340,6 +343,7 @@ type
     example*: seq[string]
     exemplar*: seq[string]
     editor*: seq[string]
+    invalidator*: seq[string]
 
   TrackConfig* = object
     slug*: string
@@ -713,11 +717,16 @@ proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
     ("solution", "example"),
     ("solution", "exemplar"),
     ("solution", "editor"),
+    ("solution", "invalidator"),
     ("test", "example"),
     ("test", "exemplar"),
     ("test", "editor"),
+    ("test", "invalidator"),
     ("editor", "example"),
     ("editor", "exemplar"),
+    ("editor", "invalidator"),
+    ("invalidator", "example"),
+    ("invalidator", "exemplar"),
   ]
 
   var seenFilePatterns = initTable[string, HashSet[string]](250)

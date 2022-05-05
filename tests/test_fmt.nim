@@ -323,6 +323,8 @@ proc testFmt =
         delete(j["files"], "originalKeyOrder")
         if j["files"]["editor"].len == 0:
           delete(j["files"], "editor")
+        if j["files"]["invalidator"].len == 0:
+          delete(j["files"], "invalidator")
         when e is ConceptExerciseConfig:
           let val = j["forked_from"]
           if val.kind == JNull or (val.kind == JArray and val.len == 0):
