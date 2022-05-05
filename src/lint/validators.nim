@@ -420,24 +420,31 @@ proc hasArrayOfFiles*(data: JsonNode;
                       path: Path;
                       context = "";
                       relativeToPath: Path;
-                      errorAnnotation = ""): bool =
-  if hasArrayOfStrings(data, key, path, context):
-    result = true
-    var processedItems = initHashSet[string](data[key].len)
+                      errorAnnotation = "";
+                      isRequired = true): bool =
+  ## Returns true in any of these cases:
+  ## - `hasArrayOfStrings` returns true for `data[key]`.
+  ## - `data` lacks the key `key` and `isRequired` is false.
+  if data.hasKey(key, path, context, isRequired):
+    if hasArrayOfStrings(data, key, path, context):
+      result = true
+      var processedItems = initHashSet[string](data[key].len)
 
-    for item in data[key]:
-      let relativeFilePath = item.getStr()
-      let absoluteFilePath = relativeToPath / relativeFilePath
-      if fileExists(absoluteFilePath):
-        let itemStr = item.getStr()
-        if processedItems.containsOrIncl(itemStr):
-          let msg = &"The {q context} array contains duplicate " &
-                    &"{q itemStr} values"
+      for item in data[key]:
+        let relativeFilePath = item.getStr()
+        let absoluteFilePath = relativeToPath / relativeFilePath
+        if fileExists(absoluteFilePath):
+          let itemStr = item.getStr()
+          if processedItems.containsOrIncl(itemStr):
+            let msg = &"The {q context} array contains duplicate " &
+                      &"{q itemStr} values"
+            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+        else:
+          let msg = &"The {q context} array contains value " &
+                    &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
           result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-      else:
-        let msg = &"The {q context} array contains value " &
-                  &"{q relativeFilePath} but {q $absoluteFilePath} could not be found"
-        result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+  elif not isRequired:
+    result = true
 
 type
   ItemCall = proc(data: JsonNode; context: string; path: Path): bool {.nimcall.}
