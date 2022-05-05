@@ -10,6 +10,7 @@ proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
       hasArrayOfFiles(d, "solution", path, k, exerciseDir),
       hasArrayOfFiles(d, "test", path, k, exerciseDir),
       hasArrayOfFiles(d, "exemplar", path, k, exerciseDir),
+      hasArrayOfFiles(d, "editor", path, k, exerciseDir, isRequired = false),
     ]
     result = allTrue(checks)
 
