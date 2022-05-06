@@ -41,7 +41,7 @@ jobs:
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
       - name: Install Nim
-        uses: iffy/install-nim@09ef2b9c32a667d88097c8db32158a90a56165d1
+        uses: iffy/install-nim@7dd1812db4916d00b984d1c43339346a76e05487
         with:
           version: "binary:1.6.4"
         env:
