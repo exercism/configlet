@@ -97,19 +97,15 @@ proc show(uWith, uWithout: HashSet[string], header: string): string =
   ## then the elements of `uWith` and `uWithout` in alphabetical order,
   ## indicating whether slugs have canonical data.
   result = header(header)
-  if uWith.len > 0:
-    var u = toSeq(uWith)
-    sort u
-    result.add "\nWith canonical data:\n"
-    for slug in u:
-      result.add &"{slug}\n"
-  if uWithout.len > 0:
-    var u = toSeq(uWithout)
-    sort u
-    result.add "\nWithout canonical data:\n"
-    for slug in u:
-      result.add &"{slug}\n"
-  if uWith.len == 0 and uWithout.len == 0:
+  if uWith.len > 0 or uWithout.len > 0:
+    for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
+      if u.len > 0:
+        result.add &"\n{s} canonical data:\n"
+        var u = toSeq(u)
+        sort u
+        for slug in u:
+          result.add &"{slug}\n"
+  else:
     result.add "none\n"
   result.add "\n"
 
