@@ -92,22 +92,6 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
-proc show(uWith, uWithout: HashSet[string], header: string): string =
-  ## Returns a string containing a colorized (when appropriate) `header`, and
-  ## then the elements of `uWith` and `uWithout` in alphabetical order,
-  ## indicating whether slugs have canonical data.
-  result = header(header)
-  if uWith.len > 0 or uWithout.len > 0:
-    for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
-      if u.len > 0:
-        result.add &"\n{s} canonical data:\n"
-        var u = toSeq(u)
-        sort u
-        for slug in u:
-          result.add &"{slug}\n"
-  else:
-    result.add "none\n"
-
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
                                      probSpecsExercises: ProbSpecsExercises): string =
@@ -120,7 +104,17 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
     &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
      "in `exercism/problem-specifications` that\n" &
      "are both unimplemented and not in the track config `exercises.foregone` array:"
-  result = show(uWith, uWithout, header)
+  result = header(header)
+  if uWith.len > 0 or uWithout.len > 0:
+    for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
+      if u.len > 0:
+        result.add &"\n{s} canonical data:\n"
+        var u = toSeq(u)
+        sort u
+        for slug in u:
+          result.add &"{slug}\n"
+  else:
+    result.add "none\n"
 
 func count(exercises: seq[ConceptExercise] |
                       seq[PracticeExercise]): tuple[visible: int, wip: int] =
