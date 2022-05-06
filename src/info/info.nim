@@ -20,11 +20,10 @@ proc getPsState(path: static string): ProbSpecsState =
   let contents = staticRead(path)
   contents.fromJson(ProbSpecsState)
 
-proc getProbSpecsSlugs: HashSet[string] =
+proc init(T: typedesc[ProbSpecsExercises]): T =
   # TODO: automatically update this at build-time?
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
-  let psExercises = getPsState(slugsPath).exercises
-  result = psExercises.withCanonicalData + psExercises.withoutCanonicalData
+  getPsState(slugsPath).exercises
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the `slug` of every concept in `concepts`.
@@ -95,16 +94,26 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
-                                     probSpecsSlugs: HashSet[string]): string =
-  let practiceExerciseSlugs = getSlugs(practiceExercises)
-  let unimplementedProbSpecsSlugs = probSpecsSlugs - practiceExerciseSlugs - foregone
-  let msg =
-    &"There are {unimplementedProbSpecsSlugs.len} non-deprecated exercises " &
-     "in `exercism/problem-specifications` that\n" &
-     "are both unimplemented and not in the track config `exercises.foregone` array:"
-  result = show(unimplementedProbSpecsSlugs, msg)
-
-  stripLineEnd(result)
+                                     probSpecsExercises: ProbSpecsExercises): string =
+  let
+    practiceExerciseSlugs = getSlugs(practiceExercises)
+    uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
+    uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
+    header =
+      &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
+      "in `exercism/problem-specifications` that\n" &
+      "are both unimplemented and not in the track config `exercises.foregone` array:"
+  result = header(header)
+  if uWith.len > 0 or uWithout.len > 0:
+    for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
+      if u.len > 0:
+        result.add &"\n{s} canonical data:\n"
+        var u = toSeq(u)
+        sort u
+        for slug in u:
+          result.add &"{slug}\n"
+  else:
+    result.add "none\n"
 
 func count(exercises: seq[ConceptExercise] |
                       seq[PracticeExercise]): tuple[visible: int, wip: int] =
@@ -147,8 +156,8 @@ proc info*(conf: Conf) =
     let concepts = trackConfig.concepts
 
     echo conceptsInfo(practiceExercises, concepts)
-    const probSpecsSlugs = getProbSpecsSlugs()
-    echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsSlugs)
+    const probSpecsExercises = ProbSpecsExercises.init()
+    echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsExercises)
     echo trackSummary(conceptExercises, practiceExercises, concepts)
   else:
     var msg = &"file does not exist: {trackConfigPath}"
