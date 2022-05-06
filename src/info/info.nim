@@ -101,22 +101,15 @@ proc show(unimplementedSlugs: HashSet[string],
   if unimplementedSlugs.len > 0:
     var u = toSeq(unimplementedSlugs)
     sort u
-    let (slugsWith, slugsWithout) = block:
-      var slugsWith = newSeq[string]()
-      var slugsWithout = newSeq[string]()
-      for slug in u:
-        if slug in probSpecsExercises.withoutCanonicalData:
-          slugsWithout.add slug
-        else:
-          slugsWith.add slug
-      (slugsWith, slugsWithout)
-    if slugsWith.len > 0:
-      result.add "\nWith canonical data:\n"
-      for slug in slugsWith:
+    for slug in u:
+      if slug in probSpecsExercises.withCanonicalData:
+        once:
+          result.add "\nWith canonical data:\n"
         result.add &"{slug}\n"
-    if slugsWithout.len > 0:
-      result.add "\nWithout canonical data:\n"
-      for slug in slugsWithout:
+    for slug in u:
+      if slug in probSpecsExercises.withoutCanonicalData:
+        once:
+          result.add "\nWithout canonical data:\n"
         result.add &"{slug}\n"
   else:
     result.add "none\n"
