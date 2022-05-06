@@ -92,26 +92,24 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   for practiceExercise in practiceExercises:
     result.incl practiceExercise.slug
 
-proc show(unimplementedSlugs: HashSet[string],
-          probSpecsExercises: ProbSpecsExercises, header: string): string =
+proc show(uWith, uWithout: HashSet[string], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
-  ## then the elements of `unimplementedSlugs` in alphabetical order, indicating
-  ## the slugs that lack canonical data.
+  ## then the elements of `uWith` and `uWithout` in alphabetical order,
+  ## indicating whether slugs have canonical data.
   result = header(header)
-  if unimplementedSlugs.len > 0:
-    var u = toSeq(unimplementedSlugs)
+  if uWith.len > 0:
+    var u = toSeq(uWith)
     sort u
+    result.add "\nWith canonical data:\n"
     for slug in u:
-      if slug in probSpecsExercises.withCanonicalData:
-        once:
-          result.add "\nWith canonical data:\n"
-        result.add &"{slug}\n"
+      result.add &"{slug}\n"
+  if uWithout.len > 0:
+    var u = toSeq(uWithout)
+    sort u
+    result.add "\nWithout canonical data:\n"
     for slug in u:
-      if slug in probSpecsExercises.withoutCanonicalData:
-        once:
-          result.add "\nWithout canonical data:\n"
-        result.add &"{slug}\n"
-  else:
+      result.add &"{slug}\n"
+  if uWith.len == 0 and uWithout.len == 0:
     result.add "none\n"
   result.add "\n"
 
@@ -119,14 +117,15 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
                                      probSpecsExercises: ProbSpecsExercises): string =
   let practiceExerciseSlugs = getSlugs(practiceExercises)
-  let unimplementedProbSpecsSlugs = probSpecsExercises.withCanonicalData +
-                                    probSpecsExercises.withoutCanonicalData -
-                                    practiceExerciseSlugs - foregone
+  let uWith = probSpecsExercises.withCanonicalData -
+              practiceExerciseSlugs - foregone
+  let uWithout = probSpecsExercises.withoutCanonicalData -
+                 practiceExerciseSlugs - foregone
   let msg =
-    &"There are {unimplementedProbSpecsSlugs.len} non-deprecated exercises " &
+    &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
      "in `exercism/problem-specifications` that\n" &
      "are both unimplemented and not in the track config `exercises.foregone` array:"
-  result = show(unimplementedProbSpecsSlugs, probSpecsExercises, msg)
+  result = show(uWith, uWithout, msg)
 
   stripLineEnd(result)
 
