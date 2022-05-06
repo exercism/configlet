@@ -117,11 +117,11 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
               practiceExerciseSlugs - foregone
   let uWithout = probSpecsExercises.withoutCanonicalData -
                  practiceExerciseSlugs - foregone
-  let msg =
+  let header =
     &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
      "in `exercism/problem-specifications` that\n" &
      "are both unimplemented and not in the track config `exercises.foregone` array:"
-  result = show(uWith, uWithout, msg)
+  result = show(uWith, uWithout, header)
 
   stripLineEnd(result)
 
