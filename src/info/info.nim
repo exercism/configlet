@@ -107,7 +107,6 @@ proc show(uWith, uWithout: HashSet[string], header: string): string =
           result.add &"{slug}\n"
   else:
     result.add "none\n"
-  result.add "\n"
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
@@ -122,8 +121,6 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
      "in `exercism/problem-specifications` that\n" &
      "are both unimplemented and not in the track config `exercises.foregone` array:"
   result = show(uWith, uWithout, header)
-
-  stripLineEnd(result)
 
 func count(exercises: seq[ConceptExercise] |
                       seq[PracticeExercise]): tuple[visible: int, wip: int] =
