@@ -95,15 +95,14 @@ func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
                                      probSpecsExercises: ProbSpecsExercises): string =
-  let practiceExerciseSlugs = getSlugs(practiceExercises)
-  let uWith = probSpecsExercises.withCanonicalData -
-              practiceExerciseSlugs - foregone
-  let uWithout = probSpecsExercises.withoutCanonicalData -
-                 practiceExerciseSlugs - foregone
-  let header =
-    &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
-     "in `exercism/problem-specifications` that\n" &
-     "are both unimplemented and not in the track config `exercises.foregone` array:"
+  let
+    practiceExerciseSlugs = getSlugs(practiceExercises)
+    uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
+    uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
+    header =
+      &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
+      "in `exercism/problem-specifications` that\n" &
+      "are both unimplemented and not in the track config `exercises.foregone` array:"
   result = header(header)
   if uWith.len > 0 or uWithout.len > 0:
     for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
