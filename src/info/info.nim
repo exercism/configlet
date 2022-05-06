@@ -98,16 +98,26 @@ proc show(unimplementedSlugs: HashSet[string],
   ## then the elements of `unimplementedSlugs` in alphabetical order, indicating
   ## the slugs that lack canonical data.
   result = header(header)
-  result.add "(\"NC\" means the exercise lacks canonical data)\n"
   if unimplementedSlugs.len > 0:
-    var elements = toSeq(unimplementedSlugs)
-    sort elements
-    for item in elements:
-      if item in probSpecsExercises.withoutCanonicalData:
-        result.add "NC"
-      else:
-        result.add "  "
-      result.add &"  {item}\n"
+    var u = toSeq(unimplementedSlugs)
+    sort u
+    let (slugsWith, slugsWithout) = block:
+      var slugsWith = newSeq[string]()
+      var slugsWithout = newSeq[string]()
+      for slug in u:
+        if slug in probSpecsExercises.withoutCanonicalData:
+          slugsWithout.add slug
+        else:
+          slugsWith.add slug
+      (slugsWith, slugsWithout)
+    if slugsWith.len > 0:
+      result.add "\nWith canonical data:\n"
+      for slug in slugsWith:
+        result.add &"{slug}\n"
+    if slugsWithout.len > 0:
+      result.add "\nWithout canonical data:\n"
+      for slug in slugsWithout:
+        result.add &"{slug}\n"
   else:
     result.add "none\n"
   result.add "\n"
