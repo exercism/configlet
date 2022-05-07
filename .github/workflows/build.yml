@@ -21,7 +21,7 @@ jobs:
         include:
           - target:
               os: linux
-            builder: ubuntu-20.04
+            builder: ubuntu-22.04
           - target:
               os: mac
             builder: macos-11
@@ -66,7 +66,7 @@ jobs:
 
   checksums:
     needs: [build]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Upload checksums file
     steps:
       - name: Checkout code
