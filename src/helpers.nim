@@ -1,4 +1,4 @@
-import std/[algorithm, os, strformat, strscans, terminal]
+import std/[algorithm, os, strformat, strscans, strutils, terminal]
 import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
@@ -91,3 +91,24 @@ func tidyJsonyMessage*(jsonyMsg, fileContents: string): string =
     &"({line}, {col}): {jsonyMsgStart}"
   else:
     &": {jsonyMsg}"
+
+proc tidyJsonyErrorMsg*(trackConfigContents: string): string =
+  let jsonyMsg = getCurrentExceptionMsg()
+  let details = tidyJsonyMessage(jsonyMsg, trackConfigContents)
+  const bugNotice = """
+    --------------------------------------------------------------------------------
+    THIS IS A CONFIGLET BUG. PLEASE REPORT IT.
+
+    The JSON parsing error above should not occur - it indicates a bug in configlet!
+
+    If you are seeing this, please open an issue in this repo:
+    https://github.com/exercism/configlet
+
+    Please include:
+    - a copy of the error message above
+    - the contents of the track `config.json` file at the time `configlet lint` ran
+
+    Thank you.
+    --------------------------------------------------------------------------------
+  """.unindent()
+  result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"

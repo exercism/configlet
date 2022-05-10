@@ -1,5 +1,5 @@
 import std/[os, strformat, strutils]
-import ".."/[cli, logger]
+import ".."/[cli, logger, types_track_config]
 import "."/sync_common
 
 type

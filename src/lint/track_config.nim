@@ -1,6 +1,5 @@
 import std/[json, os, sets, strformat, strutils, tables]
-import pkg/jsony
-import ".."/[cli, helpers]
+import ".."/[helpers, types_track_config]
 import "."/validators
 
 proc hasValidStatus(data: JsonNode; path: Path): bool =
@@ -297,89 +296,6 @@ proc satisfiesFirstPass(data: JsonNode; path: Path): bool =
     ]
     result = allTrue(checks)
 
-type
-  Status* = enum
-    sMissing = "missing"
-    sWip = "wip"
-    sBeta = "beta"
-    sActive = "active"
-    sDeprecated = "deprecated"
-
-  # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
-  # `foregone` because the first pass has already checked that each has unique
-  # values.
-  ConceptExercise* = object
-    slug*: string
-    # name*: string
-    # uuid*: string
-    concepts*: HashSet[string]
-    prerequisites*: HashSet[string]
-    status*: Status
-
-  PracticeExercise* = object
-    slug*: string
-    # name*: string
-    # uuid*: string
-    # difficulty*: int
-    practices*: HashSet[string]
-    prerequisites*: HashSet[string]
-    status*: Status
-
-  Exercises* = object
-    `concept`*: seq[ConceptExercise]
-    practice*: seq[PracticeExercise]
-    foregone*: HashSet[string]
-
-  Concept* = object
-    name*: string
-    slug*: string
-    uuid*: string
-
-  Concepts* = seq[Concept]
-
-  FilePatterns* = object
-    solution*: seq[string]
-    test*: seq[string]
-    example*: seq[string]
-    exemplar*: seq[string]
-    editor*: seq[string]
-    invalidator*: seq[string]
-
-  TrackConfig* = object
-    slug*: string
-    files*: FilePatterns
-    exercises*: Exercises
-    concepts*: Concepts
-
-proc tidyJsonyErrorMsg(trackConfigContents: string): string =
-  let jsonyMsg = getCurrentExceptionMsg()
-  let details = tidyJsonyMessage(jsonyMsg, trackConfigContents)
-  const bugNotice = """
-    --------------------------------------------------------------------------------
-    THIS IS A CONFIGLET BUG. PLEASE REPORT IT.
-
-    The JSON parsing error above should not occur - it indicates a bug in configlet!
-
-    If you are seeing this, please open an issue in this repo:
-    https://github.com/exercism/configlet
-
-    Please include:
-    - a copy of the error message above
-    - the contents of the track `config.json` file at the time `configlet lint` ran
-
-    Thank you.
-    --------------------------------------------------------------------------------
-  """.unindent()
-  result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
-
-proc init*(T: typedesc[TrackConfig]; trackConfigContents: string): T =
-  ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
-  try:
-    result = fromJson(trackConfigContents, TrackConfig)
-  except jsony.JsonError:
-    let msg = tidyJsonyErrorMsg(trackConfigContents)
-    showError(msg)
-
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns a set of every `slug` in the top-level `concepts` array of a track
   ## `config.json` file.
@@ -409,7 +325,7 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
         practicesNotInTopLevelConcepts.incl conceptPracticed
         # TODO: Eventually make this an error, not a warning.
         if false:
-          let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+          let msg = &"The Practice Exercise {q $practiceExercise.slug} has " &
                     &"{q conceptPracticed} in its `practices` array, which " &
                      "is not a `slug` in the top-level `concepts` array"
           b.setFalseAndPrint(msg, path)
@@ -453,12 +369,12 @@ proc checkExerciseConcepts(conceptExercises: seq[ConceptExercise];
     for conceptTaught in conceptExercise.concepts:
       # Build a set of every concept taught by a user-facing Concept Exercise
       if result.containsOrIncl(conceptTaught):
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+        let msg = &"The Concept Exercise {q $conceptExercise.slug} has " &
                   &"{q conceptTaught} in its `concepts`, but that concept " &
                    "appears in the `concepts` of another Concept Exercise"
         b.setFalseAndPrint(msg, path)
       if conceptTaught notin conceptSlugs:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+        let msg = &"The Concept Exercise {q $conceptExercise.slug} has " &
                   &"{q conceptTaught} in its `concepts`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
@@ -512,17 +428,17 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
       for c in conceptExercise.concepts:
         prerequisitesByConcept[c].add prereq
       if prereq in conceptExercise.concepts:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+        let msg = &"The Concept Exercise {q $conceptExercise.slug} has " &
                   &"{q prereq} in both its `prerequisites` and its `concepts`"
         b.setFalseAndPrint(msg, path)
       elif prereq notin conceptsTaught:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+        let msg = &"The Concept Exercise {q $conceptExercise.slug} has " &
                   &"{q prereq} in its `prerequisites`, which is not in the " &
                    "`concepts` array of any other user-facing Concept Exercise"
         b.setFalseAndPrint(msg, path)
 
       if prereq notin conceptSlugs:
-        let msg = &"The Concept Exercise {q conceptExercise.slug} has " &
+        let msg = &"The Concept Exercise {q $conceptExercise.slug} has " &
                   &"{q prereq} in its `prerequisites`, which is not a " &
                    "`slug` in the top-level `concepts` array"
         b.setFalseAndPrint(msg, path)
@@ -531,7 +447,7 @@ proc checkPrerequisites(conceptExercises: seq[ConceptExercise];
   for conceptExercise in visible(conceptExercises):
     var hadCycle = false
     for c in conceptExercise.concepts:
-      checkForCycle(prerequisitesByConcept, c, @[], conceptExercise.slug, b,
+      checkForCycle(prerequisitesByConcept, c, @[], $conceptExercise.slug, b,
                     hadCycle, path)
 
 proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
@@ -550,7 +466,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           prereqsNotTaught.incl prereq
           # TODO: Eventually make this an error, not a warning.
           if false:
-            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+            let msg = &"The Practice Exercise {q $practiceExercise.slug} has " &
                       &"{q prereq} in its `prerequisites`, which is not in " &
                        "the `concepts` array of any user-facing Concept Exercise"
             b.setFalseAndPrint(msg, path)
@@ -558,7 +474,7 @@ proc checkPrerequisites(practiceExercises: seq[PracticeExercise];
           prereqsNotInTopLevelConcepts.incl prereq
           # TODO: Eventually make this an error, not a warning.
           if false:
-            let msg = &"The Practice Exercise {q practiceExercise.slug} has " &
+            let msg = &"The Practice Exercise {q $practiceExercise.slug} has " &
                       &"{q prereq} in its `prerequisites`, which is not a " &
                        "`slug` in the top-level `concepts` array"
             b.setFalseAndPrint(msg, path)
@@ -596,7 +512,7 @@ func statusMsg(exercise: ConceptExercise | PracticeExercise;
     else:
       &"is user-facing (because its `status` key has the value {q $exercise.status})"
 
-  result = &"The {exerciseKind} {q exercise.slug} {statusStr}" &
+  result = &"The {exerciseKind} {q $exercise.slug} {statusStr}" &
            &", but has {problem}"
 
 proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
@@ -634,9 +550,9 @@ proc checkExercisesPCP(exercises: seq[ConceptExercise] | seq[PracticeExercise];
       # Check `prerequisites`
       when exercise is ConceptExercise:
         if exercise.prerequisites.len == 0:
-          conceptExercisesWithEmptyPrereqs.add exercise.slug
+          conceptExercisesWithEmptyPrereqs.add $exercise.slug
       else:
-        if exercise.slug == "hello-world":
+        if $exercise.slug == "hello-world":
           if exercise.prerequisites.len > 0:
             let msg = "The Practice Exercise `hello-world` must have an " &
                       "empty array of `prerequisites`"
@@ -682,15 +598,15 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
   var conceptExerciseSlugs = initHashSet[string](exercises.`concept`.len)
   for conceptExercise in exercises.`concept`:
     let slug = conceptExercise.slug
-    if conceptExerciseSlugs.containsOrIncl slug:
-      let msg = &"There is more than one Concept Exercise with the slug {q slug}"
+    if conceptExerciseSlugs.containsOrIncl $slug:
+      let msg = &"There is more than one Concept Exercise with the slug {q $slug}"
       b.setFalseAndPrint(msg, path)
 
   var practiceExerciseSlugs = initHashSet[string](exercises.practice.len)
   for practiceExercise in exercises.practice:
     let slug = practiceExercise.slug
-    if practiceExerciseSlugs.containsOrIncl slug:
-      let msg = &"There is more than one Practice Exercise with the slug {q slug}"
+    if practiceExerciseSlugs.containsOrIncl $slug:
+      let msg = &"There is more than one Practice Exercise with the slug {q $slug}"
       b.setFalseAndPrint(msg, path)
 
   for slug in conceptExerciseSlugs:

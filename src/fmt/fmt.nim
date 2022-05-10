@@ -1,5 +1,5 @@
 import std/[os, strformat, strutils]
-import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync]
+import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
 
 type
   PathAndFormattedExerciseConfig = object

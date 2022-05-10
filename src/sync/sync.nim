@@ -1,5 +1,5 @@
 import std/[os, sequtils, strformat, strutils, terminal]
-import ".."/[cli, logger]
+import ".."/[cli, logger, types_track_config]
 import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
             sync_metadata, sync_tests]
 
