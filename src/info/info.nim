@@ -110,11 +110,12 @@ func count(exercises: seq[ConceptExercise] |
 proc trackSummary(conceptExercises: seq[ConceptExercise],
                   practiceExercises: seq[PracticeExercise],
                   concepts: seq[Concept]): string =
-  let (numConceptExercises, numConceptExercisesWip) = count(conceptExercises)
-  let (numPracticeExercises, numPracticeExercisesWip) = count(practiceExercises)
-  let numExercises = numConceptExercises + numPracticeExercises
-  let numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
-  let numConcepts = concepts.len
+  let
+    (numConceptExercises, numConceptExercisesWip) = count(conceptExercises)
+    (numPracticeExercises, numPracticeExercisesWip) = count(practiceExercises)
+    numExercises = numConceptExercises + numPracticeExercises
+    numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
+    numConcepts = concepts.len
   result = header("Track summary:")
   result.add fmt"""
     {numConceptExercises:>3} Concept Exercises (plus {numConceptExercisesWip} work-in-progress)
