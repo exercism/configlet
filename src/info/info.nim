@@ -12,10 +12,8 @@ proc header(s: string): string =
 func toStringSorted(s: HashSet[string]): string =
   var elements = toSeq(s)
   sort elements
-  result = ""
-  for item in elements:
-    result.add item
-    result.add '\n'
+  result = elements.join("\n")
+  result.add '\n'
 
 proc show(s: HashSet[string], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
