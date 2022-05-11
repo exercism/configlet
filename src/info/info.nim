@@ -38,14 +38,13 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
         {prac}
 
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
+  let conceptsThatArentPracticed = conceptSlugs - practices
+  let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
+
   result = show(conceptsThatArentAPrereq,
       "Concepts that aren't a prerequisite for any Practice Exercise:")
-
-  let conceptsThatArentPracticed = conceptSlugs - practices
   result.add show(conceptsThatArentPracticed,
       "Concepts that aren't practiced by any Practice Exercise:")
-
-  let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
   result.add show(conceptsThatAreAPrereqButArentPracticed,
       "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
   stripLineEnd(result)
