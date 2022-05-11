@@ -13,16 +13,12 @@ type
     problemSpecificationsCommitRef: string
     exercises: ProbSpecsExercises
 
-proc init(T: typedesc[ProbSpecsState], path: static string): T =
-  ## Reads the slugs file at `path` at compile-time, and returns an object
-  ## containing every exercise in `exercism/problem-specifications`, grouped by
-  ## kind.
-  let contents = staticRead(path)
-  contents.fromJson(T)
-
 proc init(T: typedesc[ProbSpecsExercises]): T =
+  ## Reads the prob-specs data at compile-time, and returns an object containing
+  ## every exercise in `exercism/problem-specifications`, grouped by kind.
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
-  ProbSpecsState.init(slugsPath).exercises
+  let contents = staticRead(slugsPath)
+  contents.fromJson(ProbSpecsState).exercises
 
 proc header(s: string): string =
   if colorStdout:
