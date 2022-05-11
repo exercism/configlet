@@ -131,11 +131,9 @@ proc info*(conf: Conf) =
   if fileExists(trackConfigPath):
     let trackConfig = TrackConfig.init trackConfigPath.readFile()
 
-    let exercises = trackConfig.exercises
-    let conceptExercises = exercises.`concept`
-    let practiceExercises = exercises.practice
-    let foregone = exercises.foregone
-    let concepts = trackConfig.concepts
+    let (conceptExercises, practiceExercises, foregone, concepts) = block:
+      let exercises = trackConfig.exercises
+      (exercises.`concept`, exercises.practice, exercises.foregone, trackConfig.concepts)
 
     echo conceptsInfo(practiceExercises, concepts)
     const probSpecsExercises = ProbSpecsExercises.init()
