@@ -83,16 +83,13 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
       "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
   stripLineEnd(result)
 
-func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  collect:
-    for practiceExercise in practiceExercises:
-      {practiceExercise.slug.`$`}
-
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
                                      probSpecsExercises: ProbSpecsExercises): string =
   let
-    practiceExerciseSlugs = getSlugs(practiceExercises)
+    practiceExerciseSlugs = collect:
+      for practiceExercise in practiceExercises:
+        {practiceExercise.slug.`$`}
     uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
     uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
     header =
