@@ -28,10 +28,12 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
   let conceptSlugs = collect:
     for con in concepts:
       {con.slug}
+
   let prereqs = collect:
     for p in practiceExercises:
       for prereq in p.prerequisites:
         {prereq}
+
   let practices = collect:
     for p in practiceExercises:
       for prac in p.practices:
