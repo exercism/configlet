@@ -25,12 +25,6 @@ proc init(T: typedesc[ProbSpecsExercises]): T =
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
   getPsState(slugsPath).exercises
 
-func getConceptSlugs(concepts: Concepts): HashSet[string] =
-  ## Returns the `slug` of every concept in `concepts`.
-  collect:
-    for item in concepts:
-      {item.slug}
-
 func getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the concepts that appear at least once in the `prerequisites` array
   ## of a Practice Exercise in `practiceExercises`.
@@ -70,7 +64,9 @@ proc show[A](s: SomeSet[A], header: string): string =
 
 proc conceptsInfo(practiceExercises: seq[PracticeExercise],
                   concepts: seq[Concept]): string =
-  let conceptSlugs = getConceptSlugs(concepts)
+  let conceptSlugs = collect:
+    for item in concepts:
+      {item.slug}
   let prereqs = getPrereqs(practiceExercises)
   let practices = getPractices(practiceExercises)
 
