@@ -9,14 +9,17 @@ proc header(s: string): string =
   else:
     &"{s}\n"
 
+func toSeqSorted[A](s: SomeSet[A]): seq[A] =
+  result = toSeq(s)
+  sort result
+
 proc show[A](s: SomeSet[A], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
   ## then the elements of `s` in alphabetical order
   result = header(header)
   if s.len > 0:
-    var elements = toSeq(s)
-    sort elements
-    for item in elements:
+    let sorted = toSeqSorted(s)
+    for item in sorted:
       result.add item
       result.add "\n"
   else:
@@ -89,9 +92,8 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
     for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
       if u.len > 0:
         result.add &"\n{s} canonical data:\n"
-        var u = toSeq(u)
-        sort u
-        for slug in u:
+        let uSorted = toSeqSorted(u)
+        for slug in uSorted:
           result.add &"{slug}\n"
   else:
     result.add "none\n"
