@@ -9,19 +9,20 @@ proc header(s: string): string =
   else:
     &"{s}\n"
 
-func toSeqSorted(s: HashSet[string]): seq[string] =
-  result = toSeq(s)
-  sort result
+func toStringSorted(s: HashSet[string]): string =
+  var elements = toSeq(s)
+  sort elements
+  result = ""
+  for item in elements:
+    result.add item
+    result.add '\n'
 
 proc show(s: HashSet[string], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
   ## then the elements of `s` in alphabetical order
   result = header(header)
   if s.len > 0:
-    let sorted = toSeqSorted(s)
-    for item in sorted:
-      result.add item
-      result.add "\n"
+    result.add toStringSorted(s)
   else:
     result.add "none\n"
   result.add "\n"
@@ -92,9 +93,7 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
     for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
       if u.len > 0:
         result.add &"\n{s} canonical data:\n"
-        let uSorted = toSeqSorted(u)
-        for slug in uSorted:
-          result.add &"{slug}\n"
+        result.add toStringSorted(u)
   else:
     result.add "none\n"
 
