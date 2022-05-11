@@ -9,18 +9,18 @@ proc header(s: string): string =
   else:
     &"{s}\n"
 
-func toStringSorted(s: HashSet[string]): string =
-  var elements = toSeq(s)
+func toStringSorted(x: HashSet[string]): string =
+  var elements = toSeq(x)
   sort elements
   result = elements.join("\n")
   result.add '\n'
 
-proc show(s: HashSet[string], header: string): string =
+proc show(x: HashSet[string], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
-  ## then the elements of `s` in alphabetical order
+  ## then the elements of `x` in alphabetical order
   result = header(header)
-  if s.len > 0:
-    result.add toStringSorted(s)
+  if x.len > 0:
+    result.add toStringSorted(x)
   else:
     result.add "none\n"
   result.add "\n"
