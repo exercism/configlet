@@ -21,7 +21,6 @@ proc init(T: typedesc[ProbSpecsState], path: static string): T =
   contents.fromJson(T)
 
 proc init(T: typedesc[ProbSpecsExercises]): T =
-  # TODO: automatically update this at build-time?
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
   ProbSpecsState.init(slugsPath).exercises
 
