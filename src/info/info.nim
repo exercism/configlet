@@ -1,4 +1,4 @@
-import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
+import std/[algorithm, os, sequtils, sets, strformat, strutils, sugar, terminal]
 import pkg/jsony
 import ".."/[cli, types_track_config]
 
@@ -27,25 +27,25 @@ proc init(T: typedesc[ProbSpecsExercises]): T =
 
 func getConceptSlugs(concepts: Concepts): HashSet[string] =
   ## Returns the `slug` of every concept in `concepts`.
-  result = initHashSet[string](concepts.len)
-  for item in concepts:
-    result.incl item.slug
+  collect:
+    for item in concepts:
+      {item.slug}
 
 func getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the concepts that appear at least once in the `prerequisites` array
   ## of a Practice Exercise in `practiceExercises`.
-  result = initHashSet[string]()
-  for practiceExercise in practiceExercises:
-    for prereq in practiceExercise.prerequisites:
-      result.incl prereq
+  collect:
+    for practiceExercise in practiceExercises:
+      for prereq in practiceExercise.prerequisites:
+        {prereq}
 
 func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
   ## Returns the concepts that appear at least once in the `practices` array
   ## of a Practice Exercise in `practiceExercises`.
-  result = initHashSet[string]()
-  for practiceExercise in practiceExercises:
-    for item in practiceExercise.practices:
-      result.incl item
+  collect:
+    for practiceExercise in practiceExercises:
+      for item in practiceExercise.practices:
+        {item}
 
 proc header(s: string): string =
   if colorStdout:
@@ -88,9 +88,9 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
   stripLineEnd(result)
 
 func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  result = initHashSet[string](practiceExercises.len)
-  for practiceExercise in practiceExercises:
-    result.incl $practiceExercise.slug
+  collect:
+    for practiceExercise in practiceExercises:
+      {practiceExercise.slug.`$`}
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
