@@ -29,12 +29,12 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
     for item in concepts:
       {item.slug}
   let prereqs = collect:
-    for practiceExercise in practiceExercises:
-      for prereq in practiceExercise.prerequisites:
+    for p in practiceExercises:
+      for prereq in p.prerequisites:
         {prereq}
   let practices = collect:
-    for practiceExercise in practiceExercises:
-      for item in practiceExercise.practices:
+    for p in practiceExercises:
+      for item in p.practices:
         {item}
 
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
@@ -73,8 +73,8 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      probSpecsExercises: ProbSpecsExercises): string =
   let
     practiceExerciseSlugs = collect:
-      for practiceExercise in practiceExercises:
-        {practiceExercise.slug.`$`}
+      for p in practiceExercises:
+        {p.slug.`$`}
     uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
     uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
     header =
