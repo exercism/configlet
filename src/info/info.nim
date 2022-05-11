@@ -25,23 +25,24 @@ proc show[A](s: SomeSet[A], header: string): string =
 
 proc conceptsInfo(practiceExercises: seq[PracticeExercise],
                   concepts: seq[Concept]): string =
-  let conceptSlugs = collect:
-    for con in concepts:
-      {con.slug}
+  let
+    conceptSlugs = collect:
+      for con in concepts:
+        {con.slug}
 
-  let prereqs = collect:
-    for p in practiceExercises:
-      for prereq in p.prerequisites:
-        {prereq}
+    prereqs = collect:
+      for p in practiceExercises:
+        for prereq in p.prerequisites:
+          {prereq}
 
-  let practices = collect:
-    for p in practiceExercises:
-      for prac in p.practices:
-        {prac}
+    practices = collect:
+      for p in practiceExercises:
+        for prac in p.practices:
+          {prac}
 
-  let conceptsThatArentAPrereq = conceptSlugs - prereqs
-  let conceptsThatArentPracticed = conceptSlugs - practices
-  let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
+    conceptsThatArentAPrereq = conceptSlugs - prereqs
+    conceptsThatArentPracticed = conceptSlugs - practices
+    conceptsThatAreAPrereqButArentPracticed = prereqs - practices
 
   result = show(conceptsThatArentAPrereq,
       "Concepts that aren't a prerequisite for any Practice Exercise:")
