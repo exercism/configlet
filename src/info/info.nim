@@ -118,7 +118,7 @@ proc trackSummary(conceptExercises: seq[ConceptExercise],
     {numConceptExercises:>3} Concept Exercises (plus {numConceptExercisesWip} work-in-progress)
     {numPracticeExercises:>3} Practice Exercises (plus {numPracticeExercisesWip} work-in-progress)
     {numExercises:>3} Exercises in total (plus {numExercisesWip} work-in-progress)
-    {numConcepts:>3} Concepts""".unindent(4)
+    {numConcepts:>3} Concepts""".unindent(4) # Preserve right-alignment of digits.
 
 proc info*(conf: Conf) =
   let trackConfigPath = conf.trackDir / "config.json"
