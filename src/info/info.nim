@@ -25,14 +25,6 @@ proc init(T: typedesc[ProbSpecsExercises]): T =
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
   getPsState(slugsPath).exercises
 
-func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the concepts that appear at least once in the `practices` array
-  ## of a Practice Exercise in `practiceExercises`.
-  collect:
-    for practiceExercise in practiceExercises:
-      for item in practiceExercise.practices:
-        {item}
-
 proc header(s: string): string =
   if colorStdout:
     const ansi = ansiForegroundColorCode(fgBlue)
@@ -63,7 +55,10 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
     for practiceExercise in practiceExercises:
       for prereq in practiceExercise.prerequisites:
         {prereq}
-  let practices = getPractices(practiceExercises)
+  let practices = collect:
+    for practiceExercise in practiceExercises:
+      for item in practiceExercise.practices:
+        {item}
 
   let conceptsThatArentAPrereq = conceptSlugs - prereqs
   result = show(conceptsThatArentAPrereq,
