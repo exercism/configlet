@@ -9,11 +9,11 @@ proc header(s: string): string =
   else:
     &"{s}\n"
 
-func toSeqSorted[A](s: SomeSet[A]): seq[A] =
+func toSeqSorted(s: HashSet[string]): seq[string] =
   result = toSeq(s)
   sort result
 
-proc show[A](s: SomeSet[A], header: string): string =
+proc show(s: HashSet[string], header: string): string =
   ## Returns a string containing a colorized (when appropriate) `header`, and
   ## then the elements of `s` in alphabetical order
   result = header(header)
