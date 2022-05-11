@@ -2,24 +2,6 @@ import std/[algorithm, os, sequtils, sets, strformat, strutils, sugar, terminal]
 import pkg/jsony
 import ".."/[cli, types_track_config]
 
-type
-  ProbSpecsExercises = object
-    withCanonicalData: HashSet[string]
-    withoutCanonicalData: HashSet[string]
-    deprecated: HashSet[string]
-
-  ProbSpecsState = object
-    lastUpdated: string
-    problemSpecificationsCommitRef: string
-    exercises: ProbSpecsExercises
-
-proc init(T: typedesc[ProbSpecsExercises]): T =
-  ## Reads the prob-specs data at compile-time, and returns an object containing
-  ## every exercise in `exercism/problem-specifications`, grouped by kind.
-  const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
-  let contents = staticRead(slugsPath)
-  contents.fromJson(ProbSpecsState).exercises
-
 proc header(s: string): string =
   if colorStdout:
     const ansi = ansiForegroundColorCode(fgBlue)
@@ -67,6 +49,24 @@ proc conceptsInfo(practiceExercises: seq[PracticeExercise],
   result.add show(conceptsThatAreAPrereqButArentPracticed,
       "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
   stripLineEnd(result)
+
+type
+  ProbSpecsExercises = object
+    withCanonicalData: HashSet[string]
+    withoutCanonicalData: HashSet[string]
+    deprecated: HashSet[string]
+
+  ProbSpecsState = object
+    lastUpdated: string
+    problemSpecificationsCommitRef: string
+    exercises: ProbSpecsExercises
+
+proc init(T: typedesc[ProbSpecsExercises]): T =
+  ## Reads the prob-specs data at compile-time, and returns an object containing
+  ## every exercise in `exercism/problem-specifications`, grouped by kind.
+  const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
+  let contents = staticRead(slugsPath)
+  contents.fromJson(ProbSpecsState).exercises
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
                                      foregone: HashSet[string],
