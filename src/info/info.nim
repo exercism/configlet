@@ -83,6 +83,7 @@ proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
       &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
       "in `exercism/problem-specifications` that\n" &
       "are both unimplemented and not in the track config `exercises.foregone` array:"
+
   result = header(header)
   if uWith.len > 0 or uWithout.len > 0:
     for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
@@ -116,6 +117,7 @@ proc trackSummary(conceptExercises: seq[ConceptExercise],
     numExercises = numConceptExercises + numPracticeExercises
     numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
     numConcepts = concepts.len
+
   result = header("Track summary:")
   result.add fmt"""
     {numConceptExercises:>3} Concept Exercises (plus {numConceptExercisesWip} work-in-progress)
