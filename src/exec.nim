@@ -82,7 +82,7 @@ proc cloneExercismRepo*(repoName, dest: string; shallow = false;
   ## `singleBranch` is `true`.
   ##
   ## Quits if the clone is unsuccessful.
-  let url = &"https://github.com/exercism/{repoName}/"
+  let url = &"https://github.com/exercism/{repoName}"
   let args = block:
     var res = @["clone"]
     if shallow:
