@@ -1,6 +1,58 @@
-import std/[algorithm, os, sequtils, sets, strformat, strutils, terminal]
+import std/[algorithm, os, sequtils, sets, strformat, strutils, sugar, terminal]
 import pkg/jsony
 import ".."/[cli, types_track_config]
+
+proc header(s: string): string =
+  if colorStdout:
+    const ansi = ansiForegroundColorCode(fgBlue)
+    &"{ansi}{s}{ansiResetCode}\n"
+  else:
+    &"{s}\n"
+
+func toStringSorted(x: HashSet[string]): string =
+  var elements = toSeq(x)
+  sort elements
+  result = elements.join("\n")
+  result.add '\n'
+
+proc show(x: HashSet[string], header: string): string =
+  ## Returns a string containing a colorized (when appropriate) `header`, and
+  ## then the elements of `x` in alphabetical order
+  result = header(header)
+  if x.len > 0:
+    result.add toStringSorted(x)
+  else:
+    result.add "none\n"
+  result.add "\n"
+
+proc conceptsInfo(practiceExercises: seq[PracticeExercise],
+                  concepts: seq[Concept]): string =
+  let
+    conceptSlugs = collect:
+      for con in concepts:
+        {con.slug}
+
+    prereqs = collect:
+      for p in practiceExercises:
+        for prereq in p.prerequisites:
+          {prereq}
+
+    practices = collect:
+      for p in practiceExercises:
+        for prac in p.practices:
+          {prac}
+
+    conceptsThatArentAPrereq = conceptSlugs - prereqs
+    conceptsThatArentPracticed = conceptSlugs - practices
+    conceptsThatAreAPrereqButArentPracticed = prereqs - practices
+
+  result = show(conceptsThatArentAPrereq,
+      "Concepts that aren't a prerequisite for any Practice Exercise:")
+  result.add show(conceptsThatArentPracticed,
+      "Concepts that aren't practiced by any Practice Exercise:")
+  result.add show(conceptsThatAreAPrereqButArentPracticed,
+      "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
+  stripLineEnd(result)
 
 type
   ProbSpecsExercises = object
@@ -13,105 +65,33 @@ type
     problemSpecificationsCommitRef: string
     exercises: ProbSpecsExercises
 
-proc getPsState(path: static string): ProbSpecsState =
-  ## Reads the slugs file at `path` at compile-time, and returns an object
-  ## containing every exercise in `exercism/problem-specifications`, grouped by
-  ## kind.
-  let contents = staticRead(path)
-  contents.fromJson(ProbSpecsState)
-
 proc init(T: typedesc[ProbSpecsExercises]): T =
-  # TODO: automatically update this at build-time?
+  ## Reads the prob-specs data at compile-time, and returns an object containing
+  ## every exercise in `exercism/problem-specifications`, grouped by kind.
   const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
-  getPsState(slugsPath).exercises
-
-func getConceptSlugs(concepts: Concepts): HashSet[string] =
-  ## Returns the `slug` of every concept in `concepts`.
-  result = initHashSet[string](concepts.len)
-  for item in concepts:
-    result.incl item.slug
-
-func getPrereqs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the concepts that appear at least once in the `prerequisites` array
-  ## of a Practice Exercise in `practiceExercises`.
-  result = initHashSet[string]()
-  for practiceExercise in practiceExercises:
-    for prereq in practiceExercise.prerequisites:
-      result.incl prereq
-
-func getPractices(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  ## Returns the concepts that appear at least once in the `practices` array
-  ## of a Practice Exercise in `practiceExercises`.
-  result = initHashSet[string]()
-  for practiceExercise in practiceExercises:
-    for item in practiceExercise.practices:
-      result.incl item
-
-proc header(s: string): string =
-  if colorStdout:
-    const ansi = ansiForegroundColorCode(fgBlue)
-    &"{ansi}{s}{ansiResetCode}\n"
-  else:
-    &"{s}\n"
-
-proc show[A](s: SomeSet[A], header: string): string =
-  ## Returns a string containing a colorized (when appropriate) `header`, and
-  ## then the elements of `s` in alphabetical order
-  result = header(header)
-  if s.len > 0:
-    var elements = toSeq(s)
-    sort elements
-    for item in elements:
-      result.add item
-      result.add "\n"
-  else:
-    result.add "none\n"
-  result.add "\n"
-
-proc conceptsInfo(practiceExercises: seq[PracticeExercise],
-                  concepts: seq[Concept]): string =
-  let conceptSlugs = getConceptSlugs(concepts)
-  let prereqs = getPrereqs(practiceExercises)
-  let practices = getPractices(practiceExercises)
-
-  let conceptsThatArentAPrereq = conceptSlugs - prereqs
-  result = show(conceptsThatArentAPrereq,
-      "Concepts that aren't a prerequisite for any Practice Exercise:")
-
-  let conceptsThatArentPracticed = conceptSlugs - practices
-  result.add show(conceptsThatArentPracticed,
-      "Concepts that aren't practiced by any Practice Exercise:")
-
-  let conceptsThatAreAPrereqButArentPracticed = prereqs - practices
-  result.add show(conceptsThatAreAPrereqButArentPracticed,
-      "Concepts that are a prerequisite, but aren't practiced by any Practice Exercise:")
-  stripLineEnd(result)
-
-func getSlugs(practiceExercises: seq[PracticeExercise]): HashSet[string] =
-  result = initHashSet[string](practiceExercises.len)
-  for practiceExercise in practiceExercises:
-    result.incl $practiceExercise.slug
+  let contents = staticRead(slugsPath)
+  contents.fromJson(ProbSpecsState).exercises
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                     foregone: HashSet[string],
-                                     probSpecsExercises: ProbSpecsExercises): string =
+                                     foregone: HashSet[string]): string =
+  const probSpecsExercises = ProbSpecsExercises.init()
   let
-    practiceExerciseSlugs = getSlugs(practiceExercises)
+    practiceExerciseSlugs = collect:
+      for p in practiceExercises:
+        {p.slug.`$`}
     uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
     uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
     header =
       &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
       "in `exercism/problem-specifications` that\n" &
       "are both unimplemented and not in the track config `exercises.foregone` array:"
+
   result = header(header)
   if uWith.len > 0 or uWithout.len > 0:
     for (u, s) in [(uWith, "With"), (uWithout, "Without")]:
       if u.len > 0:
         result.add &"\n{s} canonical data:\n"
-        var u = toSeq(u)
-        sort u
-        for slug in u:
-          result.add &"{slug}\n"
+        result.add toStringSorted(u)
   else:
     result.add "none\n"
 
@@ -130,35 +110,28 @@ func count(exercises: seq[ConceptExercise] |
 proc trackSummary(conceptExercises: seq[ConceptExercise],
                   practiceExercises: seq[PracticeExercise],
                   concepts: seq[Concept]): string =
-  let (numConceptExercises, numConceptExercisesWip) = count(conceptExercises)
-  let (numPracticeExercises, numPracticeExercisesWip) = count(practiceExercises)
-  let numExercises = numConceptExercises + numPracticeExercises
-  let numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
-  let numConcepts = concepts.len
+  let
+    (numConceptExercises, numConceptExercisesWip) = count(conceptExercises)
+    (numPracticeExercises, numPracticeExercisesWip) = count(practiceExercises)
+    numExercises = numConceptExercises + numPracticeExercises
+    numExercisesWip = numConceptExercisesWip + numPracticeExercisesWip
+    numConcepts = concepts.len
+
   result = header("Track summary:")
   result.add fmt"""
     {numConceptExercises:>3} Concept Exercises (plus {numConceptExercisesWip} work-in-progress)
     {numPracticeExercises:>3} Practice Exercises (plus {numPracticeExercisesWip} work-in-progress)
     {numExercises:>3} Exercises in total (plus {numExercisesWip} work-in-progress)
-    {numConcepts:>3} Concepts""".unindent(4)
+    {numConcepts:>3} Concepts""".unindent(4) # Preserve right-alignment of digits.
 
 proc info*(conf: Conf) =
   let trackConfigPath = conf.trackDir / "config.json"
 
   if fileExists(trackConfigPath):
-    let trackConfigContents = readFile(trackConfigPath)
-    let trackConfig = TrackConfig.init(trackConfigContents)
-
-    let exercises = trackConfig.exercises
-    let conceptExercises = exercises.`concept`
-    let practiceExercises = exercises.practice
-    let foregone = exercises.foregone
-    let concepts = trackConfig.concepts
-
-    echo conceptsInfo(practiceExercises, concepts)
-    const probSpecsExercises = ProbSpecsExercises.init()
-    echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsExercises)
-    echo trackSummary(conceptExercises, practiceExercises, concepts)
+    let t = TrackConfig.init trackConfigPath.readFile()
+    echo conceptsInfo(t.exercises.practice, t.concepts)
+    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone)
+    echo trackSummary(t.exercises.`concept`, t.exercises.practice, t.concepts)
   else:
     var msg = &"file does not exist: {trackConfigPath}"
     if conf.trackDir == getCurrentDir():
