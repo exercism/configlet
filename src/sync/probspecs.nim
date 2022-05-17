@@ -104,6 +104,10 @@ proc getNameOfRemote*(probSpecsDir: ProbSpecsDir;
   showError(&"there is no remote that points to '{location}' at '{host}' in " &
             &"the cached problem-specifications directory: '{probSpecsDir}'")
 
+func isOffline(conf: Conf): bool =
+  (conf.action.kind == actSync and conf.action.offline) or
+      (conf.action.kind == actInfo and conf.action.offlineInfo)
+
 proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
   ## Raises an error if the given `probSpecsDir` is not a valid
   ## `problem-specifications` repo that is up-to-date with upstream.
@@ -128,7 +132,7 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                      "problem-specifications working directory is not clean: " &
                      &"'{probSpecsDir}'")
 
-    if conf.action.offline:
+    if isOffline(conf):
       # Don't checkout `main` when `--offline` was passed, because:
       # 1. The current tests of the configlet executable require that
       #    `configlet sync --offline` does not alter the state of the cached
@@ -166,7 +170,7 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
   result = T(getCacheDir() / "exercism" / "configlet" / "problem-specifications")
   if dirExists(result):
     validate(result, conf)
-  elif conf.action.offline:
+  elif isOffline(conf):
     let msg = fmt"""
       Error: --offline was passed, but there is no cached 'problem-specifications' repo at:
         '{result}'

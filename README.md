@@ -24,6 +24,9 @@ Options for fmt:
   -u, --update                 Prompt to write formatted files
   -y, --yes                    Auto-confirm the prompt from --update
 
+Options for info:
+  -o, --offline                Do not update the cached 'problem-specifications' data
+
 Options for sync:
   -e, --exercise <slug>        Only operate on this exercise
   -o, --offline                Do not update the cached 'problem-specifications' data
