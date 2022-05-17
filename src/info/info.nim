@@ -128,15 +128,12 @@ proc info*(conf: Conf) =
   let trackConfigPath = conf.trackDir / "config.json"
 
   if fileExists(trackConfigPath):
-    let (conceptExercises, practiceExercises, foregone, concepts) = block:
-      let trackConfig = TrackConfig.init trackConfigPath.readFile()
-      let exercises = trackConfig.exercises
-      (exercises.`concept`, exercises.practice, exercises.foregone, trackConfig.concepts)
-
-    echo conceptsInfo(practiceExercises, concepts)
+    let t = TrackConfig.init trackConfigPath.readFile()
+    echo conceptsInfo(t.exercises.practice, t.concepts)
     const probSpecsExercises = ProbSpecsExercises.init()
-    echo unimplementedProbSpecsExercises(practiceExercises, foregone, probSpecsExercises)
-    echo trackSummary(conceptExercises, practiceExercises, concepts)
+    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone,
+                                         probSpecsExercises)
+    echo trackSummary(t.exercises.`concept`, t.exercises.practice, t.concepts)
   else:
     var msg = &"file does not exist: {trackConfigPath}"
     if conf.trackDir == getCurrentDir():
