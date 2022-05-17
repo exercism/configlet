@@ -73,8 +73,8 @@ proc init(T: typedesc[ProbSpecsExercises]): T =
   contents.fromJson(ProbSpecsState).exercises
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                     foregone: HashSet[string],
-                                     probSpecsExercises: ProbSpecsExercises): string =
+                                     foregone: HashSet[string]): string =
+  const probSpecsExercises = ProbSpecsExercises.init()
   let
     practiceExerciseSlugs = collect:
       for p in practiceExercises:
@@ -130,9 +130,7 @@ proc info*(conf: Conf) =
   if fileExists(trackConfigPath):
     let t = TrackConfig.init trackConfigPath.readFile()
     echo conceptsInfo(t.exercises.practice, t.concepts)
-    const probSpecsExercises = ProbSpecsExercises.init()
-    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone,
-                                         probSpecsExercises)
+    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone)
     echo trackSummary(t.exercises.`concept`, t.exercises.practice, t.concepts)
   else:
     var msg = &"file does not exist: {trackConfigPath}"
