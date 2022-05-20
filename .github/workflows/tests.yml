@@ -40,16 +40,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
 
+      - name: On Linux, switch to GCC 10 and install musl
+        if: matrix.target.os == 'linux'
+        run: ./.github/bin/linux-install-build-tools
+
       - name: Install Nim
         uses: iffy/install-nim@7dd1812db4916d00b984d1c43339346a76e05487
         with:
           version: "binary:1.6.6"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Install musl on Linux
-        if: matrix.target.os == 'linux'
-        run: ./.github/bin/linux-install-build-tools
 
       - name: Install our Nimble dependencies
         run: nimble --accept install --depsOnly

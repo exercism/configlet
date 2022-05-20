@@ -1,3 +1,8 @@
 #!/usr/bin/env sh
 
+# Switch to GCC 10
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+sudo update-alternatives --set gcc /usr/bin/gcc-10
+
+# Install musl
 sudo apt-get install musl-dev musl-tools
