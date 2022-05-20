@@ -1,6 +1,6 @@
 import std/[algorithm, os, sequtils, sets, strformat, strutils, sugar, terminal]
 import pkg/jsony
-import ".."/[cli, types_track_config]
+import ".."/[cli, sync/probspecs, types_track_config]
 
 proc header(s: string): string =
   if colorStdout:
@@ -60,22 +60,23 @@ type
     withoutCanonicalData: HashSet[string]
     deprecated: HashSet[string]
 
-  ProbSpecsState = object
-    lastUpdated: string
-    problemSpecificationsCommitRef: string
-    exercises: ProbSpecsExercises
-
-proc init(T: typedesc[ProbSpecsExercises]): T =
-  ## Reads the prob-specs data at compile-time, and returns an object containing
-  ## every exercise in `exercism/problem-specifications`, grouped by kind.
-  const slugsPath = currentSourcePath().parentDir() / "prob_specs_exercises.json"
-  let contents = staticRead(slugsPath)
-  contents.fromJson(ProbSpecsState).exercises
+proc init(T: typedesc[ProbSpecsExercises], probSpecsDir: ProbSpecsDir): T =
+  result = T()
+  for kind, path in walkDir(probSpecsDir / "exercises"):
+    if kind == pcDir:
+      let exerciseSlug = path.lastPathPart()
+      if fileExists(path / ".deprecated"):
+        result.deprecated.incl exerciseSlug
+      elif fileExists(path / "canonical-data.json"):
+        result.withCanonicalData.incl exerciseSlug
+      else:
+        result.withoutCanonicalData.incl exerciseSlug
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                     foregone: HashSet[string]): string =
-  const probSpecsExercises = ProbSpecsExercises.init()
+                                     foregone: HashSet[string],
+                                     probSpecsDir: ProbSpecsDir): string =
   let
+    probSpecsExercises = ProbSpecsExercises.init(probSpecsDir)
     practiceExerciseSlugs = collect:
       for p in practiceExercises:
         {p.slug.`$`}
@@ -129,8 +130,10 @@ proc info*(conf: Conf) =
 
   if fileExists(trackConfigPath):
     let t = TrackConfig.init trackConfigPath.readFile()
+    let probSpecsDir = ProbSpecsDir.init(conf)
     echo conceptsInfo(t.exercises.practice, t.concepts)
-    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone)
+    echo unimplementedProbSpecsExercises(t.exercises.practice, t.exercises.foregone,
+                                         probSpecsDir)
     echo trackSummary(t.exercises.`concept`, t.exercises.practice, t.concepts)
   else:
     var msg = &"file does not exist: {trackConfigPath}"

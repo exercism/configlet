@@ -24,7 +24,7 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil, actGenerate, actInfo, actLint:
+    of actNil, actGenerate, actLint:
       discard
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
@@ -33,6 +33,8 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
+    of actInfo:
+      offlineInfo*: bool
     of actSync:
       exercise*: string
       offline*: bool
@@ -65,8 +67,9 @@ type
     optFmtSyncUpdate = "update"
     optFmtSyncYes = "yes"
 
-    # Options for `sync`
-    optSyncOffline = "offline"
+    # Options for both `info` and `sync`
+    optInfoSyncOffline = "offline"
+
     # Scope to sync
     optSyncDocs = "docs"
     optSyncFilepaths = "filepaths"
@@ -90,7 +93,7 @@ const
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
-               optSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
+               optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -199,7 +202,7 @@ func genHelpText: string =
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optSyncOffline: "Do not update the cached 'problem-specifications' data",
+    optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -252,6 +255,8 @@ func genHelpText: string =
               optFmtSyncUpdate
             of "yesFmt":
               optFmtSyncYes
+            of "offlineInfo":
+              optInfoSyncOffline
             else:
               parseEnum[Opt](key)
           # Set the description for `fmt` options.
@@ -456,7 +461,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil, actGenerate, actInfo, actLint:
+    of actNil, actGenerate, actLint:
       discard
     of actFmt:
       case opt
@@ -466,6 +471,12 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(updateFmt, true)
       of optFmtSyncYes:
         setActionOpt(yesFmt, true)
+      else:
+        discard
+    of actInfo:
+      case opt
+      of optInfoSyncOffline:
+        setActionOpt(offlineInfo, true)
       else:
         discard
     of actSync:
@@ -479,7 +490,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
-      of optSyncOffline:
+      of optInfoSyncOffline:
         setActionOpt(offline, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:
         conf.action.scope.incl parseEnum[SyncKind]($opt)
