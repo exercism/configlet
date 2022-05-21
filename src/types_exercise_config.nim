@@ -99,8 +99,8 @@ type
     forked_from*: Option[seq[string]] ## Allowed only for a Concept Exercise.
     icon*: string                     ## Allowed only for a Concept Exercise.
     blurb*: string
-    source*: string
-    source_url*: string
+    source*: Option[string]
+    source_url*: Option[string]
     custom*: Option[JsonNode]
 
   PracticeExerciseConfig* = object
@@ -113,8 +113,8 @@ type
     # The below fields are synced for a Practice Exercise that exists in the
     # `exercism/problem-specifications` repo.
     blurb*: string
-    source*: string
-    source_url*: string
+    source*: Option[string]
+    source_url*: Option[string]
     custom*: Option[JsonNode]
 
 {.pop.}

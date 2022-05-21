@@ -1,4 +1,4 @@
-import std/[os, strformat, strutils]
+import std/[options, os, strformat, strutils]
 import pkg/parsetoml
 import ".."/[cli, logger, types_exercise_config, types_track_config]
 import "."/sync_common
@@ -9,8 +9,8 @@ import "."/sync_common
 type
   UpstreamMetadata = object
     blurb: string
-    source: string
-    source_url: string
+    source: Option[string]
+    source_url: Option[string]
 
   PathAndUpdatedConfig = object
     path: string
@@ -23,9 +23,12 @@ proc parseMetadataToml(path: string): UpstreamMetadata =
   ## returns an object containing the `blurb`, `source`, and `source_url` values.
   let t = parsetoml.parseFile(path)
   result = UpstreamMetadata(
-    blurb: if t.hasKey("blurb"): t["blurb"].getStr() else: "",
-    source: if t.hasKey("source"): t["source"].getStr() else: "",
-    source_url: if t.hasKey("source_url"): t["source_url"].getStr() else: ""
+    blurb:
+      if t.hasKey("blurb"): t["blurb"].getStr() else: "",
+    source:
+      if t.hasKey("source"): t["source"].getStr().some() else: none(string),
+    source_url:
+      if t.hasKey("source_url"): t["source_url"].getStr().some() else: none(string)
   )
 
 func metadataAreUpToDate(p: PracticeExerciseConfig;
@@ -45,9 +48,9 @@ func update(p: var PracticeExerciseConfig;
   p.source_url = upstreamMetadata.source_url
   if upstreamMetadata.blurb.len > 0 and eckBlurb notin p.originalKeyOrder:
     p.originalKeyOrder.add eckBlurb
-  if upstreamMetadata.source.len > 0 and eckSource notin p.originalKeyOrder:
+  if upstreamMetadata.source.isSome() and eckSource notin p.originalKeyOrder:
     p.originalKeyOrder.add eckSource
-  if upstreamMetadata.source_url.len > 0 and eckSourceUrl notin p.originalKeyOrder:
+  if upstreamMetadata.source_url.isSome() and eckSourceUrl notin p.originalKeyOrder:
     p.originalKeyOrder.add eckSourceUrl
 
 proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
