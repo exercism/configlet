@@ -327,9 +327,9 @@ func keyOrderForFmt(e: ConceptExerciseConfig |
     if e.test_runner.isSome() and not e.test_runner.get():
       result.add eckTestRunner
   result.add eckBlurb
-  if e.source.len > 0:
+  if e.source.isSome():
     result.add eckSource
-  if e.source_url.len > 0:
+  if e.source_url.isSome():
     result.add eckSourceUrl
   if e.custom.isSome() and e.custom.get().len > 0:
     result.add eckCustom
@@ -387,9 +387,11 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:
-      result.addString("source", e.source)
+      if e.source.isSome():
+        result.addString("source", e.source.get())
     of eckSourceUrl:
-      result.addString("source_url", e.source_url)
+      if e.source_url.isSome():
+        result.addString("source_url", e.source_url.get())
     of eckCustom:
       addValOrNull(custom, addObject)
   result.removeComma()

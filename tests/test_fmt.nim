@@ -150,8 +150,8 @@ proc testFmt =
           forked_from: some(@["bar/lovely-lasagna"]),
           icon: "myicon",
           blurb: "Learn about the basics of Foo by following a lasagna recipe.",
-          source: "mysource",
-          source_url: "https://example.com",
+          source: some("mysource"),
+          source_url: some("https://example.com"),
           custom: some(customJson)
         )
         const expected = """{
@@ -228,8 +228,8 @@ proc testFmt =
           language_versions: ">=1.2.3",
           test_runner: some(false),
           blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
-          source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-          source_url: "https://example.com",
+          source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
+          source_url: some("https://example.com"),
           custom: some(customJson)
         )
         const expected = """{

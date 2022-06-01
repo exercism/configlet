@@ -41,8 +41,8 @@ proc testSyncCommon =
         forked_from: some(@["csharp/lucians-luscious-lasagna"]),
         icon: "",
         blurb: "Learn about the basics of Elixir by following a lasagna recipe.",
-        source: "",
-        source_url: ""
+        source: none(string),
+        source_url: none(string)
       )
       let exerciseConfig = parseFile(lasagnaConfigPath, ConceptExerciseConfig)
       check exerciseConfig == expected
@@ -65,8 +65,8 @@ proc testSyncCommon =
         language_versions: "",
         test_runner: none(bool),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
-        source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        source_url: ""
+        source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
+        source_url: none(string)
       )
       let exerciseConfig = parseFile(dartsConfigPath, PracticeExerciseConfig)
       check exerciseConfig == expected
@@ -158,8 +158,8 @@ proc testSyncCommon =
         forked_from: some(@["bar/lovely-lasagna"]),
         icon: "myicon",
         blurb: "Learn about the basics of Foo by following a lasagna recipe.",
-        source: "mysource",
-        source_url: "https://example.com",
+        source: some("mysource"),
+        source_url: some("https://example.com"),
         custom: some(customJson)
       )
       const expected = """{
@@ -231,8 +231,8 @@ proc testSyncCommon =
         language_versions: ">=1.2.3",
         test_runner: some(false),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
-        source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        source_url: "https://example.com",
+        source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
+        source_url: some("https://example.com"),
         custom: some(customJson)
       )
       const expected = """{
@@ -459,8 +459,8 @@ proc testSyncMetadata =
       let metadataPath = joinPath(psExercisesDir, "all-your-base", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Convert a number, represented as a sequence of digits in one base, to any other base.",
-        source: "",
-        source_url: ""
+        source: none(string),
+        source_url: none(string)
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
@@ -469,8 +469,8 @@ proc testSyncMetadata =
       let metadataPath = joinPath(psExercisesDir, "darts", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
-        source: "Inspired by an exercise created by a professor Della Paolera in Argentina",
-        source_url: ""
+        source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
+        source_url: none(string)
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
@@ -479,8 +479,8 @@ proc testSyncMetadata =
       let metadataPath = joinPath(psExercisesDir, "two-fer", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: """Create a sentence of the form "One for X, one for me.".""",
-        source: "",
-        source_url: "https://github.com/exercism/problem-specifications/issues/757"
+        source: none(string),
+        source_url: some("https://github.com/exercism/problem-specifications/issues/757")
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
@@ -489,8 +489,8 @@ proc testSyncMetadata =
       let metadataPath = joinPath(psExercisesDir, "collatz-conjecture", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "Calculate the number of steps to reach 1 using the Collatz conjecture.",
-        source: "An unsolved problem in mathematics named after mathematician Lothar Collatz",
-        source_url: "https://en.wikipedia.org/wiki/3x_%2B_1_problem"
+        source: some("An unsolved problem in mathematics named after mathematician Lothar Collatz"),
+        source_url: some("https://en.wikipedia.org/wiki/3x_%2B_1_problem")
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
@@ -499,8 +499,8 @@ proc testSyncMetadata =
       let metadataPath = joinPath(psExercisesDir, "etl", "metadata.toml")
       const expected = UpstreamMetadata(
         blurb: "We are going to do the `Transform` step of an Extract-Transform-Load.",
-        source: "The Jumpstart Lab team",
-        source_url: "http://jumpstartlab.com"
+        source: some("The Jumpstart Lab team"),
+        source_url: some("http://jumpstartlab.com")
       )
       let metadata = parseMetadataToml(metadataPath)
       check metadata == expected
@@ -511,13 +511,13 @@ proc testSyncMetadata =
   suite "update and metadataAreUpToDate":
     privateAccess(UpstreamMetadata)
     privateAccess(PracticeExerciseConfig)
-    const metadata = UpstreamMetadata(
-      blurb: "This is a really good exercise.",
-      source: "From a conversation with ee7.",
-      source_url: "https://example.com"
-    )
 
     test "updates `blurb`, `source`, and `source_url`":
+      const metadata = UpstreamMetadata(
+        blurb: "This is a really good exercise.",
+        source: some("From a conversation with ee7."),
+        source_url: some("https://example.com")
+      )
       var p = PracticeExerciseConfig(
         authors: @["foo"],
         contributors: some(@["foo"]),
@@ -530,8 +530,8 @@ proc testSyncMetadata =
         language_versions: "",
         test_runner: none(bool),
         blurb: "",
-        source: "",
-        source_url: ""
+        source: none(string),
+        source_url: none(string)
       )
       update(p, metadata)
       let expected = PracticeExerciseConfig(
@@ -547,8 +547,50 @@ proc testSyncMetadata =
         language_versions: "",
         test_runner: none(bool),
         blurb: "This is a really good exercise.",
-        source: "From a conversation with ee7.",
-        source_url: "https://example.com"
+        source: some("From a conversation with ee7."),
+        source_url: some("https://example.com")
+      )
+      check:
+        p == expected
+        metadataAreUpToDate(p, metadata)
+
+    test "removes `source_url` that previously existed":
+      const metadata = UpstreamMetadata(
+        blurb: "This is a really good exercise.",
+        source: some("From a conversation with ee7."),
+        source_url: none(string)
+      )
+      var p = PracticeExerciseConfig(
+        authors: @["foo"],
+        contributors: some(@["foo"]),
+        files: PracticeExerciseFiles(
+          solution: @["foo"],
+          test: @["foo"],
+          example: @["foo"],
+          editor: @[]
+        ),
+        language_versions: "",
+        test_runner: none(bool),
+        blurb: "",
+        source: some("From a conversation with ee7."),
+        source_url: some("https://example.com")
+      )
+      update(p, metadata)
+      let expected = PracticeExerciseConfig(
+        originalKeyOrder: @[eckBlurb, eckSource],
+        authors: @["foo"],
+        contributors: some(@["foo"]),
+        files: PracticeExerciseFiles(
+          solution: @["foo"],
+          test: @["foo"],
+          example: @["foo"],
+          editor: @[]
+        ),
+        language_versions: "",
+        test_runner: none(bool),
+        blurb: "This is a really good exercise.",
+        source: some("From a conversation with ee7."),
+        source_url: none(string)
       )
       check:
         p == expected
