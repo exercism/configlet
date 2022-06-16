@@ -77,6 +77,9 @@ proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
           The expected 'tests.toml' format is documented in
           https://exercism.org/docs/building/configlet/sync#h-tests""".unindent()
         quit 1
+      except CatchableError:
+        stderr.writeLine "Error: " & getCurrentExceptionMsg()
+        quit 1
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):
