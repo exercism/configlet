@@ -1,7 +1,16 @@
 import std/[hashes, os, strutils]
 
+proc getVersionStart: string =
+  # Returns the `major.minor.patch` version in the `configlet.version` file
+  # (that is, omitting any pre-release version information).
+  result = staticRead("configlet.version")
+  for i, c in result:
+    if c notin {'0'..'9', '.'}:
+      result.setLen(i)
+      return result
+
 # Package
-version       = "4.0.0"
+version       = getVersionStart() # Must consist only of digits and '.'
 author        = "ee7"
 description   = "A tool for managing Exercism language track repositories"
 license       = "AGPL-3.0-only"
