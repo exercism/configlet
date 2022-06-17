@@ -64,5 +64,5 @@ proc generate*(conf: Conf) =
       let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
       if fileExists(introductionTemplatePath):
         let introduction = generateIntroduction(trackDir, introductionTemplatePath)
-        let introductionPath = conceptExerciseDir / ".docs" / "introduction.md"
+        let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
         writeFile(introductionPath, introduction)
