@@ -1,4 +1,4 @@
-import std/[strbasics, strformat, strscans, terminal]
+import std/[parseutils, strbasics, strformat, strscans, terminal]
 import ".."/[cli, helpers]
 
 proc writeError(description: string, path: Path) =
@@ -10,18 +10,22 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-func demoteHeaders(s: string): string =
-  ## Demotes the level of any Markdown header in `s` by one. Supports only
-  ## headers that begin with a `#` character.
+func alterHeaders(s: string): string =
   # Markdown implementations differ on whether a space is required after the
   # final '#' character that begins the header.
   result = newStringOfCap(s.len)
   var i = 0
+  i += s.skipWhitespace()
+  # Skip the top-level header (if any)
+  if i < s.len and s[i] == '#' and i+1 < s.len and s[i+1] == ' ':
+    i += s.skipUntil('\n', i)
+  # Demote other headers
   while i < s.len:
     result.add s[i]
     if s[i] == '\n' and i+1 < s.len and s[i+1] == '#':
       result.add '#'
     inc i
+  strip result
 
 proc conceptIntroduction(trackDir: Path, slug: string,
                          templatePath: Path): string =
@@ -33,14 +37,7 @@ proc conceptIntroduction(trackDir: Path, slug: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = readFile(path)
-      var i = 0
-      # Strip the top-level header (if any)
-      if scanp(result, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
-               +(~'\n')):
-        result.setSlice(i..result.high)
-      result = demoteHeaders(result)
-      strip result
+      result = path.readFile().alterHeaders()
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
