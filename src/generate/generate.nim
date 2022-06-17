@@ -1,4 +1,4 @@
-import std/[strformat, strscans, strutils, terminal]
+import std/[strbasics, strformat, strscans, terminal]
 import ".."/[cli, helpers]
 
 proc writeError(description: string, path: Path) =
@@ -23,9 +23,10 @@ proc conceptIntroduction(trackDir: Path, slug: string,
       # Strip the top-level heading (if any)
       if scanp(content, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = content[i..^1].strip
+        result = content[i..^1]
       else:
-        result = content.strip
+        result = content
+      strip result
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
