@@ -10,20 +10,36 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
+func demoteHeaders(s: string): string =
+  ## Demotes the level of any Markdown header in `s` by one. Supports only
+  ## headers that begin with a `#` character.
+  # Markdown implementations differ on whether a space is required after the
+  # final '#' character that begins the header.
+  result = newStringOfCap(s.len)
+  var i = 0
+  while i < s.len:
+    result.add s[i]
+    if s[i] == '\n' and i+1 < s.len and s[i+1] == '#':
+      result.add '#'
+    inc i
+
 proc conceptIntroduction(trackDir: Path, slug: string,
                          templatePath: Path): string =
-  ## Returns the contents of the `introduction.md` file for a `slug`, but
-  ## without any top-level heading, and without any leading/trailing whitespace.
+  ## Returns the contents of the `introduction.md` file for a `slug`, but:
+  ## - Without a first top-level header.
+  ## - Demoting the level of any other header.
+  ## - Without any leading/trailing whitespace.
   let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
       result = readFile(path)
       var i = 0
-      # Strip the top-level heading (if any)
+      # Strip the top-level header (if any)
       if scanp(result, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
         result.setSlice(i..result.high)
+      result = demoteHeaders(result)
       strip result
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
