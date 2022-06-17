@@ -33,7 +33,7 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil, actGenerate, actLint:
+    of actNil, actLint:
       discard
     of actCompletion:
       shell*: Shell
@@ -51,6 +51,10 @@ type
       exerciseFmt*: string
       updateFmt*: bool
       yesFmt*: bool
+    of actGenerate:
+      exerciseGenerate*: string
+      updateGenerate*: bool
+      yesGenerate*: bool
     of actInfo:
       offlineInfo*: bool
     of actSync:
@@ -87,12 +91,12 @@ type
     # Options for `completion`
     optCompletionShell = "shell"
 
-    # Options for `create`, `fmt` and `sync`
-    optFmtSyncCreateExercise = "exercise"
+    # Options for `create`, `fmt`, generate, and `sync`
+    optFmtGenerateSyncCreateExercise = "exercise"
 
-    # Options for both `fmt` and `sync`
-    optFmtSyncUpdate = "update"
-    optFmtSyncYes = "yes"
+    # Options for `fmt`, `generate`, and `sync`
+    optFmtGenerateSyncUpdate = "update"
+    optFmtGenerateSyncYes = "yes"
 
     # Options for both `info` and `sync`
     optInfoSyncOffline = "offline"
@@ -119,7 +123,7 @@ const
   repoRootDir = currentSourcePath().parentDir().parentDir()
   configletVersion = staticRead(repoRootDir / "configlet.version").strip()
   short = genShortKeys()
-  optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
+  optsNoVal = {optHelp, optVersion, optFmtGenerateSyncUpdate, optFmtGenerateSyncYes,
                optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
@@ -177,7 +181,7 @@ func genHelpText: string =
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
         of optCompletionShell: "shell"
-        of optFmtSyncCreateExercise: "slug"
+        of optFmtGenerateSyncCreateExercise: "slug"
         of optCreateApproach: "slug"
         of optCreateArticle: "slug"
         of optSyncTests: "mode"
@@ -237,15 +241,15 @@ func genHelpText: string =
     optCreateArticle: "The slug of the article",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
-    optFmtSyncCreateExercise: "Only operate on this exercise",
-    optFmtSyncUpdate: "Prompt to update the unsynced track data",
-    optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
+    optFmtGenerateSyncCreateExercise: "Only operate on this exercise",
+    optFmtGenerateSyncUpdate: "Prompt to update the unsynced track data",
+    optFmtGenerateSyncYes: &"Auto-confirm prompts from --{$optFmtGenerateSyncUpdate} for updating docs, filepaths, and metadata",
     optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
     optSyncTests: &"Sync Practice Exercise '.meta/tests.toml' files.\n" &
-                  &"{paddingOpt}The mode value specifies how missing tests are handled when using --{$optFmtSyncUpdate}.\n" &
+                  &"{paddingOpt}The mode value specifies how missing tests are handled when using --{$optFmtGenerateSyncUpdate}.\n" &
                   &"{paddingOpt}{allowedValues(TestsMode)} (default: choose)",
     optUuidNum: "Number of UUIDs to output",
   ]
@@ -293,23 +297,27 @@ func genHelpText: string =
             of "articleSlug":
               optCreateArticle
             of "exerciseCreate":
-              optFmtSyncCreateExercise
-            of "exerciseFmt":
-              optFmtSyncCreateExercise
-            of "updateFmt":
-              optFmtSyncUpdate
-            of "yesFmt":
-              optFmtSyncYes
+              optFmtGenerateSyncCreateExercise
+            of "exerciseFmt", "exerciseGenerate":
+              optFmtGenerateSyncCreateExercise
+            of "updateFmt", "updateGenerate":
+              optFmtGenerateSyncUpdate
+            of "yesFmt", "yesGenerate":
+              optFmtGenerateSyncYes
             of "offlineInfo":
               optInfoSyncOffline
             else:
               parseEnum[Opt](key)
           # Set the description for `fmt` options.
           let desc =
-            if actionKind == actFmt and opt == optFmtSyncUpdate:
+            if actionKind == actFmt and opt == optFmtGenerateSyncUpdate:
               "Prompt to write formatted files"
-            elif actionKind == actFmt and opt == optFmtSyncYes:
-              &"Auto-confirm the prompt from --{$optFmtSyncUpdate}"
+            elif actionKind == actFmt and opt == optFmtGenerateSyncYes:
+              &"Auto-confirm the prompt from --{$optFmtGenerateSyncUpdate}"
+            elif actionKind == actGenerate and opt == optFmtGenerateSyncUpdate:
+              "Prompt to write generated files"
+            elif actionKind == actGenerate and opt == optFmtGenerateSyncYes:
+              &"Auto-confirm the prompt from --{$optFmtGenerateSyncUpdate}"
             else:
               optionDescriptions[opt]
           result.add alignLeft(syntax[opt], maxLen) & desc & "\n"
@@ -515,7 +523,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil, actGenerate, actLint:
+    of actNil, actLint:
       discard
     of actCompletion:
       case opt
@@ -529,18 +537,28 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(approachSlug, val)
       of optCreateArticle:
         setActionOpt(articleSlug, val)
-      of optFmtSyncCreateExercise:
+      of optFmtGenerateSyncCreateExercise:
         setActionOpt(exerciseCreate, val)
       else:
         discard
     of actFmt:
       case opt
-      of optFmtSyncCreateExercise:
+      of optFmtGenerateSyncCreateExercise:
         setActionOpt(exerciseFmt, val)
-      of optFmtSyncUpdate:
+      of optFmtGenerateSyncUpdate:
         setActionOpt(updateFmt, true)
-      of optFmtSyncYes:
+      of optFmtGenerateSyncYes:
         setActionOpt(yesFmt, true)
+      else:
+        discard
+    of actGenerate:
+      case opt
+      of optFmtGenerateSyncCreateExercise:
+        setActionOpt(exerciseGenerate, val)
+      of optFmtGenerateSyncUpdate:
+        setActionOpt(updateGenerate, true)
+      of optFmtGenerateSyncYes:
+        setActionOpt(yesGenerate, true)
       else:
         discard
     of actInfo:
@@ -551,11 +569,11 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actSync:
       case opt
-      of optFmtSyncCreateExercise:
+      of optFmtGenerateSyncCreateExercise:
         setActionOpt(exercise, val)
-      of optFmtSyncUpdate:
+      of optFmtGenerateSyncUpdate:
         setActionOpt(update, true)
-      of optFmtSyncYes:
+      of optFmtGenerateSyncYes:
         setActionOpt(yes, true)
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
