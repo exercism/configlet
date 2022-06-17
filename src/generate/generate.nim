@@ -23,7 +23,7 @@ proc conceptIntroduction(trackDir: Path, slug: string,
       # Strip the top-level heading (if any)
       if scanp(result, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = result[i..^1]
+        result.setSlice(i..result.high)
       strip result
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
