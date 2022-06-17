@@ -1,4 +1,4 @@
-import std/[algorithm, json, os, sets]
+import std/[algorithm, json, os, sets, strformat, strutils]
 import pkg/parsetoml
 import ".."/cli
 
@@ -65,7 +65,21 @@ proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
   ## included and excluded test case UUIDs.
   result = PracticeExerciseTests.init()
   if fileExists(testsPath):
-    let tests = parsetoml.parseFile(testsPath)
+    let tests =
+      try:
+        parsetoml.parseFile(testsPath)
+      except TomlError: # Note that `TomlError` inherits from `Defect`.
+        stderr.writeLine fmt"""
+
+          Error: A 'tests.toml' file contains invalid TOML:
+          {getCurrentExceptionMsg()}
+
+          The expected 'tests.toml' format is documented in
+          https://exercism.org/docs/building/configlet/sync#h-tests""".unindent()
+        quit 1
+      except CatchableError:
+        stderr.writeLine "Error: " & getCurrentExceptionMsg()
+        quit 1
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):
