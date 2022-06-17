@@ -18,14 +18,12 @@ proc conceptIntroduction(trackDir: Path, slug: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      let content = readFile(path)
+      result = readFile(path)
       var i = 0
       # Strip the top-level heading (if any)
-      if scanp(content, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
+      if scanp(result, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = content[i..^1]
-      else:
-        result = content
+        result = result[i..^1]
       strip result
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
