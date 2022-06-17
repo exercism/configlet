@@ -23,7 +23,7 @@ proc conceptIntroduction(trackDir: Path, slug: string,
       # Strip the top-level heading (if any)
       if scanp(content, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = content.substr(i).strip
+        result = content[i..^1].strip
       else:
         result = content.strip
     else:
