@@ -19,11 +19,11 @@ proc conceptIntroduction(trackDir: Path, slug: string,
     let path = conceptDir / "introduction.md"
     if fileExists(path):
       let content = readFile(path)
-      var idx = 0
+      var i = 0
       # Strip the top-level heading (if any)
-      if scanp(content, idx, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
+      if scanp(content, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = content.substr(idx).strip
+        result = content.substr(i).strip
       else:
         result = content.strip
     else:
@@ -39,19 +39,19 @@ proc generateIntroduction(trackDir: Path, templatePath: Path): string =
   ## corresponding `introduction.md` file.
   let content = readFile(templatePath)
 
-  var idx = 0
-  while idx < content.len:
+  var i = 0
+  while i < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
     # where we allow spaces after the opening brace, around the colon,
     # and before the closing brace. The slug must be in kebab-case.
-    if scanp(content, idx,
+    if scanp(content, i,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       result.add conceptIntroduction(trackDir, conceptSlug, templatePath)
     else:
-      result.add content[idx]
-      inc idx
+      result.add content[i]
+      inc i
 
 proc generate*(conf: Conf) =
   ## For every Concept Exercise in `conf.trackDir` with an `introduction.md.tpl`
