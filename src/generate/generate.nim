@@ -37,6 +37,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path): string =
   ## Reads the file at `templatePath` and returns the content of the
   ## corresponding `introduction.md` file.
   let content = readFile(templatePath)
+  result = newStringOfCap(1024)
 
   var i = 0
   while i < content.len:
