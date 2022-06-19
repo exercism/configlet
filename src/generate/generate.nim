@@ -1,4 +1,4 @@
-import std/[strformat, strscans, strutils, terminal]
+import std/[strbasics, strformat, strscans, terminal]
 import ".."/[cli, helpers]
 
 proc writeError(description: string, path: Path) =
@@ -18,14 +18,13 @@ proc conceptIntroduction(trackDir: Path, slug: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      let content = readFile(path)
-      var idx = 0
+      result = readFile(path)
+      var i = 0
       # Strip the top-level heading (if any)
-      if scanp(content, idx, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
+      if scanp(result, i, *{' ', '\t', '\v', '\c', '\n', '\f'}, "#", +' ',
                +(~'\n')):
-        result = content.substr(idx).strip
-      else:
-        result = content.strip
+        result.setSlice(i..result.high)
+      strip result
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -38,20 +37,21 @@ proc generateIntroduction(trackDir: Path, templatePath: Path): string =
   ## Reads the file at `templatePath` and returns the content of the
   ## corresponding `introduction.md` file.
   let content = readFile(templatePath)
+  result = newStringOfCap(1024)
 
-  var idx = 0
-  while idx < content.len:
+  var i = 0
+  while i < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
     # where we allow spaces after the opening brace, around the colon,
     # and before the closing brace. The slug must be in kebab-case.
-    if scanp(content, idx,
+    if scanp(content, i,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       result.add conceptIntroduction(trackDir, conceptSlug, templatePath)
     else:
-      result.add content[idx]
-      inc idx
+      result.add content[i]
+      inc i
 
 proc generate*(conf: Conf) =
   ## For every Concept Exercise in `conf.trackDir` with an `introduction.md.tpl`
@@ -64,5 +64,5 @@ proc generate*(conf: Conf) =
       let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
       if fileExists(introductionTemplatePath):
         let introduction = generateIntroduction(trackDir, introductionTemplatePath)
-        let introductionPath = conceptExerciseDir / ".docs" / "introduction.md"
+        let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
         writeFile(introductionPath, introduction)
