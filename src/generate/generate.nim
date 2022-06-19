@@ -1,5 +1,11 @@
-import std/[parseutils, strbasics, strformat, strscans, terminal]
-import ".."/[cli, helpers]
+import std/[parseutils, strbasics, strformat, strscans, tables, terminal]
+import ".."/[cli, helpers, types_track_config]
+
+proc getSlugLookup(trackDir: Path): Table[string, string] =
+  let concepts = TrackConfig.init(readFile(trackDir / "config.json")).concepts
+  result = initTable[string, string](concepts.len)
+  for `concept` in concepts:
+    result[`concept`.slug] = `concept`.name
 
 proc writeError(description: string, path: Path) =
   let descriptionPrefix = description & ":"
@@ -10,7 +16,7 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-func alterHeaders(s: string): string =
+func alterHeaders(s: string, title: string): string =
   # Markdown implementations differ on whether a space is required after the
   # final '#' character that begins the header.
   result = newStringOfCap(s.len)
@@ -19,6 +25,7 @@ func alterHeaders(s: string): string =
   # Skip the top-level header (if any)
   if i < s.len and s[i] == '#' and i+1 < s.len and s[i+1] == ' ':
     i += s.skipUntil('\n', i)
+  result.add &"## {title}"
   # Demote other headers
   var inFencedCodeBlock = false
   while i < s.len:
@@ -34,17 +41,18 @@ func alterHeaders(s: string): string =
     inc i
   strip result
 
-proc conceptIntroduction(trackDir: Path, slug: string,
+proc conceptIntroduction(trackDir: Path, slug: string, title: string,
                          templatePath: Path): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level header.
+  ## - Adding a starting a second-level header containing `title`.
   ## - Demoting the level of any other header.
   ## - Without any leading/trailing whitespace.
   let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeaders()
+      result = path.readFile().alterHeaders(title)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -53,7 +61,8 @@ proc conceptIntroduction(trackDir: Path, slug: string,
                templatePath)
     quit(1)
 
-proc generateIntroduction(trackDir: Path, templatePath: Path): string =
+proc generateIntroduction(trackDir: Path, templatePath: Path,
+                          slugLookup: Table[string, string]): string =
   ## Reads the file at `templatePath` and returns the content of the
   ## corresponding `introduction.md` file.
   let content = readFile(templatePath)
@@ -68,7 +77,8 @@ proc generateIntroduction(trackDir: Path, templatePath: Path): string =
     if scanp(content, i,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
-      result.add conceptIntroduction(trackDir, conceptSlug, templatePath)
+      let title = slugLookup[conceptSlug]
+      result.add conceptIntroduction(trackDir, conceptSlug, title, templatePath)
     else:
       result.add content[i]
       inc i
@@ -80,9 +90,11 @@ proc generate*(conf: Conf) =
 
   let conceptExercisesDir = trackDir / "exercises" / "concept"
   if dirExists(conceptExercisesDir):
+    let slugLookup = getSlugLookup(trackDir)
     for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
       let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
       if fileExists(introductionTemplatePath):
-        let introduction = generateIntroduction(trackDir, introductionTemplatePath)
+        let introduction = generateIntroduction(trackDir, introductionTemplatePath,
+                                                slugLookup)
         let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
         writeFile(introductionPath, introduction)

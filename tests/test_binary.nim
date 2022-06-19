@@ -872,17 +872,16 @@ proc testsForSync(binaryPath: static string) =
                          &"failed to merge '{mainBranchName}' in " &
                          &"problem-specifications directory: '{probSpecsDir}'")
 
-proc prepareIntroductionFiles(trackDir, header, placeholder: string;
-                              removeIntro: bool) =
+proc prepareIntroductionFiles(trackDir, placeholder: string; removeIntro: bool) =
   # Writes an `introduction.md.tpl` file for the `bird-count` Concept Exercise,
-  # containing the given `header` and `placeholder`. Also removes the
-  # `introduction.md` file if `removeIntro` is `true`.
+  # containing the given `placeholder`. Also removes the `introduction.md` file
+  # if `removeIntro` is `true`.
   let
     docsPath = trackDir / "exercises" / "concept" / "bird-count" / ".docs"
     introPath = docsPath / "introduction.md"
     templatePath = introPath & ".tpl"
     templateContents = fmt"""
-      # {header}
+      # Introduction
 
       {placeholder}
     """.unindent()
@@ -897,7 +896,7 @@ proc testsForGenerate(binaryPath: string) =
 
     # Setup: clone a track repo, and checkout a known state
     setupExercismRepo("elixir", trackDir,
-                      "f3974abf6e0d4a434dfe3494d58581d399c18edb") # 2021-05-09
+                      "91ccf91940f32aff3726c772695b2de167d8192a") # 2022-06-12
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
       execAndCheck(0, generateCmd, "")
@@ -906,8 +905,7 @@ proc testsForGenerate(binaryPath: string) =
       checkNoDiff(trackDir)
 
     # Valid placeholder syntax without spaces, and invalid slug
-    prepareIntroductionFiles(trackDir, "Recursion",
-                             "%{concept:not-a-real-concept-slug}",
+    prepareIntroductionFiles(trackDir, "%{concept:not-a-real-concept-slug}",
                              removeIntro = false)
 
     test "`configlet generate` exits with 1 for an invalid placeholder usage":
@@ -917,7 +915,7 @@ proc testsForGenerate(binaryPath: string) =
       checkNoDiff(trackDir)
 
     # Valid placeholder syntax without spaces, and valid slug
-    prepareIntroductionFiles(trackDir, "Recursion", "%{concept:recursion}",
+    prepareIntroductionFiles(trackDir, "%{concept:recursion}",
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for a valid `.md.tpl` file":
@@ -927,7 +925,7 @@ proc testsForGenerate(binaryPath: string) =
       checkNoDiff(trackDir)
 
     # Valid placeholder syntax with spaces, and valid slug
-    prepareIntroductionFiles(trackDir, "Recursion", "%{ concept : recursion }",
+    prepareIntroductionFiles(trackDir, "%{ concept : recursion }",
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for valid placeholder usage with spaces":

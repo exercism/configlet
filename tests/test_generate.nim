@@ -34,6 +34,8 @@ proc testGenerate =
       """.unindent()
 
       const expected = """
+        ## Operator Overloading
+
         The quick brown fox jumps over a lazy dog.
 
         The five boxing wizards jump quickly.
@@ -59,7 +61,7 @@ proc testGenerate =
 
         The five boxing wizards jump quickly.""".unindent() # No final newline
 
-      check alterHeaders(s) == expected
+      check alterHeaders(s, "Operator Overloading") == expected
 
 proc main =
   testGenerate()
