@@ -21,7 +21,10 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.
+        ```nim
+        # This line is not a header
+        echo "hi"
+        ```
 
         ## Header 4
 
@@ -45,7 +48,10 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.
+        ```nim
+        # This line is not a header
+        echo "hi"
+        ```
 
         ### Header 4
 

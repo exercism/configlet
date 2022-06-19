@@ -20,10 +20,17 @@ func alterHeaders(s: string): string =
   if i < s.len and s[i] == '#' and i+1 < s.len and s[i+1] == ' ':
     i += s.skipUntil('\n', i)
   # Demote other headers
+  var inFencedCodeBlock = false
   while i < s.len:
     result.add s[i]
-    if s[i] == '\n' and i+1 < s.len and s[i+1] == '#':
-      result.add '#'
+    if s[i] == '\n':
+      # When inside a fenced code block, don't alter a line that begins with '#'
+      if i+1 < s.len and s[i+1] == '#' and not inFencedCodeBlock:
+        result.add '#'
+      elif i+3 < s.len and s[i+1] == '`' and s[i+2] == '`' and s[i+3] == '`':
+        inFencedCodeBlock = not inFencedCodeBlock
+        result.add "```"
+        i += 3
     inc i
   strip result
 
