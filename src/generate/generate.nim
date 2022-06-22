@@ -36,8 +36,6 @@ func alterHeaders(s: string, title: string): string =
         result.add '#'
       elif i+3 < s.len and s[i+1] == '`' and s[i+2] == '`' and s[i+3] == '`':
         inFencedCodeBlock = not inFencedCodeBlock
-        result.add "```"
-        i += 3
     inc i
   strip result
 
