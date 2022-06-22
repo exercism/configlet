@@ -1,4 +1,4 @@
-import std/[parseutils, strbasics, strformat, strscans, tables, terminal]
+import std/[parseutils, strbasics, strformat, strscans, strutils, tables, terminal]
 import ".."/[cli, helpers, types_track_config]
 
 proc getSlugLookup(trackDir: Path): Table[string, string] =
@@ -23,7 +23,7 @@ func alterHeaders(s: string, title: string): string =
   var i = 0
   i += s.skipWhitespace()
   # Skip the top-level header (if any)
-  if i < s.len and s[i] == '#' and i+1 < s.len and s[i+1] == ' ':
+  if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
   result.add &"## {title}"
   # Demote other headers
@@ -32,9 +32,9 @@ func alterHeaders(s: string, title: string): string =
     result.add s[i]
     if s[i] == '\n':
       # When inside a fenced code block, don't alter a line that begins with '#'
-      if i+1 < s.len and s[i+1] == '#' and not inFencedCodeBlock:
+      if s.continuesWith("#", i+1) and not inFencedCodeBlock:
         result.add '#'
-      elif i+3 < s.len and s[i+1] == '`' and s[i+2] == '`' and s[i+3] == '`':
+      elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
     inc i
   strip result
