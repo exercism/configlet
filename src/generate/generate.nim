@@ -84,9 +84,14 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
     if scanp(content, i,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
-      let title = slugLookup[conceptSlug]
-      result.add conceptIntroduction(trackDir, conceptSlug, title, templatePath,
-                                     headerLevel)
+      if conceptSlug in slugLookup:
+        let title = slugLookup[conceptSlug]
+        result.add conceptIntroduction(trackDir, conceptSlug, title,
+                                       templatePath, headerLevel)
+      else:
+        writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
+                   templatePath)
+        quit(1)
     else:
       if content.continuesWith("\n#", i):
         headerLevel = content.skipWhile({'#'}, i+1)
