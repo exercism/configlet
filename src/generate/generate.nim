@@ -16,7 +16,7 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-func alterHeaders(s: string, title: string): string =
+func alterHeaders(s: string, title: string, headerLevel: int): string =
   # Markdown implementations differ on whether a space is required after the
   # final '#' character that begins the header.
   result = newStringOfCap(s.len)
@@ -25,7 +25,8 @@ func alterHeaders(s: string, title: string): string =
   # Skip the top-level header (if any)
   if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
-  result.add &"## {title}"
+  if headerLevel == 1:
+    result.add &"## {title}"
   # Demote other headers
   var inFencedCodeBlock = false
   var inCommentBlock = false
@@ -34,7 +35,9 @@ func alterHeaders(s: string, title: string): string =
     if s[i] == '\n':
       # Add a '#' to a line that begins with '#', unless inside a code or HTML block.
       if s.continuesWith("#", i+1) and not (inFencedCodeBlock or inCommentBlock):
-        result.add '#'
+        let demotionAmount = if headerLevel in [1, 2]: 1 else: headerLevel - 1
+        for _ in 1..demotionAmount:
+          result.add '#'
       elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
       elif s.continuesWith("<!--", i+1):
@@ -45,7 +48,7 @@ func alterHeaders(s: string, title: string): string =
   strip result
 
 proc conceptIntroduction(trackDir: Path, slug: string, title: string,
-                         templatePath: Path): string =
+                         templatePath: Path, headerLevel: int): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level header.
   ## - Adding a starting a second-level header containing `title`.
@@ -55,7 +58,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, title: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeaders(title)
+      result = path.readFile().alterHeaders(title, headerLevel)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -72,6 +75,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
   result = newStringOfCap(1024)
 
   var i = 0
+  var headerLevel = 1
   while i < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
@@ -81,8 +85,11 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       let title = slugLookup[conceptSlug]
-      result.add conceptIntroduction(trackDir, conceptSlug, title, templatePath)
+      result.add conceptIntroduction(trackDir, conceptSlug, title, templatePath,
+                                     headerLevel)
     else:
+      if content.continuesWith("\n#", i):
+        headerLevel = content.skipWhile({'#'}, i+1)
       result.add content[i]
       inc i
 
