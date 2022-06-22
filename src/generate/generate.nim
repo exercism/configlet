@@ -28,14 +28,19 @@ func alterHeaders(s: string, title: string): string =
   result.add &"## {title}"
   # Demote other headers
   var inFencedCodeBlock = false
+  var inCommentBlock = false
   while i < s.len:
     result.add s[i]
     if s[i] == '\n':
-      # When inside a fenced code block, don't alter a line that begins with '#'
-      if s.continuesWith("#", i+1) and not inFencedCodeBlock:
+      # Add a '#' to a line that begins with '#', unless inside a code or HTML block.
+      if s.continuesWith("#", i+1) and not (inFencedCodeBlock or inCommentBlock):
         result.add '#'
       elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
+      elif s.continuesWith("<!--", i+1):
+        inCommentBlock = true
+    elif inCommentBlock and s.continuesWith("-->", i):
+      inCommentBlock = false
     inc i
   strip result
 

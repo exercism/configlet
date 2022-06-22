@@ -15,7 +15,9 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.
+        <!--
+        # This line is not a header
+        This line is in an HTML comment block -->
 
         ### Header 3
 
@@ -44,7 +46,9 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.
+        <!--
+        # This line is not a header
+        This line is in an HTML comment block -->
 
         #### Header 3
 
