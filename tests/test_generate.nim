@@ -32,7 +32,10 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.
+        ~~~nim
+        # This line is not a header
+        echo "hi"
+        ~~~
       """.unindent()
 
       const expected = """
@@ -61,7 +64,10 @@ proc testGenerate =
 
         The quick brown fox jumps over a lazy dog.
 
-        The five boxing wizards jump quickly.""".unindent() # No final newline
+        ~~~nim
+        # This line is not a header
+        echo "hi"
+        ~~~""".unindent() # No final newline
 
       check alterHeaders(s, "Maps", 1) == "## Maps\n\n" & expected
       check alterHeaders(s, "Maps", 2) == expected

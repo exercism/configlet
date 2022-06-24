@@ -29,17 +29,21 @@ func alterHeaders(s: string, title: string, headerLevel: int): string =
     result.add &"## {title}"
   # Demote other headers
   var inFencedCodeBlock = false
+  var inFencedCodeBlockTildes = false
   var inCommentBlock = false
   while i < s.len:
     result.add s[i]
     if s[i] == '\n':
       # Add a '#' to a line that begins with '#', unless inside a code or HTML block.
-      if s.continuesWith("#", i+1) and not (inFencedCodeBlock or inCommentBlock):
+      if s.continuesWith("#", i+1) and not (inFencedCodeBlock or
+                                            inFencedCodeBlockTildes or inCommentBlock):
         let demotionAmount = if headerLevel in [1, 2]: 1 else: headerLevel - 1
         for _ in 1..demotionAmount:
           result.add '#'
       elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
+      elif s.continuesWith("~~~", i+1):
+        inFencedCodeBlockTildes = not inFencedCodeBlockTildes
       elif s.continuesWith("<!--", i+1):
         inCommentBlock = true
     elif inCommentBlock and s.continuesWith("-->", i):
