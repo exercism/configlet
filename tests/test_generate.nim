@@ -63,11 +63,10 @@ proc testGenerate =
 
         The five boxing wizards jump quickly.""".unindent() # No final newline
 
-      check alterHeaders(s, "Operator Overloading", 1) == "## Operator Overloading\n\n" &
-                                                          expected
-      check alterHeaders(s, "Operator Overloading", 2) == expected
-      check alterHeaders(s, "Operator Overloading", 3) == expected.replace("### ", "#### ")
-      check alterHeaders(s, "Operator Overloading", 4) == expected.replace("### ", "##### ")
+      check alterHeaders(s, "Maps", 1) == "## Maps\n\n" & expected
+      check alterHeaders(s, "Maps", 2) == expected
+      check alterHeaders(s, "Maps", 3) == expected.replace("### ", "#### ")
+      check alterHeaders(s, "Maps", 4) == expected.replace("### ", "##### ")
 
 proc main =
   testGenerate()
