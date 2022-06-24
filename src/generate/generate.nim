@@ -16,7 +16,8 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-func alterHeaders(s: string, title: string, headerLevel: int): string =
+func alterHeaders(s: string, title: string, headerLevel: int,
+                  links: var seq[string]): string =
   # Markdown implementations differ on whether a space is required after the
   # final '#' character that begins the header.
   result = newStringOfCap(s.len)
@@ -40,6 +41,13 @@ func alterHeaders(s: string, title: string, headerLevel: int): string =
         let demotionAmount = if headerLevel in [1, 2]: 1 else: headerLevel - 1
         for _ in 1..demotionAmount:
           result.add '#'
+      elif s.continuesWith("[", i+1):
+        let j = s.find("]:", i+2)
+        if j > i+2 and j < s.find('\n', i+2):
+          var line = ""
+          i += s.parseUntil(line, '\n', i+1)
+          if line notin links:
+            links.add line
       elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
       elif s.continuesWith("~~~", i+1):
@@ -52,17 +60,21 @@ func alterHeaders(s: string, title: string, headerLevel: int): string =
   strip result
 
 proc conceptIntroduction(trackDir: Path, slug: string, title: string,
-                         templatePath: Path, headerLevel: int): string =
+                         templatePath: Path, headerLevel: int,
+                         links: var seq[string]): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level header.
   ## - Adding a starting a second-level header containing `title`.
   ## - Demoting the level of any other header.
   ## - Without any leading/trailing whitespace.
+  ## - Without any reference links.
+  ##
+  ## Appends reference links to `links`.
   let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeaders(title, headerLevel)
+      result = path.readFile().alterHeaders(title, headerLevel, links)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -80,6 +92,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
 
   var i = 0
   var headerLevel = 1
+  var links = newSeq[string]()
   while i < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
@@ -91,7 +104,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
       if conceptSlug in slugLookup:
         let title = slugLookup[conceptSlug]
         result.add conceptIntroduction(trackDir, conceptSlug, title,
-                                       templatePath, headerLevel)
+                                       templatePath, headerLevel, links)
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
                    templatePath)
@@ -101,6 +114,11 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
         headerLevel = content.skipWhile({'#'}, i+1)
       result.add content[i]
       inc i
+  if links.len > 0:
+    result.add '\n'
+    for link in links:
+      result.add link
+      result.add '\n'
 
 proc generate*(conf: Conf) =
   ## For every Concept Exercise in `conf.trackDir` with an `introduction.md.tpl`
