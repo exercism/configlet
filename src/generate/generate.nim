@@ -1,7 +1,7 @@
 import std/[parseutils, strbasics, strformat, strscans, strutils, tables, terminal]
 import ".."/[cli, helpers, types_track_config]
 
-proc getSlugLookup(trackDir: Path): Table[string, string] =
+proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
   let concepts = TrackConfig.init(readFile(trackDir / "config.json")).concepts
   result = initTable[string, string](concepts.len)
   for `concept` in concepts:
@@ -127,7 +127,7 @@ proc generate*(conf: Conf) =
 
   let conceptExercisesDir = trackDir / "exercises" / "concept"
   if dirExists(conceptExercisesDir):
-    let slugLookup = getSlugLookup(trackDir)
+    let slugLookup = getConceptSlugLookup(trackDir)
     for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
       let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
       if fileExists(introductionTemplatePath):
