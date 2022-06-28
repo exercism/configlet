@@ -10,17 +10,18 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
 
 func alterHeadings(s: string, title: string, headingLevel: int,
                    linkDefs: var seq[string]): string =
-  # Markdown implementations differ on whether a space is required after the
-  # final '#' character that begins the heading.
   result = newStringOfCap(s.len)
   var i = 0
   i += s.skipWhitespace()
-  # Skip the top-level heading (if any)
+  # Skip the top-level heading (if any).
+  # The CommonMark Spec requires that an ATX heading has a a space, tab, or
+  # newline after the opening sequence of '#' characters.
+  # For now, support only spaces.
   if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
   if headingLevel == 1:
     result.add &"## {title}"
-  # Demote other headings
+  # Demote other headings.
   var inFencedCodeBlock = false
   var inFencedCodeBlockTildes = false
   var inCommentBlock = false
