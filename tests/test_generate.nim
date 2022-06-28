@@ -70,10 +70,8 @@ proc testGenerate =
         ~~~""".unindent() # No final newline
 
       var linkDefs = newSeq[string]()
-      check alterHeadings(s, "Maps", 1, linkDefs) == "## Maps\n\n" & expected
-      check alterHeadings(s, "Maps", 2, linkDefs) == expected
-      check alterHeadings(s, "Maps", 3, linkDefs) == expected.replace("### ", "#### ")
-      check alterHeadings(s, "Maps", 4, linkDefs) == expected.replace("### ", "##### ")
+      check alterHeadings(s, linkDefs) == expected
+      check alterHeadings(s, linkDefs, "Maps") == "## Maps\n\n" & expected
       check linkDefs.len == 0
 
 proc main =

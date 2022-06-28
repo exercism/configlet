@@ -8,8 +8,7 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
   for `concept` in concepts:
     result[`concept`.slug] = `concept`.name
 
-func alterHeadings(s: string, h2: string, headingLevel: int,
-                   linkDefs: var seq[string]): string =
+func alterHeadings(s: string, linkDefs: var seq[string], h2 = ""): string =
   result = newStringOfCap(s.len)
   var i = 0
   i += s.skipWhitespace()
@@ -19,7 +18,7 @@ func alterHeadings(s: string, h2: string, headingLevel: int,
   # For now, support only spaces.
   if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
-  if headingLevel == 1:
+  if h2.len > 0:
     result.add &"## {h2}"
   # Demote other headings.
   var inFencedCodeBlock = false
@@ -31,9 +30,7 @@ func alterHeadings(s: string, h2: string, headingLevel: int,
       # Add a '#' to a line that begins with '#', unless inside a code or HTML block.
       if s.continuesWith("#", i+1) and not (inFencedCodeBlock or
                                             inFencedCodeBlockTildes or inCommentBlock):
-        let demotionAmount = if headingLevel in [1, 2]: 1 else: headingLevel - 1
-        for _ in 1..demotionAmount:
-          result.add '#'
+        result.add '#'
       elif s.continuesWith("[", i+1):
         let j = s.find("]:", i+2)
         if j > i+2 and j < s.find('\n', i+2):
@@ -61,9 +58,8 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(trackDir: Path, slug: string, h2: string,
-                         templatePath: Path, headingLevel: int,
-                         linkDefs: var seq[string]): string =
+proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path,
+                         linkDefs: var seq[string], h2 = ""): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level heading.
   ## - Adding a starting a second-level heading containing `h2`.
@@ -76,7 +72,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, h2: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeadings(h2, headingLevel, linkDefs)
+      result = path.readFile().alterHeadings(linkDefs, h2)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -104,9 +100,9 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       if conceptSlug in slugLookup:
-        let h2 = slugLookup[conceptSlug]
-        result.add conceptIntroduction(trackDir, conceptSlug, h2,
-                                       templatePath, headingLevel, linkDefs)
+        let h2 = if headingLevel == 2: "" else: slugLookup[conceptSlug]
+        result.add conceptIntroduction(trackDir, conceptSlug, templatePath,
+                                       linkDefs, h2)
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
                    templatePath)
