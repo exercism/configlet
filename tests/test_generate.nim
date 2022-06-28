@@ -1,39 +1,39 @@
 import std/[strutils, unittest]
-from "."/generate/generate {.all.} import alterHeaders
+from "."/generate/generate {.all.} import alterHeadings
 
 proc testGenerate =
   suite "generate":
-    test "alterHeaders":
+    test "alterHeadings":
       const s = """
-        # Header 1
+        # Heading 1
 
         The quick brown fox jumps over a lazy dog.
 
         The five boxing wizards jump quickly.
 
-        ## Header 2
+        ## Heading 2
 
         The quick brown fox jumps over a lazy dog.
 
         <!--
-        # This line is not a header
+        # This line is not a heading
         This line is in an HTML comment block -->
 
-        ### Header 3
+        ### Heading 3
 
         The quick brown fox jumps over a lazy dog.
 
         ```nim
-        # This line is not a header
+        # This line is not a heading
         echo "hi"
         ```
 
-        ## Header 4
+        ## Heading 4
 
         The quick brown fox jumps over a lazy dog.
 
         ~~~nim
-        # This line is not a header
+        # This line is not a heading
         echo "hi"
         ~~~
       """.unindent()
@@ -43,37 +43,37 @@ proc testGenerate =
 
         The five boxing wizards jump quickly.
 
-        ### Header 2
+        ### Heading 2
 
         The quick brown fox jumps over a lazy dog.
 
         <!--
-        # This line is not a header
+        # This line is not a heading
         This line is in an HTML comment block -->
 
-        #### Header 3
+        #### Heading 3
 
         The quick brown fox jumps over a lazy dog.
 
         ```nim
-        # This line is not a header
+        # This line is not a heading
         echo "hi"
         ```
 
-        ### Header 4
+        ### Heading 4
 
         The quick brown fox jumps over a lazy dog.
 
         ~~~nim
-        # This line is not a header
+        # This line is not a heading
         echo "hi"
         ~~~""".unindent() # No final newline
 
       var links = newSeq[string]()
-      check alterHeaders(s, "Maps", 1, links) == "## Maps\n\n" & expected
-      check alterHeaders(s, "Maps", 2, links) == expected
-      check alterHeaders(s, "Maps", 3, links) == expected.replace("### ", "#### ")
-      check alterHeaders(s, "Maps", 4, links) == expected.replace("### ", "##### ")
+      check alterHeadings(s, "Maps", 1, links) == "## Maps\n\n" & expected
+      check alterHeadings(s, "Maps", 2, links) == expected
+      check alterHeadings(s, "Maps", 3, links) == expected.replace("### ", "#### ")
+      check alterHeadings(s, "Maps", 4, links) == expected.replace("### ", "##### ")
       check links.len == 0
 
 proc main =

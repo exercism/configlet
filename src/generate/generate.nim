@@ -16,19 +16,19 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-func alterHeaders(s: string, title: string, headerLevel: int,
-                  links: var seq[string]): string =
+func alterHeadings(s: string, title: string, headingLevel: int,
+                   links: var seq[string]): string =
   # Markdown implementations differ on whether a space is required after the
-  # final '#' character that begins the header.
+  # final '#' character that begins the heading.
   result = newStringOfCap(s.len)
   var i = 0
   i += s.skipWhitespace()
-  # Skip the top-level header (if any)
+  # Skip the top-level heading (if any)
   if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
-  if headerLevel == 1:
+  if headingLevel == 1:
     result.add &"## {title}"
-  # Demote other headers
+  # Demote other headings
   var inFencedCodeBlock = false
   var inFencedCodeBlockTildes = false
   var inCommentBlock = false
@@ -38,7 +38,7 @@ func alterHeaders(s: string, title: string, headerLevel: int,
       # Add a '#' to a line that begins with '#', unless inside a code or HTML block.
       if s.continuesWith("#", i+1) and not (inFencedCodeBlock or
                                             inFencedCodeBlockTildes or inCommentBlock):
-        let demotionAmount = if headerLevel in [1, 2]: 1 else: headerLevel - 1
+        let demotionAmount = if headingLevel in [1, 2]: 1 else: headingLevel - 1
         for _ in 1..demotionAmount:
           result.add '#'
       elif s.continuesWith("[", i+1):
@@ -60,12 +60,12 @@ func alterHeaders(s: string, title: string, headerLevel: int,
   strip result
 
 proc conceptIntroduction(trackDir: Path, slug: string, title: string,
-                         templatePath: Path, headerLevel: int,
+                         templatePath: Path, headingLevel: int,
                          links: var seq[string]): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
-  ## - Without a first top-level header.
-  ## - Adding a starting a second-level header containing `title`.
-  ## - Demoting the level of any other header.
+  ## - Without a first top-level heading.
+  ## - Adding a starting a second-level heading containing `title`.
+  ## - Demoting the level of any other heading.
   ## - Without any leading/trailing whitespace.
   ## - Without any reference links.
   ##
@@ -74,7 +74,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, title: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeaders(title, headerLevel, links)
+      result = path.readFile().alterHeadings(title, headingLevel, links)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -91,7 +91,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
   result = newStringOfCap(1024)
 
   var i = 0
-  var headerLevel = 1
+  var headingLevel = 1
   var links = newSeq[string]()
   while i < content.len:
     var conceptSlug = ""
@@ -104,14 +104,14 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
       if conceptSlug in slugLookup:
         let title = slugLookup[conceptSlug]
         result.add conceptIntroduction(trackDir, conceptSlug, title,
-                                       templatePath, headerLevel, links)
+                                       templatePath, headingLevel, links)
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
                    templatePath)
         quit(1)
     else:
       if content.continuesWith("\n#", i):
-        headerLevel = content.skipWhile({'#'}, i+1)
+        headingLevel = content.skipWhile({'#'}, i+1)
       result.add content[i]
       inc i
   if links.len > 0:
