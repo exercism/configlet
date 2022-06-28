@@ -2,6 +2,7 @@ import std/[parseutils, strbasics, strformat, strscans, strutils, tables, termin
 import ".."/[cli, helpers, types_track_config]
 
 proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
+  ## Returns a `Table` that maps each concept's `slug` to its `name`.
   let concepts = TrackConfig.init(readFile(trackDir / "config.json")).concepts
   result = initTable[string, string](concepts.len)
   for `concept` in concepts:
