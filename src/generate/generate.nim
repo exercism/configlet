@@ -8,7 +8,7 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
   for `concept` in concepts:
     result[`concept`.slug] = `concept`.name
 
-func alterHeadings(s: string, title: string, headingLevel: int,
+func alterHeadings(s: string, h2: string, headingLevel: int,
                    linkDefs: var seq[string]): string =
   result = newStringOfCap(s.len)
   var i = 0
@@ -20,7 +20,7 @@ func alterHeadings(s: string, title: string, headingLevel: int,
   if s.continuesWith("# ", i):
     i += s.skipUntil('\n', i)
   if headingLevel == 1:
-    result.add &"## {title}"
+    result.add &"## {h2}"
   # Demote other headings.
   var inFencedCodeBlock = false
   var inFencedCodeBlockTildes = false
@@ -61,12 +61,12 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(trackDir: Path, slug: string, title: string,
+proc conceptIntroduction(trackDir: Path, slug: string, h2: string,
                          templatePath: Path, headingLevel: int,
                          linkDefs: var seq[string]): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level heading.
-  ## - Adding a starting a second-level heading containing `title`.
+  ## - Adding a starting a second-level heading containing `h2`.
   ## - Demoting the level of any other heading.
   ## - Without any leading/trailing whitespace.
   ## - Without any reference link definitions.
@@ -76,7 +76,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, title: string,
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeadings(title, headingLevel, linkDefs)
+      result = path.readFile().alterHeadings(h2, headingLevel, linkDefs)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -104,8 +104,8 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
              +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
       if conceptSlug in slugLookup:
-        let title = slugLookup[conceptSlug]
-        result.add conceptIntroduction(trackDir, conceptSlug, title,
+        let h2 = slugLookup[conceptSlug]
+        result.add conceptIntroduction(trackDir, conceptSlug, h2,
                                        templatePath, headingLevel, linkDefs)
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
