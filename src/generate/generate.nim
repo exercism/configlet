@@ -1,10 +1,6 @@
-import std/[hashes, parseutils, strbasics, strformat, strscans, strutils, sugar,
-            tables, terminal]
+import std/[parseutils, strbasics, strformat, strscans, strutils, sugar, tables,
+            terminal]
 import ".."/[cli, helpers, types_track_config]
-
-proc hash(slug: Slug): Hash {.borrow.}
-proc `==`(x, y: Slug): bool {.borrow.}
-proc add(s: var Slug, c: char) {.borrow.}
 
 proc getConceptSlugLookup(trackDir: Path): Table[Slug, string] =
   ## Returns a `Table` that maps each concept's `slug` to its `name`.

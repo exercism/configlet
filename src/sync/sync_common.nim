@@ -25,17 +25,12 @@ proc postHook*(e: ConceptExercise | PracticeExercise) =
     stderr.writeLine msg
     quit 1
 
-func `==`*(x, y: Slug): bool {.borrow.}
-func `<`*(x, y: Slug): bool {.borrow.}
-
 func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
   ## Returns a seq of the slugs in `e`, in alphabetical order.
   result = newSeq[Slug](e.len)
   for i, item in e:
     result[i] = item.slug
   sort result
-
-func len*(slug: Slug): int {.borrow.}
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   ## Truncates `s` to `truncateLen`, then appends `slug`.

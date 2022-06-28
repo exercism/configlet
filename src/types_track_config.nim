@@ -1,4 +1,4 @@
-import std/sets
+import std/[hashes, sets]
 import pkg/jsony
 import "."/[cli, helpers]
 
@@ -58,6 +58,11 @@ type
     ekPractice = "practice"
 
 func `$`*(slug: Slug): string {.borrow.}
+func `==`*(x, y: Slug): bool {.borrow.}
+func `<`*(x, y: Slug): bool {.borrow.}
+func len*(slug: Slug): int {.borrow.}
+func hash*(slug: Slug): Hash {.borrow.}
+func add*(s: var Slug, c: char) {.borrow.}
 
 proc init*(T: typedesc[TrackConfig]; trackConfigContents: string): T =
   ## Deserializes `trackConfigContents` using `jsony` to a `TrackConfig` object.
