@@ -5,8 +5,8 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
   ## Returns a `Table` that maps each concept's `slug` to its `name`.
   let concepts = TrackConfig.init(readFile(trackDir / "config.json")).concepts
   result = initTable[string, string](concepts.len)
-  for `concept` in concepts:
-    result[`concept`.slug] = `concept`.name
+  for con in concepts:
+    result[con.slug] = con.name
 
 func alterHeadings(s: string, linkDefs: var seq[string], h2 = ""): string =
   result = newStringOfCap(s.len)
