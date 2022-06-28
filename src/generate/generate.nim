@@ -66,9 +66,9 @@ proc conceptIntroduction(trackDir: Path, slug: Slug, templatePath: Path,
   ## - Adding a starting a second-level heading containing `h2`.
   ## - Demoting the level of any other heading.
   ## - Without any leading/trailing whitespace.
-  ## - Without any reference link definitions.
+  ## - Without any link reference definitions.
   ##
-  ## Appends reference link definitions to `linkDefs`.
+  ## Appends link reference definitions to `linkDefs`.
   let conceptDir = trackDir / "concepts" / slug.string
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
