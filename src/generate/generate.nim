@@ -9,7 +9,7 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
     result[`concept`.slug] = `concept`.name
 
 func alterHeadings(s: string, title: string, headingLevel: int,
-                   links: var seq[string]): string =
+                   linkDefs: var seq[string]): string =
   # Markdown implementations differ on whether a space is required after the
   # final '#' character that begins the heading.
   result = newStringOfCap(s.len)
@@ -38,8 +38,8 @@ func alterHeadings(s: string, title: string, headingLevel: int,
         if j > i+2 and j < s.find('\n', i+2):
           var line = ""
           i += s.parseUntil(line, '\n', i+1)
-          if line notin links:
-            links.add line
+          if line notin linkDefs:
+            linkDefs.add line
       elif s.continuesWith("```", i+1):
         inFencedCodeBlock = not inFencedCodeBlock
       elif s.continuesWith("~~~", i+1):
@@ -62,20 +62,20 @@ proc writeError(description: string, path: Path) =
 
 proc conceptIntroduction(trackDir: Path, slug: string, title: string,
                          templatePath: Path, headingLevel: int,
-                         links: var seq[string]): string =
+                         linkDefs: var seq[string]): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level heading.
   ## - Adding a starting a second-level heading containing `title`.
   ## - Demoting the level of any other heading.
   ## - Without any leading/trailing whitespace.
-  ## - Without any reference links.
+  ## - Without any reference link definitions.
   ##
-  ## Appends reference links to `links`.
+  ## Appends reference link definitions to `linkDefs`.
   let conceptDir = trackDir / "concepts" / slug
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
-      result = path.readFile().alterHeadings(title, headingLevel, links)
+      result = path.readFile().alterHeadings(title, headingLevel, linkDefs)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
       quit(1)
@@ -93,7 +93,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
 
   var i = 0
   var headingLevel = 1
-  var links = newSeq[string]()
+  var linkDefs = newSeq[string]()
   while i < content.len:
     var conceptSlug = ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
@@ -105,7 +105,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
       if conceptSlug in slugLookup:
         let title = slugLookup[conceptSlug]
         result.add conceptIntroduction(trackDir, conceptSlug, title,
-                                       templatePath, headingLevel, links)
+                                       templatePath, headingLevel, linkDefs)
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
                    templatePath)
@@ -115,10 +115,10 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
         headingLevel = content.skipWhile({'#'}, i+1)
       result.add content[i]
       inc i
-  if links.len > 0:
+  if linkDefs.len > 0:
     result.add '\n'
-    for link in links:
-      result.add link
+    for linkDef in linkDefs:
+      result.add linkDef
       result.add '\n'
 
 proc generate*(conf: Conf) =

@@ -69,12 +69,12 @@ proc testGenerate =
         echo "hi"
         ~~~""".unindent() # No final newline
 
-      var links = newSeq[string]()
-      check alterHeadings(s, "Maps", 1, links) == "## Maps\n\n" & expected
-      check alterHeadings(s, "Maps", 2, links) == expected
-      check alterHeadings(s, "Maps", 3, links) == expected.replace("### ", "#### ")
-      check alterHeadings(s, "Maps", 4, links) == expected.replace("### ", "##### ")
-      check links.len == 0
+      var linkDefs = newSeq[string]()
+      check alterHeadings(s, "Maps", 1, linkDefs) == "## Maps\n\n" & expected
+      check alterHeadings(s, "Maps", 2, linkDefs) == expected
+      check alterHeadings(s, "Maps", 3, linkDefs) == expected.replace("### ", "#### ")
+      check alterHeadings(s, "Maps", 4, linkDefs) == expected.replace("### ", "##### ")
+      check linkDefs.len == 0
 
 proc main =
   testGenerate()
