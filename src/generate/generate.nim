@@ -7,15 +7,6 @@ proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
   for `concept` in concepts:
     result[`concept`.slug] = `concept`.name
 
-proc writeError(description: string, path: Path) =
-  let descriptionPrefix = description & ":"
-  if colorStderr:
-    stderr.styledWriteLine(fgRed, descriptionPrefix)
-  else:
-    stderr.writeLine(descriptionPrefix)
-  stderr.writeLine(path)
-  stderr.write "\n"
-
 func alterHeadings(s: string, title: string, headingLevel: int,
                    links: var seq[string]): string =
   # Markdown implementations differ on whether a space is required after the
@@ -58,6 +49,15 @@ func alterHeadings(s: string, title: string, headingLevel: int,
       inCommentBlock = false
     inc i
   strip result
+
+proc writeError(description: string, path: Path) =
+  let descriptionPrefix = description & ":"
+  if colorStderr:
+    stderr.styledWriteLine(fgRed, descriptionPrefix)
+  else:
+    stderr.writeLine(descriptionPrefix)
+  stderr.writeLine(path)
+  stderr.write "\n"
 
 proc conceptIntroduction(trackDir: Path, slug: string, title: string,
                          templatePath: Path, headingLevel: int,
