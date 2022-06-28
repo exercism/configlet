@@ -1,12 +1,17 @@
-import std/[parseutils, strbasics, strformat, strscans, strutils, tables, terminal]
+import std/[hashes, parseutils, strbasics, strformat, strscans, strutils, sugar,
+            tables, terminal]
 import ".."/[cli, helpers, types_track_config]
 
-proc getConceptSlugLookup(trackDir: Path): Table[string, string] =
+proc hash(slug: Slug): Hash {.borrow.}
+proc `==`(x, y: Slug): bool {.borrow.}
+proc add(s: var Slug, c: char) {.borrow.}
+
+proc getConceptSlugLookup(trackDir: Path): Table[Slug, string] =
   ## Returns a `Table` that maps each concept's `slug` to its `name`.
   let concepts = TrackConfig.init(readFile(trackDir / "config.json")).concepts
-  result = initTable[string, string](concepts.len)
-  for con in concepts:
-    result[con.slug] = con.name
+  collect:
+    for con in concepts:
+      {con.slug.Slug: con.name}
 
 func alterHeadings(s: string, linkDefs: var seq[string], h2 = ""): string =
   result = newStringOfCap(s.len)
@@ -58,7 +63,7 @@ proc writeError(description: string, path: Path) =
   stderr.writeLine(path)
   stderr.write "\n"
 
-proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path,
+proc conceptIntroduction(trackDir: Path, slug: Slug, templatePath: Path,
                          linkDefs: var seq[string], h2 = ""): string =
   ## Returns the contents of the `introduction.md` file for a `slug`, but:
   ## - Without a first top-level heading.
@@ -68,7 +73,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path,
   ## - Without any reference link definitions.
   ##
   ## Appends reference link definitions to `linkDefs`.
-  let conceptDir = trackDir / "concepts" / slug
+  let conceptDir = trackDir / "concepts" / slug.string
   if dirExists(conceptDir):
     let path = conceptDir / "introduction.md"
     if fileExists(path):
@@ -82,7 +87,7 @@ proc conceptIntroduction(trackDir: Path, slug: string, templatePath: Path,
     quit(1)
 
 proc generateIntroduction(trackDir: Path, templatePath: Path,
-                          slugLookup: Table[string, string]): string =
+                          slugLookup: Table[Slug, string]): string =
   ## Reads the file at `templatePath` and returns the content of the
   ## corresponding `introduction.md` file.
   let content = readFile(templatePath)
@@ -92,7 +97,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
   var headingLevel = 1
   var linkDefs = newSeq[string]()
   while i < content.len:
-    var conceptSlug = ""
+    var conceptSlug = Slug ""
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
     # where we allow spaces after the opening brace, around the colon,
     # and before the closing brace. The slug must be in kebab-case.
