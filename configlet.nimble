@@ -64,7 +64,7 @@ proc init(T: typedesc[PackagePaths]): T =
     i += output.parseUntil(fieldVal, {'\n'}, i) + 1
 
 proc patch(dir, patchPath: string;
-           files: varargs[tuple[relPath: string, patchedHash: int]]) =
+           files: varargs[tuple[relPath: string, patchedHash: int64]]) =
   ## Checks that each file in `files` has the corresponding `patchedHash`, and
   ## if not, applies the patch at `patchPath` to `dir`.
   ##
@@ -75,7 +75,7 @@ proc patch(dir, patchPath: string;
   # Use `std/hashes` to hash - note that we can't import `std/md5` or `std/sha1`
   # in a .nimble file.
   for (relPath, patchedHash) in files:
-    if readFile(dir / relPath).hash() != patchedHash:
+    if readFile(dir / relPath).hash().int64 != patchedHash:
       # Apply the patch.
       let cmd = "git -C " & dir & " apply --verbose " & patchPath
       echo gorgeCheck(cmd, "failed to apply patch")
@@ -88,5 +88,5 @@ before build:
   patch(
     packagePaths.cligen,
     thisDir() / "parseopt3_allow_long_option_optional_value.patch",
-    ("cligen" / "parseopt3.nim", 1647921161)
+    ("cligen" / "parseopt3.nim", 1647921161'i64)
   )
