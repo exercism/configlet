@@ -50,8 +50,6 @@ before build:
     let actualHash = parseopt3Path.readFile().hash()
     const patchedHash = 1647921161 # Update when bumping `cligen` changes `parseopt3`.
     if actualHash != patchedHash:
-      echo "Trying to patch parseopt3..."
-      echo "Found " & parseopt3Path
       let patchPath = thisDir() / "parseopt3_allow_long_option_optional_value.patch"
       let parseopt3Dir = parseopt3Path.parentDir()
       # Apply the patch.
