@@ -46,10 +46,12 @@ proc gorgeCheck(cmd, errorMsg: string): string =
     echo result
     raise newException(OSError, errorMsg)
 
-proc getNimblePath(package: string): string =
-  ## Returns the absolute path to the given installed Nimble `package`.
-  let cmd = "nimble path " & package
-  result = gorgeCheck(cmd, "failed to get path to " & package)
+proc getNimblePaths(packages: string): string =
+  ## Returns the (newline-delimited) absolute paths to the given installed
+  ## `packages` (space-delimited).
+  # Optimization: call `nimble path` only once.
+  let cmd = "nimble path " & packages
+  result = gorgeCheck(cmd, "failed to get path to " & packages)
 
 proc patch(dir, patchPath: string;
            files: varargs[tuple[relPath: string, patchedHash: int]]) =
@@ -73,7 +75,7 @@ before build:
   # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
   # even when `longNoVal` is both non-empty and lacks `foo`.
   patch(
-    "cligen".getNimblePath(),
+    getNimblePaths("cligen"),
     thisDir() / "parseopt3_allow_long_option_optional_value.patch",
     ("cligen" / "parseopt3.nim", 1647921161)
   )
