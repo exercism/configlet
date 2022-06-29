@@ -59,7 +59,7 @@ before build:
       let (outp, exitCode) = gorgeEx(cmd)
       echo outp
       if exitCode != 0:
-        raise newException(AssertionDefect, "failed to apply patch")
+        raise newException(OSError, "failed to apply patch")
   else:
     echo output
-    raise newException(AssertionDefect, "failed to get cligen path")
+    raise newException(OSError, "failed to get cligen path")
