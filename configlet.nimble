@@ -35,6 +35,17 @@ requires "isaac#45a5cbbd54ff59ba3ed94242620c818b9aad1b5b"     # 0.1.3  (2017-11-
 task test, "Runs the test suite":
   exec "nim r ./tests/all_tests.nim"
 
+proc gorgeCheck(cmd, errorMsg: string): string =
+  ## Executes `cmd` at compile time and returns its text output (stdout + stderr).
+  ##
+  ## Raises an exception if the exit code is non-zero, using the given `errorMsg`.
+  var exitCode = -1
+  (result, exitCode) = gorgeEx(cmd)
+  result.stripLineEnd()
+  if exitCode != 0:
+    echo result
+    raise newException(OSError, errorMsg)
+
 # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
 # even when `longNoVal` is both non-empty and lacks `foo`.
 before build:
@@ -42,22 +53,16 @@ before build:
   # we can't `import cligen/parseopt3` and check the parsing directly.
   # Instead, let's just hash the file and run `git apply` conditionally.
   # First, get the path to `parseopt3.nim` in the `cligen` package.
-  let (output, exitCode) = gorgeEx("nimble path cligen")
-  if exitCode == 0:
-    let parseopt3Path = joinPath(output.strip(), "cligen", "parseopt3.nim")
-    # Hash the file using `std/hashes`.
-    # Note that we can't import `std/md5` or `std/sha1` in a .nimble file.
-    let actualHash = parseopt3Path.readFile().hash()
-    const patchedHash = 1647921161 # Update when bumping `cligen` changes `parseopt3`.
-    if actualHash != patchedHash:
-      let patchPath = thisDir() / "parseopt3_allow_long_option_optional_value.patch"
-      let parseopt3Dir = parseopt3Path.parentDir()
-      # Apply the patch.
-      let cmd = "git -C " & parseopt3Dir & " apply --verbose " & patchPath
-      let (outp, exitCode) = gorgeEx(cmd)
-      echo outp
-      if exitCode != 0:
-        raise newException(OSError, "failed to apply patch")
-  else:
-    echo output
-    raise newException(OSError, "failed to get cligen path")
+  let parseopt3Path = block:
+    let cligenPath = gorgeCheck("nimble path cligen", "failed to get cligen path")
+    joinPath(cligenPath, "cligen", "parseopt3.nim")
+  # Hash the file using `std/hashes`.
+  # Note that we can't import `std/md5` or `std/sha1` in a .nimble file.
+  let actualHash = parseopt3Path.readFile().hash()
+  const patchedHash = 1647921161 # Update when bumping `cligen` changes `parseopt3`.
+  if actualHash != patchedHash:
+    let patchPath = thisDir() / "parseopt3_allow_long_option_optional_value.patch"
+    let parseopt3Dir = parseopt3Path.parentDir()
+    # Apply the patch.
+    let cmd = "git -C " & parseopt3Dir & " apply --verbose " & patchPath
+    echo gorgeCheck(cmd, "failed to apply patch")
