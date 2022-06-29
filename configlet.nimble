@@ -46,6 +46,11 @@ proc gorgeCheck(cmd, errorMsg: string): string =
     echo result
     raise newException(OSError, errorMsg)
 
+proc getNimblePath(package: string): string =
+  ## Returns the absolute path to the given installed Nimble `package`.
+  let cmd = "nimble path " & package
+  result = gorgeCheck(cmd, "failed to get path to " & package)
+
 # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
 # even when `longNoVal` is both non-empty and lacks `foo`.
 before build:
@@ -53,9 +58,7 @@ before build:
   # we can't `import cligen/parseopt3` and check the parsing directly.
   # Instead, let's just hash the file and run `git apply` conditionally.
   # First, get the path to `parseopt3.nim` in the `cligen` package.
-  let parseopt3Path = block:
-    let cligenPath = gorgeCheck("nimble path cligen", "failed to get cligen path")
-    joinPath(cligenPath, "cligen", "parseopt3.nim")
+  let parseopt3Path = joinPath("cligen".getNimblePath(), "cligen", "parseopt3.nim")
   # Hash the file using `std/hashes`.
   # Note that we can't import `std/md5` or `std/sha1` in a .nimble file.
   let actualHash = parseopt3Path.readFile().hash()
