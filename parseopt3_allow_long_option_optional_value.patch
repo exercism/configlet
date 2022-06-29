@@ -1,7 +1,7 @@
-diff --git a/parseopt3.nim b/parseopt3.nim
+diff --git a/cligen/parseopt3.nim b/cligen/parseopt3.nim
 index a865952..850d016 100644
---- a/parseopt3.nim
-+++ b/parseopt3.nim
+--- a/cligen/parseopt3.nim
++++ b/cligen/parseopt3.nim
 @@ -267,8 +267,17 @@ proc doLong(p: var OptParser) =
      p.kind = cmdError
      return

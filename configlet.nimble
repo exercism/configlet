@@ -51,25 +51,29 @@ proc getNimblePath(package: string): string =
   let cmd = "nimble path " & package
   result = gorgeCheck(cmd, "failed to get path to " & package)
 
-proc patch(path, patchPath: string; patchedHash: int) =
-  ## Checks that the file at `path` has the hash `patchedHash`, and if not,
-  ## patches it using the patch at `patchPath`.
+proc patch(dir, patchPath: string;
+           files: varargs[tuple[relPath: string, patchedHash: int]]) =
+  ## Checks that each file in `files` has the corresponding `patchedHash`, and
+  ## if not, applies the patch at `patchPath` to `dir`.
   ##
   ## Raises an exception if the patch could not be applied.
   # We want to support running `nimble build` before the package is installed,
   # so we can't `import foo` to check the package's behavior directly.
-  # Instead, hash a file and then run `git apply` when necessary.
+  # Instead, hash the files and then run `git apply` when necessary.
   # Use `std/hashes` to hash - note that we can't import `std/md5` or `std/sha1`
   # in a .nimble file.
-  if path.readFile().hash() != patchedHash:
-    let dir = path.parentDir()
-    # Apply the patch.
-    let cmd = "git -C " & dir & " apply --verbose " & patchPath
-    echo gorgeCheck(cmd, "failed to apply patch")
+  for (relPath, patchedHash) in files:
+    if readFile(dir / relPath).hash() != patchedHash:
+      # Apply the patch.
+      let cmd = "git -C " & dir & " apply --verbose " & patchPath
+      echo gorgeCheck(cmd, "failed to apply patch")
+      break
 
 before build:
   # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
   # even when `longNoVal` is both non-empty and lacks `foo`.
-  patch("cligen".getNimblePath() / "cligen" / "parseopt3.nim",
-        thisDir() / "parseopt3_allow_long_option_optional_value.patch",
-        1647921161)
+  patch(
+    "cligen".getNimblePath(),
+    thisDir() / "parseopt3_allow_long_option_optional_value.patch",
+    ("cligen" / "parseopt3.nim", 1647921161)
+  )
