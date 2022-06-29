@@ -51,21 +51,25 @@ proc getNimblePath(package: string): string =
   let cmd = "nimble path " & package
   result = gorgeCheck(cmd, "failed to get path to " & package)
 
-# Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
-# even when `longNoVal` is both non-empty and lacks `foo`.
-before build:
-  # We want to support running `nimble build` before `cligen` is installed, so
-  # we can't `import cligen/parseopt3` and check the parsing directly.
-  # Instead, let's just hash the file and run `git apply` conditionally.
-  # First, get the path to `parseopt3.nim` in the `cligen` package.
-  let parseopt3Path = joinPath("cligen".getNimblePath(), "cligen", "parseopt3.nim")
-  # Hash the file using `std/hashes`.
-  # Note that we can't import `std/md5` or `std/sha1` in a .nimble file.
-  let actualHash = parseopt3Path.readFile().hash()
-  const patchedHash = 1647921161 # Update when bumping `cligen` changes `parseopt3`.
-  if actualHash != patchedHash:
-    let patchPath = thisDir() / "parseopt3_allow_long_option_optional_value.patch"
-    let parseopt3Dir = parseopt3Path.parentDir()
+proc patch(path, patchPath: string; patchedHash: int) =
+  ## Checks that the file at `path` has the hash `patchedHash`, and if not,
+  ## patches it using the patch at `patchPath`.
+  ##
+  ## Raises an exception if the patch could not be applied.
+  # We want to support running `nimble build` before the package is installed,
+  # so we can't `import foo` to check the package's behavior directly.
+  # Instead, hash a file and then run `git apply` when necessary.
+  # Use `std/hashes` to hash - note that we can't import `std/md5` or `std/sha1`
+  # in a .nimble file.
+  if path.readFile().hash() != patchedHash:
+    let dir = path.parentDir()
     # Apply the patch.
-    let cmd = "git -C " & parseopt3Dir & " apply --verbose " & patchPath
+    let cmd = "git -C " & dir & " apply --verbose " & patchPath
     echo gorgeCheck(cmd, "failed to apply patch")
+
+before build:
+  # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
+  # even when `longNoVal` is both non-empty and lacks `foo`.
+  patch("cligen".getNimblePath() / "cligen" / "parseopt3.nim",
+        thisDir() / "parseopt3_allow_long_option_optional_value.patch",
+        1647921161)
