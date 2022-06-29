@@ -1,4 +1,4 @@
-import std/[hashes, os, strutils]
+import std/[hashes, os, parseutils, strutils]
 
 proc getVersionStart: string =
   # Returns the `major.minor.patch` version in the `configlet.version` file
@@ -46,12 +46,22 @@ proc gorgeCheck(cmd, errorMsg: string): string =
     echo result
     raise newException(OSError, errorMsg)
 
-proc getNimblePaths(packages: string): string =
-  ## Returns the (newline-delimited) absolute paths to the given installed
-  ## `packages` (space-delimited).
+type
+  PackagePaths = object
+    cligen: string
+
+proc init(T: typedesc[PackagePaths]): T =
+  ## Returns the absolute paths to Nimble packages that we patch.
   # Optimization: call `nimble path` only once.
-  let cmd = "nimble path " & packages
-  result = gorgeCheck(cmd, "failed to get path to " & packages)
+  result = T()
+  let output = block:
+    var cmd = "nimble path"
+    for fieldName, _ in result.fieldPairs:
+      cmd.add " " & fieldName
+    gorgeCheck(cmd, "failed to get path to packages")
+  var i = 0
+  for fieldVal in result.fields:
+    i += output.parseUntil(fieldVal, {'\n'}, i) + 1
 
 proc patch(dir, patchPath: string;
            files: varargs[tuple[relPath: string, patchedHash: int]]) =
@@ -74,8 +84,9 @@ proc patch(dir, patchPath: string;
 before build:
   # Patch `cligen/parseopt3` so that "--foo --bar" is parsed as two long options,
   # even when `longNoVal` is both non-empty and lacks `foo`.
+  let packagePaths = PackagePaths.init()
   patch(
-    getNimblePaths("cligen"),
+    packagePaths.cligen,
     thisDir() / "parseopt3_allow_long_option_optional_value.patch",
     ("cligen" / "parseopt3.nim", 1647921161)
   )
