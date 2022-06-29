@@ -78,7 +78,7 @@ proc patch(dir, patchPath: string;
     if readFile(dir / relPath).hash().int64 != patchedHash:
       # Apply the patch.
       let cmd = "git -C " & dir & " apply --verbose " & patchPath
-      echo gorgeCheck(cmd, "failed to apply patch")
+      exec cmd
       break
 
 before build:
