@@ -113,6 +113,8 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
         headingLevel = content.skipWhile({'#'}, i+1)
       result.add content[i]
       inc i
+  result.strip()
+  result.add '\n'
   if linkDefs.len > 0:
     result.add '\n'
     for linkDef in linkDefs:
