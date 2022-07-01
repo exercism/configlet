@@ -135,8 +135,6 @@ proc syncIfNeeded(exercise: Exercise, conf: Conf): bool =
 
 proc updateTests*(seenUnsynced: var set[SyncKind], conf: Conf,
                   exercises: seq[Exercise]) =
-  logNormal("Updating tests...")
-
   var everyExerciseIsSynced = true
 
   for exercise in exercises:

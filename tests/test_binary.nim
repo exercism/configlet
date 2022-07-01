@@ -57,7 +57,6 @@ proc testsForSync(binaryPath: static string) =
     syncOfflineUpdateTests = &"{syncOfflineUpdate} --tests"
 
     header = "Checking exercises..."
-    headerUpdateTests = "Updating tests..."
     footerUnsyncedDocs = "[warn] some exercises have unsynced docs"
     # footerUnsyncedFilepaths = "[warn] some exercises have unsynced filepaths"
     footerUnsyncedMetadata = "[warn] some exercises have unsynced metadata"
@@ -524,14 +523,12 @@ proc testsForSync(binaryPath: static string) =
     const
       expectedOutputAnagramInclude = fmt"""
         {header}
-        {headerUpdateTests}
         [info] anagram: included 1 missing test case
         The `anagram` exercise has up-to-date tests!
       """.unindent()
 
       expectedOutputAnagramExclude = fmt"""
         {header}
-        {headerUpdateTests}
         [info] anagram: excluded 1 missing test case
         The `anagram` exercise has up-to-date tests!
       """.unindent()
@@ -611,7 +608,6 @@ proc testsForSync(binaryPath: static string) =
     test "--tests include: includes every missing test case when not specifying an exercise, and exits with 0":
       const expectedOutput = fmt"""
         {header}
-        {headerUpdateTests}
         [info] anagram: included 1 missing test case
         [info] diffie-hellman: included 1 missing test case
         [info] grade-school: included 1 missing test case
@@ -821,7 +817,6 @@ proc testsForSync(binaryPath: static string) =
     test "after updating tests, another tests update using --tests include performs no changes, and exits with 0":
       const expectedOutput = fmt"""
         {header}
-        {headerUpdateTests}
         {footerSyncedTests}
       """.unindent()
       execAndCheck(0, &"{syncOfflineUpdateTests} include", expectedOutput)
