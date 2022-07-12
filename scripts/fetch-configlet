@@ -49,6 +49,35 @@ get_download_url() {
     cut -d'"' -f4
 }
 
+# get the user's shell (as portably as possible)
+# and print out the command to enable tab completion
+emit_completion_command() {
+  local shell file
+
+  if command -v getent >/dev/null; then
+    shell=$(getent passwd "${USER}" | cut -d: -f7)
+  elif command -v finger >/dev/null; then
+    shell=$(finger "${USER}" | sed -nE '/.*Shell: / { s///; s/ .*//; p; }')
+  elif [[ -f /etc/passwd ]]; then
+    shell=$(awk -F: -v u="${USER}" '$1 == u {print $7}' /etc/passwd)
+  fi
+
+  if [[ -z "${shell}" ]]; then
+    # could not detect the shell
+    return
+  fi
+
+  file="bin/completions/configlet.$(basename "${shell}")"
+  if [[ -f "${file}" && -r "${file}" ]]; then
+    case "${shell}" in
+      bash | fish) echo "Enable tab completions: source ${file}" ;;
+      zsh)
+        : # is there more to do here than the above?
+        ;;
+    esac
+  fi
+}
+
 main() {
   if [[ -d ./bin ]]; then
     output_dir="./bin"
@@ -69,6 +98,8 @@ main() {
   esac
 
   rm -f "${output_path}"
+
+  emit_completion_command
 }
 
 main
