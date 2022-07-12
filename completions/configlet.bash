@@ -81,7 +81,17 @@ _configlet_complete_sync_() {
             _configlet_complete_slugs_ "practice"
             ;;
         *)
-            _configlet_complete_options_ "-e --exercise -o --offline -u --update -y --yes --docs --metadata --tests $global_opts"
+            local options=(
+                -e --exercise
+                -o --offline
+                -u --update
+                -y --yes
+                   --docs
+                   --filepaths
+                   --metadata
+                   --tests
+            )
+            _configlet_complete_options_ "${options[*]} $global_opts"
             ;;
     esac
 }

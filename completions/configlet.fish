@@ -29,6 +29,7 @@ complete -c configlet -n "__fish_seen_subcommand_from sync" -s o -l offline -f -
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s u -l update -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s y -l yes -d "Auto-confirm update"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l docs -d "Sync docs only"
+complete -c configlet -n "__fish_seen_subcommand_from sync"      -l filepaths -f -d 'Populate .meta/config.json "files" entry'
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l metadata -d "Sync metadata only"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "For auto-confirming" -x -a "choose include exclude"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s e -l exercise -d "exercise slug" \
