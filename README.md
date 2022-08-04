@@ -11,7 +11,7 @@ Usage:
   configlet [global-options] <command> [command-options]
 
 Commands:
-  fmt       Format the exercise 'meta/config.json' files
+  fmt       Format the exercise '.meta/config.json' files
   generate  Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
   info      Print some information about the track
   lint      Check the track configuration for correctness
