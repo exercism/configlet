@@ -58,7 +58,14 @@ _configlet_complete_info_() {
 }
 
 _configlet_complete_uuid_() {
-  _configlet_complete_options_ "-n --num $global_opts"
+  case $prev in
+    '-n' | '--num')
+      return 0 # Don't suggest a global option if -n has no argument.
+      ;;
+    *)
+      _configlet_complete_options_ "-n --num $global_opts"
+      ;;
+  esac
 }
 
 _configlet_complete_fmt_() {
