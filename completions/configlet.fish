@@ -21,7 +21,7 @@ complete -c configlet -n "__fish_use_subcommand" -a fmt -f -d "Format the exerci
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s u -l update -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s y -l yes -d "Auto-confirm update"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s e -l exercise -d "exercise slug" \
-    -x -a "(find ./exercises/{concept,practice} -maxdepth 1 -mindepth 1 -type d -printf '%P\n' | sort)"
+  -x -a "(find ./exercises/{concept,practice} -maxdepth 1 -mindepth 1 -type d -printf '%P\n' | sort)"
 
 # sync subcommand
 complete -c configlet -n "__fish_use_subcommand" -a sync -d "Check or update Practice Exercise docs, metadata, and tests"
@@ -33,4 +33,4 @@ complete -c configlet -n "__fish_seen_subcommand_from sync"      -l filepaths -f
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l metadata -d "Sync metadata only"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "For auto-confirming" -x -a "choose include exclude"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s e -l exercise -d "exercise slug" \
-    -x -a "(find ./exercises/practice -maxdepth 1 -mindepth 1 -type d -printf '%P\n' | sort)"
+  -x -a "(find ./exercises/practice -maxdepth 1 -mindepth 1 -type d -printf '%P\n' | sort)"
