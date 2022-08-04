@@ -10,7 +10,7 @@ complete -c configlet -n "__fish_use_subcommand" -a generate -f -d "Generate con
 
 # info subcommand
 complete -c configlet -n "__fish_use_subcommand" -a info -f -d "Track info"
-complete -c configlet -n "__fish_seen_subcommand_from info" -s o -l offline -f -d "Do not update proc-spec cache"
+complete -c configlet -n "__fish_seen_subcommand_from info" -s o -l offline -f -d "Do not update prob-spec cache"
 
 # uuid subcommand
 complete -c configlet -n "__fish_use_subcommand" -a uuid -f -d "Output a UUID"
@@ -25,7 +25,7 @@ complete -c configlet -n "__fish_seen_subcommand_from fmt" -s e -l exercise -d "
 
 # sync subcommand
 complete -c configlet -n "__fish_use_subcommand" -a sync -d "Check or update Practice Exercise docs, metadata, and tests"
-complete -c configlet -n "__fish_seen_subcommand_from sync" -s o -l offline -f -d "Do not update proc-spec cache"
+complete -c configlet -n "__fish_seen_subcommand_from sync" -s o -l offline -f -d "Do not update prob-spec cache"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s u -l update -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s y -l yes -d "Auto-confirm update"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l docs -d "Sync docs only"
