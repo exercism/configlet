@@ -14,7 +14,7 @@ _configlet_completion_() {
     local cur=${COMP_WORDS[COMP_CWORD]}
     local prev=${COMP_WORDS[COMP_CWORD - 1]}
 
-    # Check for global options that takes a value
+    # Check for global options that take a value
     if _configlet_complete_global_option_; then
         return
     fi
