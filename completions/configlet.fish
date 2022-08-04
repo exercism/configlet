@@ -17,7 +17,7 @@ complete -c configlet -n "__fish_use_subcommand" -a uuid -f -d "Output a UUID"
 complete -c configlet -n "__fish_seen_subcommand_from uuid" -s n -l num -f -d "How many UUIDs"
 
 # fmt subcommand
-complete -c configlet -n "__fish_use_subcommand" -a fmt -f -d "Format the exercise 'meta/config.json' files"
+complete -c configlet -n "__fish_use_subcommand" -a fmt -f -d "Format the exercise '.meta/config.json' files"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s u -l update -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s y -l yes -d "Auto-confirm update"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s e -l exercise -d "exercise slug" \
