@@ -945,7 +945,7 @@ proc testsForCompletion(binaryPath: string) =
       test &"{shell} (produces an error)":
         let (outp, exitCode) = execCmdEx(&"{binaryPath} completion -s {shell}")
         check:
-          outp.startsWith(&"Error: invalid value for '-s': '{shell}'")
+          outp.contains(&"invalid value for '-s': '{shell}'")
           exitCode == 1
 
 proc main =
