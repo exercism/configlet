@@ -935,7 +935,7 @@ proc testsForCompletion(binaryPath: string) =
     for shell in ["bash", "fish"]:
       test shell:
         let c = shell[0]
-        let expected = readFile(completionsDir / &"configlet.{shell}")
+        let expected = readFile(completionsDir / &"configlet.{shell}").replace("\p", "\n")
         execAndCheck(0, &"{binaryPath} completion --shell {shell}", expected)
         execAndCheck(0, &"{binaryPath} completion --shell {c}", expected)
         execAndCheck(0, &"{binaryPath} completion -s {shell}", expected)
