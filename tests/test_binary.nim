@@ -929,6 +929,25 @@ proc testsForGenerate(binaryPath: string) =
     test "and writes the `introduction.md` file as expected":
       checkNoDiff(trackDir)
 
+proc testsForCompletion(binaryPath: string) =
+  suite "completion":
+    const completionsDir = repoRootDir / "completions"
+    for shell in ["bash", "fish"]:
+      test shell:
+        let c = shell[0]
+        let expected = readFile(completionsDir / &"configlet.{shell}")
+        execAndCheck(0, &"{binaryPath} completion --shell {shell}", expected)
+        execAndCheck(0, &"{binaryPath} completion --shell {c}", expected)
+        execAndCheck(0, &"{binaryPath} completion -s {shell}", expected)
+        execAndCheck(0, &"{binaryPath} completion -s {c}", expected)
+        execAndCheck(0, &"{binaryPath} completion -s{c}", expected)
+    for shell in ["powershell", "zsh"]:
+      test &"{shell} (produces an error)":
+        let (outp, exitCode) = execCmdEx(&"{binaryPath} completion -s {shell}")
+        check:
+          outp.startsWith(&"Error: invalid value for '-s': '{shell}'")
+          exitCode == 1
+
 proc main =
   const
     binaryExt =
@@ -1080,6 +1099,8 @@ proc main =
   testsForSync(binaryPath)
 
   testsForGenerate(binaryPath)
+
+  testsForCompletion(binaryPath)
 
 main()
 {.used.}
