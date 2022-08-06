@@ -70,9 +70,15 @@ emit_completion_command() {
   file="bin/completions/configlet.$(basename "${shell}")"
   if [[ -f "${file}" && -r "${file}" ]]; then
     case "${shell}" in
-      bash | fish)
+      bash)
         echo "To enable tab completions, run:"
         echo "    configlet completion -s ${shell} | source"
+        ;;
+      fish)
+        echo "To enable tab completions for the current session, run:"
+        echo "    configlet completion -s ${shell} | source"
+        echo "To enable tab completions for every session, run:"
+        echo "    configlet completion -s ${shell} > ~/.config/fish/completions/configlet.fish"
         ;;
       zsh)
         : # is there more to do here than the above?
