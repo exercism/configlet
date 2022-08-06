@@ -1,6 +1,6 @@
 import std/posix
-import "."/[cli, fmt/fmt, info/info, generate/generate, lint/lint, logger,
-            sync/sync, uuid/uuid]
+import "."/[cli, completion/completion, fmt/fmt, info/info, generate/generate,
+            lint/lint, logger, sync/sync, uuid/uuid]
 
 proc main =
   onSignal(SIGTERM):
@@ -13,6 +13,8 @@ proc main =
   case conf.action.kind
   of actNil:
     discard
+  of actCompletion:
+    completion(conf.action.shell)
   of actFmt:
     fmt(conf)
   of actLint:

@@ -4,12 +4,18 @@ import pkg/cligen/parseopt3
 type
   ActionKind* = enum
     actNil = "nil"
+    actCompletion = "completion"
     actFmt = "fmt"
     actGenerate = "generate"
     actInfo = "info"
     actLint = "lint"
     actSync = "sync"
     actUuid = "uuid"
+
+  Shell* = enum
+    sNil = "nil"
+    sBash = "bash"
+    sFish = "fish"
 
   SyncKind* = enum
     skDocs = "docs"
@@ -26,6 +32,8 @@ type
     case kind*: ActionKind
     of actNil, actGenerate, actLint:
       discard
+    of actCompletion:
+      shell*: Shell
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -61,6 +69,9 @@ type
     optVersion = "version"
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
+
+    # Options for `completion`
+    optCompletionShell = "shell"
 
     # Options for both `fmt` and `sync`
     optFmtSyncExercise = "exercise"
@@ -133,8 +144,10 @@ func genHelpText: string =
     ## Returns a string that describes the allowed values for an enum `T`.
     result = "Allowed values: "
     for val in T:
-      result.add &"{($val)[0]}"
-      result.add &"[{($val)[1 .. ^1]}], "
+      let s = $val
+      if s != "nil":
+        result.add s[0]
+        result.add &"[{s[1 .. ^1]}], "
     setLen(result, result.len - 2)
 
   func genSyntaxStrings: tuple[syntax: array[Opt, string], maxLen: int] =
@@ -147,6 +160,7 @@ func genHelpText: string =
         case opt
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
+        of optCompletionShell: "shell"
         of optFmtSyncExercise: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
@@ -174,6 +188,7 @@ func genHelpText: string =
 
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
+    actCompletion: "Output a completion script for a given shell",
     actFmt: "Format the exercise '.meta/config.json' files",
     actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
     actInfo: "Print some information about the track",
@@ -199,6 +214,8 @@ func genHelpText: string =
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
+    optCompletionShell: &"Choose the shell type (required)\n" &
+                        &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
@@ -330,7 +347,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
 func init*(T: typedesc[Action], actionKind: ActionKind,
            scope: set[SyncKind] = {}): T =
   case actionKind
-  of actNil, actFmt, actGenerate, actInfo, actLint:
+  of actNil, actCompletion, actFmt, actGenerate, actInfo, actLint:
     T(kind: actionKind)
   of actSync:
     T(kind: actionKind, scope: scope)
@@ -463,6 +480,12 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
     case conf.action.kind
     of actNil, actGenerate, actLint:
       discard
+    of actCompletion:
+      case opt
+      of optCompletionShell:
+        setActionOpt(shell, parseVal[Shell](kind, key, val))
+      else:
+        discard
     of actFmt:
       case opt
       of optFmtSyncExercise:
@@ -533,6 +556,9 @@ proc processCmdLine*: Conf =
   case result.action.kind
   of actNil:
     showHelp()
+  of actCompletion:
+    if result.action.shell == sNil:
+      showError("Please choose a shell. For example: `configlet completion -s bash`")
   of actFmt, actGenerate, actInfo, actLint, actUuid:
     discard
   of actSync:
