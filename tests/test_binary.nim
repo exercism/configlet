@@ -949,6 +949,11 @@ proc testsForCompletion(binaryPath: string) =
         check:
           outp.contains(&"invalid value for '-s': '{shell}'")
           exitCode == 1
+    test "the -s option is required":
+      let (outp, exitCode) = execCmdEx(&"{binaryPath} completion")
+      check:
+        outp.contains(&"Please choose a shell. For example: `configlet completion -s bash`")
+        exitCode == 1
 
 proc main =
   const
