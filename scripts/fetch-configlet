@@ -70,7 +70,8 @@ emit_completion_command() {
   file="bin/completions/configlet.$(basename "${shell}")"
   if [[ -f "${file}" && -r "${file}" ]]; then
     case "${shell}" in
-      bash | fish) echo "Enable tab completions: source ${file}" ;;
+      bash | fish)
+        echo "Enable tab completions: source ${file}" ;;
       zsh)
         : # is there more to do here than the above?
         ;;
