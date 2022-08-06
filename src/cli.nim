@@ -188,7 +188,7 @@ func genHelpText: string =
 
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
-    actCompletion: "Output completions for a given shell",
+    actCompletion: "Output a completion script for a given shell",
     actFmt: "Format the exercise '.meta/config.json' files",
     actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
     actInfo: "Print some information about the track",
