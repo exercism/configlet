@@ -932,7 +932,7 @@ proc testsForGenerate(binaryPath: string) =
 proc testsForCompletion(binaryPath: string) =
   suite "completion":
     const completionsDir = repoRootDir / "completions"
-    for shell in ["bash", "fish"]:
+    for shell in ["bash", "fish", "zsh"]:
       test shell:
         let c = shell[0]
         # Convert platform-specific line endings (e.g. CR+LF on Windows) to LF
@@ -943,7 +943,7 @@ proc testsForCompletion(binaryPath: string) =
         execAndCheck(0, &"{binaryPath} completion -s {shell}", expected)
         execAndCheck(0, &"{binaryPath} completion -s {c}", expected)
         execAndCheck(0, &"{binaryPath} completion -s{c}", expected)
-    for shell in ["powershell", "zsh"]:
+    for shell in ["powershell"]:
       test &"{shell} (produces an error)":
         let (outp, exitCode) = execCmdEx(&"{binaryPath} completion -s {shell}")
         check:
