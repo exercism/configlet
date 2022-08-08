@@ -47,6 +47,13 @@ _configlet() {
   (( CURRENT += 1 ))
   curcontext="${curcontext%:*:*}:configlet-command-$line[1]:"
 
+  _configlet_complete_practice_exercise_slug() {
+    local -a cmd slugs slug_paths
+    slug_paths=(./exercises/practice/*(/))
+    slugs=( ${${slug_paths#./exercises/practice/}%-*-*} )
+    compadd "$@" -a slugs
+  }
+
   case $line[1] in
     # subcommands with no options
     (generate)
@@ -78,7 +85,7 @@ _configlet() {
     (sync)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
-          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:' \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_practice_exercise_slug' \
           {-o,--offline}'[Do not update prob-specs cache]' \
           {-u,--update}'[Write changes]' \
           {-y,--yes}'[Auto-confirm update]' \
