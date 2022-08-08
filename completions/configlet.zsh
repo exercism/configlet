@@ -49,7 +49,7 @@ _configlet() {
     (fmt)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
-          {-e,--exercise}'+:[exercise slug]' \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:' \
           {-u,--update}'[Write changes]' \
           {-y,--yes}'[Auto-confirm update]' \
       ;;
@@ -61,7 +61,7 @@ _configlet() {
     (sync)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
-          {-e,--exercise}'+:[exercise slug]' \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:' \
           {-o,--offline}'[Do not update prob-specs cache]' \
           {-u,--update}'[Write changes]' \
           {-y,--yes}'[Auto-confirm update]' \
