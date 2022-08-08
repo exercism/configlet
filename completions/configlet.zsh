@@ -47,6 +47,15 @@ _configlet() {
   (( CURRENT += 1 ))
   curcontext="${curcontext%:*:*}:configlet-command-$line[1]:"
 
+  _configlet_complete_any_exercise_slug() {
+    local -a cmd slugs slug_paths
+    slug_paths=(./exercises/concept/*(/))
+    slugs=( ${${slug_paths#./exercises/concept/}%-*-*} )
+    slug_paths=(./exercises/practice/*(/))
+    slugs+=( ${${slug_paths#./exercises/practice/}%-*-*} )
+    compadd "$@" -a slugs
+  }
+
   _configlet_complete_practice_exercise_slug() {
     local -a cmd slugs slug_paths
     slug_paths=(./exercises/practice/*(/))
@@ -73,7 +82,7 @@ _configlet() {
     (fmt)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
-          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:' \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_any_exercise_slug' \
           {-u,--update}'[Write changes]' \
           {-y,--yes}'[Auto-confirm update]' \
       ;;
