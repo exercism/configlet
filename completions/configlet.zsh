@@ -14,11 +14,15 @@ _configlet() {
   local line
   local curcontext="$curcontext"
 
+  _configlet_global_opts=(
+    {-h,--help}'[Show help]'
+    '--version[Show version information]'
+    {-t,--track-dir}'+:[Select a track directory]'
+    {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)'
+  )
+
   _arguments "${_arguments_options[@]}" \
-      {-h,--help}'[Show help]' \
-      '--version[Show version information]' \
-      {-t,--track-dir}'+:[Select a track directory]' \
-      {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+      "$_configlet_global_opts[@]" \
       ":: :_configlet_commands" \
       "*::: :->configlet"
 
@@ -30,51 +34,33 @@ _configlet() {
     # subcommands with no options
     (generate)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
       ;;
     (lint)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+         "$_configlet_global_opts[@]" \
       ;;
     # subcommands with options
     (completion)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
           {-s,--shell}'[Select the shell type]: :(bash fish zsh)' \
       ;;
     (fmt)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
           {-e,--exercise}'+:[exercise slug]' \
           {-u,--update}'[Write changes]' \
           {-y,--yes}'[Auto-confirm update]' \
       ;;
     (info)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
           {-o,--offline}'[Do not update prob-specs cache]' \
       ;;
     (sync)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
           {-e,--exercise}'+:[exercise slug]' \
           {-o,--offline}'[Do not update prob-specs cache]' \
           {-u,--update}'[Write changes]' \
@@ -86,10 +72,7 @@ _configlet() {
       ;;
     (uuid)
       _arguments "${_arguments_options[@]}" \
-          {-h,--help}'[Show help]' \
-          '--version[Show version information]' \
-          {-t,--track-dir}'+:[Select a track directory]' \
-          {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)' \
+          "$_configlet_global_opts[@]" \
           {-n,--num}'+:[How many UUIDs]' \
       ;;
   esac
