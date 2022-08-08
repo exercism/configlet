@@ -2,6 +2,23 @@
 
 autoload -U is-at-least
 
+(( $+functions[_configlet_commands] )) ||
+_configlet_commands() {
+  local commands
+  commands=(
+    # subcommands with no options
+    "generate:Generate concept exercise introductions" \
+    "lint:Check the track configuration for correctness" \
+    # subcommands with options
+    "completion:Output a completion script for a given shell" \
+    "fmt:Format the exercise '.meta/config.json' files" \
+    "info:Print track information" \
+    "sync:Check or update Practice Exercise docs, metadata, and tests" \
+    "uuid:Output a version 4 UUID" \
+  )
+  _describe -t commands 'configlet commands' commands "$@"
+}
+
 _configlet() {
   typeset -a _arguments_options
 
@@ -76,23 +93,6 @@ _configlet() {
           '(-n --num)'{-n+,--num=}'[How many UUIDs]:' \
       ;;
   esac
-}
-
-(( $+functions[_configlet_commands] )) ||
-_configlet_commands() {
-  local commands
-  commands=(
-    # subcommands with no options
-    "generate:Generate concept exercise introductions" \
-    "lint:Check the track configuration for correctness" \
-    # subcommands with options
-    "completion:Output a completion script for a given shell" \
-    "fmt:Format the exercise '.meta/config.json' files" \
-    "info:Print track information" \
-    "sync:Check or update Practice Exercise docs, metadata, and tests" \
-    "uuid:Output a version 4 UUID" \
-  )
-  _describe -t commands 'configlet commands' commands "$@"
 }
 
 _configlet "$@"
