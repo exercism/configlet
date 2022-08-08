@@ -73,7 +73,7 @@ _configlet() {
     (uuid)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
-          {-n,--num}'+:[How many UUIDs]' \
+          '(-n --num)'{-n+,--num=}'[How many UUIDs]:' \
       ;;
   esac
 }
