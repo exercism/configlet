@@ -34,7 +34,7 @@ _configlet() {
   _configlet_global_opts=(
     {-h,--help}'[Show help]'
     '--version[Show version information]'
-    '(-t --track-dir)'{-t+,--track-dir=}'[Select a track directory]:'
+    '(-t --track-dir)'{-t+,--track-dir=}'[Select a track directory]:directory:_directories'
     {-v,--verbosity}'[Verbosity level]: :(quiet normal detailed)'
   )
 
