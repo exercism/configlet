@@ -1,5 +1,5 @@
 import std/[os, parseutils, strformat, strutils, terminal]
-import pkg/cligen/parseopt3
+import pkg/[cligen/parseopt3, supersnappy]
 
 type
   ActionKind* = enum
@@ -295,9 +295,9 @@ func genHelpText: string =
   setLen(result, result.len - 1)
 
 proc showHelp(exitCode: range[0..255] = 0) =
-  const helpText = genHelpText()
+  const helpText = genHelpText().compress()
   let f = if exitCode == 0: stdout else: stderr
-  f.writeLine helpText
+  f.writeLine helpText.uncompress()
   if f == stdout:
     f.flushFile()
   quit(exitCode)
@@ -415,8 +415,8 @@ proc parseOption(kind: CmdLineKind, key: string, val: string): Opt =
         user's cache directory - there is no longer an option to configure the location.
         Performing an offline sync now requires only one option (--offline), but you
         must first run a `configlet sync` command without --offline at least once on
-        your machine.""".unindent()
-      stderr.writeLine msg
+        your machine.""".unindent().compress()
+      stderr.writeLine msg.uncompress()
     showError(&"invalid option: {formatOpt(kind, key)}")
 
 proc parseVal[T: enum](kind: CmdLineKind, key: string, val: string): T =
