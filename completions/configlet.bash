@@ -21,13 +21,13 @@ _configlet_completion_() {
 
   local i
   for ((i = 1; i < COMP_CWORD; i++)); do
-    if [[ ${COMP_WORDS[i]} == @(lint|generate|info|uuid|fmt|sync) ]]; then
+    if [[ ${COMP_WORDS[i]} == @(completion|lint|generate|info|uuid|fmt|sync) ]]; then
       "_configlet_complete_${COMP_WORDS[i]}_"
       return
     fi
   done
 
-  _configlet_complete_options_ "fmt generate info lint sync uuid $global_opts"
+  _configlet_complete_options_ "completion fmt generate info lint sync uuid $global_opts"
 }
 
 _configlet_complete_global_option_() {
@@ -43,6 +43,17 @@ _configlet_complete_global_option_() {
       ;;
   esac
   return 1
+}
+
+_configlet_complete_completion_() {
+  case $prev in
+    '-s' | '--shell')
+      _configlet_complete_options_ "bash fish"
+      ;;
+    *)
+      _configlet_complete_options_ "-s --shell $global_opts"
+      ;;
+  esac
 }
 
 _configlet_complete_lint_() {
