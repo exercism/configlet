@@ -48,18 +48,16 @@ _configlet() {
   curcontext="${curcontext%:*:*}:configlet-command-$line[1]:"
 
   _configlet_complete_any_exercise_slug() {
-    local -a cmd slugs slug_paths
-    slug_paths=(./exercises/concept/*(/))
-    slugs=( ${${slug_paths#./exercises/concept/}%-*-*} )
-    slug_paths=(./exercises/practice/*(/))
-    slugs+=( ${${slug_paths#./exercises/practice/}%-*-*} )
+    local -a slugs slug_paths
+    slug_paths=( ./exercises/{concept,practice}/*(/) )
+    slugs=( "${slug_paths[@]##*/}" )
     compadd "$@" -a slugs
   }
 
   _configlet_complete_practice_exercise_slug() {
-    local -a cmd slugs slug_paths
-    slug_paths=(./exercises/practice/*(/))
-    slugs=( ${${slug_paths#./exercises/practice/}%-*-*} )
+    local -a slugs slug_paths
+    slug_paths=( ./exercises/practice/*(/) )
+    slugs=( "${slug_paths[@]##*/}" )
     compadd "$@" -a slugs
   }
 
