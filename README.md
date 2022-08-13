@@ -22,7 +22,7 @@ Commands:
 
 Options for completion:
   -s, --shell <shell>          Choose the shell type (required)
-                               Allowed values: b[ash], f[ish]
+                               Allowed values: b[ash], f[ish], z[sh]
 
 Options for fmt:
   -e, --exercise <slug>        Only operate on this exercise

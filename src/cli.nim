@@ -16,6 +16,7 @@ type
     sNil = "nil"
     sBash = "bash"
     sFish = "fish"
+    sZsh = "zsh"
 
   SyncKind* = enum
     skDocs = "docs"
