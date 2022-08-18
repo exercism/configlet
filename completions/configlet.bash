@@ -1,7 +1,7 @@
 # completions for the configlet command, bash flavour
 
 # remove any prior completions
-complete -r bin/configlet configlet 2>/dev/null
+complete -r bin/configlet configlet 2> /dev/null
 # and install this one
 complete -F _configlet_completion_ configlet
 
