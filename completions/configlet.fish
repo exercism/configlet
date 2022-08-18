@@ -29,15 +29,17 @@ complete -c configlet -n "__fish_seen_subcommand_from completion" -s s -l shell 
   -x -a "bash fish zsh"
 
 # fmt subcommand
-complete -c configlet -n "__fish_seen_subcommand_from fmt" -s u -l update -d "Write changes"
-complete -c configlet -n "__fish_seen_subcommand_from fmt" -s y -l yes -d "Auto-confirm update"
 complete -c configlet -n "__fish_seen_subcommand_from fmt" -s e -l exercise -d "exercise slug" \
   -x -a '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
+complete -c configlet -n "__fish_seen_subcommand_from fmt" -s u -l update -d "Write changes"
+complete -c configlet -n "__fish_seen_subcommand_from fmt" -s y -l yes -d "Auto-confirm update"
 
 # info subcommand
 complete -c configlet -n "__fish_seen_subcommand_from info" -s o -l offline -d "Do not update prob-specs cache"
 
 # sync subcommand
+complete -c configlet -n "__fish_seen_subcommand_from sync" -s e -l exercise -d "exercise slug" \
+  -x -a '(__fish_configlet_find_dirs ./exercises/practice)'
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s o -l offline -d "Do not update prob-specs cache"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s u -l update -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s y -l yes -d "Auto-confirm update"
@@ -46,8 +48,6 @@ complete -c configlet -n "__fish_seen_subcommand_from sync"      -l filepaths -d
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l metadata -d "Sync metadata only"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "For auto-confirming" \
   -x -a "choose include exclude"
-complete -c configlet -n "__fish_seen_subcommand_from sync" -s e -l exercise -d "exercise slug" \
-  -x -a '(__fish_configlet_find_dirs ./exercises/practice)'
 
 # uuid subcommand
 complete -c configlet -n "__fish_seen_subcommand_from uuid" -s n -l num -x -d "How many UUIDs"
