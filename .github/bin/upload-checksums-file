@@ -2,7 +2,7 @@
 
 set -e
 
-build_tag="$(echo "${REF}" | cut -d'/' -f3)"
+build_tag="${GITHUB_REF_NAME}"
 
 # Download every release asset
 download_dir="releases/${build_tag}"
