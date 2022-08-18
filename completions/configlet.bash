@@ -48,7 +48,7 @@ _configlet_complete_global_option_() {
 _configlet_complete_completion_() {
   case $prev in
     '-s' | '--shell')
-      _configlet_complete_options_ "bash fish"
+      _configlet_complete_options_ "bash fish zsh"
       ;;
     *)
       _configlet_complete_options_ "-s --shell $global_opts"

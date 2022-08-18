@@ -15,7 +15,7 @@ complete -c configlet -n "__fish_use_subcommand" -a generate -d "Generate concep
 # completion subcommand
 complete -c configlet -n "__fish_use_subcommand" -a completion -d "Output a completion script for a given shell"
 complete -c configlet -n "__fish_seen_subcommand_from completion" -s s -l shell -d "Shell type" \
-  -x -a "bash fish"
+  -x -a "bash fish zsh"
 
 # info subcommand
 complete -c configlet -n "__fish_use_subcommand" -a info -d "Track info"
