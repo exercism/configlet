@@ -50,4 +50,4 @@ complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "Fo
   -xa "choose include exclude"
 
 # uuid subcommand
-complete -c configlet -n "__fish_seen_subcommand_from uuid" -s n -l num -x -d "How many UUIDs"
+complete -c configlet -n "__fish_seen_subcommand_from uuid" -s n -l num -d "How many UUIDs" -x
