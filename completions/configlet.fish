@@ -10,7 +10,8 @@ complete -c configlet -s h -l help -d "Show help"
 complete -c configlet      -l version -d "Show version info"
 complete -c configlet -s t -l track-dir -d "Select a track directory" \
   -x -a "(__fish_complete_directories)"
-complete -c configlet -s v -l verbosity -x -a "quiet normal detailed" -d "Verbose level"
+complete -c configlet -s v -l verbosity  -d "Verbose level" \
+  -x -a "quiet normal detailed"
 
 # subcommands with no options
 complete -c configlet -n "__fish_use_subcommand" -a lint -d "Check the track configuration for correctness"
@@ -44,6 +45,7 @@ complete -c configlet -n "__fish_seen_subcommand_from sync" -s y -l yes -d "Auto
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l docs -d "Sync docs only"
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l filepaths -d 'Populate .meta/config.json "files" entry'
 complete -c configlet -n "__fish_seen_subcommand_from sync"      -l metadata -d "Sync metadata only"
-complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "For auto-confirming" -x -a "choose include exclude"
+complete -c configlet -n "__fish_seen_subcommand_from sync"      -l tests -d "For auto-confirming" \
+  -x -a "choose include exclude"
 complete -c configlet -n "__fish_seen_subcommand_from sync" -s e -l exercise -d "exercise slug" \
   -x -a '(__fish_configlet_find_dirs ./exercises/practice)'
