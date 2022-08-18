@@ -62,7 +62,6 @@ jobs:
         run: ./.github/bin/publish-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REF: ${{ github.ref }}
 
   checksums:
     needs: [build]
@@ -76,4 +75,3 @@ jobs:
         run: ./.github/bin/upload-checksums-file
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REF: ${{ github.ref }}

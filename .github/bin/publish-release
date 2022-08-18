@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-build_tag="$(echo "${REF}" | cut -d'/' -f3)"
+build_tag="${GITHUB_REF_NAME}"
 
 if ! gh release view "${build_tag}"; then
   gh release create --draft "${build_tag}" "${ARTIFACT_FILE}"
