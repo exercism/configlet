@@ -1,4 +1,4 @@
-# Notes on maintaining configlet
+# Notes on configlet releases
 
 ## How to create a configlet release
 
