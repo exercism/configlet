@@ -33,7 +33,7 @@
 > 3. Check that CI is green.
 > 4. Un-draft the release.
 
-where un-drafting the release means that, from the moment on, it is used in any
+where un-drafting the release means that, from that moment on, it is used in any
 newly triggered track CI configlet job (and downloaded by a user who runs
 `fetch-configlet`).
 
