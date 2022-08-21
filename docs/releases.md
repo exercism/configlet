@@ -39,7 +39,7 @@ newly triggered track CI configlet job (and downloaded by a user who runs
 
 If you edit the draft release notes in the GitHub web interface, be careful
 to not prematurely press the green "Publish release" button when you mean to
-press the "Save draft" button. You can also edit them using the
+press the "Save draft" button. You can also edit the release notes using the
 [GitHub CLI][gh] - for example, for a version `1.2.3`:
 
 ```sh
