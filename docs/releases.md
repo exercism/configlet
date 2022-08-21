@@ -72,5 +72,5 @@ no longer want to create a release at this time, you can either:
   draft and edit its release notes to say that it should not be used.
 
 [bump_version]: https://github.com/exercism/configlet/blob/main/bin/bump_version.nim
-[tag_release]: https://github.com/exercism/configlet/blob/main/bin/tag_release.nim
 [gh]: https://github.com/cli/cli
+[tag_release]: https://github.com/exercism/configlet/blob/main/bin/tag_release.nim
