@@ -85,13 +85,6 @@ Note that a published release cannot be set as draft again.
 If it turns out that we want the release to be available again, simply undo the marking of the release as prerelease.
 If it turns out that we want to remove the release, follow the steps in the section above to create a new release.
 
-### Should we force-push to `main` to remove the commit of a cancelled release, or a problematic commit?
-
-In general, we do not force-push to `main` in Exercism repositories.
-Force-pushing to `main` is reserved for exceptional circumstances where the benefits outweigh the inconvenience to the user who fetched a later-removed commit or tag, and to the maintainer that must temporarily disable the branch protection rule.
-For example, we should force-push to remove a commit that is too dangerous to keep in the repo history (say, if running `nimble build` or a `configlet` command can cause serious data loss).
-It should always remain safe to checkout any commit and run `nimble build` or any configlet command, so that we can diagnose regressions and use `git bisect`.
-
 [bump_version]: https://github.com/exercism/configlet/blob/main/bin/bump_version.nim
 [gh]: https://github.com/cli/cli
 [git-re-tag]: https://git-scm.com/docs/git-tag#_on_re_tagging
