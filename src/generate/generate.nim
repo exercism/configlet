@@ -93,13 +93,24 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
   var headingLevel = 1
   var linkDefs = newSeq[string]()
   while i < content.len:
-    var conceptSlug = Slug ""
+    var cs = "" # Buffer for a concept slug that may not be valid.
     # Here, we implement the syntax for a placeholder as %{concept:some-slug}
     # where we allow spaces after the opening brace, around the colon,
-    # and before the closing brace. The slug must be in kebab-case.
+    # and before the closing brace.
+    #
+    # The slug must be in kebab-case, matching the regular expression:
+    #
+    #   ^[a-z0-9]+(-[a-z0-9]+)*$
+    #
+    # `configlet lint` enforces this for slugs in the track config.json file.
     if scanp(content, i,
              "%{", *{' '}, "concept", *{' '}, ':', *{' '},
-             +{'a'..'z', '-'} -> conceptSlug.add($_), *{' '}, '}'):
+             +{'a'..'z', '0'..'9', '-'} -> cs.add($_), *{' '}, '}'):
+      if cs[0] == '-' or cs[^1] == '-' or "--" in cs:
+        writeError(&"Concept '{cs}' is invalid. A slug cannot start or end " &
+                    "with a '-', or contain consecutive '-' characters",
+                    templatePath)
+      let conceptSlug = Slug(cs)
       if conceptSlug in slugLookup:
         let h2 = if headingLevel == 2: "" else: slugLookup[conceptSlug]
         result.add conceptIntroduction(trackDir, conceptSlug, templatePath,
