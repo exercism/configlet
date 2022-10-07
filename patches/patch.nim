@@ -1,6 +1,6 @@
 import std/[hashes, os, parseutils, strutils]
 
-proc gorgeCheck(cmd, errorMsg: string): string =
+proc gorgeCheck*(cmd, errorMsg: string): string =
   ## Executes `cmd` at compile time and returns its text output (stdout + stderr).
   ##
   ## Raises an exception if the exit code is non-zero, using the given `errorMsg`.

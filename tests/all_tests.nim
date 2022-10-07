@@ -1,11 +1,24 @@
-import "."/[
-  test_binary,
-  test_fmt,
-  test_generate,
-  test_json,
-  test_lint,
-  test_probspecs,
-  test_sync,
-  test_tracks,
-  test_uuid,
-]
+import std/[macros, os, sequtils, strutils]
+from ../patches/patch import gorgeCheck
+
+proc getImports: NimNode =
+  const files = block:
+    const thisDir = currentSourcePath().parentDir()
+    const cmd = "git -C " & thisDir & " ls-files -- '*test_*.nim'"
+    gorgeCheck(cmd, "command failed:\n" & cmd)
+  result = nnkBracket.newTree()
+  for f in files.splitLines():
+    let f = f[0..^5] # Remove .nim file extension
+    result.add ident(f)
+  expectMinLen(result, 9)
+
+macro importGitTrackedTestFiles =
+  ## Imports every module in the current directory that is both:
+  ## - tracked by `git`
+  ## - and has a filename that matches `test_*.nim`
+  let imports = getImports()
+  result = quote do:
+    import "."/`imports`
+  echo "Combining these git-tracked test files:\n" & imports.toSeq().join("\n")
+
+importGitTrackedTestFiles()
