@@ -3,6 +3,8 @@ hint("Name", on)
 # switch("experimental", "strictEffects") # TODO: re-enable when possible with `parsetoml`
 switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
+when defined(nimHasOutParams):
+  switch("experimental", "strictDefs")
 
 # Replace the stdlib JSON modules with our own stricter versions.
 patchFile("stdlib", "json", "src/patched_stdlib/json")
