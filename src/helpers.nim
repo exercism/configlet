@@ -1,4 +1,4 @@
-import std/[algorithm, os, strformat, strscans, strutils, terminal]
+import std/[algorithm, os, parseutils, strformat, strscans, strutils, terminal]
 import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
@@ -17,6 +17,19 @@ type
 proc `==`(x, y: Path): bool {.borrow.}
 proc `<`(x, y: Path): bool {.borrow.}
 
+proc getSortedFiles*(dir: Path, relative = false,
+                     pattern: static string = ""): seq[Path] =
+  ## Returns the names of files in `dir`, in alphabetical order, limited to
+  ## those that match the scanf `pattern` if it has non-zero length. The
+  ## `pattern` must not contain a matcher that binds (e.g. `$i`, `$*`, `$+`).
+  ##
+  ## Can be used at compile time, unlike `walkFiles` and `walkPattern`.
+  result = @[]
+  for kind, path in walkDir(dir.string, relative = relative):
+    if kind == pcFile and (when pattern.len > 0: path.scanf(pattern) else: true):
+      result.add Path(path)
+  sort result
+
 proc getSortedSubdirs*(dir: Path): seq[Path] =
   ## Returns a seq of the subdirectories of `dir`, in alphabetical order.
   result = newSeqOfCap[Path](100)
@@ -24,6 +37,10 @@ proc getSortedSubdirs*(dir: Path): seq[Path] =
     if kind == pcDir:
       result.add Path(path)
   sort result
+
+func w*(s: string, start: int): int =
+  ## A matcher for `scanf`. Similar to `$w`, but only skips (does not bind).
+  s.skipWhile(IdentChars, start)
 
 proc setFalseAndPrint*(b: var bool; description: string; path: Path, annotation = "") =
   ## Sets `b` to `false` and writes a message to stdout containing `description`

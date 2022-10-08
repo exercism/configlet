@@ -1,21 +1,17 @@
-import std/[algorithm, macros, os, strutils]
+import std/[macros, os]
+import "."/helpers
 
-proc getSortedTestFiles(dir: string): seq[string] =
-  result = @[]
-  # Note that we cannot use `walkFiles` or `walkPattern` at compile time.
-  for kind, path in walkDir(dir, relative = true):
-    if kind == pcFile:
-      if path.startsWith("test_") and path.endsWith(".nim"):
-        result.add path[0..^5] # Remove .nim file extension.
-  sort result
+proc genBracket: NimNode =
+  const thisDir = currentSourcePath().parentDir().Path()
+  const files = thisDir.getSortedFiles(relative = true, "test_$[w].nim$.")
+  result = nnkBracket.newTree()
+  for f in files:
+    result.add ident(f.string[0..^5]) # Remove .nim file extension.
+  expectMinLen(result, 9)
 
 macro importTestFiles =
   ## Imports every Nim module that begins with `test_` in the parent directory.
-  const files = currentSourcePath().parentDir().getSortedTestFiles()
-  var bracket = nnkBracket.newTree()
-  for f in files:
-    bracket.add ident(f)
-  expectMinLen(bracket, 9)
+  let bracket = genBracket()
   result = newStmtList(quote do:
     import "."/`bracket`)
   echo "all_tests: 'importTestFiles' produced:\n" & result.repr
