@@ -4,12 +4,12 @@ from ../patches/patch import gorgeCheck
 proc getImports: NimNode =
   const files = block:
     const thisDir = currentSourcePath().parentDir()
-    const cmd = "git -C " & thisDir & " ls-files -- '*test_*.nim'"
+    const cmd = "git -C \"" & thisDir & "\" ls-files" # Don't match pattern here.
     gorgeCheck(cmd, "command failed:\n" & cmd)
   result = nnkBracket.newTree()
   for f in files.splitLines():
-    let f = f[0..^5] # Remove .nim file extension
-    result.add ident(f)
+    if f.startsWith("test_") and f.endsWith(".nim"):
+      result.add ident(f[0..^5]) # Remove .nim file extension
   expectMinLen(result, 9)
 
 macro importGitTrackedTestFiles =
