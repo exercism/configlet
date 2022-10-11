@@ -3,7 +3,26 @@
 build_tag="${GITHUB_REF_NAME}"
 
 if ! gh release view "${build_tag}"; then
-  gh release create --draft "${build_tag}" "${ARTIFACT_FILE}"
+  # Generate a list of commits for the release notes, without assuming that the
+  # tag for the previous official configlet release:
+  # - is the most recent (or second most recent) local tag.
+  # - exists locally (so we support creating test releases on a forked repo).
+  # The `gh release create` command does have a `--generate-notes` option,
+  # but the below gives full control over the format, and includes commit refs.
+  previous_release_sha="$(gh api graphql --jq 'recurse | strings' -f query='
+    {
+      repository(owner: "exercism", name: "configlet") {
+        latestRelease {
+          tagCommit {
+            oid
+          }
+        }
+      }
+    }')"
+  commits="$(git log --format='- %h %s' "${previous_release_sha}..${build_tag}")"
+  body="$(printf '### Changes\n\n%s' "${commits}")"
+  gh release create --draft --title "${build_tag}" --notes "${body}" \
+    "${build_tag}" "${ARTIFACT_FILE}"
 else
   gh release upload "${build_tag}" "${ARTIFACT_FILE}"
 fi
