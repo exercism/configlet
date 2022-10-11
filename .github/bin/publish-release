@@ -7,6 +7,8 @@ if ! gh release view "${build_tag}"; then
   # tag for the previous official configlet release:
   # - is the most recent (or second most recent) local tag.
   # - exists locally (so we support creating test releases on a forked repo).
+  # The `gh release create` command does have a `--generate-notes` option,
+  # but the below gives full control over the format, and includes commit refs.
   previous_release_sha="$(gh api graphql --jq 'recurse | strings' -f query='
     {
       repository(owner: "exercism", name: "configlet") {
