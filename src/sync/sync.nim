@@ -7,7 +7,7 @@ proc validate(conf: Conf) =
   ## Exits with an error message if the given `conf` contains an invalid
   ## combination of options.
   if conf.action.update:
-    if conf.action.yes and skTests in conf.action.scope:
+    if conf.action.yes and skTests in conf.action.scope and conf.action.tests == tmChoose:
       let msg = fmt"""
         '{list(optFmtSyncYes)}' was provided to non-interactively update, but the tests updating mode is still 'choose'.
         You can either:
