@@ -51,6 +51,7 @@ proc new(T: typedesc[ExerciseTestCase], testCase: ProbSpecsTestCase): T =
     uuid: uuid(testCase),
     description: description(testCase),
     json: testCase,
+    reimplements: none(ExerciseTestCase),
   )
 
 proc getReimplementations(testCases: ProbSpecsTestCases): Table[string, string] =
