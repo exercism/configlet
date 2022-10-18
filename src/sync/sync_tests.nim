@@ -76,7 +76,10 @@ Do you want to replace the existing test case ([y]es/[n]o/[s]kip)? """
 proc syncDecision(testCase: ExerciseTestCase, testsMode: TestsMode): SyncDecision =
   case testsMode
   of tmInclude:
-    sdIncludeTest
+    if testCase.reimplements.isNone():
+      sdIncludeTest
+    else:
+      sdReplaceTest
   of tmExclude:
     sdExcludeTest
   of tmChoose:

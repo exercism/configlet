@@ -606,14 +606,6 @@ proc testsForSync(binaryPath: static string) =
 
       expectedAnagramDiffInclude = fmt"""
         {expectedAnagramDiffStart}
-        +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
-        +description = "detects two anagrams"
-        +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-        +
-      """.unindent()
-
-      expectedAnagramDiffChooseInclude = fmt"""
-        {expectedAnagramDiffStart}
         +include = false
         +
         +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
@@ -652,7 +644,7 @@ proc testsForSync(binaryPath: static string) =
     test "--tests choose: includes a missing test case for a given exercise when the input is 'y', and exits with 0":
       execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram",
                            inputStr = "y")
-    testDiffThenRestore(trackDir, expectedAnagramDiffChooseInclude, anagramTestsTomlPath)
+    testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
 
     test "--tests choose: excludes a missing test case for a given exercise when the input is 'n', and exits with 0":
       execAndCheckExitCode(0, &"{syncOfflineUpdateTests} choose -e anagram",
@@ -685,10 +677,11 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/anagram/.meta/tests.toml
       +++ exercises/practice/anagram/.meta/tests.toml
       {testsTomlHeaderDiff}
+      +include = false
+      +
       +[03eb9bbe-8906-4ea0-84fa-ffe711b52c8b]
       +description = "detects two anagrams"
       +reimplements = "b3cca662-f50a-489e-ae10-ab8290a09bdc"
-      +
       --- exercises/practice/diffie-hellman/.meta/tests.toml
       +++ exercises/practice/diffie-hellman/.meta/tests.toml
       {testsTomlHeaderDiff}
@@ -704,25 +697,31 @@ proc testsForSync(binaryPath: static string) =
       --- exercises/practice/hamming/.meta/tests.toml
       +++ exercises/practice/hamming/.meta/tests.toml
       {testsTomlHeaderDiff}
+      +include = false
+      +
       +[b9228bb1-465f-4141-b40f-1f99812de5a8]
       +description = "disallow first strand longer"
       +reimplements = "919f8ef0-b767-4d1b-8516-6379d07fcb28"
+      +include = false
       +
       +[dab38838-26bb-4fff-acbe-3b0a9bfeba2d]
       +description = "disallow second strand longer"
       +reimplements = "8a2d4ed0-ead5-4fdd-924d-27c4cf56e60e"
+      +include = false
       +
       +[db92e77e-7c72-499d-8fe6-9354d2bfd504]
       +description = "disallow left empty strand"
+      +include = false
       +reimplements = "5dce058b-28d4-4ca7-aa64-adfe4e17784c"
       +
       +[b764d47c-83ff-4de2-ab10-6cfe4b15c0f3]
       +description = "disallow empty first strand"
       +reimplements = "db92e77e-7c72-499d-8fe6-9354d2bfd504"
-      +
+      +include = false
       +
       +[920cd6e3-18f4-4143-b6b8-74270bb8f8a3]
       +description = "disallow right empty strand"
+      +include = false
       +reimplements = "38826d4b-16fb-4639-ac3e-ba027dec8b5f"
       +
       +[9ab9262f-3521-4191-81f5-0ed184a5aa89]
