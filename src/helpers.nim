@@ -26,7 +26,7 @@ proc getSortedFiles*(dir: Path; relative = false;
   ## Can be used at compile time, unlike `walkFiles` and `walkPattern`.
   result = @[]
   for kind, path in walkDir(dir.string, relative = relative):
-    if kind == pcFile and (when pattern.len > 0: path.scanf(pattern) else: true):
+    if kind == pcFile and (pattern.len == 0 or path.scanf(pattern)):
       result.add Path(path)
   sort result
 
