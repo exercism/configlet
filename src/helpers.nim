@@ -17,7 +17,7 @@ type
 proc `==`(x, y: Path): bool {.borrow.}
 proc `<`(x, y: Path): bool {.borrow.}
 
-proc getSortedFiles*(dir: Path, relative = false,
+proc getSortedFiles*(dir: Path; relative = false;
                      pattern: static string = ""): seq[Path] =
   ## Returns the names of files in `dir`, in alphabetical order, limited to
   ## those that match the scanf `pattern` if it has non-zero length. The
@@ -38,7 +38,7 @@ proc getSortedSubdirs*(dir: Path): seq[Path] =
       result.add Path(path)
   sort result
 
-func w*(s: string, start: int): int =
+func w*(s: string; start: int): int =
   ## A matcher for `scanf`. Similar to `$w`, but only skips (does not bind).
   s.skipWhile(IdentChars, start)
 
