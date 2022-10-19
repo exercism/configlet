@@ -27,7 +27,8 @@ func testsPath*(trackDir: TrackDir, slug: PracticeExerciseSlug): string =
   joinPath(trackDir.string, "exercises", "practice", slug.string, ".meta",
            "tests.toml")
 
-proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
+proc getPracticeExerciseSlugs(trackDir: TrackDir,
+                              withDeprecated: bool): seq[PracticeExerciseSlug] =
   ## Parses the root `config.json` file in `trackDir` and returns a seq of its
   ## Practice Exercise slugs, in alphabetical order.
   let configFile = trackDir / "config.json"
@@ -40,8 +41,10 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir): seq[PracticeExerciseSlug] =
         result = newSeqOfCap[PracticeExerciseSlug](practiceExercises.len)
 
         for exercise in practiceExercises:
-          if exercise.hasKey("slug"):
-            if exercise["slug"].kind == JString:
+          if exercise.hasKey("slug") and exercise["slug"].kind == JString:
+            if withDeprecated or not exercise.hasKey("status") or
+                exercise["status"].kind != JString or
+                exercise["status"].getStr() != "deprecated":
               let slug = exercise["slug"].getStr()
               result.add PracticeExerciseSlug(slug)
     else:
@@ -101,7 +104,8 @@ iterator findPracticeExercises*(conf: Conf): PracticeExercise {.inline.} =
   let trackDir = TrackDir(conf.trackDir)
   let userExercise = PracticeExerciseSlug(conf.action.exercise)
 
-  let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir)
+  let practiceExerciseSlugs = getPracticeExerciseSlugs(trackDir,
+                                                       withDeprecated = false)
 
   for slug in practiceExerciseSlugs:
     if userExercise.len == 0 or userExercise == slug:

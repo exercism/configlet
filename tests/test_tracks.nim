@@ -19,7 +19,7 @@ proc main =
 
     test "returns the expected number of exercises":
       check:
-        practiceExercises.len == 68
+        practiceExercises.len == 67
 
     test "returns the expected object for `hello-world`":
       const expectedHelloWorld =
@@ -32,7 +32,7 @@ proc main =
         )
 
       check:
-        practiceExercises[20] == expectedHelloWorld
+        practiceExercises[19] == expectedHelloWorld
 
     test "returns the expected object for `two-fer`":
       const expectedTwoFer =
@@ -47,7 +47,7 @@ proc main =
         )
 
       check:
-        practiceExercises[65] == expectedTwoFer
+        practiceExercises[64] == expectedTwoFer
 
 main()
 {.used.}
