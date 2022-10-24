@@ -304,7 +304,7 @@ proc showHelp(exitCode: range[0..255] = 0, prependDashedLine = false) =
   let f = if exitCode == 0: stdout else: stderr
   if prependDashedLine:
     let dashLen = helpUncompressed.firstLine().len
-    f.write(&"\n\n{'-'.repeat(dashLen)}\n\n")
+    f.write(&"\n{'-'.repeat(dashLen)}\n\n")
   f.writeLine helpUncompressed
   if f == stdout:
     f.flushFile()
@@ -323,14 +323,17 @@ let
   colorStdout* = shouldUseColor(stdout)
   colorStderr* = shouldUseColor(stderr)
 
-proc showError*(s: string) =
+proc showError*(s: string, writeHelp = true) =
   const errorPrefix = "Error: "
   if colorStderr:
     stderr.styledWrite(fgRed, errorPrefix)
   else:
     stderr.write(errorPrefix)
-  stderr.write(s)
-  showHelp(exitCode = 1, prependDashedLine = true)
+  stderr.writeLine(s)
+  if writeHelp:
+    showHelp(exitCode = 1, prependDashedLine = true)
+  else:
+    quit 1
 
 func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
   ## Returns a string that describes an option, given its `kind`, `key` and

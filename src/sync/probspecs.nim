@@ -158,9 +158,26 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
 
       # `fetch` and `merge` separately, for better error messages.
       logNormal(&"Updating cached 'problem-specifications' data...")
-      discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
-                       &"failed to fetch '{mainBranchName}' in " &
-                       &"problem-specifications directory: '{probSpecsDir}'")
+      try:
+        discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
+                        &"failed to fetch '{mainBranchName}' in " &
+                        &"problem-specifications directory: '{probSpecsDir}'")
+      except OSError:
+        const msg = """
+          Unable to update the problem-specifications cache.
+
+          You can either:
+
+          - ensure that you have network connectivity, and run the same configlet command again
+          - or add the '--offline' option to skip updating the cache
+
+          The most recent commit in the problem-specifications cache is:
+
+          """.unindent()
+        const format = "commit %H%nAuthor:     %an <%ae>%nCommitDate: %cD%n%n    %s"
+        let mostRecentCommit = gitCheck(0, ["log", "-n1",
+                                            &"--format={format}"]).strip().indent(4)
+        showError(msg & mostRecentCommit, writeHelp = false)
 
       discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
                        &"failed to merge '{mainBranchName}' in " &
