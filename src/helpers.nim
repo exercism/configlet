@@ -14,8 +14,25 @@ type
   Path* {.requiresInit.} = distinct string
 
 # Borrow these two operators so that we can use `sort`.
-proc `==`(x, y: Path): bool {.borrow.}
-proc `<`(x, y: Path): bool {.borrow.}
+proc `==`*(x, y: Path): bool {.borrow.}
+proc `<`*(x, y: Path): bool {.borrow.}
+
+proc getSortedPaths(dir: Path; pc: PathComponent; relative: bool;
+                    pattern: static string): seq[Path] =
+  result = @[]
+  for kind, path in walkDir(dir.string, relative = relative):
+    if kind == pc and (pattern.len == 0 or path.scanf(pattern)):
+      result.add Path(path)
+  sort result
+
+proc getSortedSubdirs*(dir: Path; relative = false;
+                       pattern: static string = ""): seq[Path] =
+  ## Returns the names of directories in `dir`, in alphabetical order, limited
+  ## to those that match the scanf `pattern` if it has non-zero length. The
+  ## `pattern` must not contain a matcher that binds (e.g. `$i`, `$*`, `$+`).
+  ##
+  ## Can be used at compile time, unlike `os.walkDirs` and `os.walkPattern`.
+  getSortedPaths(dir, pcDir, relative, pattern)
 
 proc getSortedFiles*(dir: Path; relative = false;
                      pattern: static string = ""): seq[Path] =
@@ -23,20 +40,8 @@ proc getSortedFiles*(dir: Path; relative = false;
   ## those that match the scanf `pattern` if it has non-zero length. The
   ## `pattern` must not contain a matcher that binds (e.g. `$i`, `$*`, `$+`).
   ##
-  ## Can be used at compile time, unlike `walkFiles` and `walkPattern`.
-  result = @[]
-  for kind, path in walkDir(dir.string, relative = relative):
-    if kind == pcFile and (pattern.len == 0 or path.scanf(pattern)):
-      result.add Path(path)
-  sort result
-
-proc getSortedSubdirs*(dir: Path): seq[Path] =
-  ## Returns a seq of the subdirectories of `dir`, in alphabetical order.
-  result = newSeqOfCap[Path](100)
-  for kind, path in walkDir(dir.string):
-    if kind == pcDir:
-      result.add Path(path)
-  sort result
+  ## Can be used at compile time, unlike `os.walkFiles` and `os.walkPattern`.
+  getSortedPaths(dir, pcFile, relative, pattern)
 
 func w*(s: string; start: int): int =
   ## A matcher for `scanf`. Similar to `$w`, but only skips (does not bind).
