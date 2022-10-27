@@ -39,10 +39,9 @@ if [[ -n "${GITHUB_TOKEN}" ]]; then
   curlopts+=(--header "authorization: Bearer ${GITHUB_TOKEN}")
 fi
 
-suffix="${os}-${arch}.${ext}"
-
 get_download_url() {
   local latest='https://api.github.com/repos/exercism/configlet/releases/latest'
+  local suffix="${os}-${arch}.${ext}"
   curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |
     grep "\"browser_download_url\": \".*/download/.*/configlet.*${suffix}\"$" |
     cut -d'"' -f4
