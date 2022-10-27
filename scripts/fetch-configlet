@@ -20,13 +20,6 @@ case "${os}" in
   *)        ext='tgz' ;;
 esac
 
-case "$(uname -m)" in
-  *64*)  arch='64bit' ;;
-  *686*) arch='32bit' ;;
-  *386*) arch='32bit' ;;
-  *)     arch='64bit' ;;
-esac
-
 curlopts=(
   --silent
   --show-error
@@ -41,6 +34,13 @@ fi
 
 get_download_url() {
   local latest='https://api.github.com/repos/exercism/configlet/releases/latest'
+  local arch
+  case "$(uname -m)" in
+    *64*)  arch='64bit' ;;
+    *686*) arch='32bit' ;;
+    *386*) arch='32bit' ;;
+    *)     arch='64bit' ;;
+  esac
   local suffix="${os}-${arch}.${ext}"
   curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |
     grep "\"browser_download_url\": \".*/download/.*/configlet.*${suffix}\"$" |
