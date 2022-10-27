@@ -47,7 +47,7 @@ type
 func init*(T: typedesc[TrackExerciseSlugs], exercises: Exercises): T =
   T(
     `concept`: getSlugs(exercises.`concept`),
-    practice: getSlugs(exercises.practice)
+    practice: getSlugs(exercises.practice, withDeprecated = false)
   )
 
 proc getSlugs*(exercises: Exercises, conf: Conf,

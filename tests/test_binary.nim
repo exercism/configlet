@@ -73,7 +73,6 @@ proc testsForSync(binaryPath: static string) =
     bodyUnsyncedMetadata = """
       [warn] metadata: unsynced: acronym
       [warn] metadata: unsynced: armstrong-numbers
-      [warn] metadata: unsynced: binary
       [warn] metadata: unsynced: collatz-conjecture
       [warn] metadata: unsynced: darts
       [warn] metadata: unsynced: grade-school
@@ -452,7 +451,7 @@ proc testsForSync(binaryPath: static string) =
     const expectedOutput = fmt"""
       {header}
       {bodyUnsyncedMetadata}
-      Updated the metadata for 14 Practice Exercises
+      Updated the metadata for 13 Practice Exercises
       {footerSyncedMetadata}
     """.unindent()
     const expectedDiff = """
@@ -464,10 +463,6 @@ proc testsForSync(binaryPath: static string) =
       +++ exercises/practice/armstrong-numbers/.meta/config.json
       -  "blurb": "Determine if a number is an Armstrong number",
       +  "blurb": "Determine if a number is an Armstrong number.",
-      --- exercises/practice/binary/.meta/config.json
-      +++ exercises/practice/binary/.meta/config.json
-      -  "blurb": "Convert a binary number, represented as a string (e.g. '101010'), to its decimal equivalent using first principles",
-      +  "blurb": "Convert a binary number, represented as a string (e.g. '101010'), to its decimal equivalent using first principles.",
       --- exercises/practice/collatz-conjecture/.meta/config.json
       +++ exercises/practice/collatz-conjecture/.meta/config.json
       -  "blurb": "Calculate the number of steps to reach 1 using the Collatz conjecture",

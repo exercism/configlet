@@ -25,11 +25,13 @@ proc postHook*(e: ConceptExercise | PracticeExercise) =
     stderr.writeLine msg
     quit 1
 
-func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise]): seq[Slug] =
+func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise],
+               withDeprecated = true): seq[Slug] =
   ## Returns a seq of the slugs in `e`, in alphabetical order.
-  result = newSeq[Slug](e.len)
-  for i, item in e:
-    result[i] = item.slug
+  result = newSeqOfCap[Slug](e.len)
+  for item in e:
+    if withDeprecated or item.status != sDeprecated:
+      result.add item.slug
   sort result
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
