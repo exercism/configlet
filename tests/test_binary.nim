@@ -520,6 +520,57 @@ proc testsForSync(binaryPath: static string) =
     testDiffThenRestore(trackDir, expectedDiff, configPaths)
 
   suite "sync, with --update and --tests":
+    const expectedErrorUpdateChoose = """
+      '-y, --yes' was provided to non-interactively update, but tests are in
+      the syncing scope and the tests updating mode is 'choose'.
+
+      You can either:
+      - use '--tests include' or '--tests exclude' to non-interactively include/exclude
+        missing tests
+      - or narrow the syncing scope via some combination of '--docs', '--filepaths', and
+        '--metadata' (removing '--tests' if it was passed)
+      - or remove '-y, --yes', and update by answering prompts
+
+      If no syncing scope option is provided, configlet uses the full syncing scope.
+      If '--tests' is provided without an argument, configlet uses the 'choose' mode.
+    """.dedent(6)
+
+    for options in ["-y", "-y --docs", "-y --filepaths", "-y --metadata",
+                    "choose -y", "choose -y --docs", "choose -y --filepaths",
+                    "choose -y --metadata"]:
+      test &"--tests {options}: prints an error message, and exits with 1":
+        let (outp, exitCode) = execCmdEx(&"{syncOfflineUpdateTests} {options}")
+        check:
+          outp.contains(expectedErrorUpdateChoose)
+          exitCode == 1
+        checkNoDiff(trackDir)
+
+    const expectedErrorUpdateChooseNonInteractive = """
+      configlet ran in a non-interactive context, but interaction was required because
+      '--update' was passed without '--yes', and at least one of docs, filepaths, and
+      metadata were in the syncing scope.
+
+      You can either:
+      - keep using configlet non-interactively, and add the '--yes' option to perform
+        changes without confirmation
+      - or keep using configlet non-interactively, and remove the '--update' option so
+        that configlet performs no changes
+      - or run the same command in an interactive terminal, to update by answering
+        prompts
+    """.dedent(6)
+
+    for options in ["", "--docs", "--filepaths", "--metadata", "--tests --docs",
+                    "--tests --filepaths", "--tests --metadata",
+                    "--docs --filepaths", "--docs --metadata",
+                    "--docs --filepaths --metadata",
+                    "--docs --filepaths --metadata --tests"]:
+      test &"{options}: prints an error message, and exits with 1":
+        let (outp, exitCode) = execCmdEx(&"{syncOfflineUpdate} {options}")
+        check:
+          outp.contains(expectedErrorUpdateChooseNonInteractive)
+          exitCode == 1
+        checkNoDiff(trackDir)
+
     const
       expectedOutputAnagramInclude = fmt"""
         {header}
@@ -588,6 +639,14 @@ proc testsForSync(binaryPath: static string) =
 
     test "--tests exclude: excludes a missing test case for a given exercise, and exits with 0":
       execAndCheck(0, &"{syncOfflineUpdateTests} exclude -e anagram", expectedOutputAnagramExclude)
+    testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
+
+    test &"--tests include -y: includes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdateTests} include -e anagram -y", expectedOutputAnagramInclude)
+    testDiffThenRestore(trackDir, expectedAnagramDiffInclude, anagramTestsTomlPath)
+
+    test &"--tests exclude -y: excludes a missing test case for a given exercise, and exits with 0":
+      execAndCheck(0, &"{syncOfflineUpdateTests} exclude -e anagram -y", expectedOutputAnagramExclude)
     testDiffThenRestore(trackDir, expectedAnagramDiffExclude, anagramTestsTomlPath)
 
     test "--tests choose: includes a missing test case for a given exercise when the input is 'y', and exits with 0":

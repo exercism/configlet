@@ -8,26 +8,36 @@ proc validate(conf: Conf) =
   ## combination of options.
   if conf.action.update:
     if conf.action.yes and skTests in conf.action.scope and conf.action.tests == tmChoose:
-      let msg = fmt"""
-        '{list(optFmtSyncYes)}' was provided to non-interactively update, but the tests updating mode is still 'choose'.
+      const msg = """
+        '-y, --yes' was provided to non-interactively update, but tests are in
+        the syncing scope and the tests updating mode is 'choose'.
+
         You can either:
-        - remove '{list(optFmtSyncYes)}', and update by confirming prompts
-        - or narrow the syncing scope via some combination of --docs, --filepaths, and --metadata
-        - or add '--tests include' or '--tests exclude' to non-interactively include/exclude missing tests
+        - use '--tests include' or '--tests exclude' to non-interactively include/exclude
+          missing tests
+        - or narrow the syncing scope via some combination of '--docs', '--filepaths', and
+          '--metadata' (removing '--tests' if it was passed)
+        - or remove '-y, --yes', and update by answering prompts
+
         If no syncing scope option is provided, configlet uses the full syncing scope.
-        If no --tests value is provided, configlet uses the 'choose' mode.""".unindent()
+        If '--tests' is provided without an argument, configlet uses the 'choose' mode.""".dedent(8)
       showError(msg)
-    if not isatty(stdin):
-      if not conf.action.yes:
-        let intersection = conf.action.scope * {skDocs, skFilepaths, skMetadata}
-        if intersection.len > 0:
-          let msg = fmt"""
-            Configlet was used in a non-interactive context, and the --update option was passed without the --yes option
-            You can either:
-            - keep using configlet non-interactively, and remove the --update option so that no destructive changes are performed
-            - keep using configlet non-interactively, and add the --yes option to perform destructive changes
-            - use configlet in an interactive terminal""".unindent()
-          showError(msg)
+    if not conf.action.yes and not isatty(stdin):
+      let intersection = conf.action.scope * {skDocs, skFilepaths, skMetadata}
+      if intersection.len > 0:
+        const msg = """
+          configlet ran in a non-interactive context, but interaction was required because
+          '--update' was passed without '--yes', and at least one of docs, filepaths, and
+          metadata were in the syncing scope.
+
+          You can either:
+          - keep using configlet non-interactively, and add the '--yes' option to perform
+            changes without confirmation
+          - or keep using configlet non-interactively, and remove the '--update' option so
+            that configlet performs no changes
+          - or run the same command in an interactive terminal, to update by answering
+            prompts""".dedent(10)
+        showError(msg)
 
 type
   TrackExerciseSlugs* = object

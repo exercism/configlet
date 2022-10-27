@@ -295,10 +295,17 @@ func genHelpText: string =
       result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
   setLen(result, result.len - 1)
 
-proc showHelp(exitCode: range[0..255] = 0) =
-  const helpText = genHelpText().compress()
+func firstLine(s: string): string =
+  s[0 ..< s.find('\n')]
+
+proc showHelp(exitCode: range[0..255] = 0, prependDashedLine = false) =
+  const helpCompressed = genHelpText().compress()
+  let helpUncompressed = helpCompressed.uncompress()
   let f = if exitCode == 0: stdout else: stderr
-  f.writeLine helpText.uncompress()
+  if prependDashedLine:
+    let dashLen = helpUncompressed.firstLine().len
+    f.write(&"\n\n{'-'.repeat(dashLen)}\n\n")
+  f.writeLine helpUncompressed
   if f == stdout:
     f.flushFile()
   quit(exitCode)
@@ -323,8 +330,7 @@ proc showError*(s: string) =
   else:
     stderr.write(errorPrefix)
   stderr.write(s)
-  stderr.write("\n\n")
-  showHelp(exitCode = 1)
+  showHelp(exitCode = 1, prependDashedLine = true)
 
 func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
   ## Returns a string that describes an option, given its `kind`, `key` and
