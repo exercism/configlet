@@ -6,8 +6,6 @@
 
 set -eo pipefail
 
-readonly LATEST='https://api.github.com/repos/exercism/configlet/releases/latest'
-
 case "$(uname)" in
   Darwin*)   os='mac'     ;;
   Linux*)    os='linux'   ;;
@@ -44,7 +42,8 @@ fi
 suffix="${os}-${arch}.${ext}"
 
 get_download_url() {
-  curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${LATEST}" |
+  local latest='https://api.github.com/repos/exercism/configlet/releases/latest'
+  curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |
     grep "\"browser_download_url\": \".*/download/.*/configlet.*${suffix}\"$" |
     cut -d'"' -f4
 }
