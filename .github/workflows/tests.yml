@@ -18,17 +18,19 @@ jobs:
       matrix:
         include:
           - os: linux
+            runs-on: ubuntu-22.04
             arch: 64bit
 
           - os: mac
+            runs-on: macos-12
             arch: 64bit
 
           - os: windows
+            runs-on: windows-2022
             arch: 64bit
 
     name: "${{ matrix.os }}-${{ matrix.arch }}"
-    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-22.04' ||
-                (matrix.os == 'mac' && 'macos-12' || 'windows-2022') }}
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout code
         uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
