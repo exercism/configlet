@@ -2,7 +2,7 @@ import std/posix
 import "."/[cli, completion/completion, fmt/fmt, info/info, generate/generate,
             lint/lint, logger, sync/sync, uuid/uuid]
 
-proc main =
+proc configlet =
   onSignal(SIGTERM):
     quit(0)
 
@@ -28,4 +28,12 @@ proc main =
   of actInfo:
     info(conf)
 
-main()
+proc main =
+  try:
+    configlet()
+  except CatchableError:
+    let msg = getCurrentExceptionMsg()
+    showError(msg)
+
+when isMainModule:
+  main()
