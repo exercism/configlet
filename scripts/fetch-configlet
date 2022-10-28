@@ -72,5 +72,3 @@ main() {
 }
 
 main
-
-# Temporary comment to trigger `fetch-configlet.yml` workflow
