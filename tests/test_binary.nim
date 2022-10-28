@@ -148,7 +148,7 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, for an exercise that does not exist (prints the expected output, and exits with 1)":
     test "-e foo":
       const expectedOutput = fmt"""
-        The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
+        Error: The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
         {trackDir / "config.json"}
       """.unindent()
       execAndCheck(1, &"{syncOffline} -e foo --docs", expectedOutput)

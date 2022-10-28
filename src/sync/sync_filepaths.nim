@@ -147,8 +147,7 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
           configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
       writeFile(path, contents)
     else:
-      stderr.writeLine &"Unexpected path before writing: {path}"
-      quit 1
+      error &"Unexpected path before writing: {path}"
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")
 

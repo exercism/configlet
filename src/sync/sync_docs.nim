@@ -122,8 +122,7 @@ proc write(pairsToWrite: seq[PathAndContents]) =
       createDir path.parentDir()
       writeFile(path, pathAndContents.contents)
     else:
-      stderr.writeLine &"Unexpected path before writing: {path}"
-      quit 1
+      error &"Unexpected path before writing: {path}"
   let s = if pairsToWrite.len > 1: "s" else: ""
   logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")
 
