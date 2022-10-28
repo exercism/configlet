@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.builder }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
         with:
           fetch-depth: 0 # Allows using `git log` to set initial release notes.
 
@@ -71,7 +71,7 @@ jobs:
     name: Upload checksums file
     steps:
       - name: Checkout code
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
 
       - name: Upload checksums file
         run: ./.github/bin/upload-checksums-file
