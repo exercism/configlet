@@ -14,11 +14,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [linux, macOS, windows]
+        include:
+          - os: linux
+            runs-on: ubuntu-22.04
+
+          - os: mac
+            runs-on: macos-12
+
+          - os: windows
+            runs-on: windows-2022
 
     name: fetch-configlet-${{ matrix.os }}
-    runs-on: ${{ matrix.os == 'linux' && 'ubuntu-22.04' ||
-                (matrix.os == 'macOS' && 'macos-12' || 'windows-2022') }}
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout
         uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791
