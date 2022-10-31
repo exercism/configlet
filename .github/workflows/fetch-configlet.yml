@@ -1,0 +1,51 @@
+name: Fetch configlet
+
+on:
+  push:
+    paths:
+      - scripts/fetch-configlet*
+  pull_request:
+    paths:
+      - scripts/fetch-configlet*
+  workflow_dispatch:
+
+jobs:
+  fetch_configlet:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            runs-on: ubuntu-22.04
+
+          - os: mac
+            runs-on: macos-12
+
+          - os: windows
+            runs-on: windows-2022
+
+    name: fetch-configlet-${{ matrix.os }}
+    runs-on: ${{ matrix.runs-on }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791
+
+      - name: Run fetch-configlet
+        shell: bash
+        run: ./scripts/fetch-configlet
+
+      - name: Run the downloaded configlet
+        env:
+          EXT: ${{ matrix.os == 'windows' && '.exe' || '' }}
+        shell: bash
+        run: |
+          configlet_path="./bin/configlet${EXT}"
+          "${configlet_path}" --version
+
+      - name: On Windows, also test fetch-configlet.ps1
+        if: matrix.os == 'windows'
+        shell: pwsh
+        run: |
+          Remove-Item bin/configlet.exe
+          scripts/fetch-configlet.ps1
+          bin/configlet.exe --version
