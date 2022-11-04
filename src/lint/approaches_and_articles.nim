@@ -67,17 +67,12 @@ proc isEverySnippetValid(exerciseDir: Path, dk: DirKind): bool =
                   &"most {maxNumLines} lines long"
         result.setFalseAndPrint(msg, snippetPath)
 
-proc isDirValid(exerciseDir: Path): bool =
-  result = true
-  for dk in DirKind:
-    if not isConfigMissingOrValid(exerciseDir, dk):
-      result = false
-    if not isEverySnippetValid(exerciseDir, dk):
-      result = false
-
 proc isEveryApproachAndArticleValid*(trackDir: Path): bool =
   result = true
   for exerciseKind in ["concept", "practice"]:
     for exerciseDir in getSortedSubdirs(trackDir / "exercises" / exerciseKind):
-      if not isDirValid(exerciseDir):
-        result = false
+      for dk in DirKind:
+        if not isConfigMissingOrValid(exerciseDir, dk):
+          result = false
+        if not isEverySnippetValid(exerciseDir, dk):
+          result = false
