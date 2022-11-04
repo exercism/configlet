@@ -2,8 +2,10 @@ import std/[os, parseutils, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3, supersnappy]
 
 type
-  ConfigletError* = object of CatchableError ## Quit with exit code 1
-  ConfigletErrorAndHelp* = object of CatchableError ## Quit with exit code 1, and print help
+  ConfigletError* = object of CatchableError ## \
+    ## Raised to quit with exit code 1, but not print configlet usage
+  ConfigletErrorAndHelp* = object of CatchableError ## \
+    ## Raised to quit with exit code 1, and print configlet usage
 
 func error*(s: string) =
   raise newException(ConfigletError, s)
