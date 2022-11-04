@@ -11,26 +11,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target:
-          - os: linux
-            arch: 64bit
-          - os: mac
-            arch: 64bit
-          - os: windows
-            arch: 64bit
         include:
-          - target:
-              os: linux
-            builder: ubuntu-22.04
-          - target:
-              os: mac
-            builder: macos-12
-          - target:
-              os: windows
-            builder: windows-2022
+          - os: linux
+            runs-on: ubuntu-22.04
+            arch: 64bit
 
-    name: "${{ matrix.target.os }}-${{ matrix.target.arch }}"
-    runs-on: ${{ matrix.builder }}
+          - os: mac
+            runs-on: macos-12
+            arch: 64bit
+
+          - os: windows
+            runs-on: windows-2022
+            arch: 64bit
+
+    name: "${{ matrix.os }}-${{ matrix.arch }}"
+    runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout code
         uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
@@ -38,7 +33,7 @@ jobs:
           fetch-depth: 0 # Allows using `git log` to set initial release notes.
 
       - name: On Linux, install musl
-        if: matrix.target.os == 'linux'
+        if: matrix.os == 'linux'
         run: ./.github/bin/linux-install-build-tools
 
       - name: Install Nim
@@ -56,8 +51,8 @@ jobs:
         shell: bash
         run: ./.github/bin/create-artifact
         env:
-          OS: ${{ matrix.target.os }}
-          ARCH: ${{ matrix.target.arch }}
+          OS: ${{ matrix.os }}
+          ARCH: ${{ matrix.arch }}
 
       - name: Publish release
         shell: bash
