@@ -4,8 +4,8 @@ import "."/validators
 
 type
   DirKind = enum
-    dkApproaches = "approaches"
-    dkArticles = "articles"
+    dkApproaches = ".approaches"
+    dkArticles = ".articles"
 
 proc hasValidIntroduction(data: JsonNode, path: Path): bool =
   const k = "introduction"
@@ -33,15 +33,16 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
 
 proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
   if isObject(data, jsonRoot, path):
+    let k = dk.`$`[1..^1] # Remove dot.
     let checks = [
       if dk == dkApproaches: hasValidIntroduction(data, path) else: true,
-      hasArrayOf(data, $dk, path, isValidApproachOrArticle, isRequired = false),
+      hasArrayOf(data, k, path, isValidApproachOrArticle, isRequired = false),
     ]
     result = allTrue(checks)
 
 proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
   result = true
-  let configPath = dir / &".{dk}" / "config.json"
+  let configPath = dir / $dk / "config.json"
   if fileExists(configPath):
     let j = parseJsonFile(configPath, result)
     if j != nil:
@@ -50,7 +51,7 @@ proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
 
 proc isEverySnippetValid(exerciseDir: Path, dk: DirKind): bool =
   result = true
-  for dir in getSortedSubdirs(exerciseDir / &".{dk}"):
+  for dir in getSortedSubdirs(exerciseDir / $dk):
     let snippetPath = block:
       let ext = if dk == dkApproaches: "txt" else: "md"
       dir / &"snippet.{ext}"
