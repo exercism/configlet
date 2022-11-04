@@ -1,7 +1,7 @@
 import std/[strformat, strutils]
 import ".."/[cli, helpers]
-import "."/[concept_exercises, concepts, docs, practice_exercises,
-            track_config, validators]
+import "."/[approaches_and_articles, concept_exercises, concepts, docs,
+            practice_exercises, track_config, validators]
 
 proc allChecksPass(trackDir: Path): bool =
   ## Returns true if all the linting checks pass for the track at `trackDir`.
@@ -16,6 +16,7 @@ proc allChecksPass(trackDir: Path): bool =
     isEveryConceptConfigValid(trackDir),
     isEveryConceptExerciseConfigValid(trackDir),
     isEveryPracticeExerciseConfigValid(trackDir),
+    isEveryApproachAndArticleValid(trackDir),
     sharedExerciseDocsExist(trackDir),
     trackDocsExist(trackDir),
   ]
