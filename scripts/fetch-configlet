@@ -58,8 +58,8 @@ main() {
 
   local ext
   case "${os}" in
-    windows*) ext='zip' ;;
-    *)        ext='tgz' ;;
+    windows*) ext='zip'    ;;
+    *)        ext='tar.gz' ;;
   esac
 
   echo "Fetching configlet..." >&2

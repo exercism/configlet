@@ -11,7 +11,7 @@ case "${OS}" in
     7z a "${artifact_file}" "${binary_name}.exe"
     ;;
   linux | macos)
-    artifact_file="${artifacts_dir}/${binary_name}-${OS}-${ARCH}.tgz"
+    artifact_file="${artifacts_dir}/${binary_name}-${OS}-${ARCH}.tar.gz"
     tar -cvzf "${artifact_file}" "${binary_name}"
     ;;
 esac
