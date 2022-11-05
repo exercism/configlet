@@ -48,7 +48,7 @@ main() {
 
   local os
   case "$(uname)" in
-    Darwin*)   os='mac'     ;;
+    Darwin*)   os='macos'   ;;
     Linux*)    os='linux'   ;;
     Windows*)  os='windows' ;;
     MINGW*)    os='windows' ;;
