@@ -14,15 +14,15 @@ jobs:
         include:
           - os: linux
             runs-on: ubuntu-22.04
-            arch: 64bit
+            arch: x86-64
 
           - os: macos
             runs-on: macos-12
-            arch: 64bit
+            arch: x86-64
 
           - os: windows
             runs-on: windows-2022
-            arch: 64bit
+            arch: x86-64
 
     name: "${{ matrix.os }}-${{ matrix.arch }}"
     runs-on: ${{ matrix.runs-on }}

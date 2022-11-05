@@ -24,10 +24,10 @@ get_download_url() {
   local latest='https://api.github.com/repos/exercism/configlet/releases/latest'
   local arch
   case "$(uname -m)" in
-    *64*)  arch='64bit' ;;
-    *686*) arch='32bit' ;;
-    *386*) arch='32bit' ;;
-    *)     arch='64bit' ;;
+    x86_64) arch='x86-64' ;;
+    *686*)  arch='i386'   ;;
+    *386*)  arch='i386'   ;;
+    *)      arch='x86-64' ;;
   esac
   local suffix="${os}-${arch}.${ext}"
   curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |

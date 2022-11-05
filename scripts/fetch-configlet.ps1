@@ -12,7 +12,7 @@ $requestOpts = @{
     RetryIntervalSec  = 1
 }
 
-$arch = If ([Environment]::Is64BitOperatingSystem) { "64bit" } Else { "32bit" }
+$arch = If ([Environment]::Is64BitOperatingSystem) { "x86-64" } Else { "i386" }
 $fileName = "configlet-windows-$arch.zip"
 
 Function Get-DownloadUrl {
