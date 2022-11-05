@@ -13,7 +13,7 @@ $requestOpts = @{
 }
 
 $arch = If ([Environment]::Is64BitOperatingSystem) { "x86-64" } Else { "i386" }
-$fileName = "configlet-windows-$arch.zip"
+$fileName = "configlet_windows_$arch.zip"
 
 Function Get-DownloadUrl {
     $latestUrl = "https://api.github.com/repos/exercism/configlet/releases/latest"

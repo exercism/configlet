@@ -7,11 +7,11 @@ binary_name='configlet'
 
 case "${OS}" in
   windows)
-    artifact_file="${artifacts_dir}/${binary_name}-${OS}-${ARCH}.zip"
+    artifact_file="${artifacts_dir}/${binary_name}_${OS}_${ARCH}.zip"
     7z a "${artifact_file}" "${binary_name}.exe"
     ;;
   linux | macos)
-    artifact_file="${artifacts_dir}/${binary_name}-${OS}-${ARCH}.tar.gz"
+    artifact_file="${artifacts_dir}/${binary_name}_${OS}_${ARCH}.tar.gz"
     tar -cvzf "${artifact_file}" "${binary_name}"
     ;;
 esac
