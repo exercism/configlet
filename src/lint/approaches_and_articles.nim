@@ -9,7 +9,7 @@ type
 
 proc hasValidIntroduction(data: JsonNode, path: Path): bool =
   const k = "introduction"
-  if hasObject(data, k, path):
+  if hasObject(data, k, path, isRequired = false):
     let d = data[k]
     let checks = [
       hasArrayOfStrings(d, "authors", path, k, uniqueValues = true),
