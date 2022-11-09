@@ -1,5 +1,6 @@
-import std/unittest
+import std/[strutils, unittest]
 import "."/lint/validators
+import "."/lint/approaches_and_articles {.all.}
 
 proc testIsKebabCase =
   suite "isKebabCase":
@@ -279,11 +280,77 @@ proc testIsFilesPattern =
         isFilesPattern("somedir/%{pascal_slug}/%{snake_slug}.suffix")
         isFilesPattern("%{pascal_slug}/filename.suffix")
 
+proc testCountLinesWithoutCodeFence =
+  suite "countLinesWithoutCodeFence":
+    test "without code fence":
+      const dk = dkArticles
+      check:
+        countLinesWithoutCodeFence("", dk) == 0
+        countLinesWithoutCodeFence("a", dk) == 1
+        countLinesWithoutCodeFence("a\n", dk) == 1
+        countLinesWithoutCodeFence("foo\n", dk) == 1
+        countLinesWithoutCodeFence("foo\nb", dk) == 2
+        countLinesWithoutCodeFence("foo\nbar", dk) == 2
+        countLinesWithoutCodeFence("foo\nbar\n", dk) == 2
+        countLinesWithoutCodeFence("foo\nbar\nfoo", dk) == 3
+
+    test "with code fence only":
+      const s = """
+        ```nim
+        echo "foo"
+        ```""".unindent()
+      check:
+        countLinesWithoutCodeFence(s, dkArticles) == 1
+        countLinesWithoutCodeFence(s, dkApproaches) == 3
+
+    test "with code fence at start":
+      const s = """
+        ```nim
+        echo "foo"
+        ```
+
+      Some content.
+      """.unindent()
+      check:
+        countLinesWithoutCodeFence(s, dkArticles) == 3
+        countLinesWithoutCodeFence(s, dkApproaches) == 5
+
+    test "with code fence at end":
+      const s = """
+        # Some header
+
+        Some content.
+
+        ```nim
+        echo "foo"
+        ```
+      """.unindent()
+      check:
+        countLinesWithoutCodeFence(s, dkArticles) == 5
+        countLinesWithoutCodeFence(s, dkApproaches) == 7
+
+    test "with code fence in middle":
+      const s = """
+        # Some header
+
+        Some content.
+
+        ```nim
+        echo "foo"
+        ```
+
+        Some content.
+      """.unindent()
+      check:
+        countLinesWithoutCodeFence(s, dkArticles) == 7
+        countLinesWithoutCodeFence(s, dkApproaches) == 9
+
 proc main =
   testIsKebabCase()
   testIsUuidV4()
   testExtractPlaceholders()
   testIsFilesPattern()
+  testCountLinesWithoutCodeFence()
 
 main()
 {.used.}

@@ -49,6 +49,19 @@ proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
       if not isValidConfig(j, configPath, dk):
         result = false
 
+func countLinesWithoutCodeFence(s: string, dk: DirKind): int =
+  ## Returns the number of lines in `s`, but:
+  ##
+  ## - excluding lines that open or close a Markdown code fence.
+  ## - including a final line that does not end in a newline character.
+  result = 0
+  if s.len > 0:
+    for line in s.splitLines():
+      if not (line.startsWith("```") and dk == dkArticles):
+        inc result
+    if s[^1] in ['\n', '\l']:
+      dec result
+
 proc isEverySnippetValid(exerciseDir: Path, dk: DirKind): bool =
   result = true
   for dir in getSortedSubdirs(exerciseDir / $dk):
@@ -57,15 +70,11 @@ proc isEverySnippetValid(exerciseDir: Path, dk: DirKind): bool =
       dir / &"snippet.{ext}"
     if fileExists(snippetPath):
       let contents = readFile(snippetPath)
-      var numLines = 0
-      for line in contents.splitLines():
-        if not (line.startsWith("```") and dk == dkArticles):
-          inc numLines
-      dec numLines # Allow 8 lines with a final newline.
-      const maxNumLines = 8
-      if numLines > maxNumLines:
+      const maxLines = 8
+      let numLines = countLinesWithoutCodeFence(contents, dk)
+      if numLines > maxLines:
         let msg = &"The file is {numLines} lines long, but it must be at " &
-                  &"most {maxNumLines} lines long"
+                  &"most {maxLines} lines long"
         result.setFalseAndPrint(msg, snippetPath)
 
 proc isEveryApproachAndArticleValid*(trackDir: Path): bool =
