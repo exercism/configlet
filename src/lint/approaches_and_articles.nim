@@ -1,4 +1,4 @@
-import std/[json, strformat, strutils]
+import std/[json, os, strformat, strutils]
 import ".."/helpers
 import "."/validators
 
@@ -30,6 +30,13 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
                         isRequired = false),
     ]
     result = allTrue(checks)
+    if result:
+      let slug = data["slug"].getStr()
+      let slugDir = path.parentDir() / slug
+      if not dirExists(slugDir):
+        let msg = &"A 'slug' value is '{slug}', but there is no sibling " &
+                  "directory with that name"
+        result.setFalseAndPrint(msg, path)
 
 proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
   if isObject(data, jsonRoot, path):

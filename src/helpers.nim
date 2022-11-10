@@ -92,6 +92,7 @@ proc dirExists*(path: Path): bool {.borrow.}
 proc fileExists*(path: Path): bool {.borrow.}
 proc readFile*(path: Path): string {.borrow.}
 proc writeFile*(path: Path; content: string) {.borrow.}
+proc parentDir*(path: Path): string {.borrow.}
 
 func toLineAndCol(s: string; offset: Natural): tuple[line: int; col: int] =
   ## Returns the line and column number corresponding to the `offset` in `s`.
