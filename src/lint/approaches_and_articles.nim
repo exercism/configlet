@@ -42,12 +42,22 @@ proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
 
 proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
   result = true
-  let configPath = dir / $dk / "config.json"
+  let dkPath = dir / $dk
+  let configPath = dkPath / "config.json"
   if fileExists(configPath):
     let j = parseJsonFile(configPath, result)
     if j != nil:
       if not isValidConfig(j, configPath, dk):
         result = false
+  else:
+    if dk == dkApproaches and fileExists(dkPath / "introduction.md"):
+      let msg =  &"The below directory has an 'introduction.md' file, but " &
+                 "does not contain a 'config.json' file"
+      result.setFalseAndPrint(msg, dkPath)
+    for dir in getSortedSubdirs(dkPath, relative = true):
+      let msg = &"The below directory has a '{dir}' subdirectory, but does " &
+                "not contain a 'config.json' file"
+      result.setFalseAndPrint(msg, dkPath)
 
 func countLinesWithoutCodeFence(s: string, dk: DirKind): int =
   ## Returns the number of lines in `s`, but:
