@@ -46,6 +46,7 @@ proc lint*(conf: Conf) =
       - Every concept exercise has a valid .meta/config.json file
       - Every practice exercise has the required .md files
       - Every practice exercise has a valid .meta/config.json file
+      - Every approach and article is valid
       - Required track docs are present
       - Required shared exercise docs are present""".dedent()
     if printedWarning:
