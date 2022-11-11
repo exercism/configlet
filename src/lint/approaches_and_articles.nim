@@ -99,8 +99,8 @@ proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
         result = false
   else:
     if dk == dkApproaches and fileExists(dkPath / "introduction.md"):
-      let msg =  &"The below directory has an 'introduction.md' file, but " &
-                 "does not contain a 'config.json' file"
+      let msg = &"The below directory has an 'introduction.md' file, but " &
+                "does not contain a 'config.json' file"
       result.setFalseAndPrint(msg, dkPath)
     for dir in getSortedSubdirs(dkPath, relative = true):
       let msg = &"The below directory has a '{dir}' subdirectory, but does " &
