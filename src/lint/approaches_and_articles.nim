@@ -7,6 +7,14 @@ type
     dkApproaches = ".approaches"
     dkArticles = ".articles"
 
+proc setFalseIfFileMissingOrEmpty(b: var bool, path: Path, msgMissing: string) =
+  if fileExists(path):
+    if path.readFile().len == 0:
+      let msg = &"The below file is empty"
+      b.setFalseAndPrint(msg, path)
+  else:
+    b.setFalseAndPrint(msgMissing, path)
+
 proc hasValidIntroduction(data: JsonNode, path: Path): bool =
   const k = "introduction"
   if hasObject(data, k, path, isRequired = false):
@@ -16,6 +24,11 @@ proc hasValidIntroduction(data: JsonNode, path: Path): bool =
       hasArrayOfStrings(d, "contributors", path, k, isRequired = false),
     ]
     result = allTrue(checks)
+  if result and data.hasKey(k):
+    let introductionPath = Path(path.parentDir() / "introduction.md")
+    let msg = &"The config.json '{k}' object is present, but there is no " &
+              "corresponding introduction file at the below location"
+    result.setFalseIfFileMissingOrEmpty(introductionPath, msg)
 
 proc isValidApproachOrArticle(data: JsonNode, context: string,
                               path: Path): bool =
@@ -32,11 +45,23 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
     result = allTrue(checks)
     if result:
       let slug = data["slug"].getStr()
-      let slugDir = Path(path.parentDir() / slug)
+      let dkDir = path.parentDir()
+      let slugDir = Path(dkDir / slug)
       if not dirExists(slugDir):
         let msg = &"A config.json '{context}.slug' value is '{slug}', but " &
                   "there is no corresponding directory at the below location"
         result.setFalseAndPrint(msg, slugDir)
+      block:
+        let contentPath = slugDir / "content.md"
+        let msg = &"A config.json '{context}.slug' value is '{slug}', but " &
+                  "there is no corresponding content file at the below location"
+        result.setFalseIfFileMissingOrEmpty(contentPath, msg)
+      block:
+        let ext = if dkDir.endsWith($dkApproaches): "txt" else: "md"
+        let snippetPath = slugDir / &"snippet.{ext}"
+        let msg = &"A config.json '{context}.slug' value is '{slug}', but " &
+                  "there is no corresponding snippet file at the below location"
+        result.setFalseIfFileMissingOrEmpty(snippetPath, msg)
 
 proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
   if isObject(data, jsonRoot, path):
