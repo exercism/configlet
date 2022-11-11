@@ -63,6 +63,15 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
                   "there is no corresponding snippet file at the below location"
         result.setFalseIfFileMissingOrEmpty(snippetPath, msg)
 
+proc getSlugs(data: JsonNode, k: string): seq[string] =
+  result = @[]
+  if data.kind == JObject and data.hasKey(k):
+    if data[k].kind == JArray:
+      let elems = data[k].getElems()
+      for e in elems:
+        if e.kind == JObject and e.hasKey("slug") and e["slug"].kind == JString:
+          result.add e["slug"].getStr()
+
 proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
   if isObject(data, jsonRoot, path):
     let k = dk.`$`[1..^1] # Remove dot.
@@ -71,6 +80,13 @@ proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
       hasArrayOf(data, k, path, isValidApproachOrArticle, isRequired = false),
     ]
     result = allTrue(checks)
+    if result:
+      let slugsInConfig = getSlugs(data, k)
+      for dir in getSortedSubdirs(path.parentDir().Path, relative = true):
+        if dir.string notin slugsInConfig:
+          let msg = &"There is no '{k}.slug' key with the value '{dir}', " &
+                    &"but a sibling directory exists with that name"
+          result.setFalseAndPrint(msg, path)
 
 proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
   result = true
