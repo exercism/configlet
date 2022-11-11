@@ -24,7 +24,7 @@ proc hasValidIntroduction(data: JsonNode, path: Path): bool =
       hasArrayOfStrings(d, "contributors", path, k, isRequired = false),
     ]
     result = allTrue(checks)
-  if result and data.hasKey(k):
+  if data.kind == JObject and data.hasKey(k):
     let introductionPath = Path(path.parentDir() / "introduction.md")
     let msg = &"The config.json '{k}' object is present, but there is no " &
               "corresponding introduction file at the below location"
