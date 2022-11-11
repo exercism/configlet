@@ -32,11 +32,11 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
     result = allTrue(checks)
     if result:
       let slug = data["slug"].getStr()
-      let slugDir = path.parentDir() / slug
+      let slugDir = Path(path.parentDir() / slug)
       if not dirExists(slugDir):
-        let msg = &"A 'slug' value is '{slug}', but there is no sibling " &
-                  "directory with that name"
-        result.setFalseAndPrint(msg, path)
+        let msg = &"A config.json '{context}.slug' value is '{slug}', but " &
+                  "there is no corresponding directory at the below location"
+        result.setFalseAndPrint(msg, slugDir)
 
 proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
   if isObject(data, jsonRoot, path):
