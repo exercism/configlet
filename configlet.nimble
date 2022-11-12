@@ -32,4 +32,4 @@ when defined(linux):
     if existsEnv("GITHUB_ACTIONS") and findExe("zigcc").len > 0:
       exec "readelf -p .comment ./configlet"
       echo "stripping binary..."
-      exec "strip -s -R .comment ./configlet"
+      exec "strip -R .comment ./configlet"
