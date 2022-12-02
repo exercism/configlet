@@ -1,4 +1,4 @@
-switch("styleCheck", "hint")
+switch("styleCheck", "error")
 hint("Name", on)
 # switch("experimental", "strictEffects") # TODO: re-enable when possible with `parsetoml`
 switch("experimental", "strictFuncs")
