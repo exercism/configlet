@@ -336,6 +336,8 @@ proc testFmt =
           # Strip `"test_runner": true`
           if val.kind == JNull or (val.kind == JBool and val.getBool()):
             delete(j, "test_runner")
+        if j["representer"].kind != JObject or j["representer"].len == 0:
+          delete(j, "representer")
         for k in ["language_versions", "source", "source_url"]:
           if j[k].getStr().len == 0:
             delete(j, k)

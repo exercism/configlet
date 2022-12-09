@@ -2,6 +2,12 @@ import std/[json, os]
 import ".."/helpers
 import "."/validators
 
+proc hasValidRepresenter(data: JsonNode; path: Path): bool =
+  const s = "representer"
+  if data.hasKey(s):
+    if hasObject(data, s, path):
+      result = hasInteger(data[s], "version", path, s, isRequired = true, allowed = 1..int.high)
+
 proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
   const k = "files"
   if hasObject(data, k, path):
@@ -30,6 +36,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode;
       hasValidFiles(data, path, exerciseDir),
       hasString(data, "language_versions", path, isRequired = false),
       hasBoolean(data, "test_runner", path, isRequired = false),
+      hasValidRepresenter(data, path)
     ]
     result = allTrue(checks)
 
