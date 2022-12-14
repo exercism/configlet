@@ -6,7 +6,8 @@ proc hasValidRepresenter(data: JsonNode; path: Path): bool =
   const s = "representer"
   if data.hasKey(s):
     if hasObject(data, s, path):
-      result = hasInteger(data[s], "version", path, s, isRequired = true, allowed = 1..int.high)
+      result = hasInteger(data[s], "version", path, s, isRequired = true,
+                          allowed = 1..int.high)
 
 proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
   const k = "files"
