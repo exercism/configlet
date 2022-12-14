@@ -8,6 +8,8 @@ proc hasValidRepresenter(data: JsonNode; path: Path): bool =
     if hasObject(data, k, path):
       result = hasInteger(data[k], "version", path, k, isRequired = true,
                           allowed = 1..int.high)
+  else:
+    result = true
 
 proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
   const k = "files"
