@@ -3,10 +3,10 @@ import ".."/helpers
 import "."/validators
 
 proc hasValidRepresenter(data: JsonNode; path: Path): bool =
-  const s = "representer"
-  if data.hasKey(s):
-    if hasObject(data, s, path):
-      result = hasInteger(data[s], "version", path, s, isRequired = true,
+  const k = "representer"
+  if data.hasKey(k):
+    if hasObject(data, k, path):
+      result = hasInteger(data[k], "version", path, k, isRequired = true,
                           allowed = 1..int.high)
 
 proc hasValidFiles(data: JsonNode; path, exerciseDir: Path): bool =
