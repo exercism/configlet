@@ -264,7 +264,8 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
 
 func addRepresenter(s: var string; val: Representer;
                     prettyMode: PrettyMode; indentLevel = 1) =
-  ## Appends the pretty-printed JSON for a `files` key with value `val` to `s`.
+  ## Appends the pretty-printed JSON for a `representer` key with value `val` to
+  ## `s`.
   s.addNewlineAndIndent(indentLevel)
   escapeJson("representer", s)
   s.add ": {"
