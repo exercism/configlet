@@ -72,8 +72,8 @@ proc testFmt =
     test "omits optional keys that have an empty value - Concept Exercise":
       let p = ConceptExerciseConfig(
         originalKeyOrder: @[eckContributors, eckFiles, eckLanguageVersions,
-                            eckForkedFrom, eckIcon, eckSource, eckSourceUrl,
-                            eckCustom],
+                            eckForkedFrom, eckIcon, eckRepresenter, eckSource,
+                            eckSourceUrl, eckCustom],
         contributors: some(newSeq[string]()),
         files: ConceptExerciseFiles(
           originalKeyOrder: @[fkEditor],
@@ -96,7 +96,7 @@ proc testFmt =
     test "omits optional keys that have an empty value - Practice Exercise":
       let p = PracticeExerciseConfig(
         originalKeyOrder: @[eckContributors, eckFiles, eckLanguageVersions,
-                            eckSource, eckSourceUrl, eckCustom],
+                            eckRepresenter, eckSource, eckSourceUrl, eckCustom],
         contributors: some(newSeq[string]()),
         files: PracticeExerciseFiles(
           originalKeyOrder: @[fkEditor],
@@ -135,7 +135,7 @@ proc testFmt =
         var exerciseConfig = ConceptExerciseConfig(
           originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
                               eckLanguageVersions, eckForkedFrom, eckIcon,
-                              eckBlurb, eckSource, eckSourceUrl,
+                              eckRepresenter, eckBlurb, eckSource, eckSourceUrl,
                               eckCustom],
           authors: @["author1"],
           contributors: some(@["contributor1"]),
@@ -149,6 +149,7 @@ proc testFmt =
           language_versions: ">=1.2.3",
           forked_from: some(@["bar/lovely-lasagna"]),
           icon: "myicon",
+          representer: some(Representer(version: 42)),
           blurb: "Learn about the basics of Foo by following a lasagna recipe.",
           source: some("mysource"),
           source_url: some("https://example.com"),
@@ -180,6 +181,9 @@ proc testFmt =
             "bar/lovely-lasagna"
           ],
           "icon": "myicon",
+          "representer": {
+            "version": 42
+          },
           "blurb": "Learn about the basics of Foo by following a lasagna recipe.",
           "source": "mysource",
           "source_url": "https://example.com",
@@ -214,7 +218,7 @@ proc testFmt =
         var exerciseConfig = PracticeExerciseConfig(
           originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
                               eckLanguageVersions, eckTestRunner,
-                              eckBlurb, eckSource, eckSourceUrl,
+                              eckRepresenter, eckBlurb, eckSource, eckSourceUrl,
                               eckCustom],
           authors: @["author1"],
           contributors: some(@["contributor1"]),
@@ -227,6 +231,7 @@ proc testFmt =
           ),
           language_versions: ">=1.2.3",
           test_runner: some(false),
+          representer: some(Representer(version: 42)),
           blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
           source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
           source_url: some("https://example.com"),
@@ -255,6 +260,9 @@ proc testFmt =
           },
           "language_versions": ">=1.2.3",
           "test_runner": false,
+          "representer": {
+            "version": 42
+          },
           "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
           "source": "Inspired by an exercise created by a professor Della Paolera in Argentina",
           "source_url": "https://example.com",
