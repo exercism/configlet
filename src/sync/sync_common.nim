@@ -262,8 +262,7 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
-func addRepresenter(s: var string; val: Representer;
-                    prettyMode: PrettyMode; indentLevel = 1) =
+func addRepresenter(s: var string; val: Representer; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `representer` key with value `val` to
   ## `s`.
   s.addNewlineAndIndent(indentLevel)
@@ -405,7 +404,7 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
         addValOrNull(test_runner, addBool)
     of eckRepresenter:
       if e.representer.isSome():
-        result.addRepresenter(e.representer.get(), prettyMode);
+        result.addRepresenter(e.representer.get());
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:
