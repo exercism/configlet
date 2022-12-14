@@ -102,7 +102,7 @@ type
     language_versions*: string
     representer*: Option[Representer]
     forked_from*: Option[seq[string]] ## Allowed only for a Concept Exercise.
-    icon*: string                     ## Allowed only for a Concept Exercise.
+    icon*: string
     blurb*: string
     source*: Option[string]
     source_url*: Option[string]
@@ -116,6 +116,7 @@ type
     language_versions*: string
     test_runner*: Option[bool] ## Allowed only for a Practice Exercise.
     representer*: Option[Representer]
+    icon*: string
     # The below fields are synced for a Practice Exercise that exists in the
     # `exercism/problem-specifications` repo.
     blurb*: string

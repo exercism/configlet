@@ -38,6 +38,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode;
                         uniqueValues = true),
       hasValidFiles(data, path, exerciseDir),
       hasString(data, "language_versions", path, isRequired = false),
+      hasString(data, "icon", path, isRequired = false, checkIsKebab = true),
       hasBoolean(data, "test_runner", path, isRequired = false),
       hasValidRepresenter(data, path),
     ]

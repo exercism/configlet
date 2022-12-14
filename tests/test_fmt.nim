@@ -337,8 +337,6 @@ proc testFmt =
           let val = j["forked_from"]
           if val.kind == JNull or (val.kind == JArray and val.len == 0):
             delete(j, "forked_from")
-          if j["icon"].getStr().len == 0:
-            delete(j, "icon")
         when e is PracticeExerciseConfig:
           let val = j["test_runner"]
           # Strip `"test_runner": true`
@@ -346,6 +344,8 @@ proc testFmt =
             delete(j, "test_runner")
         if j["representer"].kind != JObject or j["representer"].len == 0:
           delete(j, "representer")
+        if j["icon"].getStr().len == 0:
+            delete(j, "icon")
         for k in ["language_versions", "source", "source_url"]:
           if j[k].getStr().len == 0:
             delete(j, k)
