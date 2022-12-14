@@ -7,7 +7,7 @@ proc hasValidRepresenter(data: JsonNode; path: Path): bool =
   if data.hasKey(k):
     if hasObject(data, k, path):
       result = hasInteger(data[k], "version", path, k, isRequired = true,
-                          allowed = 1..int.high)
+                          allowed = 1..1000)
   else:
     result = true
 
