@@ -36,9 +36,9 @@ proc isValidConceptExerciseConfig(data: JsonNode;
       hasArrayOfStrings(data, "contributors", path, isRequired = false,
                         uniqueValues = true),
       hasValidFiles(data, path, exerciseDir),
+      hasString(data, "language_versions", path, isRequired = false),
       hasArrayOfStrings(data, "forked_from", path, isRequired = false,
                         uniqueValues = true),
-      hasString(data, "language_versions", path, isRequired = false),
       hasValidRepresenter(data, path),
       hasString(data, "icon", path, isRequired = false, checkIsKebab = true),
     ]

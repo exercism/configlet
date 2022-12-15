@@ -100,8 +100,8 @@ type
     contributors*: Option[seq[string]]
     files*: ConceptExerciseFiles
     language_versions*: string
-    representer*: Option[Representer]
     forked_from*: Option[seq[string]] ## Allowed only for a Concept Exercise.
+    representer*: Option[Representer]
     icon*: string
     blurb*: string
     source*: Option[string]
