@@ -31,6 +31,9 @@ proc configlet =
 proc main =
   try:
     configlet()
+  except ConfigletError:
+    let s = getCurrentExceptionMsg()
+    showError(s, writeHelp = false)
   except CatchableError:
     let msg = getCurrentExceptionMsg()
     showError(msg)

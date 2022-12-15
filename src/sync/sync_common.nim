@@ -20,10 +20,9 @@ proc postHook*(e: ConceptExercise | PracticeExercise) =
   ## string.
   let s = e.slug.string
   if not isKebabCase(s):
-    let msg = "Error: the track `config.json` file contains " &
-              &"an exercise slug of \"{s}\", which is not a kebab-case string"
-    stderr.writeLine msg
-    quit 1
+    let msg = "the track `config.json` file contains an exercise slug of " &
+              &"\"{s}\", which is not a kebab-case string"
+    error msg
 
 func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise],
                withDeprecated = true): seq[Slug] =
@@ -107,24 +106,22 @@ func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: str
 
 proc parseFile*(path: string, T: typedesc): T =
   ## Parses the JSON file at `path` into `T`.
-  let contents =
+  let contents = block:
+    var res = ""
     try:
-      readFile(path)
+      res = readFile(path)
     except IOError:
-      let msg = getCurrentExceptionMsg()
-      stderr.writeLine &"Error: {msg}"
-      quit 1
+      error getCurrentExceptionMsg()
+    res
   if contents.len > 0:
     try:
-      contents.fromJson(T)
+      result = contents.fromJson(T)
     except jsony.JsonError:
       let jsonyMsg = getCurrentExceptionMsg()
       let details = tidyJsonyMessage(jsonyMsg, contents)
-      let msg = &"JSON parsing error:\n{path}{details}"
-      stderr.writeLine msg
-      quit 1
+      error &"JSON parsing error:\n{path}{details}"
   else:
-    T()
+    result = T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
   ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
@@ -288,9 +285,7 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
       else:
         s.add c
   else:
-    stderr.writeLine &"The value of a `{key}` key is not a JSON object:"
-    stderr.writeLine val.pretty()
-    quit 1
+    error &"The value of a `{key}` key is not a JSON object:\n{val.pretty()}"
 
 func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConfigKey] =
   if originalKeyOrder.len == 0:

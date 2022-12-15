@@ -48,13 +48,9 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir,
               let slug = exercise["slug"].getStr()
               result.add PracticeExerciseSlug(slug)
     else:
-      stderr.writeLine "Error: file does not have an `exercises` key:\n" &
-                       configFile
-      quit(1)
+      error &"file does not have an `exercises` key:\n{configFile}"
   else:
-    stderr.writeLine "Error: file does not exist:\n" & configFile
-    quit(1)
-
+    error &"file does not exist:\n{configFile}"
   sort result
 
 func init(T: typedesc[PracticeExerciseTests]): T =
@@ -68,21 +64,20 @@ proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
   ## included and excluded test case UUIDs.
   result = PracticeExerciseTests.init()
   if fileExists(testsPath):
-    let tests =
+    let tests = block:
+      var res = TomlValueRef()
       try:
-        parsetoml.parseFile(testsPath)
+        res = parsetoml.parseFile(testsPath)
       except TomlError: # Note that `TomlError` inherits from `Defect`.
-        stderr.writeLine fmt"""
+        let msg = fmt"""
 
-          Error: A 'tests.toml' file contains invalid TOML:
+          a 'tests.toml' file contains invalid TOML:
           {getCurrentExceptionMsg()}
 
           The expected 'tests.toml' format is documented in
           https://exercism.org/docs/building/configlet/sync#h-tests""".unindent()
-        quit 1
-      except CatchableError:
-        stderr.writeLine "Error: " & getCurrentExceptionMsg()
-        quit 1
+        error msg
+      res
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):

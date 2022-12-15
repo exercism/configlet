@@ -2,6 +2,18 @@ import std/[os, parseutils, strformat, strutils, terminal]
 import pkg/[cligen/parseopt3, supersnappy]
 
 type
+  ConfigletError* = object of CatchableError ## \
+    ## Raised to quit with exit code 1, but not print configlet usage
+  ConfigletErrorAndHelp* = object of CatchableError ## \
+    ## Raised to quit with exit code 1, and print configlet usage
+
+func error*(s: string) =
+  raise newException(ConfigletError, s)
+
+func errorAndHelp*(s: string) =
+  raise newException(ConfigletErrorAndHelp, s)
+
+type
   ActionKind* = enum
     actNil = "nil"
     actCompletion = "completion"

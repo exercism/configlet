@@ -101,8 +101,8 @@ proc getNameOfRemote*(probSpecsDir: ProbSpecsDir;
     discard line.scanf("$s$w$s$+fetch)$.", remoteName, remoteUrl)
     if remoteUrl.contains(host) and remoteUrl.contains(location):
       return remoteName
-  showError(&"there is no remote that points to '{location}' at '{host}' in " &
-            &"the cached problem-specifications directory: '{probSpecsDir}'")
+  errorAndHelp &"there is no remote that points to '{location}' at '{host}' in " &
+               &"the cached problem-specifications directory: '{probSpecsDir}'"
 
 func isOffline(conf: Conf): bool =
   (conf.action.kind == actSync and conf.action.offline) or
@@ -124,8 +124,8 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
                                  &"git repository: '{probSpecsDir}'")
 
     if rootCommitRef != "8ba81069dab8e96a53630f3e51446487b6ec9212\n":
-      showError("the git repo at the cached problem-specifications location " &
-                &"has an unexpected initial commit: '{probSpecsDir}'")
+      errorAndHelp "the git repo at the cached problem-specifications location " &
+                   &"has an unexpected initial commit: '{probSpecsDir}'"
 
     # Exit if the working directory is not clean (allowing untracked files).
     discard gitCheck(0, ["diff-index", "--quiet", "HEAD"], "the cached " &
@@ -189,19 +189,17 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
     validate(result, conf)
   elif isOffline(conf):
     let msg = fmt"""
-      Error: --offline was passed, but there is no cached 'problem-specifications' repo at:
+      --offline was passed, but there is no cached 'problem-specifications' repo at:
         '{result}'
       Please run once without --offline to clone 'problem-specifications' to that location.
 
       If you currently have no (or limited) network connectivity, but you do have a local
       'problem-specifications' elsewhere, you can copy it to the above location and then
       use it with --offline.""".unindent()
-    stderr.writeLine msg
-    quit 1
+    error msg
   else:
     try:
       createDir result.parentDir()
     except IOError, OSError:
-      stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
-      quit 1
+      error getCurrentExceptionMsg()
     cloneExercismRepo("problem-specifications", result.string, shallow = false)

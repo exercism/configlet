@@ -21,7 +21,7 @@ proc validate(conf: Conf) =
 
         If no syncing scope option is provided, configlet uses the full syncing scope.
         If '--tests' is provided without an argument, configlet uses the 'choose' mode.""".dedent(8)
-      showError(msg)
+      errorAndHelp msg
     if not conf.action.yes and not isatty(stdin):
       let intersection = conf.action.scope * {skDocs, skFilepaths, skMetadata}
       if intersection.len > 0:
@@ -37,7 +37,7 @@ proc validate(conf: Conf) =
             that configlet performs no changes
           - or run the same command in an interactive terminal, to update by answering
             prompts""".dedent(10)
-        showError(msg)
+        errorAndHelp msg
 
 type
   TrackExerciseSlugs* = object
@@ -74,11 +74,9 @@ proc getSlugs*(exercises: Exercises, conf: Conf,
       result.`concept`.setLen 0
       result.practice = @[userExercise]
     else:
-      let msg = &"The `-e, --exercise` option was used to specify an " &
-                &"exercise slug, but `{userExercise}` is not an slug in the " &
-                &"track config:\n{trackConfigPath}"
-      stderr.writeLine msg
-      quit 1
+      error "The `-e, --exercise` option was used to specify an exercise " &
+            &"slug, but `{userExercise}` is not an slug in the track config:" &
+            &"\n{trackConfigPath}"
 
 proc syncImpl(conf: Conf): set[SyncKind] =
   ## Checks the data specified in `conf.action.scope`, and updates them if

@@ -140,10 +140,13 @@ proc testsForSync(binaryPath: static string) =
   suite "sync, when the track `config.json` file is not found (prints the expected output, and exits with 1)":
     test "-t foo":
       const expectedOutput = fmt"""
-        Error: cannot open: my_missing_directory{DirSep}config.json
+        cannot open: my_missing_directory{DirSep}config.json
       """.unindent()
       let cmd = &"{binaryPath} -t my_missing_directory sync -o"
-      execAndCheck(1, cmd, expectedOutput)
+      let (outp, exitCode) = execCmdEx(cmd)
+      check:
+        outp.contains(expectedOutput)
+        exitCode == 1
 
   suite "sync, for an exercise that does not exist (prints the expected output, and exits with 1)":
     test "-e foo":
@@ -151,7 +154,10 @@ proc testsForSync(binaryPath: static string) =
         The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
         {trackDir / "config.json"}
       """.unindent()
-      execAndCheck(1, &"{syncOffline} -e foo --docs", expectedOutput)
+      let (outp, exitCode) = execCmdEx(&"{syncOffline} -e foo --docs")
+      check:
+        outp.contains(expectedOutput)
+        exitCode == 1
 
   suite "sync, without --update, checking parseopt3 patch (--tests -e bob is parsed correctly)":
     # With an unpatched cligen/parseopt3, we can only write `--tests` without a
