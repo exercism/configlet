@@ -144,7 +144,8 @@ proc testSyncCommon =
       let exerciseConfig = ConceptExerciseConfig(
         originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
                             eckLanguageVersions, eckForkedFrom, eckIcon,
-                            eckBlurb, eckSource, eckSourceUrl, eckCustom],
+                            eckRepresenter, eckBlurb, eckSource, eckSourceUrl,
+                            eckCustom],
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: ConceptExerciseFiles(
@@ -157,6 +158,7 @@ proc testSyncCommon =
         language_versions: ">=1.2.3",
         forked_from: some(@["bar/lovely-lasagna"]),
         icon: "myicon",
+        representer: some(Representer(version: 42)),
         blurb: "Learn about the basics of Foo by following a lasagna recipe.",
         source: some("mysource"),
         source_url: some("https://example.com"),
@@ -188,6 +190,9 @@ proc testSyncCommon =
           "bar/lovely-lasagna"
         ],
         "icon": "myicon",
+        "representer": {
+          "version": 42
+        },
         "blurb": "Learn about the basics of Foo by following a lasagna recipe.",
         "source": "mysource",
         "source_url": "https://example.com",
@@ -217,7 +222,7 @@ proc testSyncCommon =
     test "populated Practice Exercise":
       let exerciseConfig = PracticeExerciseConfig(
         originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
-                            eckLanguageVersions, eckTestRunner,
+                            eckLanguageVersions, eckTestRunner, eckRepresenter,
                             eckBlurb, eckSource, eckSourceUrl, eckCustom],
         authors: @["author1"],
         contributors: some(@["contributor1"]),
@@ -230,6 +235,7 @@ proc testSyncCommon =
         ),
         language_versions: ">=1.2.3",
         test_runner: some(false),
+        representer: some(Representer(version: 42)),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
         source_url: some("https://example.com"),
@@ -258,6 +264,9 @@ proc testSyncCommon =
         },
         "language_versions": ">=1.2.3",
         "test_runner": false,
+        "representer": {
+          "version": 42
+        },
         "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
         "source": "Inspired by an exercise created by a professor Della Paolera in Argentina",
         "source_url": "https://example.com",

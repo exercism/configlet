@@ -180,6 +180,14 @@ func addBool(s: var string; key: string; val: bool; indentLevel = 1) =
     s.add "false"
   s.add ','
 
+func addInt(s: var string; key: string; val: int; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `key` and its int `val` to `s`.
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson(key, s)
+  s.add ": "
+  s.add $val
+  s.add ','
+
 func removeComma(s: var string) =
   ## Removes the final character from `s`, if that character is a comma.
   if s[^1] == ',':
@@ -254,6 +262,17 @@ func addFiles(s: var string; val: ConceptExerciseFiles | PracticeExerciseFiles;
   s.addNewlineAndIndent(indentLevel)
   s.add "},"
 
+func addRepresenter(s: var string; val: Representer; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `representer` key with value `val` to
+  ## `s`.
+  s.addNewlineAndIndent(indentLevel)
+  escapeJson("representer", s)
+  s.add ": {"
+  s.addInt("version", val.version, indentLevel = indentLevel + 1)
+  s.removeComma()
+  s.addNewlineAndIndent(indentLevel)
+  s.add "},"
+
 proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `key` and its JSON object `val` to
   ## `s`.
@@ -323,6 +342,8 @@ func keyOrderForFmt(e: ConceptExerciseConfig |
     # Strips `"test_runner": true`.
     if e.test_runner.isSome() and not e.test_runner.get():
       result.add eckTestRunner
+  if e.representer.isSome():
+    result.add eckRepresenter
   result.add eckBlurb
   if e.source.isSome():
     result.add eckSource
@@ -381,6 +402,9 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckTestRunner:
       when e is PracticeExerciseConfig:
         addValOrNull(test_runner, addBool)
+    of eckRepresenter:
+      if e.representer.isSome():
+        result.addRepresenter(e.representer.get());
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:
