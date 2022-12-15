@@ -19,9 +19,9 @@ type
   #     case kind*: ExerciseKind
   #     of ekConcept:
   #       forked_from: Option[seq[string]]
-  #       icon: string
   #     of ekPractice:
   #       test_runner: Option[bool]
+  #     icon: string
   #     blurb*: string
   #     source*: string
   #     source_url*: string
@@ -59,9 +59,9 @@ type
     eckFiles = "files"
     eckLanguageVersions = "language_versions"
     eckForkedFrom = "forked_from"
-    eckIcon = "icon"
     eckTestRunner = "test_runner"
     eckRepresenter = "representer"
+    eckIcon = "icon"
     eckBlurb = "blurb"
     eckSource = "source"
     eckSourceUrl = "source_url"
@@ -100,9 +100,9 @@ type
     contributors*: Option[seq[string]]
     files*: ConceptExerciseFiles
     language_versions*: string
-    representer*: Option[Representer]
     forked_from*: Option[seq[string]] ## Allowed only for a Concept Exercise.
-    icon*: string                     ## Allowed only for a Concept Exercise.
+    representer*: Option[Representer]
+    icon*: string
     blurb*: string
     source*: Option[string]
     source_url*: Option[string]
@@ -116,6 +116,7 @@ type
     language_versions*: string
     test_runner*: Option[bool] ## Allowed only for a Practice Exercise.
     representer*: Option[Representer]
+    icon*: string
     # The below fields are synced for a Practice Exercise that exists in the
     # `exercism/problem-specifications` repo.
     blurb*: string

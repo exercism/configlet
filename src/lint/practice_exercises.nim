@@ -40,6 +40,7 @@ proc isValidPracticeExerciseConfig(data: JsonNode;
       hasString(data, "language_versions", path, isRequired = false),
       hasBoolean(data, "test_runner", path, isRequired = false),
       hasValidRepresenter(data, path),
+      hasString(data, "icon", path, isRequired = false, checkIsKebab = true),
     ]
     result = allTrue(checks)
 

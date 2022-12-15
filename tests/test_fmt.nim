@@ -72,7 +72,7 @@ proc testFmt =
     test "omits optional keys that have an empty value - Concept Exercise":
       let p = ConceptExerciseConfig(
         originalKeyOrder: @[eckContributors, eckFiles, eckLanguageVersions,
-                            eckForkedFrom, eckIcon, eckRepresenter, eckSource,
+                            eckForkedFrom, eckRepresenter, eckIcon, eckSource,
                             eckSourceUrl, eckCustom],
         contributors: some(newSeq[string]()),
         files: ConceptExerciseFiles(
@@ -96,7 +96,8 @@ proc testFmt =
     test "omits optional keys that have an empty value - Practice Exercise":
       let p = PracticeExerciseConfig(
         originalKeyOrder: @[eckContributors, eckFiles, eckLanguageVersions,
-                            eckRepresenter, eckSource, eckSourceUrl, eckCustom],
+                            eckRepresenter, eckIcon, eckSource, eckSourceUrl,
+                            eckCustom],
         contributors: some(newSeq[string]()),
         files: PracticeExerciseFiles(
           originalKeyOrder: @[fkEditor],
@@ -148,8 +149,8 @@ proc testFmt =
           ),
           language_versions: ">=1.2.3",
           forked_from: some(@["bar/lovely-lasagna"]),
-          icon: "myicon",
           representer: some(Representer(version: 42)),
+          icon: "myicon",
           blurb: "Learn about the basics of Foo by following a lasagna recipe.",
           source: some("mysource"),
           source_url: some("https://example.com"),
@@ -180,10 +181,10 @@ proc testFmt =
           "forked_from": [
             "bar/lovely-lasagna"
           ],
-          "icon": "myicon",
           "representer": {
             "version": 42
           },
+          "icon": "myicon",
           "blurb": "Learn about the basics of Foo by following a lasagna recipe.",
           "source": "mysource",
           "source_url": "https://example.com",
@@ -217,7 +218,7 @@ proc testFmt =
       test "populated config with random key order - Practice Exercise":
         var exerciseConfig = PracticeExerciseConfig(
           originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
-                              eckLanguageVersions, eckTestRunner,
+                              eckLanguageVersions, eckTestRunner, eckIcon,
                               eckRepresenter, eckBlurb, eckSource, eckSourceUrl,
                               eckCustom],
           authors: @["author1"],
@@ -231,6 +232,7 @@ proc testFmt =
           ),
           language_versions: ">=1.2.3",
           test_runner: some(false),
+          icon: "myicon",
           representer: some(Representer(version: 42)),
           blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
           source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
@@ -263,6 +265,7 @@ proc testFmt =
           "representer": {
             "version": 42
           },
+          "icon": "myicon",
           "blurb": "Write a function that returns the earned points in a single toss of a Darts game.",
           "source": "Inspired by an exercise created by a professor Della Paolera in Argentina",
           "source_url": "https://example.com",
@@ -337,8 +340,6 @@ proc testFmt =
           let val = j["forked_from"]
           if val.kind == JNull or (val.kind == JArray and val.len == 0):
             delete(j, "forked_from")
-          if j["icon"].getStr().len == 0:
-            delete(j, "icon")
         when e is PracticeExerciseConfig:
           let val = j["test_runner"]
           # Strip `"test_runner": true`
@@ -346,6 +347,8 @@ proc testFmt =
             delete(j, "test_runner")
         if j["representer"].kind != JObject or j["representer"].len == 0:
           delete(j, "representer")
+        if j["icon"].getStr().len == 0:
+            delete(j, "icon")
         for k in ["language_versions", "source", "source_url"]:
           if j[k].getStr().len == 0:
             delete(j, k)

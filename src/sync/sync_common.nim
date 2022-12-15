@@ -336,14 +336,14 @@ func keyOrderForFmt(e: ConceptExerciseConfig |
   when e is ConceptExerciseConfig:
     if e.forked_from.isSome() and e.forked_from.get().len > 0:
       result.add eckForkedFrom
-    if e.icon.len > 0:
-      result.add eckIcon
   when e is PracticeExerciseConfig:
     # Strips `"test_runner": true`.
     if e.test_runner.isSome() and not e.test_runner.get():
       result.add eckTestRunner
   if e.representer.isSome():
     result.add eckRepresenter
+  if e.icon.len > 0:
+    result.add eckIcon
   result.add eckBlurb
   if e.source.isSome():
     result.add eckSource
@@ -396,15 +396,14 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckForkedFrom:
       when e is ConceptExerciseConfig:
         addValOrNull(forked_from, addArray)
-    of eckIcon:
-      when e is ConceptExerciseConfig:
-        result.addString("icon", e.icon)
     of eckTestRunner:
       when e is PracticeExerciseConfig:
         addValOrNull(test_runner, addBool)
     of eckRepresenter:
       if e.representer.isSome():
         result.addRepresenter(e.representer.get());
+    of eckIcon:
+      result.addString("icon", e.icon)
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:

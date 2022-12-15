@@ -329,8 +329,10 @@ The canonical key order for an exercise `.meta/config.json` file is:
   - [invalidator]
 - [language_versions]
 - [forked_from]        (Concept Exercises only)
-- [icon]               (Concept Exercises only)
 - [test_runner]        (Practice Exercises only)
+- [representer]
+  - version
+- [icon]
 - blurb
 - [source]
 - [source_url]
