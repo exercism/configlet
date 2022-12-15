@@ -396,14 +396,14 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
     of eckForkedFrom:
       when e is ConceptExerciseConfig:
         addValOrNull(forked_from, addArray)
-    of eckIcon:
-      result.addString("icon", e.icon)
     of eckTestRunner:
       when e is PracticeExerciseConfig:
         addValOrNull(test_runner, addBool)
     of eckRepresenter:
       if e.representer.isSome():
         result.addRepresenter(e.representer.get());
+    of eckIcon:
+      result.addString("icon", e.icon)
     of eckBlurb:
       result.addString("blurb", e.blurb)
     of eckSource:

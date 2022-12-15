@@ -19,9 +19,9 @@ type
   #     case kind*: ExerciseKind
   #     of ekConcept:
   #       forked_from: Option[seq[string]]
-  #       icon: string
   #     of ekPractice:
   #       test_runner: Option[bool]
+  #     icon: string
   #     blurb*: string
   #     source*: string
   #     source_url*: string
@@ -59,9 +59,9 @@ type
     eckFiles = "files"
     eckLanguageVersions = "language_versions"
     eckForkedFrom = "forked_from"
-    eckIcon = "icon"
     eckTestRunner = "test_runner"
     eckRepresenter = "representer"
+    eckIcon = "icon"
     eckBlurb = "blurb"
     eckSource = "source"
     eckSourceUrl = "source_url"
