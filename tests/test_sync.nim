@@ -222,8 +222,9 @@ proc testSyncCommon =
     test "populated Practice Exercise":
       let exerciseConfig = PracticeExerciseConfig(
         originalKeyOrder: @[eckAuthors, eckContributors, eckFiles,
-                            eckLanguageVersions, eckTestRunner, eckRepresenter,
-                            eckBlurb, eckSource, eckSourceUrl, eckCustom],
+                            eckLanguageVersions, eckTestRunner, eckIcon,
+                            eckRepresenter, eckBlurb, eckSource, eckSourceUrl,
+                            eckCustom],
         authors: @["author1"],
         contributors: some(@["contributor1"]),
         files: PracticeExerciseFiles(
@@ -235,6 +236,7 @@ proc testSyncCommon =
         ),
         language_versions: ">=1.2.3",
         test_runner: some(false),
+        icon: "myicon",
         representer: some(Representer(version: 42)),
         blurb: "Write a function that returns the earned points in a single toss of a Darts game.",
         source: some("Inspired by an exercise created by a professor Della Paolera in Argentina"),
@@ -264,6 +266,7 @@ proc testSyncCommon =
         },
         "language_versions": ">=1.2.3",
         "test_runner": false,
+        "icon": "myicon",
         "representer": {
           "version": 42
         },
