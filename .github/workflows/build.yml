@@ -39,7 +39,7 @@ jobs:
       - name: Install Nim
         uses: iffy/install-nim@ac410af52523f06e0fa037ee81d06ead7b95692c
         with:
-          version: "binary:1.6.12"
+          version: "binary:2.0.0"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
