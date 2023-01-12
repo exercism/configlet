@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+err() {
+  echo "$*" >&2
+}
+
+main() {
+  if [[ "$#" -eq 1 ]]; then
+    local tmp_dir='upload-assets-tmp'
+    local repo='github.com/exercism/configlet'
+    local tag="$1"
+    local arch='x86-64'
+    local pattern="*${arch}*"
+    local old_name_linux='configlet-linux-64bit.tgz'
+    local old_name_macos='configlet-mac-64bit.tgz'
+    local old_name_windows='configlet-windows-64bit.zip'
+
+    mkdir -v -p "${tmp_dir}"
+    cd "${tmp_dir}"
+    gh -R "${repo}" release download "${tag}" -p "${pattern}"
+    mv -v "configlet_${tag}_linux_${arch}.tar.gz" "${old_name_linux}"
+    mv -v "configlet_${tag}_macos_${arch}.tar.gz" "${old_name_macos}"
+    mv -v "configlet_${tag}_windows_${arch}.zip" "${old_name_windows}"
+    gh -R "${repo}" release upload "${tag}" "${old_name_linux}" "${old_name_macos}" "${old_name_windows}"
+    echo "After undrafting the new release, you can delete the assets with the old names"
+    echo "from the previous release"
+  else
+    err "You must call this script with exactly one argument."
+    err "Usage:"
+    err "  upload-assets <tag>"
+    exit 1
+  fi
+}
+
+main "$@"
