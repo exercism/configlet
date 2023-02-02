@@ -29,7 +29,7 @@ main() {
   else
     err "You must call this script with exactly one argument."
     err "Usage:"
-    err "  upload-assets-with-old-names <tag>"
+    err "  upload-legacy-assets <tag>"
     exit 1
   fi
 }
