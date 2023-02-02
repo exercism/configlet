@@ -13,31 +13,18 @@ main() {
     local tag="$1"
     local arch='x86-64'
     local pattern="*${arch}*"
-    local oses=('linux' 'macos' 'windows')
     mkdir -v -p "${tmp_dir}"
     cd "${tmp_dir}"
     gh -R "${repo}" release download "${tag}" -p "${pattern}"
-    for os in "${oses[@]}"; do
-      case "${os}" in
-        linux)
-          local ext_old='tar.gz'
-          local ext_new='tgz'
-          local os_old="${os}"
-          ;;
-        macos)
-          local ext_old='tar.gz'
-          local ext_new='tgz'
-          local os_old='mac'
-          ;;
-        windows)
-          local ext_new='zip'
-          local ext_old='zip'
-          local os_old="${os}"
-          ;;
-      esac
-      mv -v "configlet_${tag}_${os}_${arch}.${ext_new}" "configlet-${os_old}-64bit.${ext_old}"
+    declare -A assets=(
+      ["configlet_${tag}_linux_${arch}.tar.gz"]='configlet-linux-64bit.tgz'
+      ["configlet_${tag}_macos_${arch}.tar.gz"]='configlet-mac-64bit.tgz'
+      ["configlet_${tag}_windows_${arch}.zip"]='configlet-windows-64bit.zip'
+    )
+    for k in "${!assets[@]}"; do
+      mv -v "${k}" "${assets[${k}]}"
     done
-    gh -R "${repo}" release upload "${tag}" configlet-*-64bit*
+    gh -R "${repo}" release upload "${tag}" "${assets[@]}"
     echo "After undrafting the new release, you can delete the assets with the old names"
     echo "from the previous release"
   else
