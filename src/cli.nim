@@ -5,6 +5,7 @@ type
   ActionKind* = enum
     actNil = "nil"
     actCompletion = "completion"
+    actCreate = "create"
     actFmt = "fmt"
     actGenerate = "generate"
     actInfo = "info"
@@ -31,7 +32,7 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil, actGenerate, actLint:
+    of actNil, actCreate, actGenerate, actLint:
       discard
     of actCompletion:
       shell*: Shell
@@ -190,6 +191,7 @@ func genHelpText: string =
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
     actCompletion: "Output a completion script for a given shell",
+    actCreate: "Add a new approach",
     actFmt: "Format the exercise 'config.json' files",
     actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
     actInfo: "Print some information about the track",
@@ -262,7 +264,8 @@ func genHelpText: string =
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[
+                opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
@@ -357,7 +360,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
 func init*(T: typedesc[Action], actionKind: ActionKind,
            scope: set[SyncKind] = {}): T =
   case actionKind
-  of actNil, actCompletion, actFmt, actGenerate, actInfo, actLint:
+  of actNil, actCompletion, actCreate, actFmt, actGenerate, actInfo, actLint:
     T(kind: actionKind)
   of actSync:
     T(kind: actionKind, scope: scope)
@@ -488,7 +491,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil, actGenerate, actLint:
+    of actNil, actCreate, actGenerate, actLint:
       discard
     of actCompletion:
       case opt
@@ -569,7 +572,7 @@ proc processCmdLine*: Conf =
   of actCompletion:
     if result.action.shell == sNil:
       showError("Please choose a shell. For example: `configlet completion -s bash`")
-  of actFmt, actGenerate, actInfo, actLint, actUuid:
+  of actFmt, actCreate, actGenerate, actInfo, actLint, actUuid:
     discard
   of actSync:
     # If the user does not specify a syncing scope, operate on all data kinds.
