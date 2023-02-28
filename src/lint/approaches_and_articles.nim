@@ -1,11 +1,17 @@
 import std/[json, options, os, strformat, strutils]
-import ".."/[helpers, types_approaches_config]
+import ".."/[helpers, sync/sync_common, types_approaches_config, types_articles_config]
 import "."/validators
 
 type
-  DirKind = enum
+  DocumentKind = enum
     dkApproaches = ".approaches"
     dkArticles = ".articles"
+
+proc initApproaches*(exerciseApproachesConfigPath: string): ApproachesConfig =
+  parseFile(exerciseApproachesConfigPath, ApproachesConfig)
+
+proc initArticles*(exerciseArticlesConfigPath: string): ArticlesConfig =
+  parseFile(exerciseArticlesConfigPath, ArticlesConfig)
 
 proc setFalseIfFileMissingOrEmpty(b: var bool, path: Path, msgMissing: string) =
   if fileExists(path):
@@ -72,7 +78,7 @@ proc getSlugs(data: JsonNode, k: string): seq[string] =
         if e.kind == JObject and e.hasKey("slug") and e["slug"].kind == JString:
           result.add e["slug"].getStr()
 
-proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
+proc isValidConfig(data: JsonNode, path: Path, dk: DocumentKind): bool =
   if isObject(data, jsonRoot, path):
     let k = dk.`$`[1..^1] # Remove dot.
     let checks = [
@@ -88,7 +94,7 @@ proc isValidConfig(data: JsonNode, path: Path, dk: DirKind): bool =
                     &"but a sibling directory exists with that name"
           result.setFalseAndPrint(msg, path)
 
-proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
+proc isConfigMissingOrValid(dir: Path, dk: DocumentKind): bool =
   result = true
   let dkPath = dir / $dk
   let configPath = dkPath / "config.json"
@@ -107,7 +113,7 @@ proc isConfigMissingOrValid(dir: Path, dk: DirKind): bool =
                 "not contain a 'config.json' file"
       result.setFalseAndPrint(msg, dkPath)
 
-func countLinesWithoutCodeFence(s: string, dk: DirKind): int =
+func countLinesWithoutCodeFence(s: string, dk: DocumentKind): int =
   ## Returns the number of lines in `s`, but:
   ##
   ## - excluding lines that open or close a Markdown code fence.
@@ -120,7 +126,7 @@ func countLinesWithoutCodeFence(s: string, dk: DirKind): int =
     if s[^1] in ['\n', '\l']:
       dec result
 
-proc isEverySnippetValid(exerciseDir: Path, dk: DirKind): bool =
+proc isEverySnippetValid(exerciseDir: Path, dk: DocumentKind): bool =
   result = true
   for dir in getSortedSubdirs(exerciseDir / $dk):
     let snippetPath = block:
@@ -139,7 +145,7 @@ proc isEveryApproachAndArticleValid*(trackDir: Path): bool =
   result = true
   for exerciseKind in ["concept", "practice"]:
     for exerciseDir in getSortedSubdirs(trackDir / "exercises" / exerciseKind):
-      for dk in DirKind:
+      for dk in DocumentKind:
         if not isConfigMissingOrValid(exerciseDir, dk):
           result = false
         if not isEverySnippetValid(exerciseDir, dk):

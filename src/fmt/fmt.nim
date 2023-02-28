@@ -10,6 +10,10 @@ type
     path: string
     formattedApproachesConfig: string
 
+  PathAndFormattedArticlesConfig = object
+    path: string
+    formattedArticlesConfig: string
+
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
                         trackExercisesDir: string): (ExerciseKind, string) =
   ## Yields the `.meta/config.json` path for each exercise in
@@ -101,8 +105,8 @@ proc fmt*(conf: Conf) =
             &"and {trackConfig.exercises.practice.len} Practice Exercises in " &
             trackConfigPath)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
-  logNormal("Looking for exercises that lack a formatted '.meta/config.json' " &
-            "or '.approaches/config.json' file...")
+  logNormal("Looking for exercises that lack a formatted '.meta/config.json', " &
+            "or '.approaches/config.json'or '.approaches/config.json' file...")
 
   let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
 
