@@ -518,6 +518,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actCreate:
       case opt
+      of optCreateApproach:
+        setActionOpt(approachSlug, val)
       of optFmtSyncCreateExercise:
         setActionOpt(exerciseCreate, val)
       else:

@@ -1,4 +1,9 @@
 import ".."/[cli]
 
 proc create*(conf: Conf) =
-  echo "create command"
+  if conf.action.kind == actCreate:
+    echo conf.action.approachSlug
+    echo conf.action.exerciseCreate
+  else:
+    quit 1
+  
