@@ -2,17 +2,15 @@ import std/[options, os, strformat, strutils]
 import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
 
 type
-  PathAndFormattedExerciseConfig = object
-    path: string
-    formattedExerciseConfig: string
+  DocumentKind* = enum
+    dkExerciseConfig,
+    dkApproachesConfig,
+    dkArticlesConfig
 
-  PathAndFormattedApproachesConfig = object
+  PathAndFormattedDocument = object
+    kind: DocumentKind
     path: string
-    formattedApproachesConfig: string
-
-  PathAndFormattedArticlesConfig = object
-    path: string
-    formattedArticlesConfig: string
+    formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
                         trackExercisesDir: string): (ExerciseKind, string) =
@@ -47,7 +45,7 @@ proc formatFile(exerciseKind: ExerciseKind,
     pretty(exerciseConfig.p, pmFmt)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
-             trackDir: string): seq[PathAndFormattedExerciseConfig] =
+             trackDir: string): seq[PathAndFormattedDocument] =
   ## Reads the `.meta/config.json` file for every slug in `trackExerciseSlugs`
   ## in `trackExerciseDir`.
   ##
@@ -66,9 +64,10 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
         logNormal(&"The below paths are relative to '{trackDir}'")
       seenUnformatted = true
       logNormal(&"Not formatted: {relativePath(configPath, trackDir)}")
-      result.add PathAndFormattedExerciseConfig(
+      result.add PathAndFormattedDocument(
+        kind: dkExerciseConfig,
         path: configPath,
-        formattedExerciseConfig: formatted
+        formattedDocument: formatted
       )
 
 proc userSaysYes(userExercise: string): bool =
@@ -85,13 +84,13 @@ proc userSaysYes(userExercise: string): bool =
     else:
       stderr.writeLine "Unrecognized response. Please answer [y]es or [n]o."
 
-proc writeFormatted(prettyPairs: seq[PathAndFormattedExerciseConfig]) =
+proc writeFormatted(prettyPairs: seq[PathAndFormattedDocument]) =
   for prettyPair in prettyPairs:
     let path = prettyPair.path
     doAssert lastPathPart(path) == "config.json"
     createDir path.parentDir()
     logDetailed(&"Writing formatted: {path}")
-    writeFile(path, prettyPair.formattedExerciseConfig)
+    writeFile(path, prettyPair.formattedDocument)
   let s = if prettyPairs.len > 1: "s" else: ""
   logNormal(&"Formatted the exercise config for {prettyPairs.len} exercise{s}")
 
