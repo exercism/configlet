@@ -32,10 +32,15 @@ type
 
   Action* = object
     case kind*: ActionKind
-    of actNil, actCreate, actGenerate, actLint:
+    of actNil, actGenerate, actLint:
       discard
     of actCompletion:
       shell*: Shell
+    of actCreate:
+      # We can't name this field `exercise` because we use that names
+      # in `actSync`, and Nim doesn't yet support duplicate field names
+      # in object variants.
+      exerciseCreate*: string
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -75,8 +80,10 @@ type
     # Options for `completion`
     optCompletionShell = "shell"
 
+    # Options for `create`, `fmt` and `sync`
+    optFmtSyncCreateExercise = "exercise"
+
     # Options for both `fmt` and `sync`
-    optFmtSyncExercise = "exercise"
     optFmtSyncUpdate = "update"
     optFmtSyncYes = "yes"
 
@@ -163,7 +170,7 @@ func genHelpText: string =
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
         of optCompletionShell: "shell"
-        of optFmtSyncExercise: "slug"
+        of optFmtSyncCreateExercise: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
@@ -219,7 +226,7 @@ func genHelpText: string =
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
-    optFmtSyncExercise: "Only operate on this exercise",
+    optFmtSyncCreateExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
     optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
@@ -270,8 +277,10 @@ func genHelpText: string =
         elif key != "kind":
           let opt =
             case key
+            of "exerciseCreate":
+              optFmtSyncCreateExercise
             of "exerciseFmt":
-              optFmtSyncExercise
+              optFmtSyncCreateExercise
             of "updateFmt":
               optFmtSyncUpdate
             of "yesFmt":
@@ -491,7 +500,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
   # Process action-specific options
   if not isGlobalOpt:
     case conf.action.kind
-    of actNil, actCreate, actGenerate, actLint:
+    of actNil, actGenerate, actLint:
       discard
     of actCompletion:
       case opt
@@ -499,9 +508,15 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(shell, parseVal[Shell](kind, key, val))
       else:
         discard
+    of actCreate:
+      case opt
+      of optFmtSyncCreateExercise:
+        setActionOpt(exerciseCreate, val)
+      else:
+        discard
     of actFmt:
       case opt
-      of optFmtSyncExercise:
+      of optFmtSyncCreateExercise:
         setActionOpt(exerciseFmt, val)
       of optFmtSyncUpdate:
         setActionOpt(updateFmt, true)
@@ -517,7 +532,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actSync:
       case opt
-      of optFmtSyncExercise:
+      of optFmtSyncCreateExercise:
         setActionOpt(exercise, val)
       of optFmtSyncUpdate:
         setActionOpt(update, true)
