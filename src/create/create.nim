@@ -22,7 +22,7 @@ proc create*(conf: Conf) =
           stderr.writeLine msg
           quit 1
       
-      createApproach(Slug(conf.action.approachSlug), exerciseDir)
+      createApproach(Slug(conf.action.approachSlug), userExercise, exerciseDir)
     else:
       quit 1
   else:

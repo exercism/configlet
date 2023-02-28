@@ -30,7 +30,7 @@ func kebabToTitleCase(slug: Slug): string =
       result.add(if capitalizeNext: toUpperAscii(c) else: c)
       capitalizeNext = false
 
-proc createApproach*(approachSlug: Slug, exerciseDir: string) =
+proc createApproach*(approachSlug: Slug, exerciseSlug: Slug, exerciseDir: string) =
   let approachesDir = exerciseDir / ".approaches"
   let configPath = approachesDir / "config.json"
 
@@ -46,35 +46,35 @@ proc createApproach*(approachSlug: Slug, exerciseDir: string) =
     else:
       parseFile(configPath, ApproachesConfig)
 
-  config.approaches.add ApproachConfig(
-    uuid: $genUUID(),
-    slug: $approachSlug,
-    title: kebabToTitleCase(approachSlug),
-    blurb: "",
-    authors: newSeq[string]()
-  )
+  var approachExists = false  
 
-  writeFile(configPath, config.toJson())
+  for approach in config.approaches:
+    if $approachSlug == approach.slug:
+      approachExists = true
+      break
 
-# hasString(data, "uuid", path, context, checkIsUuid = true),
-#       hasString(data, "slug", path, context, checkIsKebab = true),
-#       hasString(data, "title", path, context, maxLen = 255),
-#       hasString(data, "blurb", path, context, maxLen = 280),
-#       hasArrayOfStrings(data, "authors", path, context, uniqueValues = true),
-#   "{"
-#   writeFile()
+  let title = kebabToTitleCase(approachSlug)
 
-  #   let j = parseJsonFile(configPath, result)
-  #   if j != nil:
-  #     if not isValidConfig(j, configPath, dk):
-  #       result = false
-  # else:
-  #   if dk == dkApproaches and fileExists(dkPath / "introduction.md"):
-  #     let msg = &"The below directory has an 'introduction.md' file, but " &
-  #               "does not contain a 'config.json' file"
-  #     result.setFalseAndPrint(msg, dkPath)
-  #   for dir in getSortedSubdirs(dkPath, relative = true):
-  #     let msg = &"The below directory has a '{dir}' subdirectory, but does " &
-  #               "not contain a 'config.json' file"
-  #     result.setFalseAndPrint(msg, dkPath)
+  if not approachExists:
+    config.approaches.add ApproachConfig(
+      uuid: $genUUID(),
+      slug: $approachSlug,
+      title: title,
+      blurb: "",
+      authors: newSeq[string]()
+    )
 
+    writeFile(configPath, config.toJson())
+
+  let approachDir = approachesDir / $approachSlug
+  if not dirExists(approachDir):
+    createDir(approachDir)
+
+  let contentPath = approachDir / "content.md"
+  let snippetPath = approachDir / "snippet.txt"
+
+  if not fileExists(contentPath):
+    writeFile(contentPath, &"# {title}\n\n")
+
+  if not fileExists(snippetPath):
+    writeFile(snippetPath, "")
