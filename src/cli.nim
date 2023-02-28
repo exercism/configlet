@@ -37,6 +37,7 @@ type
     of actCompletion:
       shell*: Shell
     of actCreate:
+      approachSlug*: string
       # We can't name this field `exercise` because we use that names
       # in `actSync`, and Nim doesn't yet support duplicate field names
       # in object variants.
@@ -76,6 +77,9 @@ type
     optVersion = "version"
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
+
+    # Options for `create`
+    optCreateApproach = "approach"
 
     # Options for `completion`
     optCompletionShell = "shell"
@@ -171,6 +175,7 @@ func genHelpText: string =
         of optVerbosity: "verbosity"
         of optCompletionShell: "shell"
         of optFmtSyncCreateExercise: "slug"
+        of optCreateApproach: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
@@ -224,6 +229,7 @@ func genHelpText: string =
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
+    optCreateApproach: "The slug of the approach",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",
@@ -277,6 +283,8 @@ func genHelpText: string =
         elif key != "kind":
           let opt =
             case key
+            of "approachSlug":
+              optCreateApproach
             of "exerciseCreate":
               optFmtSyncCreateExercise
             of "exerciseFmt":
