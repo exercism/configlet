@@ -1,5 +1,5 @@
-import std/[json, os, strformat, strutils]
-import ".."/helpers
+import std/[json, options, os, strformat, strutils]
+import ".."/[helpers, types_approaches_config]
 import "."/validators
 
 type

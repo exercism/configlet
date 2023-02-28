@@ -1,10 +1,14 @@
-import std/[os, strformat, strutils]
+import std/[options, os, strformat, strutils]
 import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
 
 type
   PathAndFormattedExerciseConfig = object
     path: string
     formattedExerciseConfig: string
+
+  PathAndFormattedApproachesConfig = object
+    path: string
+    formattedApproachesConfig: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
                         trackExercisesDir: string): (ExerciseKind, string) =
@@ -98,7 +102,7 @@ proc fmt*(conf: Conf) =
             trackConfigPath)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   logNormal("Looking for exercises that lack a formatted '.meta/config.json' " &
-            "file...")
+            "or '.approaches/config.json' file...")
 
   let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
 
