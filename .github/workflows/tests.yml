@@ -40,7 +40,7 @@ jobs:
         run: ./.github/bin/linux-install-build-tools
 
       - name: Install Nim
-        uses: iffy/install-nim@560f0647083257e632182be888862d69eeb6f2c4
+        uses: iffy/install-nim@c0887b5bcc85d135a2f7a5abd6c7a68bc2d38574
         with:
           version: "binary:1.6.10"
         env:
