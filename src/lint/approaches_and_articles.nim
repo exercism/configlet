@@ -7,12 +7,6 @@ type
     dkApproaches = ".approaches"
     dkArticles = ".articles"
 
-proc initApproaches*(exerciseApproachesConfigPath: string): ApproachesConfig =
-  parseFile(exerciseApproachesConfigPath, ApproachesConfig)
-
-proc initArticles*(exerciseArticlesConfigPath: string): ArticlesConfig =
-  parseFile(exerciseArticlesConfigPath, ArticlesConfig)
-
 proc setFalseIfFileMissingOrEmpty(b: var bool, path: Path, msgMissing: string) =
   if fileExists(path):
     if path.readFile().len == 0:

@@ -1,5 +1,6 @@
 import std/[options, os, strformat, strutils]
-import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
+import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config,
+             types_approaches_config, types_articles_config]
 
 type
   DocumentKind* = enum
@@ -34,6 +35,14 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
       trackExerciseConfigPath.addExerciseConfigPath()
       yield (exerciseKind, dkExerciseConfig, trackExerciseConfigPath)
 
+      trackExerciseConfigPath.truncateAndAdd(startLen, slug)
+      trackExerciseConfigPath.addApproachesConfigPath()
+      yield (exerciseKind, dkApproachesConfig, trackExerciseConfigPath)
+
+      trackExerciseConfigPath.truncateAndAdd(startLen, slug)
+      trackExerciseConfigPath.addArticlesConfigPath()
+      yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
+
 proc formatExerciseConfigFile(exerciseKind: ExerciseKind,
                               configPath: string): string =
   ## Parses the `.meta/config.json` file at `configPath` and returns it in the
@@ -44,6 +53,18 @@ proc formatExerciseConfigFile(exerciseKind: ExerciseKind,
     prettyExerciseConfig(exerciseConfig.c, pmFmt)
   of ekPractice:
     prettyExerciseConfig(exerciseConfig.p, pmFmt)
+
+proc formatApproachesConfigFile(configPath: string): string =
+  ## Parses the `.approaches/config.json` file at `configPath` and
+  ## returns it in the canonical form.
+  let approachesConfig = ApproachesConfig.init(configPath)
+  prettyApproachesConfig(approachesConfig)
+
+proc formatArticlesConfigFile(configPath: string): string =
+  ## Parses the `.articles/config.json` file at `configPath` and
+  ## returns it in the canonical form.
+  let articlesConfig = ArticlesConfig.init(configPath)
+  prettyArticlesConfig(articlesConfig)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
              trackDir: string): seq[PathAndFormattedDocument] =
@@ -58,7 +79,12 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   var seenUnformatted = false
   for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
                                                                  trackExercisesDir):
-    let formatted = formatExerciseConfigFile(exerciseKind, configPath)
+    let formatted =
+      case documentKind
+      of dkExerciseConfig: formatExerciseConfigFile(exerciseKind, configPath)
+      of dkApproachesConfig: formatApproachesConfigFile(configPath)
+      of dkArticlesConfig: formatArticlesConfigFile(configPath)
+
     # TODO: remove duplicate `readFile`.
     if fileExists(configPath) and readFile(configPath) == formatted:
       logDetailed(&"Already formatted: {relativePath(configPath, trackDir)}")
@@ -68,7 +94,7 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
       seenUnformatted = true
       logNormal(&"Not formatted: {relativePath(configPath, trackDir)}")
       result.add PathAndFormattedDocument(
-        kind: dkExerciseConfig,
+        kind: documentKind,
         path: configPath,
         formattedDocument: formatted
       )

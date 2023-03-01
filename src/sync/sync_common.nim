@@ -1,6 +1,7 @@
 import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils]
 import pkg/jsony
-import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config]
+import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config,
+             types_approaches_config, types_articles_config]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
   ## Asks the user if they want to sync the given `syncKind`, and returns `true`
@@ -54,6 +55,14 @@ func addMetadataTomlPath*(s: var string) =
 
 func addExerciseConfigPath*(s: var string) =
   const pathExerciseConfig = DirSep & joinPath(".meta", "config.json")
+  s.add pathExerciseConfig
+
+func addApproachesConfigPath*(s: var string) =
+  const pathExerciseConfig = DirSep & joinPath(".approaches", "config.json")
+  s.add pathExerciseConfig
+
+func addArticlesConfigPath*(s: var string) =
+  const pathExerciseConfig = DirSep & joinPath(".articles", "config.json")
   s.add pathExerciseConfig
 
 func identity(s: string): string =
@@ -292,8 +301,8 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
     stderr.writeLine val.pretty()
     quit 1
 
-func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[
-    ExerciseConfigKey] =
+func exerciseConfigKeyOrderForSync(originalKeyOrder: seq[
+    ExerciseConfigKey]): seq[ExerciseConfigKey] =
   if originalKeyOrder.len == 0:
     return @[eckAuthors, eckFiles, eckBlurb]
   else:
@@ -326,8 +335,9 @@ func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[
         i
       result.insert(eckBlurb, insertionIndex)
 
-func keyOrderForFmt(e: ConceptExerciseConfig |
-                       PracticeExerciseConfig): seq[ExerciseConfigKey] =
+func exerciseConfigKeyOrderForFmt(e: ConceptExerciseConfig |
+                                     PracticeExerciseConfig): seq[
+                                         ExerciseConfigKey] =
   result = @[eckAuthors]
   if e.contributors.isSome() and e.contributors.get().len > 0:
     result.add eckContributors
@@ -352,6 +362,20 @@ func keyOrderForFmt(e: ConceptExerciseConfig |
     result.add eckSourceUrl
   if e.custom.isSome() and e.custom.get().len > 0:
     result.add eckCustom
+
+func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[
+    ApproachesConfigKey] =
+  result = @[]
+  if e.introduction.isSome():
+    result.add ackIntroduction
+  if e.approaches.len > 0:
+    result.add ackApproaches
+
+func articlesConfigKeyOrderForFmt(e: ArticlesConfig): seq[
+    ArticlesConfigKey] =
+  result = @[]
+  if e.articles.len > 0:
+    result.add ackArticles
 
 template addValOrNull(key, f: untyped) =
   if e.key.isSome():
@@ -378,9 +402,9 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   let keys =
     case prettyMode
     of pmSync:
-      keyOrderForSync(e.originalKeyOrder)
+      exerciseConfigKeyOrderForSync(e.originalKeyOrder)
     of pmFmt:
-      keyOrderForFmt(e)
+      exerciseConfigKeyOrderForFmt(e)
 
   result = newStringOfCap(1000)
   result.add '{'
@@ -415,5 +439,90 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
         result.addString("source_url", e.source_url.get())
     of eckCustom:
       addValOrNull(custom, addObject)
+  result.removeComma()
+  result.add "\n}\n"
+
+proc prettyApproachesConfig*(e: ApproachesConfig): string =
+  ## Serializes `e` as pretty-printed JSON, using the canonical key order.
+  let keys = approachesConfigKeyOrderForFmt(e)
+
+  result = newStringOfCap(1000)
+  result.add '{'
+  for key in keys:
+    case key
+    of ackIntroduction:
+      discard # TODO
+      # result.addArray("introduction", e.authors)
+    of ackApproaches:
+      discard # TODO
+      # result.addArray("introduction", e.authors)
+    # of eckContributors:
+    #   addValOrNull(contributors, addArray)
+    # of eckFiles:
+    #   result.addFiles(e.files, prettyMode)
+    # of eckLanguageVersions:
+    #   result.addString("language_versions", e.language_versions)
+    # of eckForkedFrom:
+    #   when e is ConceptExerciseConfig:
+    #     addValOrNull(forked_from, addArray)
+    # of eckTestRunner:
+    #   when e is PracticeExerciseConfig:
+    #     addValOrNull(test_runner, addBool)
+    # of eckRepresenter:
+    #   if e.representer.isSome():
+    #     result.addRepresenter(e.representer.get());
+    # of eckIcon:
+    #   result.addString("icon", e.icon)
+    # of eckBlurb:
+    #   result.addString("blurb", e.blurb)
+    # of eckSource:
+    #   if e.source.isSome():
+    #     result.addString("source", e.source.get())
+    # of eckSourceUrl:
+    #   if e.source_url.isSome():
+    #     result.addString("source_url", e.source_url.get())
+    # of eckCustom:
+    #   addValOrNull(custom, addObject)
+  result.removeComma()
+  result.add "\n}\n"
+
+proc prettyArticlesConfig*(e: ArticlesConfig): string =
+  ## Serializes `e` as pretty-printed JSON, using the canonical key order.
+  let keys = articlesConfigKeyOrderForFmt(e)
+
+  result = newStringOfCap(1000)
+  result.add '{'
+  for key in keys:
+    case key
+    of ackArticles:
+      discard # TODO
+      # result.addArray("introduction", e.authors)
+    # of eckContributors:
+    #   addValOrNull(contributors, addArray)
+    # of eckFiles:
+    #   result.addFiles(e.files, prettyMode)
+    # of eckLanguageVersions:
+    #   result.addString("language_versions", e.language_versions)
+    # of eckForkedFrom:
+    #   when e is ConceptExerciseConfig:
+    #     addValOrNull(forked_from, addArray)
+    # of eckTestRunner:
+    #   when e is PracticeExerciseConfig:
+    #     addValOrNull(test_runner, addBool)
+    # of eckRepresenter:
+    #   if e.representer.isSome():
+    #     result.addRepresenter(e.representer.get());
+    # of eckIcon:
+    #   result.addString("icon", e.icon)
+    # of eckBlurb:
+    #   result.addString("blurb", e.blurb)
+    # of eckSource:
+    #   if e.source.isSome():
+    #     result.addString("source", e.source.get())
+    # of eckSourceUrl:
+    #   if e.source_url.isSome():
+    #     result.addString("source_url", e.source_url.get())
+    # of eckCustom:
+    #   addValOrNull(custom, addObject)
   result.removeComma()
   result.add "\n}\n"
