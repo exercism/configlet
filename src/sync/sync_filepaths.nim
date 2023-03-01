@@ -62,7 +62,8 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
       genCond(exemplar)
     else:
       genCond(example)
-  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and genCond(invalidator)
+  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and
+      genCond(invalidator)
 
 type
   ExerciseConfig* = object
@@ -142,9 +143,9 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
       let contents =
         case configPair.exerciseConfig.kind
         of ekConcept:
-          configPair.exerciseConfig.c.pretty(prettyMode = pmSync)
+          configPair.exerciseConfig.c.prettyExerciseConfig(prettyMode = pmSync)
         of ekPractice:
-          configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
+          configPair.exerciseConfig.p.prettyExerciseConfig(prettyMode = pmSync)
       writeFile(path, contents)
     else:
       stderr.writeLine &"Unexpected path before writing: {path}"

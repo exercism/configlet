@@ -24,11 +24,11 @@ proc parseMetadataToml(path: string): UpstreamMetadata =
   let t = parsetoml.parseFile(path)
   result = UpstreamMetadata(
     blurb:
-      if t.hasKey("blurb"): t["blurb"].getStr() else: "",
+    if t.hasKey("blurb"): t["blurb"].getStr() else: "",
     source:
-      if t.hasKey("source"): t["source"].getStr().some() else: none(string),
+    if t.hasKey("source"): t["source"].getStr().some() else: none(string),
     source_url:
-      if t.hasKey("source_url"): t["source_url"].getStr().some() else: none(string)
+    if t.hasKey("source_url"): t["source_url"].getStr().some() else: none(string)
   )
 
 func metadataAreUpToDate(p: PracticeExerciseConfig;
@@ -50,7 +50,8 @@ func update(p: var PracticeExerciseConfig;
     p.originalKeyOrder.add eckBlurb
   if upstreamMetadata.source.isSome() and eckSource notin p.originalKeyOrder:
     p.originalKeyOrder.add eckSource
-  if upstreamMetadata.source_url.isSome() and eckSourceUrl notin p.originalKeyOrder:
+  if upstreamMetadata.source_url.isSome() and eckSourceUrl notin
+      p.originalKeyOrder:
     p.originalKeyOrder.add eckSourceUrl
 
 proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
@@ -94,7 +95,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
 
 proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
-    let updatedJson = pretty(configPair.practiceExerciseConfig, pmSync)
+    let updatedJson = prettyExerciseConfig(configPair.practiceExerciseConfig, pmSync)
     let path = configPair.path
     if path.endsWith(&".meta{DirSep}config.json"):
       createDir path.parentDir()

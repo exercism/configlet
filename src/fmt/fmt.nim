@@ -13,8 +13,9 @@ type
     formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
-                        trackExercisesDir: string): (ExerciseKind, string) =
-  ## Yields the `.meta/config.json` path for each exercise in
+                        trackExercisesDir: string): (ExerciseKind, DocumentKind, string) =
+  ## Yields the `.meta/config.json`, `.approaches/config.json` and
+  ## `.articles/config.json` paths for each exercise in
   ## `trackExerciseSlugs` in `trackExercisesDir`.
   for exerciseKind in [ekConcept, ekPractice]:
     let slugs =
@@ -31,31 +32,33 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
     for slug in slugs:
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addExerciseConfigPath()
-      yield (exerciseKind, trackExerciseConfigPath)
+      yield (exerciseKind, dkExerciseConfig, trackExerciseConfigPath)
 
-proc formatFile(exerciseKind: ExerciseKind,
-                configPath: string): string =
+proc formatExerciseConfigFile(exerciseKind: ExerciseKind,
+                              configPath: string): string =
   ## Parses the `.meta/config.json` file at `configPath` and returns it in the
   ## canonical form.
   let exerciseConfig = ExerciseConfig.init(exerciseKind, configPath)
   case exerciseKind
   of ekConcept:
-    pretty(exerciseConfig.c, pmFmt)
+    prettyExerciseConfig(exerciseConfig.c, pmFmt)
   of ekPractice:
-    pretty(exerciseConfig.p, pmFmt)
+    prettyExerciseConfig(exerciseConfig.p, pmFmt)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
              trackDir: string): seq[PathAndFormattedDocument] =
-  ## Reads the `.meta/config.json` file for every slug in `trackExerciseSlugs`
+  ## Reads the config files for every slug in `trackExerciseSlugs`
   ## in `trackExerciseDir`.
+  ## This includes `.meta/config.json`, `.approaches/config.json`
+  ## and `.articles/config.json`.
   ##
-  ## Returns a seq of (path, formatted config) objects containing every exercise
-  ## config that is not already formatted.
+  ## Returns a seq of (docuement kind, path, formatted document) objects
+  ## containing every exercise's configs that are not already formatted.
   let trackExercisesDir = trackDir / "exercises"
   var seenUnformatted = false
-  for (exerciseKind, configPath) in getConfigPaths(trackExerciseSlugs,
-                                                   trackExercisesDir):
-    let formatted = formatFile(exerciseKind, configPath)
+  for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
+                                                                 trackExercisesDir):
+    let formatted = formatExerciseConfigFile(exerciseKind, configPath)
     # TODO: remove duplicate `readFile`.
     if fileExists(configPath) and readFile(configPath) == formatted:
       logDetailed(&"Already formatted: {relativePath(configPath, trackDir)}")

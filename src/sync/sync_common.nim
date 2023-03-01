@@ -292,7 +292,8 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
     stderr.writeLine val.pretty()
     quit 1
 
-func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConfigKey] =
+func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[
+    ExerciseConfigKey] =
   if originalKeyOrder.len == 0:
     return @[eckAuthors, eckFiles, eckBlurb]
   else:
@@ -358,8 +359,8 @@ template addValOrNull(key, f: untyped) =
   else:
     result.addNull(&"{key}")
 
-proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
-             prettyMode: PrettyMode): string =
+proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
+                           prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
   ## - the original key order if `prettyMode` is `pmSync`.
   ## - the canonical key order if `prettyMode` is `pmFmt`.
