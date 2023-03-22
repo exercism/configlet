@@ -81,7 +81,7 @@ proc testGenerate =
         ~~~~exercism/note
         See the [foo docs][foo-docs] for more details.
 
-        [foo-docs]: http://example.com
+        [foo-docs]: https://example.com
         ~~~~
       """.unindent()
 
@@ -89,7 +89,7 @@ proc testGenerate =
         ~~~~exercism/note
         See the [foo docs][foo-docs] for more details.
 
-        [foo-docs]: http://example.com
+        [foo-docs]: https://example.com
         ~~~~""".unindent()
 
       var linkDefs = newSeq[string]()
