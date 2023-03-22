@@ -32,7 +32,8 @@ func alterHeadings(s: string, linkDefs: var seq[string], h2 = ""): string =
       if s.continuesWith("#", i+1) and not (inFencedCodeBlock or
                                             inFencedCodeBlockTildes or inCommentBlock):
         result.add '#'
-      elif s.continuesWith("[", i+1):
+      elif s.continuesWith("[", i+1) and not (inFencedCodeBlock or
+                                              inFencedCodeBlockTildes or inCommentBlock):
         let j = s.find("]:", i+2)
         if j > i+2 and j < s.find('\n', i+2):
           var line = ""
