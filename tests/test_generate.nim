@@ -74,6 +74,28 @@ proc testGenerate =
       check alterHeadings(s, linkDefs, "Maps") == "## Maps\n\n" & expected
       check linkDefs.len == 0
 
+    test "alterHeadings: keeps link reference definition inside block":
+      const s = """
+        # Heading 1
+
+        ~~~~note
+        See the [foo docs][foo-docs] for more details.
+
+        [foo-docs]: http://example.com
+        ~~~~
+      """.unindent()
+
+      const expected = """
+        ~~~~note
+        See the [foo docs][foo-docs] for more details.
+
+        [foo-docs]: http://example.com
+        ~~~~""".unindent()
+
+      var linkDefs = newSeq[string]()
+      check alterHeadings(s, linkDefs) == expected
+      check linkDefs.len == 0
+
 proc main =
   testGenerate()
 
