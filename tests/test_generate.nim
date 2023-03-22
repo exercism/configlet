@@ -78,7 +78,7 @@ proc testGenerate =
       const s = """
         # Heading 1
 
-        ~~~~note
+        ~~~~exercism/note
         See the [foo docs][foo-docs] for more details.
 
         [foo-docs]: http://example.com
@@ -86,7 +86,7 @@ proc testGenerate =
       """.unindent()
 
       const expected = """
-        ~~~~note
+        ~~~~exercism/note
         See the [foo docs][foo-docs] for more details.
 
         [foo-docs]: http://example.com
