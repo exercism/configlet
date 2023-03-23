@@ -1,5 +1,5 @@
 import std/[options, os, strformat, strutils]
-import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config,
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config,
              types_approaches_config, types_articles_config]
 
 type
@@ -37,11 +37,13 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addApproachesConfigPath()
-      yield (exerciseKind, dkApproachesConfig, trackExerciseConfigPath)
+      if fileExists(trackExerciseConfigPath):
+        yield (exerciseKind, dkApproachesConfig, trackExerciseConfigPath)
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addArticlesConfigPath()
-      yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
+      if fileExists(trackExerciseConfigPath):
+        yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
 
 proc formatExerciseConfigFile(exerciseKind: ExerciseKind,
                               configPath: string): string =
@@ -58,6 +60,7 @@ proc formatApproachesConfigFile(configPath: string): string =
   ## Parses the `.approaches/config.json` file at `configPath` and
   ## returns it in the canonical form.
   let approachesConfig = ApproachesConfig.init(configPath)
+  echo $approachesConfig
   prettyApproachesConfig(approachesConfig)
 
 proc formatArticlesConfigFile(configPath: string): string =
@@ -79,6 +82,7 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   var seenUnformatted = false
   for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
                                                                  trackExercisesDir):
+
     let formatted =
       case documentKind
       of dkExerciseConfig: formatExerciseConfigFile(exerciseKind, configPath)
@@ -134,7 +138,7 @@ proc fmt*(conf: Conf) =
             trackConfigPath)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   logNormal("Looking for exercises that lack a formatted '.meta/config.json', " &
-            "or '.approaches/config.json'or '.approaches/config.json' file...")
+            "'.approaches/config.json' or '.approaches/config.json' file...")
 
   let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
 

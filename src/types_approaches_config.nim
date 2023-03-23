@@ -1,6 +1,5 @@
 import std/options
-import pkg/jsony
-import "."/[cli, helpers]
+import "."/[helpers]
 
 type
   ApproachesConfigKey* = enum
@@ -21,7 +20,7 @@ type
 
   ApproachesIntroductionConfig* = object
     authors*: seq[string]
-    contributors*: Option[seq[string]]
+    contributors*: seq[string]
 
   ApproachConfig* = object
     uuid*: string
@@ -29,16 +28,13 @@ type
     title*: string
     blurb*: string
     authors*: seq[string]
-    contributors*: Option[seq[string]]
+    contributors*: seq[string]
 
   ApproachesConfig* = object
-    introduction*: Option[ApproachesIntroductionConfig]
+    introduction*: ApproachesIntroductionConfig
     approaches*: seq[ApproachConfig]
 
-proc init*(T: typedesc[ApproachesConfig]; approachesConfigContents: string): T =
-  ## Deserializes `approachesConfigContents` using `jsony` to a `ApproachesConfig` object.
-  try:
-    result = fromJson(approachesConfigContents, ApproachesConfig)
-  except jsony.JsonError:
-    let msg = tidyJsonyErrorMsg(approachesConfigContents)
-    showError(msg)
+proc init*(T: typedesc[ApproachesConfig]; approachesConfigFilePath: string): T =
+  ## Deserializes contents of `approachesConfigFilePath` using `jsony` to
+  ## an `ApproachesConfig` object.
+  parseFile(approachesConfigFilePath, ApproachesConfig)

@@ -1,4 +1,5 @@
 import std/[algorithm, os, parseutils, strformat, strscans, strutils, terminal]
+import pkg/jsony
 import "."/cli
 
 template withDir*(dir: string; body: untyped): untyped =
@@ -47,7 +48,8 @@ func w*(s: string; start: int): int =
   ## A matcher for `scanf`. Similar to `$w`, but only skips (does not bind).
   s.skipWhile(IdentChars, start)
 
-proc setFalseAndPrint*(b: var bool; description: string; path: Path, annotation = "") =
+proc setFalseAndPrint*(b: var bool; description: string; path: Path;
+    annotation = "") =
   ## Sets `b` to `false` and writes a message to stdout containing `description`
   ## and `path`.
   b = false
@@ -135,3 +137,24 @@ proc tidyJsonyErrorMsg*(trackConfigContents: string): string =
     --------------------------------------------------------------------------------
   """.unindent()
   result = &"JSON parsing error:\nconfig.json{details}\n\n{bugNotice}"
+
+proc parseFile*(path: string; T: typedesc): T =
+  ## Parses the JSON file at `path` into `T`.
+  let contents =
+    try:
+      readFile(path)
+    except IOError:
+      let msg = getCurrentExceptionMsg()
+      stderr.writeLine &"Error: {msg}"
+      quit 1
+  if contents.len > 0:
+    try:
+      contents.fromJson(T)
+    except jsony.JsonError:
+      let jsonyMsg = getCurrentExceptionMsg()
+      let details = tidyJsonyMessage(jsonyMsg, contents)
+      let msg = &"JSON parsing error:\n{path}{details}"
+      stderr.writeLine msg
+      quit 1
+  else:
+    T()

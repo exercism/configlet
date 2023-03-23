@@ -1,6 +1,5 @@
 import std/options
-import pkg/jsony
-import "."/[cli, helpers]
+import "."/[helpers]
 
 type
   ArticlesConfigKey* = enum
@@ -25,10 +24,7 @@ type
   ArticlesConfig* = object
     articles*: seq[ArticleConfig]
 
-proc init*(T: typedesc[ArticlesConfig]; articlesConfigContents: string): T =
-  ## Deserializes `articlesConfigContents` using `jsony` to a `ArticlesConfig` object.
-  try:
-    result = fromJson(articlesConfigContents, ArticlesConfig)
-  except jsony.JsonError:
-    let msg = tidyJsonyErrorMsg(articlesConfigContents)
-    showError(msg)
+proc init*(T: typedesc[ArticlesConfig]; articlesConfigFilePath: string): T =
+  ## Deserializes contents of `articlesConfigFilePath` using `jsony` to
+  ## an `ArticlesConfig` object.
+  parseFile(articlesConfigFilePath, ArticlesConfig)

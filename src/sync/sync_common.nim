@@ -1,5 +1,4 @@
 import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils]
-import pkg/jsony
 import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config,
              types_approaches_config, types_articles_config]
 
@@ -113,27 +112,6 @@ func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: str
     f.originalKeyOrder.add fk
   except ValueError:
     discard
-
-proc parseFile*(path: string, T: typedesc): T =
-  ## Parses the JSON file at `path` into `T`.
-  let contents =
-    try:
-      readFile(path)
-    except IOError:
-      let msg = getCurrentExceptionMsg()
-      stderr.writeLine &"Error: {msg}"
-      quit 1
-  if contents.len > 0:
-    try:
-      contents.fromJson(T)
-    except jsony.JsonError:
-      let jsonyMsg = getCurrentExceptionMsg()
-      let details = tidyJsonyMessage(jsonyMsg, contents)
-      let msg = &"JSON parsing error:\n{path}{details}"
-      stderr.writeLine msg
-      quit 1
-  else:
-    T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
   ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
@@ -366,7 +344,7 @@ func exerciseConfigKeyOrderForFmt(e: ConceptExerciseConfig |
 func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[
     ApproachesConfigKey] =
   result = @[]
-  if e.introduction.isSome():
+  if e.introduction.authors.len > 0:
     result.add ackIntroduction
   if e.approaches.len > 0:
     result.add ackApproaches
