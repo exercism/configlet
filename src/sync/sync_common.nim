@@ -420,6 +420,21 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   result.removeComma()
   result.add "\n}\n"
 
+
+func addApproachesIntroduction(result: var string;
+    val: ApproachesIntroductionConfig; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for a `representer` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("introduction", result)
+  result.add ": {"
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
 proc prettyApproachesConfig*(e: ApproachesConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
   let keys = approachesConfigKeyOrderForFmt(e)
@@ -429,8 +444,8 @@ proc prettyApproachesConfig*(e: ApproachesConfig): string =
   for key in keys:
     case key
     of ackIntroduction:
-      discard # TODO
-      # result.addArray("introduction", e.authors)
+      if e.introduction.authors.len > 0 or e.introduction.contributors.len > 0:
+        result.addApproachesIntroduction(e.introduction)
     of ackApproaches:
       discard # TODO
       # result.addArray("introduction", e.authors)

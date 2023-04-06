@@ -60,7 +60,6 @@ proc formatApproachesConfigFile(configPath: string): string =
   ## Parses the `.approaches/config.json` file at `configPath` and
   ## returns it in the canonical form.
   let approachesConfig = ApproachesConfig.init(configPath)
-  echo $approachesConfig
   prettyApproachesConfig(approachesConfig)
 
 proc formatArticlesConfigFile(configPath: string): string =
