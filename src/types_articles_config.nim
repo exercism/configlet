@@ -1,4 +1,3 @@
-import std/options
 import "."/[helpers]
 
 type
@@ -19,7 +18,7 @@ type
     title*: string
     blurb*: string
     authors*: seq[string]
-    contributors*: Option[seq[string]]
+    contributors*: seq[string]
 
   ArticlesConfig* = object
     articles*: seq[ArticleConfig]

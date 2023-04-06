@@ -1,4 +1,4 @@
-import std/[options, os, strformat, strutils]
+import std/[os, strformat, strutils]
 import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config,
              types_approaches_config, types_articles_config]
 

@@ -1,5 +1,5 @@
-import std/[json, options, os, strformat, strutils]
-import ".."/[helpers, sync/sync_common, types_approaches_config, types_articles_config]
+import std/[json, os, strformat, strutils]
+import ".."/helpers
 import "."/validators
 
 type

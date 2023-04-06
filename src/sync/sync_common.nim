@@ -477,36 +477,40 @@ proc prettyApproachesConfig*(e: ApproachesConfig): string =
       if e.introduction.authors.len > 0 or e.introduction.contributors.len > 0:
         result.addApproachesIntroduction(e.introduction)
     of ackApproaches:
-      result.addApproaches(e.approaches)
-    # of eckContributors:
-    #   addValOrNull(contributors, addArray)
-    # of eckFiles:
-    #   result.addFiles(e.files, prettyMode)
-    # of eckLanguageVersions:
-    #   result.addString("language_versions", e.language_versions)
-    # of eckForkedFrom:
-    #   when e is ConceptExerciseConfig:
-    #     addValOrNull(forked_from, addArray)
-    # of eckTestRunner:
-    #   when e is PracticeExerciseConfig:
-    #     addValOrNull(test_runner, addBool)
-    # of eckRepresenter:
-    #   if e.representer.isSome():
-    #     result.addRepresenter(e.representer.get());
-    # of eckIcon:
-    #   result.addString("icon", e.icon)
-    # of eckBlurb:
-    #   result.addString("blurb", e.blurb)
-    # of eckSource:
-    #   if e.source.isSome():
-    #     result.addString("source", e.source.get())
-    # of eckSourceUrl:
-    #   if e.source_url.isSome():
-    #     result.addString("source_url", e.source_url.get())
-    # of eckCustom:
-    #   addValOrNull(custom, addObject)
+      if e.approaches.len > 0:
+        result.addApproaches(e.approaches)
   result.removeComma()
   result.add "\n}\n"
+
+func addArticle(result: var string;
+    val: ArticleConfig; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `article` element with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  result.add "{"
+  result.addString("uuid", val.uuid, indentLevel + 1)
+  result.addString("slug", val.slug, indentLevel + 1)
+  result.addString("title", val.title, indentLevel + 1)
+  result.addString("blurb", val.blurb, indentLevel + 1)
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
+func addArticles(result: var string;
+    val: seq[ArticleConfig]; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `articles` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("articles", result)
+  result.add ": ["
+  for article in val:
+    result.addArticle(article, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "]"
 
 proc prettyArticlesConfig*(e: ArticlesConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
@@ -517,34 +521,7 @@ proc prettyArticlesConfig*(e: ArticlesConfig): string =
   for key in keys:
     case key
     of ackArticles:
-      discard # TODO
-      # result.addArray("introduction", e.authors)
-    # of eckContributors:
-    #   addValOrNull(contributors, addArray)
-    # of eckFiles:
-    #   result.addFiles(e.files, prettyMode)
-    # of eckLanguageVersions:
-    #   result.addString("language_versions", e.language_versions)
-    # of eckForkedFrom:
-    #   when e is ConceptExerciseConfig:
-    #     addValOrNull(forked_from, addArray)
-    # of eckTestRunner:
-    #   when e is PracticeExerciseConfig:
-    #     addValOrNull(test_runner, addBool)
-    # of eckRepresenter:
-    #   if e.representer.isSome():
-    #     result.addRepresenter(e.representer.get());
-    # of eckIcon:
-    #   result.addString("icon", e.icon)
-    # of eckBlurb:
-    #   result.addString("blurb", e.blurb)
-    # of eckSource:
-    #   if e.source.isSome():
-    #     result.addString("source", e.source.get())
-    # of eckSourceUrl:
-    #   if e.source_url.isSome():
-    #     result.addString("source_url", e.source_url.get())
-    # of eckCustom:
-    #   addValOrNull(custom, addObject)
+      if e.articles.len > 0:
+        result.addArticles(e.articles)
   result.removeComma()
   result.add "\n}\n"
