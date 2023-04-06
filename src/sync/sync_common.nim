@@ -423,7 +423,7 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
 
 func addApproachesIntroduction(result: var string;
     val: ApproachesIntroductionConfig; indentLevel = 1) =
-  ## Appends the pretty-printed JSON for a `representer` key with value `val` to
+  ## Appends the pretty-printed JSON for an `introduction` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
   escapeJson("introduction", result)
@@ -434,6 +434,36 @@ func addApproachesIntroduction(result: var string;
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
+
+func addApproach(result: var string;
+    val: ApproachConfig; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `approach` element with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  result.add "{"
+  result.addString("uuid", val.uuid, indentLevel + 1)
+  result.addString("slug", val.slug, indentLevel + 1)
+  result.addString("title", val.title, indentLevel + 1)
+  result.addString("blurb", val.blurb, indentLevel + 1)
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
+func addApproaches(result: var string;
+    val: seq[ApproachConfig]; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `approaches` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("approaches", result)
+  result.add ": ["
+  for approach in val:
+    result.addApproach(approach, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "]"
 
 proc prettyApproachesConfig*(e: ApproachesConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
@@ -447,8 +477,7 @@ proc prettyApproachesConfig*(e: ApproachesConfig): string =
       if e.introduction.authors.len > 0 or e.introduction.contributors.len > 0:
         result.addApproachesIntroduction(e.introduction)
     of ackApproaches:
-      discard # TODO
-      # result.addArray("introduction", e.authors)
+      result.addApproaches(e.approaches)
     # of eckContributors:
     #   addValOrNull(contributors, addArray)
     # of eckFiles:
