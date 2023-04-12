@@ -75,7 +75,7 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   ## This includes `.meta/config.json`, `.approaches/config.json`
   ## and `.articles/config.json`.
   ##
-  ## Returns a seq of (docuement kind, path, formatted document) objects
+  ## Returns a seq of (document kind, path, formatted document) objects
   ## containing every exercise's configs that are not already formatted.
   let trackExercisesDir = trackDir / "exercises"
   var seenUnformatted = false
