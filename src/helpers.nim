@@ -48,8 +48,7 @@ func w*(s: string; start: int): int =
   ## A matcher for `scanf`. Similar to `$w`, but only skips (does not bind).
   s.skipWhile(IdentChars, start)
 
-proc setFalseAndPrint*(b: var bool; description: string; path: Path;
-    annotation = "") =
+proc setFalseAndPrint*(b: var bool; description: string; path: Path, annotation = "") =
   ## Sets `b` to `false` and writes a message to stdout containing `description`
   ## and `path`.
   b = false
