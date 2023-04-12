@@ -81,7 +81,6 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   var seenUnformatted = false
   for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
                                                                  trackExercisesDir):
-
     let formatted =
       case documentKind
       of dkExerciseConfig: formatExerciseConfigFile(exerciseKind, configPath)
