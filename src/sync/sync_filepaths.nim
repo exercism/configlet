@@ -62,8 +62,7 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
       genCond(exemplar)
     else:
       genCond(example)
-  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and
-      genCond(invalidator)
+  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and genCond(invalidator)
 
 type
   ExerciseConfig* = object
