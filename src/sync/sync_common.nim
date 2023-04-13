@@ -341,16 +341,14 @@ func exerciseConfigKeyOrderForFmt(e: ConceptExerciseConfig |
   if e.custom.isSome() and e.custom.get().len > 0:
     result.add eckCustom
 
-func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[
-    ApproachesConfigKey] =
+func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[ApproachesConfigKey] =
   result = @[]
   if e.introduction.authors.len > 0:
     result.add ackIntroduction
   if e.approaches.len > 0:
     result.add ackApproaches
 
-func articlesConfigKeyOrderForFmt(e: ArticlesConfig): seq[
-    ArticlesConfigKey] =
+func articlesConfigKeyOrderForFmt(e: ArticlesConfig): seq[ArticlesConfigKey] =
   result = @[]
   if e.articles.len > 0:
     result.add ackArticles
@@ -421,7 +419,8 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   result.add "\n}\n"
 
 func addApproachesIntroduction(result: var string;
-    val: ApproachesIntroductionConfig; indentLevel = 1) =
+                               val: ApproachesIntroductionConfig;
+                               indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `introduction` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -434,8 +433,7 @@ func addApproachesIntroduction(result: var string;
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addApproach(result: var string;
-    val: ApproachConfig; indentLevel = 1) =
+func addApproach(result: var string; val: ApproachConfig; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `approach` element with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -452,7 +450,8 @@ func addApproach(result: var string;
   result.add "},"
 
 func addApproaches(result: var string;
-    val: seq[ApproachConfig]; indentLevel = 1) =
+                   val: seq[ApproachConfig];
+                   indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `approaches` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -481,8 +480,7 @@ func prettyApproachesConfig*(e: ApproachesConfig): string =
   result.removeComma()
   result.add "\n}\n"
 
-func addArticle(result: var string;
-    val: ArticleConfig; indentLevel = 1) =
+func addArticle(result: var string; val: ArticleConfig; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `article` element with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
