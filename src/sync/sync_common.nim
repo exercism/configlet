@@ -496,8 +496,7 @@ func addArticle(result: var string; val: ArticleConfig; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addArticles(result: var string;
-    val: seq[ArticleConfig]; indentLevel = 1) =
+func addArticles(result: var string; val: seq[ArticleConfig]; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `articles` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
