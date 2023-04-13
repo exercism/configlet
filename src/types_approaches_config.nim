@@ -1,4 +1,4 @@
-import "."/[helpers]
+import "."/helpers
 
 type
   ApproachesConfigKey* = enum
