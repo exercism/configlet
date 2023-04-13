@@ -434,7 +434,7 @@ func addApproachesIntroduction(result: var string;
   result.add "},"
 
 func addApproach(result: var string; val: ApproachConfig; indentLevel = 1) =
-  ## Appends the pretty-printed JSON for an `approach` element with value `val` to
+  ## Appends the pretty-printed JSON for an `approach` object with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
   result.add "{"
@@ -481,7 +481,7 @@ func prettyApproachesConfig*(e: ApproachesConfig): string =
   result.add "\n}\n"
 
 func addArticle(result: var string; val: ArticleConfig; indentLevel = 1) =
-  ## Appends the pretty-printed JSON for an `article` element with value `val` to
+  ## Appends the pretty-printed JSON for an `article` object with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
   result.add "{"
