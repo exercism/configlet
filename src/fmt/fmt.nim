@@ -136,7 +136,7 @@ proc fmt*(conf: Conf) =
             trackConfigPath)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   logNormal("Looking for exercises that lack a formatted '.meta/config.json', " &
-            "'.approaches/config.json'\nor '.approaches/config.json' file...")
+            "'.approaches/config.json'\nor '.articles/config.json' file...")
 
   let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
 
