@@ -420,7 +420,6 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   result.removeComma()
   result.add "\n}\n"
 
-
 func addApproachesIntroduction(result: var string;
     val: ApproachesIntroductionConfig; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `introduction` key with value `val` to
