@@ -106,7 +106,7 @@ proc userSaysYes(userExercise: string): bool =
   ## confirm.
   let s = if userExercise.len > 0: "" else: "s"
   while true:
-    stderr.write &"Format the above exercise config{s} ([y]es/[n]o)? "
+    stderr.write &"Format the above file{s} ([y]es/[n]o)? "
     case stdin.readLine().toLowerAscii()
     of "y", "yes":
       return true
