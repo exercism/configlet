@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
 import pkg/jsony
-import ".."/[cli, logger, types_exercise_config, types_track_config]
+import ".."/[cli, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
 func replace(slug: Slug, sub: char, by: char): string {.borrow.}
@@ -142,9 +142,9 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
       let contents =
         case configPair.exerciseConfig.kind
         of ekConcept:
-          configPair.exerciseConfig.c.pretty(prettyMode = pmSync)
+          configPair.exerciseConfig.c.prettyExerciseConfig(prettyMode = pmSync)
         of ekPractice:
-          configPair.exerciseConfig.p.pretty(prettyMode = pmSync)
+          configPair.exerciseConfig.p.prettyExerciseConfig(prettyMode = pmSync)
       writeFile(path, contents)
     else:
       stderr.writeLine &"Unexpected path before writing: {path}"

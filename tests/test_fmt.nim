@@ -48,26 +48,26 @@ proc testFmt =
       test "empty Concept Exercise":
         let empty = ConceptExerciseConfig()
         check:
-          empty.pretty(pmFmt) == emptyConceptExerciseContents
+          empty.prettyExerciseConfig(pmFmt) == emptyConceptExerciseContents
 
       test "empty Practice Exercise":
         let empty = PracticeExerciseConfig()
         check:
-          empty.pretty(pmFmt) == emptyPracticeExerciseContents
+          empty.prettyExerciseConfig(pmFmt) == emptyPracticeExerciseContents
 
       test "reorders mandatory keys - Concept Exercise":
         let empty = ConceptExerciseConfig(
           originalKeyOrder: @[eckBlurb, eckAuthors, eckFiles]
         )
         check:
-          empty.pretty(pmFmt) == emptyConceptExerciseContents
+          empty.prettyExerciseConfig(pmFmt) == emptyConceptExerciseContents
 
       test "reorders mandatory keys - Practice Exercise":
         let empty = PracticeExerciseConfig(
           originalKeyOrder: @[eckBlurb, eckAuthors, eckFiles]
         )
         check:
-          empty.pretty(pmFmt) == emptyPracticeExerciseContents
+          empty.prettyExerciseConfig(pmFmt) == emptyPracticeExerciseContents
 
     test "omits optional keys that have an empty value - Concept Exercise":
       let p = ConceptExerciseConfig(
@@ -91,7 +91,7 @@ proc testFmt =
       }
       """.dedent(6)
       check:
-        p.pretty(pmFmt) == expected
+        p.prettyExerciseConfig(pmFmt) == expected
 
     test "omits optional keys that have an empty value - Practice Exercise":
       let p = PracticeExerciseConfig(
@@ -115,7 +115,7 @@ proc testFmt =
       }
       """.dedent(6)
       check:
-        p.pretty(pmFmt) == expected
+        p.prettyExerciseConfig(pmFmt) == expected
 
     block:
       let customJson = """
@@ -213,7 +213,7 @@ proc testFmt =
           shuffle(exerciseConfig.originalKeyOrder)
           shuffle(exerciseConfig.files.originalKeyOrder)
           check:
-            exerciseConfig.pretty(pmFmt) == expected
+            exerciseConfig.prettyExerciseConfig(pmFmt) == expected
 
       test "populated config with random key order - Practice Exercise":
         var exerciseConfig = PracticeExerciseConfig(
@@ -294,7 +294,7 @@ proc testFmt =
           shuffle(exerciseConfig.originalKeyOrder)
           shuffle(exerciseConfig.files.originalKeyOrder)
           check:
-            exerciseConfig.pretty(pmFmt) == expected
+            exerciseConfig.prettyExerciseConfig(pmFmt) == expected
 
     test "fmt omits `test_runner: true`":
       let exerciseConfig = PracticeExerciseConfig(
@@ -312,7 +312,7 @@ proc testFmt =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty(pmFmt) == expected
+        exerciseConfig.prettyExerciseConfig(pmFmt) == expected
 
     block:
       # This checks that we format every exercise `.meta/config.json` file in
@@ -361,7 +361,7 @@ proc testFmt =
         for exerciseDir in getSortedSubdirs(conceptExercisesDir.Path):
           let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
           let exerciseConfig = parseFile(exerciseConfigPath, ConceptExerciseConfig)
-          let ourSerialization = exerciseConfig.pretty(pmFmt)
+          let ourSerialization = exerciseConfig.prettyExerciseConfig(pmFmt)
           let stdlibSerialization = fmtViaRoundtrip(exerciseConfig)
           check ourSerialization == stdlibSerialization
 
@@ -369,7 +369,7 @@ proc testFmt =
         for exerciseDir in getSortedSubdirs(practiceExercisesDir.Path):
           let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
           let exerciseConfig = parseFile(exerciseConfigPath, PracticeExerciseConfig)
-          let ourSerialization = exerciseConfig.pretty(pmFmt)
+          let ourSerialization = exerciseConfig.prettyExerciseConfig(pmFmt)
           let stdlibSerialization = fmtViaRoundtrip(exerciseConfig)
           check ourSerialization == stdlibSerialization
 

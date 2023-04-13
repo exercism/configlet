@@ -1,6 +1,6 @@
 import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils]
-import pkg/jsony
-import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config]
+import ".."/[cli, helpers, lint/validators, types_exercise_config, types_track_config,
+             types_approaches_config, types_articles_config]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
   ## Asks the user if they want to sync the given `syncKind`, and returns `true`
@@ -56,6 +56,14 @@ func addExerciseConfigPath*(s: var string) =
   const pathExerciseConfig = DirSep & joinPath(".meta", "config.json")
   s.add pathExerciseConfig
 
+func addApproachesConfigPath*(s: var string) =
+  const pathExerciseConfig = DirSep & joinPath(".approaches", "config.json")
+  s.add pathExerciseConfig
+
+func addArticlesConfigPath*(s: var string) =
+  const pathExerciseConfig = DirSep & joinPath(".articles", "config.json")
+  s.add pathExerciseConfig
+
 func identity(s: string): string =
   s
 
@@ -104,27 +112,6 @@ func renameHook*(f: var (ConceptExerciseFiles | PracticeExerciseFiles); key: str
     f.originalKeyOrder.add fk
   except ValueError:
     discard
-
-proc parseFile*(path: string, T: typedesc): T =
-  ## Parses the JSON file at `path` into `T`.
-  let contents =
-    try:
-      readFile(path)
-    except IOError:
-      let msg = getCurrentExceptionMsg()
-      stderr.writeLine &"Error: {msg}"
-      quit 1
-  if contents.len > 0:
-    try:
-      contents.fromJson(T)
-    except jsony.JsonError:
-      let jsonyMsg = getCurrentExceptionMsg()
-      let details = tidyJsonyMessage(jsonyMsg, contents)
-      let msg = &"JSON parsing error:\n{path}{details}"
-      stderr.writeLine msg
-      quit 1
-  else:
-    T()
 
 func addNewlineAndIndent(s: var string, indentLevel: int) =
   ## Appends a newline and spaces (given by `indentLevel` multiplied by 2) to
@@ -292,7 +279,8 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
     stderr.writeLine val.pretty()
     quit 1
 
-func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConfigKey] =
+func exerciseConfigKeyOrderForSync(originalKeyOrder: seq[
+    ExerciseConfigKey]): seq[ExerciseConfigKey] =
   if originalKeyOrder.len == 0:
     return @[eckAuthors, eckFiles, eckBlurb]
   else:
@@ -325,8 +313,9 @@ func keyOrderForSync(originalKeyOrder: seq[ExerciseConfigKey]): seq[ExerciseConf
         i
       result.insert(eckBlurb, insertionIndex)
 
-func keyOrderForFmt(e: ConceptExerciseConfig |
-                       PracticeExerciseConfig): seq[ExerciseConfigKey] =
+func exerciseConfigKeyOrderForFmt(e: ConceptExerciseConfig |
+                                     PracticeExerciseConfig): seq[
+                                         ExerciseConfigKey] =
   result = @[eckAuthors]
   if e.contributors.isSome() and e.contributors.get().len > 0:
     result.add eckContributors
@@ -352,14 +341,26 @@ func keyOrderForFmt(e: ConceptExerciseConfig |
   if e.custom.isSome() and e.custom.get().len > 0:
     result.add eckCustom
 
+func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[ApproachesConfigKey] =
+  result = @[]
+  if e.introduction.authors.len > 0:
+    result.add ackIntroduction
+  if e.approaches.len > 0:
+    result.add ackApproaches
+
+func articlesConfigKeyOrderForFmt(e: ArticlesConfig): seq[ArticlesConfigKey] =
+  result = @[]
+  if e.articles.len > 0:
+    result.add ackArticles
+
 template addValOrNull(key, f: untyped) =
   if e.key.isSome():
     result.f(&"{key}", e.key.get())
   else:
     result.addNull(&"{key}")
 
-proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
-             prettyMode: PrettyMode): string =
+proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
+                           prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
   ## - the original key order if `prettyMode` is `pmSync`.
   ## - the canonical key order if `prettyMode` is `pmFmt`.
@@ -377,9 +378,9 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   let keys =
     case prettyMode
     of pmSync:
-      keyOrderForSync(e.originalKeyOrder)
+      exerciseConfigKeyOrderForSync(e.originalKeyOrder)
     of pmFmt:
-      keyOrderForFmt(e)
+      exerciseConfigKeyOrderForFmt(e)
 
   result = newStringOfCap(1000)
   result.add '{'
@@ -414,5 +415,109 @@ proc pretty*(e: ConceptExerciseConfig | PracticeExerciseConfig,
         result.addString("source_url", e.source_url.get())
     of eckCustom:
       addValOrNull(custom, addObject)
+  result.removeComma()
+  result.add "\n}\n"
+
+func addApproachesIntroduction(result: var string;
+                               val: ApproachesIntroductionConfig;
+                               indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `introduction` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("introduction", result)
+  result.add ": {"
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
+func addApproach(result: var string; val: ApproachConfig; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `approach` object with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  result.add "{"
+  result.addString("uuid", val.uuid, indentLevel + 1)
+  result.addString("slug", val.slug, indentLevel + 1)
+  result.addString("title", val.title, indentLevel + 1)
+  result.addString("blurb", val.blurb, indentLevel + 1)
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
+func addApproaches(result: var string;
+                   val: seq[ApproachConfig];
+                   indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `approaches` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("approaches", result)
+  result.add ": ["
+  for approach in val:
+    result.addApproach(approach, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "]"
+
+func prettyApproachesConfig*(e: ApproachesConfig): string =
+  ## Serializes `e` as pretty-printed JSON, using the canonical key order.
+  let keys = approachesConfigKeyOrderForFmt(e)
+
+  result = newStringOfCap(1000)
+  result.add '{'
+  for key in keys:
+    case key
+    of ackIntroduction:
+      if e.introduction.authors.len > 0 or e.introduction.contributors.len > 0:
+        result.addApproachesIntroduction(e.introduction)
+    of ackApproaches:
+      if e.approaches.len > 0:
+        result.addApproaches(e.approaches)
+  result.removeComma()
+  result.add "\n}\n"
+
+func addArticle(result: var string; val: ArticleConfig; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `article` object with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  result.add "{"
+  result.addString("uuid", val.uuid, indentLevel + 1)
+  result.addString("slug", val.slug, indentLevel + 1)
+  result.addString("title", val.title, indentLevel + 1)
+  result.addString("blurb", val.blurb, indentLevel + 1)
+  result.addArray("authors", val.authors, indentLevel + 1)
+  if val.contributors.len > 0:
+    result.addArray("contributors", val.contributors, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
+func addArticles(result: var string; val: seq[ArticleConfig]; indentLevel = 1) =
+  ## Appends the pretty-printed JSON for an `articles` key with value `val` to
+  ## `result`.
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("articles", result)
+  result.add ": ["
+  for article in val:
+    result.addArticle(article, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "]"
+
+func prettyArticlesConfig*(e: ArticlesConfig): string =
+  ## Serializes `e` as pretty-printed JSON, using the canonical key order.
+  let keys = articlesConfigKeyOrderForFmt(e)
+
+  result = newStringOfCap(1000)
+  result.add '{'
+  for key in keys:
+    case key
+    of ackArticles:
+      if e.articles.len > 0:
+        result.addArticles(e.articles)
   result.removeComma()
   result.add "\n}\n"

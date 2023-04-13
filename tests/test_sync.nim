@@ -86,7 +86,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        empty.pretty(pmSync) == expected
+        empty.prettyExerciseConfig(pmSync) == expected
 
     test "empty Practice Exercise":
       let empty = PracticeExerciseConfig()
@@ -102,7 +102,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        empty.pretty(pmSync) == expected
+        empty.prettyExerciseConfig(pmSync) == expected
 
     test "Practice Exercise with `custom` key having value of the empty object":
       let p = PracticeExerciseConfig(
@@ -125,7 +125,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        p.pretty(pmSync) == expected
+        p.prettyExerciseConfig(pmSync) == expected
 
     let customJson = """
       {
@@ -217,7 +217,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty(pmSync) == expected
+        exerciseConfig.prettyExerciseConfig(pmSync) == expected
 
     test "populated Practice Exercise":
       let exerciseConfig = PracticeExerciseConfig(
@@ -294,7 +294,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty(pmSync) == expected
+        exerciseConfig.prettyExerciseConfig(pmSync) == expected
 
     test "test_runner: true is not omitted when not formatting":
       let exerciseConfig = PracticeExerciseConfig(
@@ -313,7 +313,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty(pmSync) == expected
+        exerciseConfig.prettyExerciseConfig(pmSync) == expected
 
     test "pretty: can use `pmSync` when an optional key has the value `null`":
       let exerciseConfig = PracticeExerciseConfig(
@@ -332,7 +332,7 @@ proc testSyncCommon =
       }
       """.dedent(6)
       check:
-        exerciseConfig.pretty(pmSync) == expected
+        exerciseConfig.prettyExerciseConfig(pmSync) == expected
 
     proc stdlibSerialize(path: string): string =
       var j = json.parseFile(path)
@@ -346,7 +346,7 @@ proc testSyncCommon =
       for exerciseDir in getSortedSubdirs(conceptExercisesDir.Path):
         let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, ConceptExerciseConfig)
-        let ourSerialization = exerciseConfig.pretty(pmSync)
+        let ourSerialization = exerciseConfig.prettyExerciseConfig(pmSync)
         let stdlibSerialization = stdlibSerialize(exerciseConfigPath)
         check ourSerialization == stdlibSerialization
 
@@ -354,7 +354,7 @@ proc testSyncCommon =
       for exerciseDir in getSortedSubdirs(practiceExercisesDir.Path):
         let exerciseConfigPath = joinPath(exerciseDir.string, ".meta", "config.json")
         let exerciseConfig = parseFile(exerciseConfigPath, PracticeExerciseConfig)
-        let ourSerialization = exerciseConfig.pretty(pmSync)
+        let ourSerialization = exerciseConfig.prettyExerciseConfig(pmSync)
         let stdlibSerialization = stdlibSerialize(exerciseConfigPath)
         check ourSerialization == stdlibSerialization
 

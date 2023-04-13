@@ -1,6 +1,6 @@
 import std/[options, os, strformat, strutils]
 import pkg/parsetoml
-import ".."/[cli, logger, types_exercise_config, types_track_config]
+import ".."/[cli, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
 # Silence the styleCheck hint for `source_url`.
@@ -94,7 +94,7 @@ proc addUnsynced(configPairs: var seq[PathAndUpdatedConfig];
 
 proc write(configPairs: seq[PathAndUpdatedConfig]) =
   for configPair in configPairs:
-    let updatedJson = pretty(configPair.practiceExerciseConfig, pmSync)
+    let updatedJson = prettyExerciseConfig(configPair.practiceExerciseConfig, pmSync)
     let path = configPair.path
     if path.endsWith(&".meta{DirSep}config.json"):
       createDir path.parentDir()
