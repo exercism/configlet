@@ -123,7 +123,7 @@ proc writeFormatted(prettyPairs: seq[PathAndFormattedDocument]) =
     logDetailed(&"Writing formatted: {path}")
     writeFile(path, prettyPair.formattedDocument)
   let s = if prettyPairs.len > 1: "s" else: ""
-  logNormal(&"Formatted the exercise config for {prettyPairs.len} exercise{s}")
+  logNormal(&"Formatted {prettyPairs.len} file{s}")
 
 proc fmt*(conf: Conf) =
   ## Prints a list of `.meta/config.json` paths in `conf.trackDir` where the
