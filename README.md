@@ -2,7 +2,7 @@
 
 The official tool for managing Exercism language track repositories.
 
-## Use in your track
+## Download
 
 Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too.
 The first is a bash script, and the second is a PowerShell script.
