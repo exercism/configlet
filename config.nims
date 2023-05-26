@@ -6,6 +6,7 @@ switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
 when defined(nimHasOutParams):
   switch("experimental", "strictDefs")
+switch("mm", "refc")
 
 # Replace the stdlib JSON modules with our own stricter versions.
 patchFile("stdlib", "json", "src/patched_stdlib/json")
