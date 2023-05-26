@@ -2,6 +2,14 @@
 
 The official tool for managing Exercism language track repositories.
 
+## Use in your track
+
+Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too.
+The first is a bash script, and the second is a PowerShell script.
+
+Running one of these scripts downloads the latest version of configlet to the `bin` directory.
+You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
+
 ## Usage
 
 The application is a single binary and can be used as follows:
@@ -390,14 +398,6 @@ For example, if the track has a concept named `floating-point-numbers` then an `
 You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file.
 The generated `introduction.md` is identical to the `introduction.md.tpl`, except that concept placeholders are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading).
 In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
-
-## Use in your track
-
-Each track should have a `bin/fetch-configlet` script, and might have a `bin/fetch-configlet.ps1` script too.
-The first is a bash script, and the second is a PowerShell script.
-
-Running one of these scripts downloads the latest version of configlet to the `bin` directory.
-You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
 
 ## Contributing
 
