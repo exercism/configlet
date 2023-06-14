@@ -1,24 +1,7 @@
 import std/[options, os, strformat, strutils]
 import pkg/[jsony, uuids]
 import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
-    sync/sync, types_track_config]
-
-type
-  ApproachesIntroductionConfig* = object
-    authors*: seq[string]
-    contributors*: Option[seq[string]]
-
-  ApproachConfig* = object
-    uuid*: string
-    slug*: string
-    title*: string
-    blurb*: string
-    authors*: seq[string]
-    contributors*: Option[seq[string]]
-
-  ApproachesConfig* = object
-    introduction*: Option[ApproachesIntroductionConfig]
-    approaches*: seq[ApproachConfig]
+    sync/sync, types_track_config, types_approaches_config]
 
 func kebabToTitleCase(slug: Slug): string =
   result = newStringOfCap(slug.len)
@@ -42,7 +25,10 @@ proc createApproach*(approachSlug: Slug, exerciseSlug: Slug,
   var config =
     if not fileExists(configPath):
       ApproachesConfig(
-        introduction: none[ApproachesIntroductionConfig](),
+        introduction: ApproachesIntroductionConfig(
+          authors: newSeq[string](),
+          contributors: newSeq[string]()
+        ),
         approaches: newSeq[ApproachConfig]()
       )
     else:
@@ -66,7 +52,8 @@ proc createApproach*(approachSlug: Slug, exerciseSlug: Slug,
       authors: newSeq[string]()
     )
 
-    writeFile(configPath, config.toJson())
+    let formattedConfig = prettyApproachesConfig(config)
+    writeFile(configPath, formattedConfig)
 
   let approachDir = approachesDir / $approachSlug
   if not dirExists(approachDir):
