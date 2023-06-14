@@ -1,6 +1,7 @@
 import std/[options, os, strformat, strutils]
 import pkg/[jsony, uuids]
-import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
+    sync/sync, types_track_config]
 
 type
   ApproachesIntroductionConfig* = object
@@ -30,14 +31,15 @@ func kebabToTitleCase(slug: Slug): string =
       result.add(if capitalizeNext: toUpperAscii(c) else: c)
       capitalizeNext = false
 
-proc createApproach*(approachSlug: Slug, exerciseSlug: Slug, exerciseDir: string) =
+proc createApproach*(approachSlug: Slug, exerciseSlug: Slug,
+    exerciseDir: string) =
   let approachesDir = exerciseDir / ".approaches"
   let configPath = approachesDir / "config.json"
 
   if not dirExists(approachesDir):
     createDir(approachesDir)
 
-  var config = 
+  var config =
     if not fileExists(configPath):
       ApproachesConfig(
         introduction: none[ApproachesIntroductionConfig](),
@@ -46,7 +48,7 @@ proc createApproach*(approachSlug: Slug, exerciseSlug: Slug, exerciseDir: string
     else:
       parseFile(configPath, ApproachesConfig)
 
-  var approachExists = false  
+  var approachExists = false
 
   for approach in config.approaches:
     if $approachSlug == approach.slug:

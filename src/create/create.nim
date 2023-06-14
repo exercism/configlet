@@ -1,5 +1,6 @@
 import std/[os, strformat, strutils]
-import ".."/[cli, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
+    sync/sync, types_track_config]
 import "."/[approaches]
 
 proc create*(conf: Conf) =
@@ -10,7 +11,7 @@ proc create*(conf: Conf) =
       let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
       let userExercise = Slug(conf.action.exerciseCreate)
 
-      let exerciseDir = 
+      let exerciseDir =
         if userExercise in trackExerciseSlugs.`concept`:
           conf.trackDir / "exercises" / "concept" / $userExercise
         elif userExercise in trackExerciseSlugs.practice:
@@ -21,10 +22,10 @@ proc create*(conf: Conf) =
                     &"track config:\n{trackConfigPath}"
           stderr.writeLine msg
           quit 1
-      
+
       createApproach(Slug(conf.action.approachSlug), userExercise, exerciseDir)
     else:
       quit 1
   else:
     quit 1
-  
+
