@@ -38,6 +38,7 @@ type
       shell*: Shell
     of actCreate:
       approachSlug*: string
+      articleSlug*: string
       # We can't name this field `exercise` because we use that names
       # in `actSync`, and Nim doesn't yet support duplicate field names
       # in object variants.
@@ -80,6 +81,7 @@ type
 
     # Options for `create`
     optCreateApproach = "approach"
+    optCreateArticle = "article"
 
     # Options for `completion`
     optCompletionShell = "shell"
@@ -230,6 +232,7 @@ func genHelpText: string =
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optCreateApproach: "The slug of the approach",
+    optCreateArticle: "The slug of the article",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",
@@ -285,6 +288,8 @@ func genHelpText: string =
             case key
             of "approachSlug":
               optCreateApproach
+            of "articleSlug":
+              optCreateArticle
             of "exerciseCreate":
               optFmtSyncCreateExercise
             of "exerciseFmt":
@@ -520,6 +525,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       case opt
       of optCreateApproach:
         setActionOpt(approachSlug, val)
+      of optCreateArticle:
+        setActionOpt(articleSlug, val)
       of optFmtSyncCreateExercise:
         setActionOpt(exerciseCreate, val)
       else:

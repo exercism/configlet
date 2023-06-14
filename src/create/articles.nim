@@ -1,0 +1,65 @@
+import std/[options, os, strformat, strutils]
+import pkg/[jsony, uuids]
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
+    sync/sync, types_track_config, types_articles_config]
+
+func kebabToTitleCase(slug: Slug): string =
+  result = newStringOfCap(slug.len)
+  var capitalizeNext = true
+  for c in slug.string:
+    if c == '-':
+      result.add ' '
+      capitalizeNext = true
+    else:
+      result.add(if capitalizeNext: toUpperAscii(c) else: c)
+      capitalizeNext = false
+
+proc createArticle*(articleSlug: Slug, exerciseSlug: Slug,
+    exerciseDir: string) =
+  let articlesDir = exerciseDir / ".articles"
+  let configPath = articlesDir / "config.json"
+
+  if not dirExists(articlesDir):
+    createDir(articlesDir)
+
+  var config =
+    if not fileExists(configPath):
+      ArticlesConfig(
+        articles: newSeq[ArticleConfig]()
+      )
+    else:
+      parseFile(configPath, ArticlesConfig)
+
+  var articlexists = false
+
+  for article in config.articles:
+    if $articleSlug == article.slug:
+      articlexists = true
+      break
+
+  let title = kebabToTitleCase(articleSlug)
+
+  if not articlexists:
+    config.articles.add ArticleConfig(
+      uuid: $genUUID(),
+      slug: $articleSlug,
+      title: title,
+      blurb: "",
+      authors: newSeq[string]()
+    )
+
+    let formattedConfig = prettyArticlesConfig(config)
+    writeFile(configPath, formattedConfig)
+
+  let articleDir = articlesDir / $articleSlug
+  if not dirExists(articleDir):
+    createDir(articleDir)
+
+  let contentPath = articleDir / "content.md"
+  let snippetPath = articleDir / "snippet.md"
+
+  if not fileExists(contentPath):
+    writeFile(contentPath, &"# {title}\n\n")
+
+  if not fileExists(snippetPath):
+    writeFile(snippetPath, "")
