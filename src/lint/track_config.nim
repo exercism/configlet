@@ -62,8 +62,8 @@ proc hasValidTestRunner(data: JsonNode; path: Path): bool =
       # Only check the `test_runner` object if `status.test_runner` is `true`.
       if data[s][k].getBool():
         if hasObject(data, k, path):
-          result = hasFloat(data[k], "average_run_time", path, k,
-                            requirePositive = true, decimalPlaces = 1)
+          result = hasInteger(data[k], "average_run_time", path, k,
+                              allowed = 1..20)
       else:
         result = true
 
