@@ -1,5 +1,4 @@
 import std/[os, strformat, strutils]
-import pkg/jsony
 import ".."/[cli, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
@@ -62,7 +61,8 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
       genCond(exemplar)
     else:
       genCond(example)
-  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and genCond(invalidator)
+  uniqueCond and genCond(solution) and genCond(test) and genCond(editor) and
+      genCond(invalidator)
 
 type
   ExerciseConfig* = object

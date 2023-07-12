@@ -109,7 +109,7 @@ func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
     if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optSyncTests}:
+               optSyncTests, optCreateApproach, optCreateArticle}:
       result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
@@ -178,6 +178,7 @@ func genHelpText: string =
         of optCompletionShell: "shell"
         of optFmtSyncCreateExercise: "slug"
         of optCreateApproach: "slug"
+        of optCreateArticle: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
