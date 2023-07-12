@@ -1,6 +1,5 @@
-import std/[os, strformat, strutils]
-import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
-    sync/sync, types_track_config]
+import std/[os, strformat]
+import ".."/[cli, helpers, sync/sync, types_track_config]
 import "."/[approaches, articles]
 
 proc create*(conf: Conf) =

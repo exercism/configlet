@@ -1,7 +1,6 @@
-import std/[options, os, strformat, strutils]
+import std/[os, strformat, strutils]
 import pkg/[jsony, uuids]
-import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths,
-    sync/sync, types_track_config, types_approaches_config]
+import ".."/[helpers, sync/sync_common, types_track_config, types_approaches_config]
 
 func kebabToTitleCase(slug: Slug): string =
   result = newStringOfCap(slug.len)
