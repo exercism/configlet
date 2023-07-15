@@ -63,7 +63,7 @@ jobs:
   checksums:
     needs: [build]
     runs-on: ubuntu-22.04
-    name: Upload checksums file
+    name: Upload signatures and checksums
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
@@ -71,8 +71,8 @@ jobs:
       - name: Install minisign
         run: ./.github/bin/linux-install-minisign
 
-      - name: Upload checksums file
-        run: ./.github/bin/upload-checksums-file
+      - name: Upload signatures and checksums
+        run: ./.github/bin/upload-signatures-and-checksums
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
