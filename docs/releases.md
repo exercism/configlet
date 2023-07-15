@@ -9,7 +9,7 @@
 1. Ideally, check that `configlet lint` and `configlet sync` do not produce unexpected output on any track - diffing the output from the previous release.
 
 1. Double-check that the repo is in a state such that a release makes sense.
-   Remember that we do not usually force-push to `main`, so any release commit (and tag) will remain permanently.
+   Remember that we do not force-push to `main`, so any release commit (and tag) will remain permanently.
 
 1. If any commit has been merged since the release PR was created, rebase the release PR on `main`.
    This ensures that CI tests the merge immediately before the release.
