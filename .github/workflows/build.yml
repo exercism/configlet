@@ -68,7 +68,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 
+      - name: Install minisign
+        run: ./.github/bin/linux-install-minisign
+
       - name: Upload checksums file
         run: ./.github/bin/upload-checksums-file
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}

@@ -13,5 +13,34 @@ cd "${download_dir}" || exit
 checksums_file="configlet_${build_tag}_checksums_sha256.txt"
 sha256sum -- * > "${checksums_file}"
 
-# Upload checksums file
-gh release upload "${build_tag}" "${checksums_file}"
+# Write secret key to expected location
+if [ -n "${MINISIGN_SECRET_KEY}" ]; then
+  minisign_dir="${HOME}/.minisign"
+  mkdir -p "${minisign_dir}"
+  printenv MINISIGN_SECRET_KEY > "${minisign_dir}/minisign.key"
+else
+  printf "MINISIGN_SECRET_KEY environment variable not found. Exiting."
+  exit 1
+fi
+
+# Write password (see https://github.com/jedisct1/minisign/issues/43)
+password_path='minisign_password.txt'
+if [ -n "${MINISIGN_PASSWORD}" ]; then
+  printenv MINISIGN_PASSWORD > "${password_path}"
+else
+  printf "MINISIGN_PASSWORD environment variable not found. Exiting."
+  exit 1
+fi
+
+# Sign checksum file
+dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
+# The below is the same format as minisign's default, but using a non-unix timestamp.
+trusted_comment="timestamp:${dt}   file:${checksums_file}    hashed"
+minisign -Sm "${checksums_file}" -t "${trusted_comment}" < "${password_path}"
+
+# Verify the signed file
+minisign_public_key='RWSDBrBOL29nTxsWe47s5pdnGLNvklqoM84yKr2oYvwhLMDVkpA51RnH'
+minisign -Vm "${checksums_file}" -P "${minisign_public_key}"
+
+# Upload checksums file and its signature file
+gh release upload "${build_tag}" "${checksums_file}" "${checksums_file}.minisig"
