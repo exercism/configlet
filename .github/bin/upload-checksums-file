@@ -8,11 +8,6 @@ build_tag="${GITHUB_REF_NAME}"
 download_dir="releases/${build_tag}"
 gh release download "${build_tag}" --dir "${download_dir}"
 
-# Write checksums file
-cd "${download_dir}" || exit
-checksums_file="configlet_${build_tag}_checksums_sha256.txt"
-sha256sum -- * > "${checksums_file}"
-
 # Write secret key to expected location
 if [ -n "${MINISIGN_SECRET_KEY}" ]; then
   minisign_dir="${HOME}/.minisign"
@@ -23,15 +18,23 @@ else
   exit 1
 fi
 
-# Sign checksum file
-dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
-# The below is the same format as minisign's default, but using a non-unix timestamp.
-trusted_comment="timestamp:${dt}   file:${checksums_file}    hashed"
-minisign -Sm "${checksums_file}" -t "${trusted_comment}"
+cd "${download_dir}" || exit
 
-# Verify the signed file
-minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
-minisign -Vm "${checksums_file}" -P "${minisign_public_key}"
+# Write checksums file
+checksums_file="configlet_${build_tag}_checksums_sha256.txt"
+sha256sum -- * > "${checksums_file}"
 
-# Upload checksums file and its signature file
-gh release upload "${build_tag}" "${checksums_file}" "${checksums_file}.minisig"
+for file in ./*; do
+  # Create minisig file with a custom trusted comment
+  dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
+  # The below is the same format as minisign's default, but using a non-unix timestamp.
+  trusted_comment="timestamp:${dt}   file:${file}    hashed"
+  minisign -Sm "${file}" -t "${trusted_comment}"
+
+  # Verify the signed file
+  minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
+  minisign -Vm "${file}" -P "${minisign_public_key}"
+done
+
+# Upload checksums file and signature files
+gh release upload "${build_tag}" "${checksums_file}" ./*.minisig
