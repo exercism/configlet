@@ -32,8 +32,8 @@ for file in ./*; do
   minisign -Sm "${file}" -t "${trusted_comment}"
 
   # Verify the signed file
-  minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
-  minisign -Vm "${file}" -P "${minisign_public_key}"
+  configlet_minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
+  minisign -Vm "${file}" -P "${configlet_minisign_public_key}"
 done
 
 # Upload checksums file and signature files
