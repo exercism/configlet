@@ -9,12 +9,12 @@ download_dir="releases/${build_tag}"
 gh release download "${build_tag}" --dir "${download_dir}"
 
 # Write secret key to expected location
-if [ -n "${MINISIGN_SECRET_KEY}" ]; then
+if [ -n "${CONFIGLET_MINISIGN_SECRET_KEY}" ]; then
   minisign_dir="${HOME}/.minisign"
   mkdir -p "${minisign_dir}"
-  printenv MINISIGN_SECRET_KEY > "${minisign_dir}/minisign.key"
+  printenv CONFIGLET_MINISIGN_SECRET_KEY > "${minisign_dir}/minisign.key"
 else
-  printf "MINISIGN_SECRET_KEY environment variable not found. Exiting."
+  printf "CONFIGLET_MINISIGN_SECRET_KEY environment variable not found. Exiting."
   exit 1
 fi
 

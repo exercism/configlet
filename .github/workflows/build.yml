@@ -75,4 +75,4 @@ jobs:
         run: ./.github/bin/upload-signatures-and-checksums
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          CONFIGLET_MINISIGN_SECRET_KEY: ${{ secrets.CONFIGLET_MINISIGN_SECRET_KEY }}
