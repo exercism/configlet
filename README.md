@@ -10,6 +10,41 @@ The first is a bash script, and the second is a PowerShell script.
 Running one of these scripts downloads the latest version of configlet to the `bin` directory.
 You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
 
+### Verifying
+
+We sign each configlet release archive with [`minisign`](https://jedisct1.github.io/minisign/).
+
+For now, if you want to verify the signature of a configlet release, you need to do it manually.
+The `fetch-configlet` script may support checking the release signature in the future, but it won't be required: we don't want to require every `fetch-configlet` user to install `minisign`.
+
+To verify a release archive, first download from the assets section of a [release](https://github.com/exercism/configlet/releases) the archive and its corresponding `.minisig` file.
+Write them to the same directory.
+For example, to verify the configlet 4.0.0 Linux x86-64 release, download these files to the same directory:
+
+```text
+configlet_4.0.0_linux_x86-64.tar.gz
+configlet_4.0.0_linux_x86-64.tar.gz.minisig
+```
+
+Then run a `minisign` command in that directory:
+
+```shell
+minisign -Vm configlet_4.0.0_linux_x86-64.tar.gz -P RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE
+```
+
+where the argument to `-P` is the configlet public key.
+
+The release is verified if (and only if) the output contains `Signature and comment signature verified`.
+For example:
+
+```text
+Signature and comment signature verified
+Trusted comment: timestamp:2023-07-15T12:34:56Z   file:./configlet_4.0.0_linux_x86-64.tar.gz    hashed
+```
+
+Then extract the archive to obtain the (now-verified) configlet executable.
+You may delete the archive and the `.minisig` file.
+
 ## Usage
 
 The application is a single binary and can be used as follows:
