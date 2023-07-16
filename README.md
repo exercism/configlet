@@ -39,7 +39,7 @@ For example:
 
 ```text
 Signature and comment signature verified
-Trusted comment: timestamp:2023-07-15T12:34:56Z   file:configlet_4.0.0_linux_x86-64.tar.gz    hashed
+Trusted comment: timestamp:2023-07-15T12:34:56Z  file:configlet_4.0.0_linux_x86-64.tar.gz  hashed
 ```
 
 Then extract the archive to obtain the (now-verified) configlet executable.

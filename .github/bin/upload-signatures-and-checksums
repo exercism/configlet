@@ -29,7 +29,7 @@ for file in *; do
   # Create minisig file with a custom trusted comment
   dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
   # The below is the same format as minisign's default, but using a non-unix timestamp.
-  trusted_comment="timestamp:${dt}   file:${file}    hashed"
+  trusted_comment="timestamp:${dt}  file:${file}  hashed"
   minisign -Sm "${file}" -t "${trusted_comment}"
 
   # Verify the signed file
