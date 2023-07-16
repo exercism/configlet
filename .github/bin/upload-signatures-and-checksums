@@ -21,6 +21,7 @@ fi
 cd "${download_dir}" || exit
 
 # Write checksums file
+# Don't include checksums of the minisig files
 checksums_file="configlet_${build_tag}_checksums_sha256.txt"
 sha256sum -- * > "${checksums_file}"
 
