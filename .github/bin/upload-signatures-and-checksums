@@ -36,5 +36,19 @@ for file in ./*; do
   minisign -Vm "${file}" -P "${configlet_minisign_public_key}"
 done
 
+# Don't upload the signature for the checksum file, because:
+#
+# - we want to optimize for the simplicity of verifying a single configlet
+#   release archive, so it's best to have only one way to do it (verify the signature for
+#   that archive).
+#
+# - it's harder to explain the alternative: verify the signature for the checksum file
+#   AND check that the sha256 of the release archive matches that in the checksum file.
+#
+# - it doesn't matter that verifying `n` configlet release archives requires running `n`
+#   minisign commands, rather than exactly 1 minisign command plus 1 `sha256sum --check`
+#   command.
+rm "${checksums_file}.minisig"
+
 # Upload checksums file and signature files
 gh release upload "${build_tag}" "${checksums_file}" ./*.minisig
