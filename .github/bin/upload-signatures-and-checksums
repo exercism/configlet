@@ -25,7 +25,7 @@ cd "${download_dir}" || exit
 checksums_file="configlet_${build_tag}_checksums_sha256.txt"
 sha256sum -- * > "${checksums_file}"
 
-for file in ./*; do
+for file in *; do
   # Create minisig file with a custom trusted comment
   dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
   # The below is the same format as minisign's default, but using a non-unix timestamp.
