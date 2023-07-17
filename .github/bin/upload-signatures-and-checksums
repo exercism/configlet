@@ -18,14 +18,15 @@ else
   exit 1
 fi
 
+# Get the configlet public key from a file in the repo
+configlet_minisign_public_key="$(tail -n1 configlet-minisign.pub)"
+
 cd "${download_dir}" || exit
 
 # Write checksums file
 # Don't include checksums of the minisig files
 checksums_file="configlet_${build_tag}_checksums_sha256.txt"
 sha256sum -- * > "${checksums_file}"
-
-configlet_minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
 
 for file in *; do
   # Create minisig file with a custom trusted comment
