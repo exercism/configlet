@@ -26,6 +26,8 @@ jobs:
 
     name: "${{ matrix.os }}-${{ matrix.arch }}"
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
@@ -64,6 +66,8 @@ jobs:
     needs: [build]
     runs-on: ubuntu-22.04
     name: Upload signatures and checksums
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
