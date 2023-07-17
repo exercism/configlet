@@ -25,6 +25,8 @@ cd "${download_dir}" || exit
 checksums_file="configlet_${build_tag}_checksums_sha256.txt"
 sha256sum -- * > "${checksums_file}"
 
+configlet_minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
+
 for file in *; do
   # Create minisig file with a custom trusted comment
   dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
@@ -33,7 +35,6 @@ for file in *; do
   minisign -Sm "${file}" -t "${trusted_comment}"
 
   # Verify the signed file
-  configlet_minisign_public_key='RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE'
   minisign -Vm "${file}" -P "${configlet_minisign_public_key}"
 done
 
