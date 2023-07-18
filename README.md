@@ -29,7 +29,7 @@ configlet_4.0.0_linux_x86-64.tar.gz.minisig
 Then run a `minisign` command in that directory:
 
 ```shell
-minisign -Vm configlet_4.0.0_linux_x86-64.tar.gz -P RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE
+minisign -Vm configlet_4.0.0_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGtbDUrZerawUcyWnti9MGuWMx7VDW9DqZn2tMZ
 ```
 
 where the above argument to `-P` is the configlet public key.
