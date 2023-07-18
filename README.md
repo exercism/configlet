@@ -17,7 +17,7 @@ We sign each configlet release archive with [`minisign`](https://jedisct1.github
 For now, if you want to verify the signature of a configlet release, you need to do it manually.
 The `fetch-configlet` script may support checking the release signature in the future, but it won't be required: we don't want to require every `fetch-configlet` user to install `minisign`.
 
-To verify a release archive, first download from the assets section of a [release](https://github.com/exercism/configlet/releases) the archive and its corresponding `.minisig` file.
+To verify a release archive, first download (from the assets section of a [release](https://github.com/exercism/configlet/releases)) the archive and its corresponding `.minisig` file.
 Write them to the same directory.
 For example, to verify the configlet 4.0.0 Linux x86-64 release, download these files to the same directory:
 
@@ -32,9 +32,9 @@ Then run a `minisign` command in that directory:
 minisign -Vm configlet_4.0.0_linux_x86-64.tar.gz -P RWR9FAzgZvE/ZfMzAmaWmeQNtlYVGMvdHy99HG5jZkZ8WNYGl+whrQvE
 ```
 
-where the argument to `-P` is the configlet public key.
+where the above argument to `-P` is the configlet public key.
 
-The release is verified if (and only if) the output contains `Signature and comment signature verified`.
+The above command has verified the release archive if (and only if) the command's output contains `Signature and comment signature verified`.
 For example:
 
 ```text
