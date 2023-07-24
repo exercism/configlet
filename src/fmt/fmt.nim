@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
-import "."/[approaches, articles]
-import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config]
+import "."/[approaches, articles, exercises]
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync, types_exercise_config, types_track_config]
 
 type
   DocumentKind* = enum
