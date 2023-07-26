@@ -1,6 +1,6 @@
 import std/[importutils, json, os, options, random, strutils, unittest]
 import pkg/jsony
-import "."/[exec, helpers, sync/sync_common, types_exercise_config]
+import "."/[exec, fmt/exercises, helpers, sync/sync_common, types_exercise_config]
 
 const
   testsDir = currentSourcePath().parentDir()
@@ -348,7 +348,7 @@ proc testFmt =
         if j["representer"].kind != JObject or j["representer"].len == 0:
           delete(j, "representer")
         if j["icon"].getStr().len == 0:
-            delete(j, "icon")
+          delete(j, "icon")
         for k in ["language_versions", "source", "source_url"]:
           if j[k].getStr().len == 0:
             delete(j, k)
