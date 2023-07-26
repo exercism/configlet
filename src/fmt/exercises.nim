@@ -163,7 +163,7 @@ template addValOrNull(key, f: untyped) =
   else:
     result.addNull(&"{key}")
 
-proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
+proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig;
                            prettyMode: PrettyMode): string =
   ## Serializes `e` as pretty-printed JSON, using:
   ## - the original key order if `prettyMode` is `pmSync`.
@@ -222,7 +222,7 @@ proc prettyExerciseConfig*(e: ConceptExerciseConfig | PracticeExerciseConfig,
   result.removeComma()
   result.add "\n}\n"
 
-proc formatExerciseConfigFile*(exerciseKind: ExerciseKind,
+proc formatExerciseConfigFile*(exerciseKind: ExerciseKind;
                               configPath: string): string =
   ## Parses the `.meta/config.json` file at `configPath` and returns it in the
   ## canonical form.
@@ -232,4 +232,3 @@ proc formatExerciseConfigFile*(exerciseKind: ExerciseKind,
     prettyExerciseConfig(exerciseConfig.c, pmFmt)
   of ekPractice:
     prettyExerciseConfig(exerciseConfig.p, pmFmt)
-
