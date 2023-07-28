@@ -46,4 +46,3 @@ proc create*(conf: Conf) =
       quit 1
   else:
     quit 1
-
