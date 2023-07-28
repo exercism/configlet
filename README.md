@@ -20,7 +20,7 @@ Usage:
 
 Commands:
   completion  Output a completion script for a given shell
-  create      Add a new approach
+  create      Add a new approach or article
   fmt         Format the exercise 'config.json' files
   generate    Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
   info        Print some information about the track
