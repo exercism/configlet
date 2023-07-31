@@ -5,6 +5,30 @@ import "."/[cli, helpers]
 type
   Slug* = distinct string ## A `slug` value in a track `config.json` file is a kebab-case string.
 
+type
+  FilePatternsKey* = enum
+    fpSolution = "solution"
+    fpTest = "test"
+    fpExemplar = "exemplar"
+    fpExample = "example"
+    fpEditor = "editor"
+    fpInvalidator = "invalidator"
+
+  TrackConfigKey* = enum
+    tckLanguage = "language"
+    tckSlug = "string"
+    tckActive = "active"
+    tckBlurb = "blurb"
+    tckVersion = "version"
+    tckExercises = "exercises"
+    tckFiles = "files"
+    tckConcepts = "concepts"
+    tckTestRunner = "test_runner"
+    tckOnlineEditor = "online_editor"
+    tckKeyFeatures = "key_features"
+    tckStatus = "status"
+    tckTags = "tags"
+
   Status* = enum
     sMissing = "missing"
     sWip = "wip"
@@ -17,14 +41,20 @@ type
   # values.
   ConceptExercise* = object
     slug*: Slug
+    name*: string
+    uuid*: string
     concepts*: HashSet[string]
     prerequisites*: HashSet[string]
     status*: Status
 
   PracticeExercise* = object
     slug*: Slug
+    name*: string
+    uuid*: string
     practices*: HashSet[string]
     prerequisites*: HashSet[string]
+    difficulty*: int
+    topics*: HashSet[string]
     status*: Status
 
   Exercises* = object
@@ -40,6 +70,15 @@ type
     editor*: seq[string]
     invalidator*: seq[string]
 
+  IndentStyle* = enum
+    isSpace = "space"
+    isTab = "tab"
+
+  OnlineEditor* = object
+    indentStyle*: IndentStyle
+    indentSize*: int
+    highlightjsLanguage*: string
+
   Concept* = object
     name*: string
     slug*: string
@@ -47,11 +86,36 @@ type
 
   Concepts* = seq[Concept]
 
+  KeyFeature* = object
+    icon*: string
+    title*: string
+    content*: string
+
+  KeyFeatures* = seq[KeyFeature]
+
+  TestRunner* = object
+    averageRunTime*: int
+
+  TrackStatus* = object
+    conceptExercises*: bool
+    testRunner*: bool
+    representer*: bool
+    analyzer*: bool
+
   TrackConfig* = object
+    language*: string
     slug*: string
+    active*: bool
+    blurb*: string
+    version*: int
     exercises*: Exercises
     files*: FilePatterns
     concepts*: Concepts
+    testRunner*: TestRunner
+    onlineEditor*: OnlineEditor
+    keyFeatures*: KeyFeatures
+    status*: TrackStatus
+    tags*: HashSet[string]
 
 func `$`*(slug: Slug): string {.borrow.}
 func `==`*(x, y: Slug): bool {.borrow.}

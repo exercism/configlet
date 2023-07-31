@@ -5,6 +5,7 @@ import ".."/[cli, helpers, logger, sync/sync_common, sync/sync,
 
 type
   DocumentKind* = enum
+    dkTrackConfig,
     dkConceptExerciseConfig,
     dkPracticeExerciseConfig,
     dkApproachesConfig,
@@ -16,10 +17,14 @@ type
     formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
-                        trackExercisesDir: string): (DocumentKind, string) =
-  ## Yields the `.meta/config.json`, `.approaches/config.json` and
-  ## `.articles/config.json` paths for each exercise in
-  ## `trackExerciseSlugs` in `trackExercisesDir`.
+                        trackDir: string): (DocumentKind, string) =
+  ## Yield the track's `config.json` file
+  yield (dkTrackConfig, trackDir / "config.json")
+
+  # ## Yields the `.meta/config.json`, `.approaches/config.json` and
+  # ## `.articles/config.json` paths for each exercise in
+  # ## `trackExerciseSlugs` in `trackExercisesDir`.
+  let trackExercisesDir = trackDir / "exercises"
   for exerciseKind in [ekConcept, ekPractice]:
     let documentKind =
       case exerciseKind
@@ -53,19 +58,20 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
              trackDir: string): seq[PathAndFormattedDocument] =
-  ## Reads the config files for every slug in `trackExerciseSlugs`
-  ## in `trackExerciseDir`.
+  ## Reads the track config file and all exercise config files
+  ## for every slug in `trackExerciseSlugs` in `trackExerciseDir`.
   ## This includes `.meta/config.json`, `.approaches/config.json`
-  ## and `.articles/config.json`.
+  ## and `.articles/config.json` for each exercise, and `config.json`
+  ## for the track.
   ##
   ## Returns a seq of (document kind, path, formatted document) objects
   ## containing every exercise's configs that are not already formatted.
-  let trackExercisesDir = trackDir / "exercises"
   var seenUnformatted = false
   for (documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
-                                                   trackExercisesDir):
+                                                   trackDir):
     let formatted =
       case documentKind
+      of dkTrackConfig: formatTrackConfigFile(configPath)
       of dkConceptExerciseConfig: formatExerciseConfigFile(ekConcept, configPath)
       of dkPracticeExerciseConfig: formatExerciseConfigFile(ekPractice, configPath)
       of dkApproachesConfig: formatApproachesConfigFile(configPath)
