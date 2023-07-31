@@ -5,7 +5,8 @@ import ".."/[cli, helpers, logger, sync/sync_common, sync/sync,
 
 type
   DocumentKind* = enum
-    dkExerciseConfig,
+    dkConceptExerciseConfig,
+    dkPracticeExerciseConfig,
     dkApproachesConfig,
     dkArticlesConfig
 
@@ -15,11 +16,15 @@ type
     formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
-                        trackExercisesDir: string): (ExerciseKind, DocumentKind, string) =
+                        trackExercisesDir: string): (DocumentKind, string) =
   ## Yields the `.meta/config.json`, `.approaches/config.json` and
   ## `.articles/config.json` paths for each exercise in
   ## `trackExerciseSlugs` in `trackExercisesDir`.
   for exerciseKind in [ekConcept, ekPractice]:
+    let documentKind =
+      case exerciseKind
+      of ekConcept: dkConceptExerciseConfig
+      of ekPractice: dkPracticeExerciseConfig
     let slugs =
       case exerciseKind
       of ekConcept: trackExerciseSlugs.`concept`
@@ -34,17 +39,17 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
     for slug in slugs:
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addExerciseConfigPath()
-      yield (exerciseKind, dkExerciseConfig, trackExerciseConfigPath)
+      yield (documentKind, trackExerciseConfigPath)
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addApproachesConfigPath()
       if fileExists(trackExerciseConfigPath):
-        yield (exerciseKind, dkApproachesConfig, trackExerciseConfigPath)
+        yield (dkApproachesConfig, trackExerciseConfigPath)
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addArticlesConfigPath()
       if fileExists(trackExerciseConfigPath):
-        yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
+        yield (dkArticlesConfig, trackExerciseConfigPath)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
              trackDir: string): seq[PathAndFormattedDocument] =
@@ -57,11 +62,12 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   ## containing every exercise's configs that are not already formatted.
   let trackExercisesDir = trackDir / "exercises"
   var seenUnformatted = false
-  for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
-                                                                 trackExercisesDir):
+  for (documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
+                                                   trackExercisesDir):
     let formatted =
       case documentKind
-      of dkExerciseConfig: formatExerciseConfigFile(exerciseKind, configPath)
+      of dkConceptExerciseConfig: formatExerciseConfigFile(ekConcept, configPath)
+      of dkPracticeExerciseConfig: formatExerciseConfigFile(ekPractice, configPath)
       of dkApproachesConfig: formatApproachesConfigFile(configPath)
       of dkArticlesConfig: formatArticlesConfigFile(configPath)
 
