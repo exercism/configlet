@@ -9,6 +9,10 @@ proc create*(conf: Conf) =
       stderr.writeLine msg
       quit 1
     if conf.action.approachSlug.len > 0:
+      if conf.action.articleSlug.len > 0:
+        let msg = &"Both --approach and --article were provided. Please specify only one."
+        stderr.writeLine msg
+        quit 1
       let trackConfigPath = conf.trackDir / "config.json"
       let trackConfig = parseFile(trackConfigPath, TrackConfig)
       let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
