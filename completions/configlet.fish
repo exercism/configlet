@@ -11,6 +11,7 @@ complete -c configlet -n "__fish_use_subcommand" -a lint       -d "Check the tra
 
 # subcommands with options
 complete -c configlet -n "__fish_use_subcommand" -a completion -d "Output a completion script for a given shell"
+complete -c configlet -n "__fish_use_subcommand" -a create     -d "Add a new approach or article"
 complete -c configlet -n "__fish_use_subcommand" -a fmt        -d "Format the exercise '.meta/config.json' files"
 complete -c configlet -n "__fish_use_subcommand" -a info       -d "Track info"
 complete -c configlet -n "__fish_use_subcommand" -a sync       -d "Check or update Practice Exercise docs, metadata, and tests"
@@ -19,6 +20,12 @@ complete -c configlet -n "__fish_use_subcommand" -a uuid       -d "Output a UUID
 # completion subcommand
 complete -c configlet -n "__fish_seen_subcommand_from completion" -s s -l shell     -d "Shell type" \
   -xa "bash fish zsh"
+
+# create subcommand
+complete -c configlet -n "__fish_seen_subcommand_from create"     -s e -l exercise  -d "exercise slug" \
+  -xa '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
+complete -c configlet -n "__fish_seen_subcommand_from create"          -l approach  -d "The slug of the approach"
+complete -c configlet -n "__fish_seen_subcommand_from create"          -l article   -d "The slug of the article"
 
 # fmt subcommand
 complete -c configlet -n "__fish_seen_subcommand_from fmt"        -s e -l exercise  -d "exercise slug" \
