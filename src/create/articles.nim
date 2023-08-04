@@ -29,16 +29,16 @@ proc createArticle*(articleSlug: Slug, exerciseSlug: Slug,
     else:
       parseFile(configPath, ArticlesConfig)
 
-  var articlexists = false
+  var articleExists = false
 
   for article in config.articles:
     if $articleSlug == article.slug:
-      articlexists = true
+      articleExists = true
       break
 
   let title = kebabToTitleCase(articleSlug)
 
-  if not articlexists:
+  if not articleExists:
     config.articles.add ArticleConfig(
       uuid: $genUUID(),
       slug: $articleSlug,
