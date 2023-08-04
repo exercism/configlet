@@ -66,3 +66,5 @@ proc createApproach*(approachSlug: Slug, exerciseSlug: Slug,
 
   if not fileExists(snippetPath):
     writeFile(snippetPath, "")
+
+  echo &"Created approach '{approachSlug}' for the exercise '{exerciseSlug}'."
