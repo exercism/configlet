@@ -62,3 +62,5 @@ proc createArticle*(articleSlug: Slug, exerciseSlug: Slug,
 
   if not fileExists(snippetPath):
     writeFile(snippetPath, "")
+
+  echo &"Created article '{articleSlug}' for the exercise '{exerciseSlug}'."

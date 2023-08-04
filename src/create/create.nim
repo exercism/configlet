@@ -4,7 +4,15 @@ import "."/[approaches, articles]
 
 proc create*(conf: Conf) =
   if conf.action.kind == actCreate:
+    if conf.action.exerciseCreate.len == 0:
+      let msg = "Please specify an exercise, using --exercise <slug>"
+      stderr.writeLine msg
+      quit 1
     if conf.action.approachSlug.len > 0:
+      if conf.action.articleSlug.len > 0:
+        let msg = &"Both --approach and --article were provided. Please specify only one."
+        stderr.writeLine msg
+        quit 1
       let trackConfigPath = conf.trackDir / "config.json"
       let trackConfig = parseFile(trackConfigPath, TrackConfig)
       let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
@@ -43,6 +51,8 @@ proc create*(conf: Conf) =
 
       createArticle(Slug(conf.action.articleSlug), userExercise, exerciseDir)
     else:
+      let msg = "Please specify `--article <slug>` or `--approach <slug>`"
+      stderr.writeLine msg
       quit 1
   else:
     quit 1
