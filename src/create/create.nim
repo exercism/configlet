@@ -51,6 +51,8 @@ proc create*(conf: Conf) =
 
       createArticle(Slug(conf.action.articleSlug), userExercise, exerciseDir)
     else:
+      let msg = "Please specify `--article <slug>` or `--approach <slug>`"
+      stderr.writeLine msg
       quit 1
   else:
     quit 1
