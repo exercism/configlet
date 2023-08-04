@@ -4,6 +4,10 @@ import "."/[approaches, articles]
 
 proc create*(conf: Conf) =
   if conf.action.kind == actCreate:
+    if conf.action.exerciseCreate.len == 0:
+      let msg = "Please specify an exercise, using --exercise <slug>"
+      stderr.writeLine msg
+      quit 1
     if conf.action.approachSlug.len > 0:
       let trackConfigPath = conf.trackDir / "config.json"
       let trackConfig = parseFile(trackConfigPath, TrackConfig)
