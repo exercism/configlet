@@ -4,7 +4,7 @@ import ".."/logger
 type
   Uuid = array[16, byte]
 
-proc genUuid*: Uuid =
+proc genUuid*: Uuid {.noinit.} =
   ## Returns a version 4 UUID, using the system CSPRNG as the source of randomness.
   if urandom(result):
     result[6] = (result[6] and 0x0f) or 0x40 # Set version to 4
