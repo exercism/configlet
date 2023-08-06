@@ -3,7 +3,7 @@ import "."/[lint/validators, uuid/uuid]
 
 proc main =
   suite "genUUID":
-    const n = 10_000
+    const n = 100_000
     var uuids = initHashSet[Uuid](n)
 
     test &"can generate {insertSep($n)} valid version 4 UUIDs":
