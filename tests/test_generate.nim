@@ -1,5 +1,5 @@
 import std/[strutils, unittest]
-from "."/generate/generate {.all.} import alterHeadings
+from generate/generate {.all.} import alterHeadings
 
 proc testGenerate =
   suite "generate":

@@ -1,6 +1,6 @@
 # This module contains tests for `src/probspecs.nim`
 import std/[json, os, strformat, tables, unittest]
-import "."/[cli, exec, sync/probspecs]
+import cli, exec, sync/probspecs
 
 proc getProbSpecsExercises(probSpecsDir: ProbSpecsDir): Table[string,
     seq[ProbSpecsTestCase]] =

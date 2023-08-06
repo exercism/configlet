@@ -1,5 +1,5 @@
 import std/[macros, os]
-import "."/helpers
+import helpers
 
 proc genBracket: NimNode =
   const thisDir = currentSourcePath().parentDir().Path()
