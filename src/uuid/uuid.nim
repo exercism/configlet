@@ -1,17 +1,28 @@
-import std/[strformat, sysrand]
+import std/[strformat, random, sysrand]
 import ".."/logger
 
 type
   Uuid* = array[16, byte]
 
-proc genUuid*: Uuid {.noinit.} =
-  ## Returns a version 4 UUID, using the system CSPRNG as the source of randomness.
-  if urandom(result):
-    result[6] = (result[6] and 0x0f) or 0x40 # Set version to 4
-    result[8] = (result[8] and 0x3f) or 0x80 # Set variant to 1
-  else:
+var r = block:
+  var seed: array[8, byte]
+  if not urandom(seed):
     stderr.writeLine "uuid: error: failed to generate UUID"
     quit 1
+  initRand(cast[int64](seed))
+
+proc genUuid*: Uuid {.noinit.} =
+  ## Returns a version 4 UUID, using the system CSPRNG as the source of randomness.
+  var a = rand(r, uint32.high) # Can't use uint64.high
+  copyMem(result[0].addr, a.addr, 4)
+  a = rand(r, uint32.high)
+  copyMem(result[4].addr, a.addr, 4)
+  a = rand(r, uint32.high)
+  copyMem(result[8].addr, a.addr, 4)
+  a = rand(r, uint32.high)
+  copyMem(result[12].addr, a.addr, 4)
+  result[6] = (result[6] and 0x0f) or 0x40 # Set version to 4
+  result[8] = (result[8] and 0x3f) or 0x80 # Set variant to 1
 
 func `$`*(u: Uuid): string =
   ## Returns the canonical string representation for the given UUID `u`.
