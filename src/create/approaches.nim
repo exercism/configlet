@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
-import pkg/[jsony, uuids]
-import ".."/[helpers, sync/sync_common, types_track_config, types_approaches_config]
+import pkg/jsony
+import ".."/[helpers, sync/sync_common, types_track_config, types_approaches_config, uuid/uuid]
 
 func kebabToTitleCase(slug: Slug): string =
   result = newStringOfCap(slug.len)
@@ -44,7 +44,7 @@ proc createApproach*(approachSlug: Slug, exerciseSlug: Slug,
 
   if not approachExists:
     config.approaches.add ApproachConfig(
-      uuid: $genUUID(),
+      uuid: $genUuid(),
       slug: $approachSlug,
       title: title,
       blurb: "",

@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
-import pkg/[jsony, uuids]
-import ".."/[helpers, sync/sync_common, types_track_config, types_articles_config]
+import pkg/jsony
+import ".."/[helpers, sync/sync_common, types_track_config, types_articles_config, uuid/uuid]
 
 func kebabToTitleCase(slug: Slug): string =
   result = newStringOfCap(slug.len)
@@ -40,7 +40,7 @@ proc createArticle*(articleSlug: Slug, exerciseSlug: Slug,
 
   if not articleExists:
     config.articles.add ArticleConfig(
-      uuid: $genUUID(),
+      uuid: $genUuid(),
       slug: $articleSlug,
       title: title,
       blurb: "",
