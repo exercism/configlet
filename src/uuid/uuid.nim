@@ -15,23 +15,17 @@ proc genUuid*: Uuid =
     stderr.writeLine "uuid: error: failed to generate UUID"
     quit 1
 
-func addHex(s: var string, bytes: openArray[byte]) =
-  ## Appends the hex string representation of each item in `bytes` to `s`.
-  for b in bytes:
-    s.add &"{b:02x}"
-
 func `$`*(u: Uuid): string =
   ## Returns the canonical string representation for the given UUID `u`.
-  result = newStringOfCap(36)
-  result.addHex u.bytes.toOpenArray(0, 3)
-  result.add '-'
-  result.addHex u.bytes.toOpenArray(4, 5)
-  result.add '-'
-  result.addHex u.bytes.toOpenArray(6, 7)
-  result.add '-'
-  result.addHex u.bytes.toOpenArray(8, 9)
-  result.add '-'
-  result.addHex u.bytes.toOpenArray(10, 15)
+  result = newString(36)
+  result[8] = '-'
+  result[13] = '-'
+  result[18] = '-'
+  result[23] = '-'
+  for i, j in [0, 2, 4, 6, 9, 11, 14, 16, 19, 21, 24, 26, 28, 30, 32, 34]:
+    const hex = "0123456789abcdef"
+    result[j + 0] = hex[u.bytes[i] shr 4]
+    result[j + 1] = hex[u.bytes[i] and 0x0f]
 
 proc outputUuids(n: Positive) =
   ## Writes `n` version 4 UUIDs to stdout. Writes only 1000 UUIDs if `n` is
