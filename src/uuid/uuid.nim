@@ -2,7 +2,7 @@ import std/[strformat, sysrand]
 import ".."/logger
 
 type
-  Uuid = array[16, byte]
+  Uuid* = array[16, byte]
 
 proc genUuid*: Uuid {.noinit.} =
   ## Returns a version 4 UUID, using the system CSPRNG as the source of randomness.
