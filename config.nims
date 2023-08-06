@@ -2,7 +2,7 @@ switch("styleCheck", "error")
 hint("Name", on)
 warning("BareExcept", off)
 switch("experimental", "strictEffects")
-# switch("experimental", "strictFuncs") # TODO: re-enable when possible with `parsetoml`
+switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
 when defined(nimHasOutParams):
   switch("experimental", "strictDefs")
