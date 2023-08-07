@@ -2,7 +2,7 @@ import std/[sets, strformat, strutils, unittest]
 import "."/[lint/validators, uuid/uuid]
 
 proc main =
-  suite "genUUID":
+  suite "genUuid":
     const n = 100_000
     var uuids = initHashSet[Uuid](n)
 
