@@ -10,7 +10,7 @@ proc genUuid*: Uuid {.noinit.} =
     result[6] = (result[6] and 0x0f) or 0x40 # Set version to 4
     result[8] = (result[8] and 0x3f) or 0x80 # Set variant to 1
   else:
-    stderr.writeLine "uuid: error: failed to generate UUID"
+    stderr.writeLine "uuid: error: failed to read from the system CSPRNG"
     quit 1
 
 func `$`*(u: Uuid): string =
