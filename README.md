@@ -19,17 +19,17 @@ The `fetch-configlet` script may support checking the release signature in the f
 
 To verify a release archive, first download (from the assets section of a [release](https://github.com/exercism/configlet/releases)) the archive and its corresponding `.minisig` file.
 Write them to the same directory.
-For example, to verify the configlet 4.0.0 Linux x86-64 release, download these files to the same directory:
+For example, to verify the configlet 4.0.0-beta.13 Linux x86-64 release, download these files to the same directory:
 
 ```text
-configlet_4.0.0_linux_x86-64.tar.gz
-configlet_4.0.0_linux_x86-64.tar.gz.minisig
+configlet_4.0.0-beta.13_linux_x86-64.tar.gz
+configlet_4.0.0-beta.13_linux_x86-64.tar.gz.minisig
 ```
 
 Then run a `minisign` command in that directory:
 
 ```shell
-minisign -Vm configlet_4.0.0_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGtbDUrZerawUcyWnti9MGuWMx7VDW9DqZn2tMZ
+minisign -Vm configlet_4.0.0-beta.13_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGtbDUrZerawUcyWnti9MGuWMx7VDW9DqZn2tMZ
 ```
 
 where the above argument to `-P` is the configlet public key.
@@ -39,7 +39,7 @@ For example:
 
 ```text
 Signature and comment signature verified
-Trusted comment: timestamp:2023-07-15T12:34:56Z  file:configlet_4.0.0_linux_x86-64.tar.gz  hashed
+Trusted comment: timestamp:2023-07-15T12:34:56Z  file:configlet_4.0.0-beta.13_linux_x86-64.tar.gz  hashed
 ```
 
 Then extract the archive to obtain the (now-verified) configlet executable.
