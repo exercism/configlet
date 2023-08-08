@@ -1,5 +1,5 @@
 import std/[sets, strformat, strutils, unittest]
-import "."/[lint/validators, uuid/uuid]
+import lint/validators, uuid/uuid
 
 proc main =
   suite "genUuid":

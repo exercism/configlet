@@ -1,11 +1,11 @@
 switch("styleCheck", "error")
 hint("Name", on)
 warning("BareExcept", off)
-switch("experimental", "strictEffects")
+warning("ProveInit", off)
+warning("Uninit", off)
+switch("experimental", "strictDefs")
 switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
-when defined(nimHasOutParams):
-  switch("experimental", "strictDefs")
 switch("mm", "refc")
 
 # Replace the stdlib JSON modules with our own stricter versions.
