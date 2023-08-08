@@ -1,6 +1,6 @@
 import std/posix
-import "."/[cli, completion/completion, fmt/fmt, info/info, generate/generate,
-            lint/lint, logger, sync/sync, uuid/uuid]
+import "."/[cli, completion/completion, create/create, fmt/fmt, info/info,
+            generate/generate, lint/lint, logger, sync/sync, uuid/uuid]
 
 proc configlet =
   onSignal(SIGTERM):
@@ -15,6 +15,8 @@ proc configlet =
     discard
   of actCompletion:
     completion(conf.action.shell)
+  of actCreate:
+    create(conf)
   of actFmt:
     fmt(conf)
   of actLint:

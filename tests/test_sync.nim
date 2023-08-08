@@ -1,7 +1,7 @@
 import std/[importutils, json, os, options, strutils, unittest]
-import "."/[exec, helpers, sync/sync_common, types_exercise_config, types_track_config]
-from "."/sync/sync_filepaths {.all.} import update
-from "."/sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
+import exec, helpers, sync/sync_common, types_exercise_config, types_track_config
+from sync/sync_filepaths {.all.} import update
+from sync/sync_metadata {.all.} import UpstreamMetadata, parseMetadataToml,
     metadataAreUpToDate, update
 
 const

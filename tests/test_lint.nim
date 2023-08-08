@@ -1,6 +1,6 @@
 import std/[strutils, unittest]
-import "."/lint/validators
-import "."/lint/approaches_and_articles {.all.}
+import lint/validators
+import lint/approaches_and_articles {.all.}
 
 proc testIsKebabCase =
   suite "isKebabCase":
