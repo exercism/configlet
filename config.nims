@@ -3,7 +3,6 @@ hint("Name", on)
 warning("BareExcept", off)
 warning("ProveInit", off)
 warning("Uninit", off)
-switch("experimental", "strictEffects")
 switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
 when defined(nimHasOutParams):
