@@ -2,8 +2,9 @@
 # https://github.com/c-blake/cligen/blob/8d4e5fb58917/cligen/parseopt3.nim
 # The only changes:
 #
-# - Allow a long option to have an optional value. See the patch file
-#   in the configlet repo.
+# - Allow a long option to have an optional value. This is the result of
+#   applying the patch in the configlet repo:
+#       patches/parseopt3_allow_long_option_optional_value.patch
 #
 # - Add this header.
 #
