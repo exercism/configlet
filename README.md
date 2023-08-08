@@ -35,12 +35,6 @@ minisign -Vm configlet_4.0.0-beta.13_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGt
 where the above argument to `-P` is the configlet public key.
 
 The above command has verified the release archive if (and only if) the command's output contains `Signature and comment signature verified`.
-For example:
-
-```text
-Signature and comment signature verified
-Trusted comment: timestamp:2023-07-15T12:34:56Z  file:configlet_4.0.0-beta.13_linux_x86-64.tar.gz  hashed
-```
 
 Then extract the archive to obtain the (now-verified) configlet executable.
 You may delete the archive and the `.minisig` file.
