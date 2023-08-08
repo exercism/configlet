@@ -1,4 +1,4 @@
-import std/[os, parseutils, strformat, strutils, terminal]
+import std/[os, parseutils, strformat, strutils, syncio, terminal]
 import pkg/supersnappy
 import patched_libs/parseopt3
 

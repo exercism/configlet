@@ -5,6 +5,7 @@ warning("ProveInit", off)
 warning("Uninit", off)
 switch("experimental", "strictDefs")
 switch("experimental", "strictFuncs")
+switch("define", "nimPreviewSlimSystem")
 switch("define", "nimStrictDelete")
 switch("mm", "refc")
 
