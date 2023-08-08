@@ -53,7 +53,7 @@ proc patchCligen(packagePaths: PackagePaths) =
   patch(
     packagePaths.cligen,
     thisDir / "parseopt3_allow_long_option_optional_value.patch",
-    ("cligen" / "parseopt3.nim", 1647921161'i64)
+    ("cligen" / "parseopt3.nim", 3589591455'i64)
   )
 
 proc ensureThatNimblePackagesArePatched* =
