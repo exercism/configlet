@@ -34,7 +34,7 @@ minisign -Vm configlet_4.0.0-beta.13_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGt
 
 where the above argument to `-P` is the configlet public key.
 
-The above command has verified the release archive if (and only if) the command's output contains `Signature and comment signature verified`.
+The above command has verified the release archive if (and only if) the command's output begins with `Signature and comment signature verified`.
 For example:
 
 ```text
