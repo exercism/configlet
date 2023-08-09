@@ -1,0 +1,57 @@
+#!/usr/bin/env sh
+
+set -e
+
+build_tag="${GITHUB_REF_NAME}"
+
+# Download every release asset
+download_dir="releases/${build_tag}"
+gh release download "${build_tag}" --dir "${download_dir}"
+
+# Write secret key to expected location
+if [ -n "${CONFIGLET_MINISIGN_SECRET_KEY}" ]; then
+  minisign_dir="${HOME}/.minisign"
+  mkdir -p "${minisign_dir}"
+  printenv CONFIGLET_MINISIGN_SECRET_KEY > "${minisign_dir}/minisign.key"
+else
+  printf "CONFIGLET_MINISIGN_SECRET_KEY environment variable not found. Exiting."
+  exit 1
+fi
+
+# Get the configlet public key from a file in the repo
+configlet_minisign_public_key="$(tail -n1 configlet-minisign.pub)"
+
+cd "${download_dir}" || exit
+
+# Write checksums file
+# Don't include checksums of the minisig files
+checksums_file="configlet_${build_tag}_checksums_sha256.txt"
+sha256sum -- * > "${checksums_file}"
+
+for file in *; do
+  # Create minisig file with a custom trusted comment
+  dt="$(date -u '+%Y-%m-%dT%H:%M:%SZ')" # Like `date --utc --iso=seconds`
+  # The below is the same format as minisign's default, but using a non-unix timestamp.
+  trusted_comment="timestamp:${dt}  file:${file}  hashed"
+  minisign -Sm "${file}" -t "${trusted_comment}"
+
+  # Verify the signed file
+  minisign -Vm "${file}" -P "${configlet_minisign_public_key}"
+done
+
+# Don't upload the signature for the checksum file, because:
+#
+# - we want to optimize for the simplicity of verifying a single configlet
+#   release archive, so it's best to have only one way to do it (verify the signature for
+#   that archive).
+#
+# - it's harder to explain the alternative: verify the signature for the checksum file
+#   AND check that the sha256 of the release archive matches that in the checksum file.
+#
+# - it doesn't matter that verifying `n` configlet release archives requires running `n`
+#   minisign commands, rather than exactly 1 minisign command plus 1 `sha256sum --check`
+#   command.
+rm "${checksums_file}.minisig"
+
+# Upload checksums file and signature files
+gh release upload "${build_tag}" "${checksums_file}" ./*.minisig
