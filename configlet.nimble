@@ -22,4 +22,6 @@ requires "parsetoml"
 requires "supersnappy"
 
 task test, "Runs the test suite":
+  if not fileExists("nimble.paths"):
+    exec "nimble setup"
   exec "nim r ./tests/all_tests.nim"
