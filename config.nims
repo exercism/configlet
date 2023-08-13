@@ -28,8 +28,9 @@ if defined(release):
     elif defined(clang):
       switch("clang.exe", "musl-clang")
       switch("clang.linkerexe", "musl-clang")
-# begin Nimble config (version 2)
+
+# Tell Nim the paths to Nimble packages. We need this because we ran `nimble lock`.
+# The below lines are added by `nimble setup`.
 --noNimblePath
 when withDir(thisDir(), system.fileExists("nimble.paths")):
   include "nimble.paths"
-# end Nimble config
