@@ -31,6 +31,8 @@ if defined(release):
 
 # Tell Nim the paths to Nimble packages. We need this because we ran `nimble lock`.
 # The below lines are added by `nimble setup`.
+# begin Nimble config (version 2)
 --noNimblePath
 when withDir(thisDir(), system.fileExists("nimble.paths")):
   include "nimble.paths"
+# end Nimble config
