@@ -15,4 +15,4 @@ build_tag="${GITHUB_REF_NAME}"
 artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
 tar -cvzf "${artifact_file}" "${binary_name}"
 
-gh release upload "${build_tag}" "${artifacts_dir}/${artifact_file}"
+gh release upload "${build_tag}" "${artifact_file}"
