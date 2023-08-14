@@ -24,8 +24,12 @@ if defined(zig) and findExe("zigcc").len > 0:
 
 if defined(release):
   switch("opt", "size")
-  switch("passC", "-flto")
-  switch("passL", "-flto")
+
+  if not (defined(zig) and defined(macosx)):
+    # `zig ld` doesn't support LTO.
+    # See https://github.com/ziglang/zig/issues/8680
+    switch("passC", "-flto")
+    switch("passL", "-flto")
 
   if defined(linux) or defined(windows):
     switch("passL", "-s")
