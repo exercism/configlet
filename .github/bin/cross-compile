@@ -9,7 +9,10 @@ cross_compile() {
   local target="$1"
   local arch='arm64'
   local os
-  os="$(cut -d'-' -f2 <<<"${target}")"
+  case "$(cut -d'-' -f2 <<<"${target}")" in
+    macos) os='macosx' ;;
+    *)     os='linux'  ;;
+  esac
 
   nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
 
