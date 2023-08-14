@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+nimble --accept install --depsOnly
+
+artifacts_dir='artifacts'
+mkdir -p "${artifacts_dir}"
+
+target='aarch64-linux-musl'
+arch='arm64'
+os='linux'
+nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
+
+binary_name='configlet'
+build_tag="${GITHUB_REF_NAME}"
+artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
+tar -cvzf "${artifact_file}" "${binary_name}"
+
+gh release upload "${build_tag}" "${artifacts_dir}/${artifact_file}"

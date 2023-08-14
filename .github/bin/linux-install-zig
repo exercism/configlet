@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+version='0.11.0' # 2023-08-04
+release_name="zig-linux-x86_64-${version}"
+archive="${release_name}.tar.xz"
+url="https://ziglang.org/download/${version}/${archive}"
+
+curlopts=(
+  --silent
+  --show-error
+  --fail
+  --location
+  --retry 3
+)
+
+# Download the release archive.
+echo "Downloading Zig release archive..." >&2
+curl "${curlopts[@]}" --output "${archive}" "${url}"
+
+# Check that the archive has the expected hash.
+echo "Verifying archive..." >&2
+archive_sha256='2d00e789fec4f71790a6e7bf83ff91d564943c5ee843c5fd966efc474b423047'
+echo "${archive_sha256} ${archive}" | sha256sum -c -
+
+# Extract the archive, then remove it.
+echo "Extracting archive..." >&2
+tar xJf "${archive}"
+rm "${archive}"
+
+# Add zig directory to `GITHUB_PATH`.
+zig_dir="$(pwd)/${release_name}"
+echo "${zig_dir}" >> "${GITHUB_PATH}"
+
+# Install `zigcc`, which is just a wrapper for `zig cc`. We need this because
+# the value of e.g. `--clang.exe` cannot contain a space (Nim requires the value
+# to be an executable, not a command).
+zigcc_path="${zig_dir}/zigcc"
+printf '#!/usr/bin/env sh\nzig cc $@\n' > "${zigcc_path}"
+chmod +x "${zigcc_path}"
+
+# Print the versions of Zig and Clang.
+"${zig_dir}"/zig version
+"${zig_dir}"/zig cc --version
+echo "Successfully installed Zig ${version}."
