@@ -17,9 +17,11 @@ bin           = @["configlet"]
 
 # Dependencies
 requires "nim >= 2.0.0"
-requires "jsony#ea811bec7fa50f5abd3088ba94cda74285e93f18"       # 1.1.5  (2023-02-09)
-requires "parsetoml#6e5e16179fa2db60f2f37d8b1af4128aaa9c8aaf"   # 0.7.1  (2023-08-06)
-requires "supersnappy#e4df8cb5468dd96fc5a4764028e20c8a3942f16a" # 2.1.3  (2022-06-12)
+requires "jsony"
+requires "parsetoml"
+requires "supersnappy"
 
 task test, "Runs the test suite":
+  if not fileExists("nimble.paths"):
+    exec "nimble setup"
   exec "nim r ./tests/all_tests.nim"

@@ -22,3 +22,7 @@
 # Ignore temporary repos
 tests/.test_elixir_track_repo/
 tests/.test_nim_track_repo/
+
+# Ignore user-specific Nimble files
+nimble.develop
+nimble.paths
