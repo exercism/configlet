@@ -1,18 +1,39 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-nimble --accept install --depsOnly
+set -eo pipefail
 
 artifacts_dir='artifacts'
-mkdir -p "${artifacts_dir}"
-
-target='aarch64-linux-musl'
-arch='arm64'
-os='linux'
-nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
-
-binary_name='configlet'
 build_tag="${GITHUB_REF_NAME}"
-artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
-tar -cvzf "${artifact_file}" "${binary_name}"
 
-gh release upload "${build_tag}" "${artifact_file}"
+cross_compile() {
+  local target="$1"
+  local arch='arm64'
+  local os
+  os="$(cut -d'-' -f2 <<<"${target}")"
+
+  nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
+
+  mkdir -p "${artifacts_dir}"
+
+  local binary_name='configlet'
+
+  local artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
+  tar -cvzf "${artifact_file}" "${binary_name}"
+}
+
+main() {
+  nimble --accept install --depsOnly
+
+  local targets=(
+    aarch64-linux-musl
+    aarch64-macos-none
+  )
+
+  for target in "${targets[@]}"; do
+    cross_compile "${target}"
+  done
+
+  gh release upload "${build_tag}" "${artifacts_dir}"/*
+}
+
+main
