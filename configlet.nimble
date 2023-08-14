@@ -31,5 +31,5 @@ when defined(linux):
   after build:
     if existsEnv("GITHUB_ACTIONS") and findExe("zigcc").len > 0:
       exec "readelf -p .comment ./configlet"
-      echo "stripping binary..."
+      echo "stripping large comment section from executable..."
       exec "strip -R .comment ./configlet"
