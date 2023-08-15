@@ -25,12 +25,3 @@ task test, "Runs the test suite":
   if not fileExists("nimble.paths"):
     exec "nimble setup"
   exec "nim r ./tests/all_tests.nim"
-
-# Strip the binary when it is produced by `zig cc`.
-when defined(linux):
-  after build:
-    if existsEnv("GITHUB_ACTIONS") and findExe("zigcc").len > 0:
-      exec "readelf -p .comment ./configlet"
-      # TODO: strip
-      # echo "stripping large comment section from executable..."
-      # exec "strip -R .comment ./configlet"

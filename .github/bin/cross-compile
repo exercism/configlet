@@ -16,8 +16,12 @@ cross_compile() {
   esac
 
   nimble --verbose build --cpu:"${arch}" --os:"${nim_os}" -d:release -d:zig -d:target:"${target}"
-  mkdir -p "${artifacts_dir}"
   local binary_name='configlet'
+  if command -v llvm-strip &> /dev/null; then
+    echo "stripping large comment section from executable..." >&2
+    llvm-strip -R .comment "${binary_name}"
+  fi
+  mkdir -p "${artifacts_dir}"
   local artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
   tar -cvzf "${artifact_file}" "${binary_name}"
 }
