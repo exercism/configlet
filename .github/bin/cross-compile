@@ -31,7 +31,7 @@ main() {
   local targets=(
     aarch64-linux-musl
     # aarch64-macos-none
-    aarch64-windows-gnu
+    # aarch64-windows-gnu
   )
 
   for target in "${targets[@]}"; do
