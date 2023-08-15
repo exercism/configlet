@@ -8,7 +8,7 @@ cross_compile() {
   local target="$1"
   local arch='arm64'
   local os
-  os="$(cut -d'-' -f2 <<<"${target}")"
+  os="$(cut -d'-' -f2 <<< "${target}")"
   local nim_os
   case "${os}" in
     macos) nim_os='macosx' ;;
