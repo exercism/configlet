@@ -9,13 +9,14 @@ cross_compile() {
   local target="$1"
   local arch='arm64'
   local os
-  case "$(cut -d'-' -f2 <<<"${target}")" in
-    macos)   os='macosx'  ;;
-    windows) os='windows' ;;
-    *)       os='linux'   ;;
+  os="$(cut -d'-' -f2 <<<"${target}")"
+  local nim_os
+  case "${os}" in
+    macos) nim_os='macosx' ;;
+    *)     nim_os="${os}"  ;;
   esac
 
-  nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
+  nimble --verbose build --cpu:"${arch}" --os:"${nim_os}" -d:release -d:zig -d:target:"${target}"
 
   mkdir -p "${artifacts_dir}"
 
