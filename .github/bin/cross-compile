@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -eo pipefail
 
 artifacts_dir='artifacts'
@@ -17,11 +16,8 @@ cross_compile() {
   esac
 
   nimble --verbose build --cpu:"${arch}" --os:"${nim_os}" -d:release -d:zig -d:target:"${target}"
-
   mkdir -p "${artifacts_dir}"
-
   local binary_name='configlet'
-
   local artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
   tar -cvzf "${artifact_file}" "${binary_name}"
 }
