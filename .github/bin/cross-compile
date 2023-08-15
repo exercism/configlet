@@ -10,8 +10,9 @@ cross_compile() {
   local arch='arm64'
   local os
   case "$(cut -d'-' -f2 <<<"${target}")" in
-    macos) os='macosx' ;;
-    *)     os='linux'  ;;
+    macos)   os='macosx'  ;;
+    windows) os='windows' ;;
+    *)       os='linux'   ;;
   esac
 
   nimble --verbose build --cpu:"${arch}" --os:"${os}" -d:release -d:zig -d:target:"${target}"
@@ -30,6 +31,7 @@ main() {
   local targets=(
     aarch64-linux-musl
     # aarch64-macos-none
+    aarch64-windows-gnu
   )
 
   for target in "${targets[@]}"; do
