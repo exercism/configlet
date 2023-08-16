@@ -21,11 +21,6 @@ if defined(zig) and findExe("zigcc").len > 0:
   if target.len > 0:
     switch("passC", "-target " & target)
     switch("passL", "-target " & target)
-    const dir = "/Library/Developer/CommandLineTools/SDKs/MacOSX12.3.sdk/" &
-                "System/Library/Frameworks"
-    if dirExists(dir):
-      switch("passC", "-F" & dir)
-      switch("passL", "-F" & dir)
 
 if defined(release):
   switch("opt", "size")

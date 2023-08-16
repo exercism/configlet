@@ -17,7 +17,21 @@ cross_compile() {
     *)     nim_os="${os}"  ;;
   esac
 
-  nimble --verbose build --cpu:"${arch}" --os:"${nim_os}" -d:release -d:zig -d:target:"${target}"
+  local build_options=(
+    -d:release
+    --cpu:"${arch}"
+    --os:"${nim_os}"
+    -d:zig
+    -d:target:"${target}"
+  )
+  # On macOS, add to the compiler's and linker's framework search path.
+  dir='/Library/Developer/CommandLineTools/SDKs/MacOSX12.3.sdk/System/Library/Frameworks'
+  if [[ -d "${dir}" ]]; then
+    build_options+=("--passC:-F${dir}")
+    build_options+=("--passL:-F${dir}")
+  fi
+
+  nimble --verbose build "${build_options[@]}"
   local binary_name='configlet'
   if command -v llvm-strip &> /dev/null; then
     echo "stripping large comment section from executable..." >&2
