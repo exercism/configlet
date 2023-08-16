@@ -64,9 +64,9 @@ jobs:
         shell: bash
         run: ./.github/bin/build
 
-      - name: Create artifact
+      - name: Upload archive
         shell: bash
-        run: ./.github/bin/create-artifact
+        run: ./.github/bin/upload-archive
         env:
           OS: ${{ matrix.os }}
           ARCH: ${{ matrix.arch }}
