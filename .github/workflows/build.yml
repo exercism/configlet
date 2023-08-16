@@ -19,7 +19,7 @@ jobs:
 
       - name: Create empty release
         shell: bash
-        run: ./.github/bin/publish-release
+        run: ./.github/bin/create-empty-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -64,9 +64,9 @@ jobs:
         shell: bash
         run: ./.github/bin/build
 
-      - name: Create artifact
+      - name: Upload archive
         shell: bash
-        run: ./.github/bin/create-artifact
+        run: ./.github/bin/upload-archive
         env:
           OS: ${{ matrix.os }}
           ARCH: ${{ matrix.arch }}
