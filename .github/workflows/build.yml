@@ -74,8 +74,18 @@ jobs:
 
   cross-compile:
     needs: [create-empty-release]
-    runs-on: ubuntu-22.04
-    name: cross-compile
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runs-on: ubuntu-22.04
+            zig_target: aarch64-linux-musl
+
+          # - runs-on: macos-12
+          #   zig_target: aarch64-macos-none
+
+    name: "${{ matrix.zig_target }}"
+    runs-on: ${{ matrix.runs-on }}
     permissions:
       contents: write
     steps:
@@ -96,6 +106,7 @@ jobs:
         run: ./.github/bin/cross-compile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZIG_TARGET: ${{ matrix.zig_target }}
 
   checksums:
     needs: [build, cross-compile]

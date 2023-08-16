@@ -3,6 +3,8 @@ set -eo pipefail
 
 archives_dir='archives'
 build_tag="${GITHUB_REF_NAME}"
+# shellcheck disable=SC2153
+zig_target="${ZIG_TARGET}"
 
 cross_compile() {
   local target="$1"
@@ -28,17 +30,7 @@ cross_compile() {
 
 main() {
   nimble --accept install --depsOnly
-
-  local targets=(
-    aarch64-linux-musl
-    # aarch64-macos-none
-    # aarch64-windows-gnu
-  )
-
-  for target in "${targets[@]}"; do
-    cross_compile "${target}"
-  done
-
+  cross_compile "${zig_target}"
   gh release upload "${build_tag}" "${archives_dir}"/*
 }
 
