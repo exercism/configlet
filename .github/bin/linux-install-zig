@@ -2,8 +2,23 @@
 set -eo pipefail
 
 version='0.11.0' # 2023-08-04
-release_name="zig-linux-x86_64-${version}"
-archive="${release_name}.tar.xz"
+
+case "$(uname)" in
+  Darwin*)   os='macos'   ;;
+  Linux*)    os='linux'   ;;
+  Windows*)  os='windows' ;;
+  MINGW*)    os='windows' ;;
+  MSYS_NT-*) os='windows' ;;
+  *)         os='linux'   ;;
+esac
+
+case "${os}" in
+  windows*) ext='zip'    ;;
+  *)        ext='tar.xz' ;;
+esac
+
+release_name="zig-${os}-x86_64-${version}"
+archive="${release_name}.${ext}"
 url="https://ziglang.org/download/${version}/${archive}"
 
 curlopts=(
@@ -25,7 +40,10 @@ echo "${archive_sha256} ${archive}" | sha256sum -c -
 
 # Extract the archive, then remove it.
 echo "Extracting archive..." >&2
-tar xJf "${archive}"
+case "${ext}" in
+  *zip) unzip "${archive}"   ;;
+  *)    tar xJf "${archive}" ;;
+esac
 rm "${archive}"
 
 # Add zig directory to `GITHUB_PATH`.
