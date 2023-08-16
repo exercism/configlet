@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-artifacts_dir='artifacts'
+archives_dir='archives'
 build_tag="${GITHUB_REF_NAME}"
 
 cross_compile() {
@@ -21,9 +21,9 @@ cross_compile() {
     echo "stripping large comment section from executable..." >&2
     llvm-strip -R .comment "${binary_name}"
   fi
-  mkdir -p "${artifacts_dir}"
-  local artifact_file="${artifacts_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
-  tar -cvzf "${artifact_file}" "${binary_name}"
+  mkdir -p "${archives_dir}"
+  local archive="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
+  tar -cvzf "${archive}" "${binary_name}"
 }
 
 main() {
@@ -39,7 +39,7 @@ main() {
     cross_compile "${target}"
   done
 
-  gh release upload "${build_tag}" "${artifacts_dir}"/*
+  gh release upload "${build_tag}" "${archives_dir}"/*
 }
 
 main
