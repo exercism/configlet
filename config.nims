@@ -25,7 +25,7 @@ if defined(zig) and findExe("zigcc").len > 0:
                 "System/Library/Frameworks"
     if dirExists(dir):
       switch("passC", "-F" & dir)
-      switch("passL", "-L" & dir)
+      switch("passL", "-F" & dir)
 
 if defined(release):
   switch("opt", "size")
