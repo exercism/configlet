@@ -12,16 +12,30 @@ switch("mm", "refc")
 patchFile("stdlib", "json", "src/patched_stdlib/json")
 patchFile("stdlib", "parsejson", "src/patched_stdlib/parsejson")
 
+if defined(zig) and findExe("zigcc").len > 0:
+  switch("cc", "clang")
+  # We can't write `zig cc` below, because the value cannot contain a space.
+  switch("clang.exe", "zigcc")
+  switch("clang.linkerexe", "zigcc")
+  const target {.strdefine.} = ""
+  if target.len > 0:
+    switch("passC", "-target " & target)
+    switch("passL", "-target " & target)
+
 if defined(release):
   switch("opt", "size")
-  switch("passC", "-flto")
-  switch("passL", "-flto")
+
+  if not (defined(zig) and defined(macosx)):
+    # `zig ld` doesn't support LTO.
+    # See https://github.com/ziglang/zig/issues/8680
+    switch("passC", "-flto")
+    switch("passL", "-flto")
 
   if defined(linux) or defined(windows):
     switch("passL", "-s")
     switch("passL", "-static")
 
-  if defined(linux):
+  if defined(linux) and not defined(zig):
     if defined(gcc):
       switch("gcc.exe", "musl-gcc")
       switch("gcc.linkerexe", "musl-gcc")

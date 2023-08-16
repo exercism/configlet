@@ -39,7 +39,7 @@ jobs:
 
       - name: On Linux, install musl
         if: matrix.os == 'linux'
-        run: ./.github/bin/linux-install-build-tools
+        run: ./.github/bin/linux-install-musl
 
       - name: Install Nim
         uses: iffy/install-nim@ac410af52523f06e0fa037ee81d06ead7b95692c
