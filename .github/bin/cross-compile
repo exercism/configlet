@@ -29,6 +29,8 @@ cross_compile() {
   if [[ -d "${dir}" ]]; then
     build_options+=("--passC:-F${dir}")
     build_options+=("--passL:-F${dir}")
+    # Strip
+    build_options+=("--passL:-s")
   fi
 
   nimble --verbose build "${build_options[@]}"
