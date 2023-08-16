@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   cross-compile:
-    needs: [build]
+    needs: [create-empty-release]
     runs-on: ubuntu-22.04
     name: cross-compile
     permissions:
@@ -98,7 +98,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   checksums:
-    needs: [cross-compile]
+    needs: [build, cross-compile]
     runs-on: ubuntu-22.04
     name: Upload signatures and checksums
     permissions:
