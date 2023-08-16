@@ -29,9 +29,6 @@ cross_compile() {
   if [[ -d "${dir}" ]]; then
     build_options+=("--passC:-F${dir}")
     build_options+=("--passL:-F${dir}")
-    # Enable FLTO
-    build_options+=("--passC:-flto")
-    build_options+=("--passL:-flto")
     # Strip
     build_options+=("--passL:-s")
   fi
