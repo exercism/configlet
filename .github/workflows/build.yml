@@ -87,6 +87,9 @@ jobs:
           - runs-on: macos-12
             zig_target: aarch64-macos-none
 
+          - runs-on: windows-2022
+            zig_target: aarch64-windows-gnu
+
     name: "${{ matrix.zig_target }}"
     runs-on: ${{ matrix.runs-on }}
     permissions:

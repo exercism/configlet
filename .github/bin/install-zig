@@ -44,9 +44,9 @@ case "${os}" in
     archive_sha256='1c1c6b9a906b42baae73656e24e108fd8444bb50b6e8fd03e9e7a3f8b5f05686'
     shasum -a 256 -c <<< "${archive_sha256} *${archive}"
     ;;
-  *)
-    echo "${os} not yet supported" >&2
-    exit 1
+  windows)
+    archive_sha256='142caa3b804d86b4752556c9b6b039b7517a08afa3af842645c7e2dcd125f652'
+    # TODO: check windows archive checksum
     ;;
 esac
 

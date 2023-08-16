@@ -116,8 +116,7 @@ func genShortKeys: array[Opt, char] =
       result[opt] = ($opt)[0]
 
 const
-  repoRootDir = currentSourcePath().parentDir().parentDir()
-  configletVersion = staticRead(repoRootDir / "configlet.version").strip()
+  configletVersion = staticRead("../configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
                optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
