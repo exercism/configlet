@@ -81,8 +81,8 @@ jobs:
           - runs-on: ubuntu-22.04
             zig_target: aarch64-linux-musl
 
-          # - runs-on: macos-12
-          #   zig_target: aarch64-macos-none
+          - runs-on: macos-12
+            zig_target: aarch64-macos-none
 
     name: "${{ matrix.zig_target }}"
     runs-on: ${{ matrix.runs-on }}
