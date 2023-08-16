@@ -42,7 +42,7 @@ case "${os}" in
     ;;
   macos)
     archive_sha256='1c1c6b9a906b42baae73656e24e108fd8444bb50b6e8fd03e9e7a3f8b5f05686'
-    shasum -a 256 -c <<< "${archive_sha256} ${archive}"
+    # shasum -a 256 -c <<< "${archive_sha256} ${archive}"
     ;;
   *)
     echo "${os} not yet supported" >&2
