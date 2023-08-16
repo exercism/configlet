@@ -17,4 +17,4 @@ case "${OS}" in
     ;;
 esac
 
-echo "ARTIFACT_FILE=${artifact_file}" >> "${GITHUB_ENV}"
+gh release upload "${build_tag}" "${artifact_file}"
