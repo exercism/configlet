@@ -24,6 +24,7 @@ if defined(zig) and findExe("zigcc").len > 0:
     const dir = "/Library/Developer/CommandLineTools/SDKs/MacOSX12.3.sdk/" &
                 "System/Library/Frameworks"
     if dirExists(dir):
+      putEnv("FRAMEWORK_SEARCH_PATHS", dir)
       switch("passC", "-F" & dir)
 
 if defined(release):
