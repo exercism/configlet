@@ -3,6 +3,8 @@ set -eo pipefail
 
 archives_dir='archives'
 build_tag="${GITHUB_REF_NAME}"
+# shellcheck disable=SC2153
+zig_target="${ZIG_TARGET}"
 
 cross_compile() {
   local target="$1"
@@ -15,7 +17,23 @@ cross_compile() {
     *)     nim_os="${os}"  ;;
   esac
 
-  nimble --verbose build --cpu:"${arch}" --os:"${nim_os}" -d:release -d:zig -d:target:"${target}"
+  local build_options=(
+    -d:release
+    --cpu:"${arch}"
+    --os:"${nim_os}"
+    -d:zig
+    -d:target:"${target}"
+  )
+  # On macOS, add to the compiler's and linker's framework search path.
+  dir='/Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/System/Library/Frameworks'
+  if [[ -d "${dir}" ]]; then
+    build_options+=("--passC:-F${dir}")
+    build_options+=("--passL:-F${dir}")
+    # Strip
+    build_options+=("--passL:-s")
+  fi
+
+  nimble --verbose build "${build_options[@]}"
   local binary_name='configlet'
   if command -v llvm-strip &> /dev/null; then
     echo "stripping large comment section from executable..." >&2
@@ -28,17 +46,7 @@ cross_compile() {
 
 main() {
   nimble --accept install --depsOnly
-
-  local targets=(
-    aarch64-linux-musl
-    # aarch64-macos-none
-    # aarch64-windows-gnu
-  )
-
-  for target in "${targets[@]}"; do
-    cross_compile "${target}"
-  done
-
+  cross_compile "${zig_target}"
   gh release upload "${build_tag}" "${archives_dir}"/*
 }
 

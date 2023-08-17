@@ -2,8 +2,23 @@
 set -eo pipefail
 
 version='0.11.0' # 2023-08-04
-release_name="zig-linux-x86_64-${version}"
-archive="${release_name}.tar.xz"
+
+case "$(uname)" in
+  Darwin*)   os='macos'   ;;
+  Linux*)    os='linux'   ;;
+  Windows*)  os='windows' ;;
+  MINGW*)    os='windows' ;;
+  MSYS_NT-*) os='windows' ;;
+  *)         os='linux'   ;;
+esac
+
+case "${os}" in
+  windows*) ext='zip'    ;;
+  *)        ext='tar.xz' ;;
+esac
+
+release_name="zig-${os}-x86_64-${version}"
+archive="${release_name}.${ext}"
 url="https://ziglang.org/download/${version}/${archive}"
 
 curlopts=(
@@ -20,12 +35,27 @@ curl "${curlopts[@]}" --output "${archive}" "${url}"
 
 # Check that the archive has the expected hash.
 echo "Verifying archive..." >&2
-archive_sha256='2d00e789fec4f71790a6e7bf83ff91d564943c5ee843c5fd966efc474b423047'
-echo "${archive_sha256} ${archive}" | sha256sum -c -
+case "${os}" in
+  linux)
+    archive_sha256='2d00e789fec4f71790a6e7bf83ff91d564943c5ee843c5fd966efc474b423047'
+    echo "${archive_sha256} ${archive}" | sha256sum -c -
+    ;;
+  macos)
+    archive_sha256='1c1c6b9a906b42baae73656e24e108fd8444bb50b6e8fd03e9e7a3f8b5f05686'
+    shasum -a 256 -c <<< "${archive_sha256} *${archive}"
+    ;;
+  *)
+    echo "${os} not yet supported" >&2
+    exit 1
+    ;;
+esac
 
 # Extract the archive, then remove it.
 echo "Extracting archive..." >&2
-tar xJf "${archive}"
+case "${ext}" in
+  *zip) unzip "${archive}"   ;;
+  *)    tar xJf "${archive}" ;;
+esac
 rm "${archive}"
 
 # Add zig directory to `GITHUB_PATH`.
