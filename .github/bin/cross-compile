@@ -42,16 +42,18 @@ cross_compile() {
   fi
 
   nimble --verbose build "${build_options[@]}"
-  local binary_name='configlet'
-  local executable_ext
-  case "${os}" in
-    windows) executable_ext='.exe' ;;
-    *)       executable_ext=''     ;;
-  esac
 
+  local binary_name='configlet'
   mkdir -p "${archives_dir}"
-  local archive="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
-  tar -cvzf "${archive}" "${binary_name}${executable_ext}"
+  local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
+  case "${os}" in
+    linux | macos)
+      tar -cvzf "${archive_base}.tar.gz" "${binary_name}"
+      ;;
+    windows)
+      7z a "${archive_base}.zip" "${binary_name}.exe"
+      ;;
+  esac
 }
 
 main() {
