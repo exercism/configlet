@@ -106,9 +106,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Zig
+        shell: bash
         run: ./.github/bin/install-zig
 
       - name: Cross-compile
+        shell: bash
         run: ./.github/bin/cross-compile
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
