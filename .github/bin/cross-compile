@@ -25,19 +25,12 @@ cross_compile() {
     *)     nim_os="${os}"  ;;
   esac
 
-  local binary_name
-  case "${os}" in
-    linux | macos) binary_name='configlet'     ;;
-    windows)       binary_name='configlet.exe' ;;
-  esac
-
   local build_options=(
     -d:release
     --cpu:"${arch}"
     --os:"${nim_os}"
     -d:zig
     -d:target:"${target}"
-    -o:"${binary_name}"
   )
   # On macOS, add to the compiler's and linker's framework search path.
   dir='/Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/System/Library/Frameworks'
@@ -49,13 +42,19 @@ cross_compile() {
   fi
 
   nimble --verbose build "${build_options[@]}"
-  file "${binary_name}"
 
+  local binary_name='configlet'
   mkdir -p "${archives_dir}"
-  local archive_base="${archives_dir}/configlet_${build_tag}_${os}_${arch}"
+  local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
   case "${os}" in
-    linux | macos) tar -cvzf "${archive_base}.tar.gz" "${binary_name}" ;;
-    windows)       7z a "${archive_base}.zip" "${binary_name}"         ;;
+    linux | macos)
+      file "${binary_name}"
+      tar -cvzf "${archive_base}.tar.gz" "${binary_name}"
+      ;;
+    windows)
+      llvm-readobj "${binary_name}.exe"
+      7z a "${archive_base}.zip" "${binary_name}.exe"
+      ;;
   esac
 }
 
