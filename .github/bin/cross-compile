@@ -52,7 +52,7 @@ cross_compile() {
       tar -cvzf "${archive_base}.tar.gz" "${binary_name}"
       ;;
     windows)
-      dumpbin /headers "${binary_name}.exe"
+      llvm-readobj "${binary_name}.exe"
       7z a "${archive_base}.zip" "${binary_name}.exe"
       ;;
   esac
