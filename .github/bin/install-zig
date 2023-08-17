@@ -53,7 +53,7 @@ esac
 # Extract the archive, then remove it.
 echo "Extracting archive..." >&2
 case "${ext}" in
-  *zip) unzip "${archive}"   ;;
+  *zip) unzip -q "${archive}"   ;;
   *)    tar xJf "${archive}" ;;
 esac
 rm "${archive}"
