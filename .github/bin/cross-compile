@@ -51,7 +51,7 @@ cross_compile() {
 
   if command -v llvm-strip &> /dev/null; then
     echo "stripping large comment section from executable..." >&2
-    llvm-strip --strip-all-gnu -R .comment "${binary_name}${executable_ext}"
+    llvm-strip --strip-all -R .comment "${binary_name}${executable_ext}"
   fi
   mkdir -p "${archives_dir}"
   local archive="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
