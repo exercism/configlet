@@ -25,7 +25,7 @@ cross_compile() {
     -d:target:"${target}"
   )
   # On macOS, add to the compiler's and linker's framework search path.
-  dir='/Library/Developer/CommandLineTools/SDKs/MacOSX12.3.sdk/System/Library/Frameworks'
+  dir='/Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk/System/Library/Frameworks'
   if [[ -d "${dir}" ]]; then
     build_options+=("--passC:-F${dir}")
     build_options+=("--passL:-F${dir}")
