@@ -8,7 +8,15 @@ zig_target="${ZIG_TARGET}"
 
 cross_compile() {
   local target="$1"
-  local arch='arm64'
+
+  local zig_arch
+  zig_arch="$(cut -d'-' -f1 <<< "${target}")"
+  local arch
+  case "${zig_arch}" in
+    aarch64) arch='arm64'       ;;
+    *)       arch="${zig_arch}" ;;
+  esac
+
   local os
   os="$(cut -d'-' -f2 <<< "${target}")"
   local nim_os
