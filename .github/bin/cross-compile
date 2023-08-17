@@ -44,15 +44,15 @@ cross_compile() {
   nimble --verbose build "${build_options[@]}"
 
   local binary_name='configlet'
+  file "${binary_name}"
   mkdir -p "${archives_dir}"
   local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
   case "${os}" in
     linux | macos)
-      file "${binary_name}"
       tar -cvzf "${archive_base}.tar.gz" "${binary_name}"
       ;;
     windows)
-      llvm-readobj "${binary_name}.exe"
+      mv "${binary_name}" "${binary_name}".exe
       7z a "${archive_base}.zip" "${binary_name}.exe"
       ;;
   esac
