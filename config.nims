@@ -33,8 +33,6 @@ if defined(release):
 
   if defined(linux) or defined(windows):
     switch("passL", "-s")
-
-  if defined(linux):
     switch("passL", "-static")
 
   if defined(linux) and not defined(zig):
