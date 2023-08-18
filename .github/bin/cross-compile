@@ -48,7 +48,12 @@ cross_compile() {
     echo "stripping large comment section from executable..." >&2
     llvm-strip --strip-all-gnu -R .comment "${binary_name}"
   fi
-  file "${binary_name}"
+  if command -v file &> /dev/null; then
+    file "${binary_name}"
+  fi
+  if command -v llvm-readobj &> /dev/null; then
+    llvm-readobj "${binary_name}"
+  fi
 
   mkdir -p "${archives_dir}"
   local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
