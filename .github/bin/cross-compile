@@ -42,14 +42,30 @@ cross_compile() {
   fi
 
   nimble --verbose build "${build_options[@]}"
+
   local binary_name='configlet'
   if command -v llvm-strip &> /dev/null; then
     echo "stripping large comment section from executable..." >&2
     llvm-strip -R .comment "${binary_name}"
   fi
+  if command -v file &> /dev/null; then
+    file "${binary_name}"
+  fi
+  if command -v llvm-readobj &> /dev/null; then
+    llvm-readobj "${binary_name}"
+  fi
+
   mkdir -p "${archives_dir}"
-  local archive="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}.tar.gz"
-  tar -cvzf "${archive}" "${binary_name}"
+  local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
+  case "${os}" in
+    linux | macos)
+      tar -cvzf "${archive_base}.tar.gz" "${binary_name}"
+      ;;
+    windows)
+      mv "${binary_name}" "${binary_name}".exe
+      7z a "${archive_base}.zip" "${binary_name}.exe"
+      ;;
+  esac
 }
 
 main() {
