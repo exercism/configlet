@@ -44,7 +44,12 @@ cross_compile() {
   nimble --verbose build "${build_options[@]}"
 
   local binary_name='configlet'
+  if command -v llvm-strip &> /dev/null; then
+    echo "stripping large comment section from executable..." >&2
+    llvm-strip --strip-all-gnu -R .comment "${binary_name}"
+  fi
   file "${binary_name}"
+
   mkdir -p "${archives_dir}"
   local archive_base="${archives_dir}/${binary_name}_${build_tag}_${os}_${arch}"
   case "${os}" in
