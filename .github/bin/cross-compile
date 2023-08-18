@@ -46,7 +46,7 @@ cross_compile() {
   local binary_name='configlet'
   if command -v llvm-strip &> /dev/null; then
     echo "stripping large comment section from executable..." >&2
-    llvm-strip --strip-all-gnu -R .comment "${binary_name}"
+    llvm-strip -R .comment "${binary_name}"
   fi
   if command -v file &> /dev/null; then
     file "${binary_name}"
