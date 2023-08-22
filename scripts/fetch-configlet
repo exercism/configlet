@@ -50,13 +50,15 @@ main() {
   fi
 
   local os
-  case "$(uname -s)" in
-    Darwin*)   os='macos'   ;;
-    Linux*)    os='linux'   ;;
-    Windows*)  os='windows' ;;
-    MINGW*)    os='windows' ;;
-    MSYS_NT-*) os='windows' ;;
-    *)         os='linux'   ;;
+  local unames
+  unames="$(uname -s)"
+  case "${unames}" in
+    Darwin*)   os='macos'       ;;
+    Linux*)    os='linux'       ;;
+    Windows*)  os='windows'     ;;
+    MINGW*)    os='windows'     ;;
+    MSYS_NT-*) os='windows'     ;;
+    *)         os="${unames,,}" ;; # Convert to lower case.
   esac
 
   local ext
