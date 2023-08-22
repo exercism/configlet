@@ -26,11 +26,14 @@ get_download_url() {
   unamem="$(uname -m)"
   local arch
   case "${unamem}" in
-    aarch64|arm64) arch='arm64'     ;;
-    x86_64)        arch='x86-64'    ;;
-    *686*)         arch='i386'      ;;
-    *386*)         arch='i386'      ;;
-    *)             arch="${unamem}" ;;
+    aarch64|arm64) arch='arm64'       ;;
+    x86_64)        arch='x86-64'      ;;
+    *686*)         arch='i386'        ;;
+    *386*)         arch='i386'        ;;
+    ppc)           arch='powerpc'     ;;
+    ppc64)         arch='powerpc64'   ;;
+    ppc64le)       arch='powerpc64le' ;;
+    *)             arch="${unamem}"   ;;
   esac
   local suffix="${os}_${arch}.${ext}"
   curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |
