@@ -1,6 +1,6 @@
 # This file implements tests for `src/tracks.nim`
 import std/[os, sequtils, sets, unittest]
-import "."/[cli, exec, sync/tracks]
+import cli, exec, sync/tracks
 
 const
   testsDir = currentSourcePath().parentDir()

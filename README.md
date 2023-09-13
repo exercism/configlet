@@ -10,6 +10,41 @@ The first is a bash script, and the second is a PowerShell script.
 Running one of these scripts downloads the latest version of configlet to the `bin` directory.
 You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
 
+### Verifying
+
+We sign each configlet release archive with [`minisign`](https://jedisct1.github.io/minisign/).
+
+For now, if you want to verify the signature of a configlet release, you need to do it manually.
+The `fetch-configlet` script may support checking the release signature in the future, but it won't be required: we don't want to require every `fetch-configlet` user to install `minisign`.
+
+To verify a release archive, first download (from the assets section of a [release](https://github.com/exercism/configlet/releases)) the archive and its corresponding `.minisig` file.
+Write them to the same directory.
+For example, to verify the configlet 4.0.0-beta.13 Linux x86-64 release, download these files to the same directory:
+
+```text
+configlet_4.0.0-beta.13_linux_x86-64.tar.gz
+configlet_4.0.0-beta.13_linux_x86-64.tar.gz.minisig
+```
+
+Then run a `minisign` command in that directory:
+
+```shell
+minisign -Vm configlet_4.0.0-beta.13_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGtbDUrZerawUcyWnti9MGuWMx7VDW9DqZn2tMZ
+```
+
+where the above argument to `-P` is the [configlet public key](https://github.com/exercism/configlet/blob/009dc9df9d947e71ff039ac2af0f82315dbf9073/configlet-minisign.pub).
+
+The above command has verified the release archive if (and only if) the command's output begins with `Signature and comment signature verified`.
+For example:
+
+```text
+Signature and comment signature verified
+Trusted comment: timestamp:2023-08-09T10:27:15Z  file:configlet_4.0.0-beta.13_linux_x86-64.tar.gz  hashed
+```
+
+Then extract the archive to obtain the (now-verified) configlet executable.
+You may delete the archive and the `.minisig` file.
+
 ## Usage
 
 The application is a single binary and can be used as follows:
@@ -20,6 +55,7 @@ Usage:
 
 Commands:
   completion  Output a completion script for a given shell
+  create      Add a new approach or article
   fmt         Format the exercise 'config.json' files
   generate    Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
   info        Print some information about the track
@@ -31,6 +67,11 @@ Commands:
 Options for completion:
   -s, --shell <shell>          Choose the shell type (required)
                                Allowed values: b[ash], f[ish], z[sh]
+
+Options for create:
+      --approach <slug>        The slug of the approach
+      --article <slug>         The slug of the article
+  -e, --exercise <slug>        Only operate on this exercise
 
 Options for fmt:
   -e, --exercise <slug>        Only operate on this exercise

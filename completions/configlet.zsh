@@ -11,6 +11,7 @@ _configlet_commands() {
     "lint:Check the track configuration for correctness" \
     # subcommands with options
     "completion:Output a completion script for a given shell" \
+    "create:Add a new approach or article" \
     "fmt:Format the exercise '.meta/config.json' files" \
     "info:Print track information" \
     "sync:Check or update Practice Exercise docs, metadata, and tests" \
@@ -76,6 +77,13 @@ _configlet() {
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
           {-s,--shell}'[Select the shell type]: :(bash fish zsh)' \
+      ;;
+    (create)
+      _arguments "${_arguments_options[@]}" \
+          "$_configlet_global_opts[@]" \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_any_exercise_slug' \
+          '--approach=[The slug of the approach]' \
+          '--article=[The slug of the article]' \
       ;;
     (fmt)
       _arguments "${_arguments_options[@]}" \

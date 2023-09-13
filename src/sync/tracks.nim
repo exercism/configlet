@@ -71,7 +71,7 @@ proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
     let tests =
       try:
         parsetoml.parseFile(testsPath)
-      except TomlError: # Note that `TomlError` inherits from `Defect`.
+      except TomlError:
         stderr.writeLine fmt"""
 
           Error: A 'tests.toml' file contains invalid TOML:

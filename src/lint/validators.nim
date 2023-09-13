@@ -568,56 +568,6 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
   elif not isRequired:
     result = true
 
-proc isFloat(data: JsonNode; key: static string; path: Path; context: string;
-             isRequired = true; requirePositive: bool;
-             decimalPlaces: int; errorAnnotation = ""): bool =
-  result = true
-  case data.kind
-  of JFloat:
-    let num = data.getFloat()
-    if requirePositive:
-      if num <= 0:
-        let msg = &"The value of {format(context, key)} is {num}, but it " &
-                   "must be greater than 0"
-        result.setFalseAndPrint(msg, path)
-    if decimalPlaces >= 0:
-      # To check the number of digits after the decimal place, we must parse
-      # the value as a string.
-      var digitsBeforeDecimalPoint = ""
-      var digitsAfterDecimalPoint = "" # An int would fail for e.g. 1.01
-      for line in path.string.lines:
-        if line.scanf(&"""$s"{key}"$s:$s$*.$*$.""",
-                      digitsBeforeDecimalPoint,
-                      digitsAfterDecimalPoint):
-          if digitsAfterDecimalPoint.len != decimalPlaces:
-            let s = &"{digitsBeforeDecimalPoint}.{digitsAfterDecimalPoint}"
-            let wording = if decimalPlaces == 1: "digit" else: "digits"
-            let msg = &"The value of {format(context, key)} is {s}, but it " &
-                      &"must have exactly {decimalPlaces} {wording} after " &
-                       "the decimal point"
-            result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-          return
-      let msg = &"The value of {format(context, key)} doesn't look like a float"
-      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-  of JNull:
-    if isRequired:
-      result.setFalseAndPrint(&"The value of {format(context, key)} is {qNull}, " &
-                               "but it must be a float", path,
-                               annotation = errorAnnotation)
-  else:
-    result.setFalseAndPrint(&"The value of {format(context, key)} is {q $data}, " &
-                             "but it must be a float", path,
-                             annotation = errorAnnotation)
-
-proc hasFloat*(data: JsonNode; key: static string; path: Path; context = "";
-               isRequired = true; requirePositive: bool;
-               decimalPlaces: int; errorAnnotation = ""): bool =
-  if data.hasKey(key, path, context, isRequired):
-    result = isFloat(data[key], key, path, context, isRequired, requirePositive,
-                     decimalPlaces, errorAnnotation = errorAnnotation)
-  elif not isRequired:
-    result = true
-
 proc parseJson(s: Stream; filename: Path; rawIntegers = false;
                rawFloats = false): JsonNode {.borrow.}
 

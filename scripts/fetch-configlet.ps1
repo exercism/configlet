@@ -20,7 +20,7 @@ Function Get-DownloadUrl {
     Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts
     | Select-Object -ExpandProperty assets
     | Where-Object { $_.browser_download_url -match $FileName }
-    | Select-Object -ExpandProperty browser_download_url
+    | Select-Object -ExpandProperty browser_download_url -First 1
 }
 
 $downloadUrl = Get-DownloadUrl

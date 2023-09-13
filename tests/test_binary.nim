@@ -1,5 +1,5 @@
 import std/[os, osproc, strformat, strscans, strutils, unittest]
-import "."/[exec, helpers, lint/validators, sync/probspecs]
+import exec, helpers, lint/validators, sync/probspecs
 
 const
   testsDir = currentSourcePath().parentDir()

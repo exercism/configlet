@@ -28,11 +28,13 @@ jobs:
     runs-on: ${{ matrix.runs-on }}
     steps:
       - name: Checkout
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
 
       - name: Run fetch-configlet
         shell: bash
         run: ./scripts/fetch-configlet
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run the downloaded configlet
         env:
@@ -49,3 +51,5 @@ jobs:
           Remove-Item bin/configlet.exe
           scripts/fetch-configlet.ps1
           bin/configlet.exe --version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,2 @@
 #!/usr/bin/env sh
-
-# Install musl
 sudo apt-get install musl-dev musl-tools

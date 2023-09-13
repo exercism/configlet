@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+archives_dir='archives'
+mkdir -p "${archives_dir}"
+
+binary_name='configlet'
+build_tag="${GITHUB_REF_NAME}"
+
+case "${OS}" in
+  windows)
+    archive="${archives_dir}/${binary_name}_${build_tag}_${OS}_${ARCH}.zip"
+    7z a "${archive}" "${binary_name}.exe"
+    ;;
+  linux | macos)
+    archive="${archives_dir}/${binary_name}_${build_tag}_${OS}_${ARCH}.tar.gz"
+    tar -cvzf "${archive}" "${binary_name}"
+    ;;
+esac
+
+gh release upload "${build_tag}" "${archive}"

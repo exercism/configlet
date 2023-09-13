@@ -1,6 +1,6 @@
 import std/[importutils, json, os, options, random, strutils, unittest]
 import pkg/jsony
-import "."/[exec, fmt/exercises, helpers, sync/sync_common, types_exercise_config]
+import exec, fmt/exercises, helpers, sync/sync_common, types_exercise_config
 
 const
   testsDir = currentSourcePath().parentDir()

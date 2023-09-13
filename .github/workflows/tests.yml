@@ -31,18 +31,20 @@ jobs:
 
     name: "${{ matrix.os }}-${{ matrix.arch }}"
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
 
       - name: On Linux, install musl
         if: matrix.os == 'linux'
-        run: ./.github/bin/linux-install-build-tools
+        run: ./.github/bin/linux-install-musl
 
       - name: Install Nim
-        uses: iffy/install-nim@bea090a732f3e1918187bac8dd05ab1ab87a569f
+        uses: iffy/install-nim@ac410af52523f06e0fa037ee81d06ead7b95692c
         with:
-          version: "binary:1.6.12"
+          version: "binary:2.0.0"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

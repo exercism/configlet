@@ -21,13 +21,13 @@ _configlet_completion_() {
 
   local i
   for ((i = 1; i < COMP_CWORD; i++)); do
-    if [[ ${COMP_WORDS[i]} == @(completion|lint|generate|info|uuid|fmt|sync) ]]; then
+    if [[ ${COMP_WORDS[i]} == @(completion|create|lint|generate|info|uuid|fmt|sync) ]]; then
       "_configlet_complete_${COMP_WORDS[i]}_"
       return
     fi
   done
 
-  _configlet_complete_options_ "completion fmt generate info lint sync uuid $global_opts"
+  _configlet_complete_options_ "completion create fmt generate info lint sync uuid $global_opts"
 }
 
 _configlet_complete_global_option_() {
@@ -75,6 +75,17 @@ _configlet_complete_uuid_() {
       ;;
     *)
       _configlet_complete_options_ "-n --num $global_opts"
+      ;;
+  esac
+}
+
+_configlet_complete_create_() {
+  case $prev in
+    '-e' | '--exercise')
+      _configlet_complete_slugs_ "practice" "concept"
+      ;;
+    *)
+      _configlet_complete_options_ "--approach --article -e --exercise $global_opts"
       ;;
   esac
 }

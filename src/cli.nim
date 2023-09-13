@@ -1,10 +1,12 @@
 import std/[os, parseutils, strformat, strutils, terminal]
-import pkg/[cligen/parseopt3, supersnappy]
+import pkg/supersnappy
+import patched_libs/parseopt3
 
 type
   ActionKind* = enum
     actNil = "nil"
     actCompletion = "completion"
+    actCreate = "create"
     actFmt = "fmt"
     actGenerate = "generate"
     actInfo = "info"
@@ -35,6 +37,13 @@ type
       discard
     of actCompletion:
       shell*: Shell
+    of actCreate:
+      approachSlug*: string
+      articleSlug*: string
+      # We can't name this field `exercise` because we use that names
+      # in `actSync`, and Nim doesn't yet support duplicate field names
+      # in object variants.
+      exerciseCreate*: string
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -71,11 +80,17 @@ type
     optTrackDir = "trackDir"
     optVerbosity = "verbosity"
 
+    # Options for `create`
+    optCreateApproach = "approach"
+    optCreateArticle = "article"
+
     # Options for `completion`
     optCompletionShell = "shell"
 
+    # Options for `create`, `fmt` and `sync`
+    optFmtSyncCreateExercise = "exercise"
+
     # Options for both `fmt` and `sync`
-    optFmtSyncExercise = "exercise"
     optFmtSyncUpdate = "update"
     optFmtSyncYes = "yes"
 
@@ -95,14 +110,13 @@ func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
     if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optSyncTests}:
+               optSyncTests, optCreateApproach, optCreateArticle}:
       result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
 
 const
-  repoRootDir = currentSourcePath().parentDir().parentDir()
-  configletVersion = staticRead(repoRootDir / "configlet.version").strip()
+  configletVersion = staticRead("../configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
                optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
@@ -162,7 +176,9 @@ func genHelpText: string =
         of optTrackDir: "dir"
         of optVerbosity: "verbosity"
         of optCompletionShell: "shell"
-        of optFmtSyncExercise: "slug"
+        of optFmtSyncCreateExercise: "slug"
+        of optCreateApproach: "slug"
+        of optCreateArticle: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
@@ -190,6 +206,7 @@ func genHelpText: string =
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
     actCompletion: "Output a completion script for a given shell",
+    actCreate: "Add a new approach or article",
     actFmt: "Format the exercise 'config.json' files",
     actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
     actInfo: "Print some information about the track",
@@ -215,9 +232,11 @@ func genHelpText: string =
     optTrackDir: "Specify a track directory to use instead of the current directory",
     optVerbosity: &"The verbosity of output.\n" &
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
+    optCreateApproach: "The slug of the approach",
+    optCreateArticle: "The slug of the article",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
-    optFmtSyncExercise: "Only operate on this exercise",
+    optFmtSyncCreateExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
     optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
@@ -262,13 +281,20 @@ func genHelpText: string =
         if key == "scope":
           for syncKind in {skDocs, skFilepaths, skMetadata}:
             let opt = parseEnum[Opt]($syncKind)
-            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[opt] & "\n"
+            result.add alignLeft(syntax[opt], maxLen) & optionDescriptions[
+                opt] & "\n"
             optSeen.incl opt
         elif key != "kind":
           let opt =
             case key
+            of "approachSlug":
+              optCreateApproach
+            of "articleSlug":
+              optCreateArticle
+            of "exerciseCreate":
+              optFmtSyncCreateExercise
             of "exerciseFmt":
-              optFmtSyncExercise
+              optFmtSyncCreateExercise
             of "updateFmt":
               optFmtSyncUpdate
             of "yesFmt":
@@ -339,7 +365,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
   ## Returns a string that describes an option, given its `kind`, `key` and
   ## optionally `val`. This is useful for displaying in error messages.
   runnableExamples:
-    import pkg/cligen/parseopt3
+    import patched_libs/parseopt3
     assert formatOpt(cmdShortOption, "h") == "'-h'"
     assert formatOpt(cmdLongOption, "help") == "'--help'"
     assert formatOpt(cmdShortOption, "v", "quiet") == "'-v': 'quiet'"
@@ -357,7 +383,7 @@ func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
 func init*(T: typedesc[Action], actionKind: ActionKind,
            scope: set[SyncKind] = {}): T =
   case actionKind
-  of actNil, actCompletion, actFmt, actGenerate, actInfo, actLint:
+  of actNil, actCompletion, actCreate, actFmt, actGenerate, actInfo, actLint:
     T(kind: actionKind)
   of actSync:
     T(kind: actionKind, scope: scope)
@@ -496,9 +522,19 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(shell, parseVal[Shell](kind, key, val))
       else:
         discard
+    of actCreate:
+      case opt
+      of optCreateApproach:
+        setActionOpt(approachSlug, val)
+      of optCreateArticle:
+        setActionOpt(articleSlug, val)
+      of optFmtSyncCreateExercise:
+        setActionOpt(exerciseCreate, val)
+      else:
+        discard
     of actFmt:
       case opt
-      of optFmtSyncExercise:
+      of optFmtSyncCreateExercise:
         setActionOpt(exerciseFmt, val)
       of optFmtSyncUpdate:
         setActionOpt(updateFmt, true)
@@ -514,7 +550,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actSync:
       case opt
-      of optFmtSyncExercise:
+      of optFmtSyncCreateExercise:
         setActionOpt(exercise, val)
       of optFmtSyncUpdate:
         setActionOpt(update, true)
@@ -569,7 +605,7 @@ proc processCmdLine*: Conf =
   of actCompletion:
     if result.action.shell == sNil:
       showError("Please choose a shell. For example: `configlet completion -s bash`")
-  of actFmt, actGenerate, actInfo, actLint, actUuid:
+  of actFmt, actCreate, actGenerate, actInfo, actLint, actUuid:
     discard
   of actSync:
     # If the user does not specify a syncing scope, operate on all data kinds.
