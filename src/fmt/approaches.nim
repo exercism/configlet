@@ -53,7 +53,7 @@ func addApproaches(result: var string;
   result.addNewlineAndIndent(indentLevel)
   result.add "]"
 
-func prettyApproachesConfig(e: ApproachesConfig): string =
+func prettyApproachesConfig*(e: ApproachesConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
   let keys = approachesConfigKeyOrderForFmt(e)
 

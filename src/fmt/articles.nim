@@ -34,7 +34,7 @@ func addArticles(result: var string; val: seq[ArticleConfig]; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "]"
 
-func prettyArticlesConfig(e: ArticlesConfig): string =
+func prettyArticlesConfig*(e: ArticlesConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
   let keys = articlesConfigKeyOrderForFmt(e)
 
