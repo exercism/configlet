@@ -21,9 +21,9 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
   ## Yield the track's `config.json` file
   yield (dkTrackConfig, trackDir / "config.json")
 
-  # ## Yields the `.meta/config.json`, `.approaches/config.json` and
-  # ## `.articles/config.json` paths for each exercise in
-  # ## `trackExerciseSlugs` in `trackExercisesDir`.
+  ## Yields the `.meta/config.json`, `.approaches/config.json` and
+  ## `.articles/config.json` paths for each exercise in
+  ## `trackExerciseSlugs` in `trackExercisesDir`.
   let trackExercisesDir = trackDir / "exercises"
   for exerciseKind in [ekConcept, ekPractice]:
     let documentKind =
