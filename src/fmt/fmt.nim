@@ -1,5 +1,5 @@
 import std/[os, strformat, strutils]
-import "."/[approaches, articles, exercises]
+import "."/[approaches, articles, exercises, track_config]
 import ".."/[cli, helpers, logger, sync/sync_common, sync/sync,
     types_exercise_config, types_track_config]
 
@@ -65,7 +65,7 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   ## for the track.
   ##
   ## Returns a seq of (document kind, path, formatted document) objects
-  ## containing every exercise's configs that are not already formatted.
+  ## containing every document that is not already formatted.
   var seenUnformatted = false
   for (documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
                                                    trackDir):
