@@ -33,11 +33,12 @@ func trackConfigKeyOrderForFmt(e: TrackConfig): seq[TrackConfigKey] =
   if e.tags.len > 0:
     result.add tckTags
 
-func addStatus(result: var string; val: TrackStatus, indentLevel = 1) =
+func addStatus(result: var string; val: TrackStatus; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   escapeJson("status", result)
   result.add ": {"
-  result.addBool("concept_exercises", val.conceptExercises, indentLevel = indentLevel + 1)
+  result.addBool("concept_exercises", val.conceptExercises,
+      indentLevel = indentLevel + 1)
   result.addBool("test_runner", val.testRunner, indentLevel = indentLevel + 1)
   result.addBool("representer", val.representer, indentLevel = indentLevel + 1)
   result.addBool("analyzer", val.analyzer, indentLevel = indentLevel + 1)
@@ -45,28 +46,30 @@ func addStatus(result: var string; val: TrackStatus, indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addTestRunner(result: var string; val: TestRunner, indentLevel = 1) =
+func addTestRunner(result: var string; val: TestRunner; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   escapeJson("test_runner", result)
   result.add ": {"
-  result.addInt("average_run_time", val.averageRunTime, indentLevel = indentLevel + 1)
+  result.addInt("average_run_time", val.averageRunTime,
+      indentLevel = indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addOnlineEditor(result: var string; val: OnlineEditor, indentLevel = 1) =
+func addOnlineEditor(result: var string; val: OnlineEditor; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   escapeJson("online_editor", result)
   result.add ": {"
   result.addString("indent_style", $val.indentStyle, indentLevel = indentLevel + 1)
   result.addInt("indent_size", val.indentSize, indentLevel = indentLevel + 1)
   if val.highlightjsLanguage.len > 0:
-    result.addString("highlightjs_language", val.highlightjsLanguage, indentLevel = indentLevel + 1)
+    result.addString("highlightjs_language", val.highlightjsLanguage,
+        indentLevel = indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addFiles(result: var string; val: FilePatterns, indentLevel = 1) =
+func addFiles(result: var string; val: FilePatterns; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   escapeJson("files", result)
   result.add ": {"
@@ -86,7 +89,7 @@ func addFiles(result: var string; val: FilePatterns, indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addTags(result: var string; val: HashSet[string], indentLevel = 1) =
+func addTags(result: var string; val: HashSet[string]; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `val` key with value `tags`
   ## to `result`.
   var tags = toSeq(val)
@@ -130,7 +133,8 @@ func addConcept(result: var string; val: Concept; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addConceptExercise(result: var string; val: ConceptExercise; indentLevel = 1) =
+func addConceptExercise(result: var string; val: ConceptExercise;
+    indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `concept` object with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -148,7 +152,8 @@ func addConceptExercise(result: var string; val: ConceptExercise; indentLevel = 
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addConceptExercises(result: var string; val: seq[ConceptExercise]; indentLevel = 2) =
+func addConceptExercises(result: var string; val: seq[ConceptExercise];
+    indentLevel = 2) =
   ## Appends the pretty-printed JSON for a `concepts` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -160,7 +165,8 @@ func addConceptExercises(result: var string; val: seq[ConceptExercise]; indentLe
   result.addNewlineAndIndent(indentLevel)
   result.add "],"
 
-func addPracticeExercise(result: var string; val: PracticeExercise; indentLevel = 1) =
+func addPracticeExercise(result: var string; val: PracticeExercise;
+    indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `practice` object with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -181,7 +187,8 @@ func addPracticeExercise(result: var string; val: PracticeExercise; indentLevel 
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addPracticeExercises(result: var string; val: seq[PracticeExercise]; indentLevel = 2) =
+func addPracticeExercises(result: var string; val: seq[PracticeExercise];
+    indentLevel = 2) =
   ## Appends the pretty-printed JSON for a `practice` key with value `val` to
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
@@ -255,8 +262,6 @@ func prettyTrackConfig(e: TrackConfig): string =
       result.addStatus(e.status)
     of tckTags:
       result.addTags(e.tags)
-    else:
-      discard
   result.removeComma()
   result.add "\n}\n"
 
