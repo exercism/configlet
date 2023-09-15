@@ -1,4 +1,5 @@
 import std/[json, options]
+import "."/helpers
 
 # Silence the styleCheck hint for `source_url`.
 {.push hint[Name]: off.}
@@ -124,4 +125,26 @@ type
     source_url*: Option[string]
     custom*: Option[JsonNode]
 
+  ExerciseKind* = enum
+    ekConcept = "concept"
+    ekPractice = "practice"
+
+  ExerciseConfig* = object
+    case kind*: ExerciseKind
+    of ekConcept:
+      c*: ConceptExerciseConfig
+    of ekPractice:
+      p*: PracticeExerciseConfig
 {.pop.}
+
+proc init*(T: typedesc[ExerciseConfig], kind: ExerciseKind,
+           trackExerciseConfigPath: string): T =
+  case kind
+  of ekConcept: T(
+    kind: kind,
+    c: parseFile(trackExerciseConfigPath, ConceptExerciseConfig)
+  )
+  of ekPractice: T(
+    kind: kind,
+    p: parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
+  )

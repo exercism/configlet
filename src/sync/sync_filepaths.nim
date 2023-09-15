@@ -1,6 +1,6 @@
 import std/[os, strformat, strutils]
 import pkg/jsony # This is not always used, but removing it will make tests fail.
-import ".."/[cli, helpers, logger, types_exercise_config, types_track_config]
+import ".."/[cli, fmt/exercises, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
 func replace(slug: Slug, sub: char, by: char): string {.borrow.}
@@ -66,28 +66,9 @@ func isSynced(f: ConceptExerciseFiles | PracticeExerciseFiles,
       genCond(invalidator)
 
 type
-  ExerciseConfig* = object
-    case kind: ExerciseKind
-    of ekConcept:
-      c*: ConceptExerciseConfig
-    of ekPractice:
-      p*: PracticeExerciseConfig
-
   PathAndUpdatedExerciseConfig = object
     path: string
     exerciseConfig: ExerciseConfig
-
-proc init*(T: typedesc[ExerciseConfig], kind: ExerciseKind,
-           trackExerciseConfigPath: string): T =
-  case kind
-  of ekConcept: T(
-    kind: kind,
-    c: parseFile(trackExerciseConfigPath, ConceptExerciseConfig)
-  )
-  of ekPractice: T(
-    kind: kind,
-    p: parseFile(trackExerciseConfigPath, PracticeExerciseConfig)
-  )
 
 func hasSyncedFilepaths(e: ExerciseConfig, patterns: FilePatterns): bool =
   case e.kind

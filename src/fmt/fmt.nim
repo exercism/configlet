@@ -1,6 +1,7 @@
 import std/[os, strformat, strutils]
-import ".."/[cli, helpers, logger, sync/sync_common, sync/sync_filepaths, sync/sync, types_track_config,
-             types_approaches_config, types_articles_config]
+import "."/[approaches, articles, exercises]
+import ".."/[cli, helpers, logger, sync/sync_common, sync/sync,
+    types_exercise_config, types_track_config]
 
 type
   DocumentKind* = enum
@@ -44,29 +45,6 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
       trackExerciseConfigPath.addArticlesConfigPath()
       if fileExists(trackExerciseConfigPath):
         yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
-
-proc formatExerciseConfigFile(exerciseKind: ExerciseKind,
-                              configPath: string): string =
-  ## Parses the `.meta/config.json` file at `configPath` and returns it in the
-  ## canonical form.
-  let exerciseConfig = ExerciseConfig.init(exerciseKind, configPath)
-  case exerciseKind
-  of ekConcept:
-    prettyExerciseConfig(exerciseConfig.c, pmFmt)
-  of ekPractice:
-    prettyExerciseConfig(exerciseConfig.p, pmFmt)
-
-proc formatApproachesConfigFile(configPath: string): string =
-  ## Parses the `.approaches/config.json` file at `configPath` and
-  ## returns it in the canonical form.
-  let approachesConfig = ApproachesConfig.init(configPath)
-  prettyApproachesConfig(approachesConfig)
-
-proc formatArticlesConfigFile(configPath: string): string =
-  ## Parses the `.articles/config.json` file at `configPath` and
-  ## returns it in the canonical form.
-  let articlesConfig = ArticlesConfig.init(configPath)
-  prettyArticlesConfig(articlesConfig)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
              trackDir: string): seq[PathAndFormattedDocument] =

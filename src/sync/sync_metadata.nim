@@ -1,6 +1,6 @@
 import std/[options, os, strformat, strutils]
 import pkg/parsetoml
-import ".."/[cli, helpers, logger, types_exercise_config, types_track_config]
+import ".."/[cli, fmt/exercises, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
 
 # Silence the styleCheck hint for `source_url`.

@@ -53,10 +53,6 @@ type
     files*: FilePatterns
     concepts*: Concepts
 
-  ExerciseKind* = enum
-    ekConcept = "concept"
-    ekPractice = "practice"
-
 func `$`*(slug: Slug): string {.borrow.}
 func `==`*(x, y: Slug): bool {.borrow.}
 func `<`*(x, y: Slug): bool {.borrow.}
