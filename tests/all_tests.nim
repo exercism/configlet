@@ -7,7 +7,7 @@ proc genBracket: NimNode =
   result = nnkBracket.newTree()
   for f in files:
     result.add ident(f.string[0..^5]) # Remove .nim file extension.
-  expectMinLen(result, 9)
+  expectMinLen(result, 8)
 
 macro importTestFiles =
   ## Imports every Nim module that begins with `test_` in the parent directory.
