@@ -1,4 +1,4 @@
-import std/[algorithm, sequtils, json, sets, strformat]
+import std/[algorithm, sequtils, json, options, sets, strformat]
 import ".."/[helpers, sync/sync_common, types_track_config]
 
 func trackConfigKeyOrderForFmt(e: TrackConfig): seq[TrackConfigKey] =
@@ -181,8 +181,8 @@ func addPracticeExercise(result: var string; val: PracticeExercise;
   result.addInt("difficulty", val.difficulty, indentLevel + 1)
   if val.status != sMissing:
     result.addString("status", $val.status, indentLevel + 1)
-  if val.topics.len > 0:
-    result.addArray("topics", toSeq(val.topics), indentLevel + 1)
+  if val.topics.isSome() and val.topics.get.len > 0:
+    result.addArray("topics", toSeq(val.topics.get), indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"

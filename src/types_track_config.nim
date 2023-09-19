@@ -1,4 +1,4 @@
-import std/[hashes, sets]
+import std/[hashes, options, sets]
 import pkg/jsony
 import "."/[cli, helpers]
 
@@ -54,7 +54,7 @@ type
     practices*: HashSet[string]
     prerequisites*: HashSet[string]
     difficulty*: int
-    topics*: HashSet[string]
+    topics*: Option[HashSet[string]]
     status*: Status
 
   Exercises* = object
