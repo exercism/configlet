@@ -1,4 +1,5 @@
 import std/[os, sequtils, strformat, strutils, terminal]
+import pkg/jsony # This is not always used, but removing it will make tests fail.
 import ".."/[cli, helpers, logger, types_track_config]
 import "."/[exercises, probspecs, sync_common, sync_docs, sync_filepaths,
             sync_metadata, sync_tests]
