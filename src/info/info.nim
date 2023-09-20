@@ -73,15 +73,17 @@ proc init(T: typedesc[ProbSpecsExercises], probSpecsDir: ProbSpecsDir): T =
         result.withoutCanonicalData.incl exerciseSlug
 
 proc unimplementedProbSpecsExercises(practiceExercises: seq[PracticeExercise],
-                                     foregone: HashSet[string],
+                                     foregone: OrderedSet[string],
                                      probSpecsDir: ProbSpecsDir): string =
   let
     probSpecsExercises = ProbSpecsExercises.init(probSpecsDir)
     practiceExerciseSlugs = collect:
       for p in practiceExercises:
         {p.slug.`$`}
-    uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs - foregone
-    uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs - foregone
+    uWith = probSpecsExercises.withCanonicalData - practiceExerciseSlugs -
+        foregone.toSeq.toHashSet
+    uWithout = probSpecsExercises.withoutCanonicalData - practiceExerciseSlugs -
+        foregone.toSeq.toHashSet
     header =
       &"There are {uWith.len + uWithout.len} non-deprecated exercises " &
       "in `exercism/problem-specifications` that\n" &

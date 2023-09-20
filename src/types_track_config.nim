@@ -36,31 +36,31 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
-  # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
+  # We can use an `OrderedSet` for `concepts`, `prerequisites`, `practices`, and
   # `foregone` because the first pass has already checked that each has unique
-  # values.
+  # values, but we want to retain insertion order to reduce churn.
   ConceptExercise* = object
     slug*: Slug
     name*: string
     uuid*: string
-    concepts*: HashSet[string]
-    prerequisites*: HashSet[string]
+    concepts*: OrderedSet[string]
+    prerequisites*: OrderedSet[string]
     status*: Status
 
   PracticeExercise* = object
     slug*: Slug
     name*: string
     uuid*: string
-    practices*: HashSet[string]
-    prerequisites*: HashSet[string]
+    practices*: OrderedSet[string]
+    prerequisites*: OrderedSet[string]
     difficulty*: int
-    topics*: Option[HashSet[string]]
+    topics*: Option[OrderedSet[string]]
     status*: Status
 
   Exercises* = object
     `concept`*: seq[ConceptExercise]
     practice*: seq[PracticeExercise]
-    foregone*: HashSet[string]
+    foregone*: OrderedSet[string]
 
   FilePatterns* = object
     solution*: seq[string]
@@ -115,7 +115,7 @@ type
     onlineEditor*: OnlineEditor
     keyFeatures*: KeyFeatures
     status*: TrackStatus
-    tags*: HashSet[string]
+    tags*: OrderedSet[string]
 
 func `$`*(slug: Slug): string {.borrow.}
 func `==`*(x, y: Slug): bool {.borrow.}

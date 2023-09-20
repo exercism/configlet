@@ -90,7 +90,7 @@ func addFiles(result: var string; val: FilePatterns; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
-func addTags(result: var string; val: HashSet[string]; indentLevel = 1) =
+func addTags(result: var string; val: OrderedSet[string]; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `val` key with value `tags`
   ## to `result`.
   var tags = toSeq(val)
