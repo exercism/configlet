@@ -108,6 +108,15 @@ proc gitCheckout(dir, hash: string) =
   let args = ["-C", dir, "checkout", "--force", hash]
   discard gitCheck(0, args)
 
+proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
+  let configJson = readFile(file)
+    .replace(
+        &""""average_run_time": {oldValue}""",
+        &""""average_run_time": {newValue}""")
+  writeFile(file, configJson)
+  discard execCmdEx("git commit -am 'config: convert `average_run_time` to int'",
+      workingDir = parentDir(file))
+
 proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named
   ## `repoName` to `dest`.
@@ -116,6 +125,11 @@ proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   if not dirExists(dest):
     cloneExercismRepo(repoName, dest, shallow)
   gitCheckout(dest, hash)
+
+  if repoName == "nim":
+    fixAverageRunTimeInConfigJson(dest / "config.json", "3.0", "3")
+  elif repoName == "elixir":
+    fixAverageRunTimeInConfigJson(dest / "config.json", "4.1", "4")
 
 func conciseDiff(s: string): string =
   ## Returns the lines of `s` that begin with a `+` or `-` character.
