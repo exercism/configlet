@@ -103,9 +103,9 @@ func addKeyFeature(result: var string; val: KeyFeature; indentLevel = 1) =
   ## `result`.
   result.addNewlineAndIndent(indentLevel)
   result.add "{"
-  result.addString("icon", val.icon, indentLevel + 1)
   result.addString("title", val.title, indentLevel + 1)
   result.addString("content", val.content, indentLevel + 1)
+  result.addString("icon", val.icon, indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
@@ -143,10 +143,8 @@ func addConceptExercise(result: var string; val: ConceptExercise;
   result.addString("slug", $val.slug, indentLevel + 1)
   result.addString("name", val.name, indentLevel + 1)
   result.addString("uuid", val.uuid, indentLevel + 1)
-  if val.concepts.len > 0:
-    result.addArray("concepts", toSeq(val.concepts), indentLevel + 1)
-  if val.prerequisites.len > 0:
-    result.addArray("prerequisites", toSeq(val.prerequisites), indentLevel + 1)
+  result.addArray("concepts", toSeq(val.concepts), indentLevel + 1)
+  result.addArray("prerequisites", toSeq(val.prerequisites), indentLevel + 1)
   if val.status != sMissing:
     result.addString("status", $val.status, indentLevel + 1)
   result.removeComma()
@@ -175,10 +173,8 @@ func addPracticeExercise(result: var string; val: PracticeExercise;
   result.addString("slug", $val.slug, indentLevel + 1)
   result.addString("name", val.name, indentLevel + 1)
   result.addString("uuid", val.uuid, indentLevel + 1)
-  if val.practices.len > 0:
-    result.addArray("practices", toSeq(val.practices), indentLevel + 1)
-  if val.prerequisites.len > 0:
-    result.addArray("prerequisites", toSeq(val.prerequisites), indentLevel + 1)
+  result.addArray("practices", toSeq(val.practices), indentLevel + 1)
+  result.addArray("prerequisites", toSeq(val.prerequisites), indentLevel + 1)
   result.addInt("difficulty", val.difficulty, indentLevel + 1)
   if val.status != sMissing:
     result.addString("status", $val.status, indentLevel + 1)
