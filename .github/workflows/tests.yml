@@ -37,6 +37,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
 
+      - name: Configure the git user # Required to create a commit in our binary tests
+        run: |
+          git config --global user.email "66069679+exercism-bot@users.noreply.github.com"
+          git config --global user.name "Exercism Bot"
+
       - name: On Linux, install musl
         if: matrix.os == 'linux'
         run: ./.github/bin/linux-install-musl
