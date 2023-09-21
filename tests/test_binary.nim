@@ -1125,16 +1125,32 @@ proc testsForFmt(binaryPath: static string) =
       """.unindent()
       execAndCheck(1, &"{fmtBase} -e foo", expectedOutput)
 
-  suite "fmt, with --update, without --yes, for an exercise that is correctly formatted (no diff, and exits with 1)":
+  suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
     test "-e bob":
       let exitCode = execCmdEx(&"{fmtUpdate} -e leap")[1]
       check exitCode == 1
       checkNoDiff(trackDir)
 
-  suite "fmt, with --update, for an exercise that is correctly formatted (no diff, and exits with 1)":
+  suite "fmt, with --update, for an exercise that is not formatted (no diff, and exits with 1)":
     test "-e bob":
       let exitCode = execCmdEx(&"{fmtUpdate} --yes -e leap")[1]
       check exitCode == 1
+      checkNoDiff(trackDir)
+
+  # Setup: clone a track repo, and checkout a known state
+  setupExercismRepo("nim", trackDir,
+                    "ea91acb3edb6c7bc05dd3b050c0a566be6c3329e") # 2022-01-22
+
+  suite "fmt, with --update, without --yes, for an exercise that is formatted (no diff, and exits with 0)":
+    test "-e bob":
+      let exitCode = execCmdEx(&"{fmtUpdate} -e leap")[1]
+      check exitCode == 0
+      checkNoDiff(trackDir)
+
+  suite "fmt, with --update, for an exercise that is formatted (no diff, and exits with 0)":
+    test "-e bob":
+      let exitCode = execCmdEx(&"{fmtUpdate} --yes -e leap")[1]
+      check exitCode == 0
       checkNoDiff(trackDir)
 
 proc main =
