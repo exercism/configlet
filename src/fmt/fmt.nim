@@ -17,9 +17,13 @@ type
     formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
-                        trackDir: string): (DocumentKind, string) =
-  ## Yield the track's `config.json` file
-  yield (dkTrackConfig, trackDir / "config.json")
+                        conf: Conf): (DocumentKind, string) =
+  let trackDir = conf.trackDir
+
+  ## Yield the track's `config.json` file, but only when the user
+  ## is not formatting a single exercise
+  if conf.action.exerciseFmt.len == 0:
+    yield (dkTrackConfig, trackDir / "config.json")
 
   ## Yields the `.meta/config.json`, `.approaches/config.json` and
   ## `.articles/config.json` paths for each exercise in
@@ -57,7 +61,7 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
         yield (dkArticlesConfig, trackExerciseConfigPath)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
-             trackDir: string): seq[PathAndFormattedDocument] =
+             conf: Conf): seq[PathAndFormattedDocument] =
   ## Reads the track config file and all exercise config files
   ## for every slug in `trackExerciseSlugs` in `trackExerciseDir`.
   ## This includes `.meta/config.json`, `.approaches/config.json`
@@ -67,8 +71,9 @@ proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
   ## Returns a seq of (document kind, path, formatted document) objects
   ## containing every document that is not already formatted.
   var seenUnformatted = false
+  let trackDir = conf.trackDir
   for (documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
-                                                   trackDir):
+                                                   conf):
     let formatted =
       case documentKind
       of dkTrackConfig: formatTrackConfigFile(configPath)
@@ -128,7 +133,7 @@ proc fmt*(conf: Conf) =
   logNormal("Looking for exercises that lack a formatted '.meta/config.json', " &
             "'.approaches/config.json'\nor '.articles/config.json' file...")
 
-  let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
+  let pairs = fmtImpl(trackExerciseSlugs, conf)
 
   let userExercise = conf.action.exerciseFmt
   if pairs.len > 0:
