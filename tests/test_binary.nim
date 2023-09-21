@@ -1008,6 +1008,99 @@ proc testsForCompletion(binaryPath: string) =
         outp.contains(&"Please choose a shell. For example: `configlet completion -s bash`")
         exitCode == 1
 
+proc testsForFmt(binaryPath: static string) =
+  const trackDir = testsDir / ".test_nim_track_repo"
+
+  # Setup: clone a track repo, and checkout a known state
+  setupExercismRepo("nim", trackDir,
+                    "736245965db724cafc5ec8e9dcae83c850b7c5a8") # 2021-10-22
+
+  const
+    fmtBase = &"{binaryPath} -t {trackDir} fmt"
+    fmtUpdate = &"{fmtBase} --update"
+    header = fmt"""
+      Found 0 Concept Exercises and 68 Practice Exercises in {trackDir}/config.json
+      Looking for exercises that lack a formatted '.meta/config.json', '.approaches/config.json'
+      or '.articles/config.json' file...
+      The below paths are relative to '{trackDir}'
+    """.unindent().strip(trailing = true)
+
+  suite "fmt, when the track `config.json` file is not formatted (prints the expected output, and exits with 1)":
+    test "-t foo":
+      const expectedOutput = fmt"""
+        {header}
+        Not formatted: config.json
+        Not formatted: exercises/practice/acronym/.meta/config.json
+        Not formatted: exercises/practice/all-your-base/.meta/config.json
+        Not formatted: exercises/practice/allergies/.meta/config.json
+        Not formatted: exercises/practice/anagram/.meta/config.json
+        Not formatted: exercises/practice/armstrong-numbers/.meta/config.json
+        Not formatted: exercises/practice/atbash-cipher/.meta/config.json
+        Not formatted: exercises/practice/bob/.meta/config.json
+        Not formatted: exercises/practice/clock/.meta/config.json
+        Not formatted: exercises/practice/collatz-conjecture/.meta/config.json
+        Not formatted: exercises/practice/crypto-square/.meta/config.json
+        Not formatted: exercises/practice/darts/.meta/config.json
+        Not formatted: exercises/practice/diamond/.meta/config.json
+        Not formatted: exercises/practice/difference-of-squares/.meta/config.json
+        Not formatted: exercises/practice/diffie-hellman/.meta/config.json
+        Not formatted: exercises/practice/etl/.meta/config.json
+        Not formatted: exercises/practice/gigasecond/.meta/config.json
+        Not formatted: exercises/practice/grade-school/.meta/config.json
+        Not formatted: exercises/practice/grains/.meta/config.json
+        Not formatted: exercises/practice/hamming/.meta/config.json
+        Not formatted: exercises/practice/hello-world/.meta/config.json
+        Not formatted: exercises/practice/high-scores/.meta/config.json
+        Not formatted: exercises/practice/isbn-verifier/.meta/config.json
+        Not formatted: exercises/practice/isogram/.meta/config.json
+        Not formatted: exercises/practice/kindergarten-garden/.meta/config.json
+        Not formatted: exercises/practice/largest-series-product/.meta/config.json
+        Not formatted: exercises/practice/leap/.meta/config.json
+        Not formatted: exercises/practice/luhn/.meta/config.json
+        Not formatted: exercises/practice/matching-brackets/.meta/config.json
+        Not formatted: exercises/practice/matrix/.meta/config.json
+        Not formatted: exercises/practice/meetup/.meta/config.json
+        Not formatted: exercises/practice/nth-prime/.meta/config.json
+        Not formatted: exercises/practice/nucleotide-count/.meta/config.json
+        Not formatted: exercises/practice/pangram/.meta/config.json
+        Not formatted: exercises/practice/pascals-triangle/.meta/config.json
+        Not formatted: exercises/practice/perfect-numbers/.meta/config.json
+        Not formatted: exercises/practice/phone-number/.meta/config.json
+        Not formatted: exercises/practice/prime-factors/.meta/config.json
+        Not formatted: exercises/practice/protein-translation/.meta/config.json
+        Not formatted: exercises/practice/proverb/.meta/config.json
+        Not formatted: exercises/practice/queen-attack/.meta/config.json
+        Not formatted: exercises/practice/raindrops/.meta/config.json
+        Not formatted: exercises/practice/react/.meta/config.json
+        Not formatted: exercises/practice/resistor-color/.meta/config.json
+        Not formatted: exercises/practice/resistor-color-duo/.meta/config.json
+        Not formatted: exercises/practice/resistor-color-trio/.meta/config.json
+        Not formatted: exercises/practice/reverse-string/.meta/config.json
+        Not formatted: exercises/practice/rna-transcription/.meta/config.json
+        Not formatted: exercises/practice/robot-name/.meta/config.json
+        Not formatted: exercises/practice/roman-numerals/.meta/config.json
+        Not formatted: exercises/practice/rotational-cipher/.meta/config.json
+        Not formatted: exercises/practice/run-length-encoding/.meta/config.json
+        Not formatted: exercises/practice/saddle-points/.meta/config.json
+        Not formatted: exercises/practice/say/.meta/config.json
+        Not formatted: exercises/practice/scale-generator/.meta/config.json
+        Not formatted: exercises/practice/scrabble-score/.meta/config.json
+        Not formatted: exercises/practice/secret-handshake/.meta/config.json
+        Not formatted: exercises/practice/series/.meta/config.json
+        Not formatted: exercises/practice/sieve/.meta/config.json
+        Not formatted: exercises/practice/space-age/.meta/config.json
+        Not formatted: exercises/practice/spiral-matrix/.meta/config.json
+        Not formatted: exercises/practice/sublist/.meta/config.json
+        Not formatted: exercises/practice/sum-of-multiples/.meta/config.json
+        Not formatted: exercises/practice/triangle/.meta/config.json
+        Not formatted: exercises/practice/twelve-days/.meta/config.json
+        Not formatted: exercises/practice/two-fer/.meta/config.json
+        Not formatted: exercises/practice/word-count/.meta/config.json
+        Not formatted: exercises/practice/yacht/.meta/config.json
+      """.unindent()
+      let cmd = fmtBase
+      execAndCheck(1, cmd, expectedOutput)
+
 proc main =
   const
     binaryExt =
@@ -1161,6 +1254,8 @@ proc main =
   testsForGenerate(binaryPath)
 
   testsForCompletion(binaryPath)
+
+  testsForFmt(binaryPath)
 
 main()
 {.used.}
