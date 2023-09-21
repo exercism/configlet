@@ -1025,8 +1025,8 @@ proc testsForFmt(binaryPath: static string) =
       The below paths are relative to '{trackDir}'
     """.unindent().strip(trailing = true)
 
-  suite "fmt, when the track `config.json` file is not formatted (prints the expected output, and exits with 1)":
-    test "-t foo":
+  suite "fmt, when the track `config.json` file is not formatted":
+    test "prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
         {header}
         Not formatted: config.json
