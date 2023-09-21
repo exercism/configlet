@@ -1138,18 +1138,19 @@ proc testsForFmt(binaryPath: static string) =
       checkNoDiff(trackDir)
 
   # Setup: clone a track repo, and checkout a known state
+  # This state has all exercise configs properly formatted
   setupExercismRepo("nim", trackDir,
                     "ea91acb3edb6c7bc05dd3b050c0a566be6c3329e") # 2022-01-22
 
   suite "fmt, with --update, without --yes, for an exercise that is formatted (no diff, and exits with 0)":
     test "-e bob":
-      let exitCode = execCmdEx(&"{fmtUpdate} -e leap")[1]
+      let exitCode = execCmdEx(&"{fmtUpdate} -e bob")[1]
       check exitCode == 0
       checkNoDiff(trackDir)
 
   suite "fmt, with --update, for an exercise that is formatted (no diff, and exits with 0)":
     test "-e bob":
-      let exitCode = execCmdEx(&"{fmtUpdate} --yes -e leap")[1]
+      let exitCode = execCmdEx(&"{fmtUpdate} --yes -e bob")[1]
       check exitCode == 0
       checkNoDiff(trackDir)
 
@@ -1301,11 +1302,11 @@ proc main =
         check:
           usage in readmeContents
 
-  # testsForSync(binaryPath)
+  testsForSync(binaryPath)
 
-  # testsForGenerate(binaryPath)
+  testsForGenerate(binaryPath)
 
-  # testsForCompletion(binaryPath)
+  testsForCompletion(binaryPath)
 
   testsForFmt(binaryPath)
 
