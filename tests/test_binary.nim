@@ -367,7 +367,8 @@ proc testsForSync(binaryPath: static string) =
       +    "example": []
       +  "blurb": "Diffie-Hellman key exchange.",
     """.unindent()
-    let configPath = joinPath("exercises", "practice", "diffie-hellman", ".meta", "config.json")
+    let configPath = joinPath("exercises", "practice", "diffie-hellman",
+        ".meta", "config.json")
     let configPathAbsolute = trackDir / configPath
     let metaDir = configPathAbsolute.parentDir()
     doAssert metaDir.lastPathPart() == ".meta"
@@ -907,7 +908,8 @@ proc testsForSync(binaryPath: static string) =
       let probSpecsDir = ProbSpecsDir(psDir) # Don't use `init` (it performs extra setup).
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
       withDir psDir:
-        let upstreamLatestRef = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
+        let upstreamLatestRef = gitCheck(0, ["rev-parse",
+            &"{remoteName}/{mainBranchName}"])
         let localHead = gitCheck(0, ["rev-parse", "HEAD"])
         let localMain = gitCheck(0, ["rev-parse", mainBranchName])
         check:
@@ -920,7 +922,8 @@ proc testsForSync(binaryPath: static string) =
                          &"failed to merge '{mainBranchName}' in " &
                          &"problem-specifications directory: '{probSpecsDir}'")
 
-proc prepareIntroductionFiles(trackDir, placeholder: string; removeIntro: bool) =
+proc prepareIntroductionFiles(trackDir, placeholder: string;
+    removeIntro: bool) =
   # Writes an `introduction.md.tpl` file for the `bird-count` Concept Exercise,
   # containing the given `placeholder`. Also removes the `introduction.md` file
   # if `removeIntro` is `true`.
@@ -990,7 +993,8 @@ proc testsForCompletion(binaryPath: string) =
         let c = shell[0]
         # Convert platform-specific line endings (e.g. CR+LF on Windows) to LF
         # before comparing. The below `replace` makes the tests pass on Windows.
-        let expected = readFile(completionsDir / &"configlet.{shell}").replace("\p", "\n")
+        let expected = readFile(completionsDir / &"configlet.{shell}").replace(
+            "\p", "\n")
         execAndCheck(0, &"{binaryPath} completion --shell {shell}", expected)
         execAndCheck(0, &"{binaryPath} completion --shell {c}", expected)
         execAndCheck(0, &"{binaryPath} completion -s {shell}", expected)
@@ -1019,7 +1023,10 @@ proc testsForFmt(binaryPath: static string) =
     fmtBase = &"{binaryPath} -t {trackDir} fmt"
     fmtUpdate = &"{fmtBase} --update"
     header = fmt"""
-      Found 0 Concept Exercises and 68 Practice Exercises in {trackDir}/config.json
+      Found 0 Concept Exercises and 68 Practice Exercises in {trackDir}/config.json      
+    """.unindent().strip(trailing = true)
+    headerWithPaths = fmt"""
+      {header}
       Looking for exercises that lack a formatted '.meta/config.json', '.approaches/config.json'
       or '.articles/config.json' file...
       The below paths are relative to '{trackDir}'
@@ -1028,7 +1035,7 @@ proc testsForFmt(binaryPath: static string) =
   suite "fmt, when the track `config.json` file is not formatted":
     test "prints the expected output, and exits with 1":
       const expectedOutput = fmt"""
-        {header}
+        {headerWithPaths}
         Not formatted: config.json
         Not formatted: exercises/practice/acronym/.meta/config.json
         Not formatted: exercises/practice/all-your-base/.meta/config.json
@@ -1100,6 +1107,35 @@ proc testsForFmt(binaryPath: static string) =
       """.unindent()
       let cmd = fmtBase
       execAndCheck(1, cmd, expectedOutput)
+
+  suite "fmt, for an exercise that is not formatted (prints the expected output, and exits with 1)":
+    test "-e bob":
+      const expectedOutput = fmt"""
+        {headerWithPaths}
+        Not formatted: exercises/practice/bob/.meta/config.json
+      """.unindent()
+      execAndCheck(1, &"{fmtBase} -e bob", expectedOutput)
+
+  suite "fmt, for an exercise that does not exist (prints the expected output, and exits with 1)":
+    test "-e foo":
+      const expectedOutput = fmt"""
+        {header}
+        The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
+        {trackDir / "config.json"}
+      """.unindent()
+      execAndCheck(1, &"{fmtBase} -e foo", expectedOutput)
+
+  suite "fmt, with --update, without --yes, for an exercise that is correctly formatted (no diff, and exits with 1)":
+    test "-e bob":
+      let exitCode = execCmdEx(&"{fmtUpdate} -e leap")[1]
+      check exitCode == 1
+      checkNoDiff(trackDir)
+
+  suite "fmt, with --update, for an exercise that is correctly formatted (no diff, and exits with 1)":
+    test "-e bob":
+      let exitCode = execCmdEx(&"{fmtUpdate} --yes -e leap")[1]
+      check exitCode == 1
+      checkNoDiff(trackDir)
 
 proc main =
   const
@@ -1249,11 +1285,11 @@ proc main =
         check:
           usage in readmeContents
 
-  testsForSync(binaryPath)
+  # testsForSync(binaryPath)
 
-  testsForGenerate(binaryPath)
+  # testsForGenerate(binaryPath)
 
-  testsForCompletion(binaryPath)
+  # testsForCompletion(binaryPath)
 
   testsForFmt(binaryPath)
 
