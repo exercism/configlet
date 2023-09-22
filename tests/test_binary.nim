@@ -1029,7 +1029,8 @@ proc testsForFmt(binaryPath: static string) =
     fmtBaseFormatted = &"{binaryPath} -t {formattedTrackDir} fmt"
     fmtUpdateUnformatted = &"{fmtBaseUnformatted} --update"
     fmtUpdateFormatted = &"{fmtBaseFormatted} --update"
-    unformattedHeader = &"Found 39 Concept Exercises and 118 Practice Exercises in {unformattedTrackDir}/config.json"
+    configJsonAbsolutePathUnFormatted = unformattedTrackDir / "config.json"
+    unformattedHeader = &"Found 39 Concept Exercises and 118 Practice Exercises in {configJsonAbsolutePathUnFormatted}"
 
   suite "fmt, when the track `config.json` file is not formatted":
     test "prints the expected output, and exits with 1":
