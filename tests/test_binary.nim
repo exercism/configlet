@@ -367,8 +367,7 @@ proc testsForSync(binaryPath: static string) =
       +    "example": []
       +  "blurb": "Diffie-Hellman key exchange.",
     """.unindent()
-    let configPath = joinPath("exercises", "practice", "diffie-hellman",
-        ".meta", "config.json")
+    let configPath = joinPath("exercises", "practice", "diffie-hellman", ".meta", "config.json")
     let configPathAbsolute = trackDir / configPath
     let metaDir = configPathAbsolute.parentDir()
     doAssert metaDir.lastPathPart() == ".meta"
@@ -908,8 +907,7 @@ proc testsForSync(binaryPath: static string) =
       let probSpecsDir = ProbSpecsDir(psDir) # Don't use `init` (it performs extra setup).
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
       withDir psDir:
-        let upstreamLatestRef = gitCheck(0, ["rev-parse",
-            &"{remoteName}/{mainBranchName}"])
+        let upstreamLatestRef = gitCheck(0, ["rev-parse", &"{remoteName}/{mainBranchName}"])
         let localHead = gitCheck(0, ["rev-parse", "HEAD"])
         let localMain = gitCheck(0, ["rev-parse", mainBranchName])
         check:
@@ -922,8 +920,7 @@ proc testsForSync(binaryPath: static string) =
                          &"failed to merge '{mainBranchName}' in " &
                          &"problem-specifications directory: '{probSpecsDir}'")
 
-proc prepareIntroductionFiles(trackDir, placeholder: string;
-    removeIntro: bool) =
+proc prepareIntroductionFiles(trackDir, placeholder: string; removeIntro: bool) =
   # Writes an `introduction.md.tpl` file for the `bird-count` Concept Exercise,
   # containing the given `placeholder`. Also removes the `introduction.md` file
   # if `removeIntro` is `true`.
@@ -993,8 +990,7 @@ proc testsForCompletion(binaryPath: string) =
         let c = shell[0]
         # Convert platform-specific line endings (e.g. CR+LF on Windows) to LF
         # before comparing. The below `replace` makes the tests pass on Windows.
-        let expected = readFile(completionsDir / &"configlet.{shell}").replace(
-            "\p", "\n")
+        let expected = readFile(completionsDir / &"configlet.{shell}").replace("\p", "\n")
         execAndCheck(0, &"{binaryPath} completion --shell {shell}", expected)
         execAndCheck(0, &"{binaryPath} completion --shell {c}", expected)
         execAndCheck(0, &"{binaryPath} completion -s {shell}", expected)
