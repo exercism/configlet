@@ -1048,81 +1048,81 @@ proc testsForFmt(binaryPath: static string) =
       The below paths are relative to '{unformattedTrackDir}'
     """.unindent().strip(trailing = true)
 
-  # suite "fmt, when the track `config.json` file is not formatted":
-  #   test "prints the expected output, and exits with 1":
-  #     const expectedOutput = fmt"""
-  #       {unformattedHeaderWithPaths}
-  #       Not formatted: config.json
-  #       Not formatted: exercises/practice/acronym/.meta/config.json
-  #       Not formatted: exercises/practice/all-your-base/.meta/config.json
-  #       Not formatted: exercises/practice/allergies/.meta/config.json
-  #       Not formatted: exercises/practice/anagram/.meta/config.json
-  #       Not formatted: exercises/practice/armstrong-numbers/.meta/config.json
-  #       Not formatted: exercises/practice/atbash-cipher/.meta/config.json
-  #       Not formatted: exercises/practice/bob/.meta/config.json
-  #       Not formatted: exercises/practice/clock/.meta/config.json
-  #       Not formatted: exercises/practice/collatz-conjecture/.meta/config.json
-  #       Not formatted: exercises/practice/crypto-square/.meta/config.json
-  #       Not formatted: exercises/practice/darts/.meta/config.json
-  #       Not formatted: exercises/practice/diamond/.meta/config.json
-  #       Not formatted: exercises/practice/difference-of-squares/.meta/config.json
-  #       Not formatted: exercises/practice/diffie-hellman/.meta/config.json
-  #       Not formatted: exercises/practice/etl/.meta/config.json
-  #       Not formatted: exercises/practice/gigasecond/.meta/config.json
-  #       Not formatted: exercises/practice/grade-school/.meta/config.json
-  #       Not formatted: exercises/practice/grains/.meta/config.json
-  #       Not formatted: exercises/practice/hamming/.meta/config.json
-  #       Not formatted: exercises/practice/hello-world/.meta/config.json
-  #       Not formatted: exercises/practice/high-scores/.meta/config.json
-  #       Not formatted: exercises/practice/isbn-verifier/.meta/config.json
-  #       Not formatted: exercises/practice/isogram/.meta/config.json
-  #       Not formatted: exercises/practice/kindergarten-garden/.meta/config.json
-  #       Not formatted: exercises/practice/largest-series-product/.meta/config.json
-  #       Not formatted: exercises/practice/leap/.meta/config.json
-  #       Not formatted: exercises/practice/luhn/.meta/config.json
-  #       Not formatted: exercises/practice/matching-brackets/.meta/config.json
-  #       Not formatted: exercises/practice/matrix/.meta/config.json
-  #       Not formatted: exercises/practice/meetup/.meta/config.json
-  #       Not formatted: exercises/practice/nth-prime/.meta/config.json
-  #       Not formatted: exercises/practice/nucleotide-count/.meta/config.json
-  #       Not formatted: exercises/practice/pangram/.meta/config.json
-  #       Not formatted: exercises/practice/pascals-triangle/.meta/config.json
-  #       Not formatted: exercises/practice/perfect-numbers/.meta/config.json
-  #       Not formatted: exercises/practice/phone-number/.meta/config.json
-  #       Not formatted: exercises/practice/prime-factors/.meta/config.json
-  #       Not formatted: exercises/practice/protein-translation/.meta/config.json
-  #       Not formatted: exercises/practice/proverb/.meta/config.json
-  #       Not formatted: exercises/practice/queen-attack/.meta/config.json
-  #       Not formatted: exercises/practice/raindrops/.meta/config.json
-  #       Not formatted: exercises/practice/react/.meta/config.json
-  #       Not formatted: exercises/practice/resistor-color/.meta/config.json
-  #       Not formatted: exercises/practice/resistor-color-duo/.meta/config.json
-  #       Not formatted: exercises/practice/resistor-color-trio/.meta/config.json
-  #       Not formatted: exercises/practice/reverse-string/.meta/config.json
-  #       Not formatted: exercises/practice/rna-transcription/.meta/config.json
-  #       Not formatted: exercises/practice/robot-name/.meta/config.json
-  #       Not formatted: exercises/practice/roman-numerals/.meta/config.json
-  #       Not formatted: exercises/practice/rotational-cipher/.meta/config.json
-  #       Not formatted: exercises/practice/run-length-encoding/.meta/config.json
-  #       Not formatted: exercises/practice/saddle-points/.meta/config.json
-  #       Not formatted: exercises/practice/say/.meta/config.json
-  #       Not formatted: exercises/practice/scale-generator/.meta/config.json
-  #       Not formatted: exercises/practice/scrabble-score/.meta/config.json
-  #       Not formatted: exercises/practice/secret-handshake/.meta/config.json
-  #       Not formatted: exercises/practice/series/.meta/config.json
-  #       Not formatted: exercises/practice/sieve/.meta/config.json
-  #       Not formatted: exercises/practice/space-age/.meta/config.json
-  #       Not formatted: exercises/practice/spiral-matrix/.meta/config.json
-  #       Not formatted: exercises/practice/sublist/.meta/config.json
-  #       Not formatted: exercises/practice/sum-of-multiples/.meta/config.json
-  #       Not formatted: exercises/practice/triangle/.meta/config.json
-  #       Not formatted: exercises/practice/twelve-days/.meta/config.json
-  #       Not formatted: exercises/practice/two-fer/.meta/config.json
-  #       Not formatted: exercises/practice/word-count/.meta/config.json
-  #       Not formatted: exercises/practice/yacht/.meta/config.json
-  #     """.unindent()
-  #     let cmd = unformattedTrackDir
-  #     execAndCheck(1, cmd, expectedOutput)
+  suite "fmt, when the track `config.json` file is not formatted":
+    test "prints the expected output, and exits with 1":
+      const expectedOutput = fmt"""
+        {unformattedHeaderWithPaths}
+        Not formatted: config.json
+        Not formatted: exercises/practice/acronym/.meta/config.json
+        Not formatted: exercises/practice/all-your-base/.meta/config.json
+        Not formatted: exercises/practice/allergies/.meta/config.json
+        Not formatted: exercises/practice/anagram/.meta/config.json
+        Not formatted: exercises/practice/armstrong-numbers/.meta/config.json
+        Not formatted: exercises/practice/atbash-cipher/.meta/config.json
+        Not formatted: exercises/practice/bob/.meta/config.json
+        Not formatted: exercises/practice/clock/.meta/config.json
+        Not formatted: exercises/practice/collatz-conjecture/.meta/config.json
+        Not formatted: exercises/practice/crypto-square/.meta/config.json
+        Not formatted: exercises/practice/darts/.meta/config.json
+        Not formatted: exercises/practice/diamond/.meta/config.json
+        Not formatted: exercises/practice/difference-of-squares/.meta/config.json
+        Not formatted: exercises/practice/diffie-hellman/.meta/config.json
+        Not formatted: exercises/practice/etl/.meta/config.json
+        Not formatted: exercises/practice/gigasecond/.meta/config.json
+        Not formatted: exercises/practice/grade-school/.meta/config.json
+        Not formatted: exercises/practice/grains/.meta/config.json
+        Not formatted: exercises/practice/hamming/.meta/config.json
+        Not formatted: exercises/practice/hello-world/.meta/config.json
+        Not formatted: exercises/practice/high-scores/.meta/config.json
+        Not formatted: exercises/practice/isbn-verifier/.meta/config.json
+        Not formatted: exercises/practice/isogram/.meta/config.json
+        Not formatted: exercises/practice/kindergarten-garden/.meta/config.json
+        Not formatted: exercises/practice/largest-series-product/.meta/config.json
+        Not formatted: exercises/practice/leap/.meta/config.json
+        Not formatted: exercises/practice/luhn/.meta/config.json
+        Not formatted: exercises/practice/matching-brackets/.meta/config.json
+        Not formatted: exercises/practice/matrix/.meta/config.json
+        Not formatted: exercises/practice/meetup/.meta/config.json
+        Not formatted: exercises/practice/nth-prime/.meta/config.json
+        Not formatted: exercises/practice/nucleotide-count/.meta/config.json
+        Not formatted: exercises/practice/pangram/.meta/config.json
+        Not formatted: exercises/practice/pascals-triangle/.meta/config.json
+        Not formatted: exercises/practice/perfect-numbers/.meta/config.json
+        Not formatted: exercises/practice/phone-number/.meta/config.json
+        Not formatted: exercises/practice/prime-factors/.meta/config.json
+        Not formatted: exercises/practice/protein-translation/.meta/config.json
+        Not formatted: exercises/practice/proverb/.meta/config.json
+        Not formatted: exercises/practice/queen-attack/.meta/config.json
+        Not formatted: exercises/practice/raindrops/.meta/config.json
+        Not formatted: exercises/practice/react/.meta/config.json
+        Not formatted: exercises/practice/resistor-color/.meta/config.json
+        Not formatted: exercises/practice/resistor-color-duo/.meta/config.json
+        Not formatted: exercises/practice/resistor-color-trio/.meta/config.json
+        Not formatted: exercises/practice/reverse-string/.meta/config.json
+        Not formatted: exercises/practice/rna-transcription/.meta/config.json
+        Not formatted: exercises/practice/robot-name/.meta/config.json
+        Not formatted: exercises/practice/roman-numerals/.meta/config.json
+        Not formatted: exercises/practice/rotational-cipher/.meta/config.json
+        Not formatted: exercises/practice/run-length-encoding/.meta/config.json
+        Not formatted: exercises/practice/saddle-points/.meta/config.json
+        Not formatted: exercises/practice/say/.meta/config.json
+        Not formatted: exercises/practice/scale-generator/.meta/config.json
+        Not formatted: exercises/practice/scrabble-score/.meta/config.json
+        Not formatted: exercises/practice/secret-handshake/.meta/config.json
+        Not formatted: exercises/practice/series/.meta/config.json
+        Not formatted: exercises/practice/sieve/.meta/config.json
+        Not formatted: exercises/practice/space-age/.meta/config.json
+        Not formatted: exercises/practice/spiral-matrix/.meta/config.json
+        Not formatted: exercises/practice/sublist/.meta/config.json
+        Not formatted: exercises/practice/sum-of-multiples/.meta/config.json
+        Not formatted: exercises/practice/triangle/.meta/config.json
+        Not formatted: exercises/practice/twelve-days/.meta/config.json
+        Not formatted: exercises/practice/two-fer/.meta/config.json
+        Not formatted: exercises/practice/word-count/.meta/config.json
+        Not formatted: exercises/practice/yacht/.meta/config.json
+      """.unindent()
+      let cmd = unformattedTrackDir
+      execAndCheck(1, cmd, expectedOutput)
 
   # suite "fmt, for an exercise that is not formatted (prints the expected output, and exits with 1)":
   #   test "-e bob":
@@ -1141,38 +1141,38 @@ proc testsForFmt(binaryPath: static string) =
   #     """.unindent()
   #     execAndCheck(1, &"{fmtUnformattedBase} -e foo", expectedOutput)
 
-  suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
-    test "-e bob":
-      let exitCode = execCmdEx(&"{fmtUnformattedUpdate} -e leap")[1]
-      check exitCode == 1
-      checkNoDiff(unformattedTrackDir)
+  # suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
+  #   test "-e leap":
+  #     let exitCode = execCmdEx(&"{fmtUnformattedUpdate} -e leap")[1]
+  #     check exitCode == 1
+  #     checkNoDiff(unformattedTrackDir)
 
-  suite "fmt, with --update, for an exercise that is not formatted (no diff, and exits with 0)":
-    test "-e anagram":
-      echo &"{fmtUnformattedUpdate} --yes -e anagram"
-      let exitCode = execCmdEx(&"{fmtUnformattedUpdate} --yes -e anagram")[1]
-      check exitCode == 0
-      const expectedDiff = """
-        --- exercises/practice/anagram/.meta/config.json
-        +++ exercises/practice/anagram/.meta/config.json
-        -  "blurb": "Given a word and a list of possible anagrams, select the correct sublist.",
-        +  "blurb": "Given a word and a list of possible anagrams, select the correct sublist.",
-      """.unindent()
-      let configPath = unformattedTrackDir / "exercises" / "anagram" / ".meta" / "config.json"
-      let trackDir = unformattedTrackDir
-      testDiffThenRestore(trackDir, expectedDiff, configPath)
+  # suite "fmt, with --update, for an exercise that is not formatted (no diff, and exits with 0)":
+  #   test "-e anagram":
+  #     echo &"{fmtUnformattedUpdate} --yes -e anagram"
+  #     let exitCode = execCmdEx(&"{fmtUnformattedUpdate} --yes -e anagram")[1]
+  #     check exitCode == 0
+  #     const expectedDiff = """
+  #       --- exercises/practice/anagram/.meta/config.json
+  #       +++ exercises/practice/anagram/.meta/config.json
+  #       -  "blurb": "Given a word and a list of possible anagrams, select the correct sublist.",
+  #       +  "blurb": "Given a word and a list of possible anagrams, select the correct sublist.",
+  #     """.unindent()
+  #     let configPath = "exercises" / "practice" / "anagram" / ".meta" / "config.json"
+  #     let trackDir = unformattedTrackDir
+  #     testDiffThenRestore(trackDir, expectedDiff, configPath)
 
-  suite "fmt, with --update, without --yes, for an exercise that is formatted (no diff, and exits with 0)":
-    test "-e bob":
-      let exitCode = execCmdEx(&"{fmtFormattedUpdate} -e bob")[1]
-      check exitCode == 0
-      checkNoDiff(formattedTrackDir)
+  # suite "fmt, with --update, without --yes, for an exercise that is formatted (no diff, and exits with 0)":
+  #   test "-e bob":
+  #     let exitCode = execCmdEx(&"{fmtFormattedUpdate} -e bob")[1]
+  #     check exitCode == 0
+  #     checkNoDiff(formattedTrackDir)
 
-  suite "fmt, with --update, for an exercise that is formatted (no diff, and exits with 0)":
-    test "-e bob":
-      let exitCode = execCmdEx(&"{fmtFormattedUpdate} --yes -e bob")[1]
-      check exitCode == 0
-      checkNoDiff(formattedTrackDir)
+  # suite "fmt, with --update, for an exercise that is formatted (no diff, and exits with 0)":
+  #   test "-e bob":
+  #     let exitCode = execCmdEx(&"{fmtFormattedUpdate} --yes -e bob")[1]
+  #     check exitCode == 0
+  #     checkNoDiff(formattedTrackDir)
 
 proc main =
   const
