@@ -109,11 +109,11 @@ proc gitCheckout(dir, hash: string) =
   discard gitCheck(0, args)
 
 proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
-  ## We're cloning track repos where the `average_run_time` value in the
-  ## track's `config.json` file still is a float value. However, that
-  ## has later changed to be an `int`, but in order to not break all the
-  ## existing tests, we're adding this little workaround to manually change
-  ## the value from a float to an int.
+  ## For testing purposes, we clone track repos and checkout commits
+  ## where the `average_run_time` value in the `config.json` file
+  ## is a float, which has later since changed to an int.
+  ## In order to not break existing tests, we manually change the value
+  ## from a float to an int.
   let configJson = readFile(file)
     .replace(
         &""""average_run_time": {oldValue}""",
