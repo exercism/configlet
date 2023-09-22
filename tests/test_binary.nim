@@ -1216,7 +1216,7 @@ proc testsForFmt(binaryPath: static string) =
       execAndCheck(1, &"{fmtBaseUnformatted} -e foo", expectedOutput)
 
   suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
-    test "-e leap":
+    test "-e bob":
       let exitCode = execCmdEx(&"{fmtUpdateUnformatted} -e bob")[1]
       check exitCode == 1
       checkNoDiff(unformattedTrackDir)
