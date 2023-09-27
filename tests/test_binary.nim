@@ -1191,7 +1191,7 @@ proc testsForFmt(binaryPath: static string) =
         Not formatted: {"exercises"/"practice"/"yacht"/".meta"/"config.json"}
         Not formatted: {"exercises"/"practice"/"zebra-puzzle"/".meta"/"config.json"}
         Not formatted: {"exercises"/"practice"/"zipper"/".meta"/"config.json"}
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       let cmd = fmtBaseUnformatted
       execAndCheck(1, cmd, expectedOutput)
 
@@ -1203,7 +1203,7 @@ proc testsForFmt(binaryPath: static string) =
         or '.articles/config.json' file...
         The below paths are relative to '{unformattedTrackDir}'
         Not formatted: {"exercises"/"practice"/"bob"/".meta"/"config.json"}
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       execAndCheck(1, &"{fmtBaseUnformatted} -e bob", expectedOutput)
 
   suite "fmt, for an exercise that does not exist (prints the expected output, and exits with 1)":
@@ -1212,7 +1212,7 @@ proc testsForFmt(binaryPath: static string) =
         {unformattedHeader}
         The `-e, --exercise` option was used to specify an exercise slug, but `foo` is not an slug in the track config:
         {unformattedTrackDir / "config.json"}
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       execAndCheck(1, &"{fmtBaseUnformatted} -e foo", expectedOutput)
 
   suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
@@ -1231,7 +1231,7 @@ proc testsForFmt(binaryPath: static string) =
         +++ exercises/practice/bob/.meta/config.json
         -  "blurb": "Bob is a lackadaisical teenager. In conversation, his responses are very limited.",
         +  "blurb": "Bob is a lackadaisical teenager. In conversation, his responses are very limited.",
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       let configPath = "exercises" / "practice" / "bob" / ".meta" / "config.json"
       let trackDir = unformattedTrackDir
       testDiffThenRestore(trackDir, expectedDiff, configPath)
@@ -1258,7 +1258,7 @@ proc testsForFmt(binaryPath: static string) =
         +++ exercises/practice/bob/.meta/config.json
         -  "blurb": "Bob is a lackadaisical teenager. In conversation, his responses are very limited.",
         +  "blurb": "Bob is a lackadaisical teenager. In conversation, his responses are very limited.",
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       let configPath = "exercises" / "practice" / "bob" / ".meta" / "config.json"
       let trackDir = unformattedTrackDir
       testDiffThenRestore(trackDir, expectedDiff, configPath)
@@ -1284,7 +1284,7 @@ proc testsForFmt(binaryPath: static string) =
         +    "platform/windows",
         +    "typing/static",
         +    "typing/strong",
-      """.unindent()
+      """.unindent().replace("\p", "\n")
       let configPath = "config.json"
       let trackDir = formattedTrackDir
       testDiffThenRestore(trackDir, expectedDiff, configPath)
