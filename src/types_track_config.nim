@@ -1,9 +1,33 @@
-import std/[hashes, sets]
+import std/[hashes, options, sets]
 import pkg/jsony
 import "."/[cli, helpers]
 
 type
   Slug* = distinct string ## A `slug` value in a track `config.json` file is a kebab-case string.
+
+type
+  FilePatternsKey* = enum
+    fpSolution = "solution"
+    fpTest = "test"
+    fpExemplar = "exemplar"
+    fpExample = "example"
+    fpEditor = "editor"
+    fpInvalidator = "invalidator"
+
+  TrackConfigKey* = enum
+    tckLanguage = "language"
+    tckSlug = "string"
+    tckActive = "active"
+    tckBlurb = "blurb"
+    tckVersion = "version"
+    tckExercises = "exercises"
+    tckFiles = "files"
+    tckConcepts = "concepts"
+    tckTestRunner = "test_runner"
+    tckOnlineEditor = "online_editor"
+    tckKeyFeatures = "key_features"
+    tckStatus = "status"
+    tckTags = "tags"
 
   Status* = enum
     sMissing = "missing"
@@ -12,25 +36,31 @@ type
     sActive = "active"
     sDeprecated = "deprecated"
 
-  # We can use a `HashSet` for `concepts`, `prerequisites`, `practices`, and
+  # We can use an `OrderedSet` for `concepts`, `prerequisites`, `practices`, and
   # `foregone` because the first pass has already checked that each has unique
-  # values.
+  # values, but we want to retain insertion order to reduce churn.
   ConceptExercise* = object
     slug*: Slug
-    concepts*: HashSet[string]
-    prerequisites*: HashSet[string]
+    name*: string
+    uuid*: string
+    concepts*: OrderedSet[string]
+    prerequisites*: OrderedSet[string]
     status*: Status
 
   PracticeExercise* = object
     slug*: Slug
-    practices*: HashSet[string]
-    prerequisites*: HashSet[string]
+    name*: string
+    uuid*: string
+    practices*: OrderedSet[string]
+    prerequisites*: OrderedSet[string]
+    difficulty*: int
+    topics*: Option[OrderedSet[string]]
     status*: Status
 
   Exercises* = object
     `concept`*: seq[ConceptExercise]
     practice*: seq[PracticeExercise]
-    foregone*: HashSet[string]
+    foregone*: OrderedSet[string]
 
   FilePatterns* = object
     solution*: seq[string]
@@ -40,6 +70,15 @@ type
     editor*: seq[string]
     invalidator*: seq[string]
 
+  IndentStyle* = enum
+    isSpace = "space"
+    isTab = "tab"
+
+  OnlineEditor* = object
+    indentStyle*: IndentStyle
+    indentSize*: int
+    highlightjsLanguage*: string
+
   Concept* = object
     name*: string
     slug*: string
@@ -47,11 +86,36 @@ type
 
   Concepts* = seq[Concept]
 
+  KeyFeature* = object
+    icon*: string
+    title*: string
+    content*: string
+
+  KeyFeatures* = seq[KeyFeature]
+
+  TestRunner* = object
+    averageRunTime*: int
+
+  TrackStatus* = object
+    conceptExercises*: bool
+    testRunner*: bool
+    representer*: bool
+    analyzer*: bool
+
   TrackConfig* = object
+    language*: string
     slug*: string
+    active*: bool
+    blurb*: string
+    version*: int
     exercises*: Exercises
     files*: FilePatterns
     concepts*: Concepts
+    testRunner*: TestRunner
+    onlineEditor*: OnlineEditor
+    keyFeatures*: KeyFeatures
+    status*: TrackStatus
+    tags*: OrderedSet[string]
 
 func `$`*(slug: Slug): string {.borrow.}
 func `==`*(x, y: Slug): bool {.borrow.}

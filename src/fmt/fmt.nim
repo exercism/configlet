@@ -1,11 +1,13 @@
 import std/[os, strformat, strutils]
-import "."/[approaches, articles, exercises]
+import "."/[approaches, articles, exercises, track_config]
 import ".."/[cli, helpers, logger, sync/sync_common, sync/sync,
     types_exercise_config, types_track_config]
 
 type
   DocumentKind* = enum
-    dkExerciseConfig,
+    dkTrackConfig,
+    dkConceptExerciseConfig,
+    dkPracticeExerciseConfig,
     dkApproachesConfig,
     dkArticlesConfig
 
@@ -15,11 +17,23 @@ type
     formattedDocument: string
 
 iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
-                        trackExercisesDir: string): (ExerciseKind, DocumentKind, string) =
+                        conf: Conf): (DocumentKind, string) =
+  let trackDir = conf.trackDir
+
+  ## Yield the track's `config.json` file, but only when the user
+  ## is not formatting a single exercise
+  if conf.action.exerciseFmt.len == 0:
+    yield (dkTrackConfig, trackDir / "config.json")
+
   ## Yields the `.meta/config.json`, `.approaches/config.json` and
   ## `.articles/config.json` paths for each exercise in
   ## `trackExerciseSlugs` in `trackExercisesDir`.
+  let trackExercisesDir = trackDir / "exercises"
   for exerciseKind in [ekConcept, ekPractice]:
+    let documentKind =
+      case exerciseKind
+      of ekConcept: dkConceptExerciseConfig
+      of ekPractice: dkPracticeExerciseConfig
     let slugs =
       case exerciseKind
       of ekConcept: trackExerciseSlugs.`concept`
@@ -34,34 +48,37 @@ iterator getConfigPaths(trackExerciseSlugs: TrackExerciseSlugs,
     for slug in slugs:
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addExerciseConfigPath()
-      yield (exerciseKind, dkExerciseConfig, trackExerciseConfigPath)
+      yield (documentKind, trackExerciseConfigPath)
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addApproachesConfigPath()
       if fileExists(trackExerciseConfigPath):
-        yield (exerciseKind, dkApproachesConfig, trackExerciseConfigPath)
+        yield (dkApproachesConfig, trackExerciseConfigPath)
 
       trackExerciseConfigPath.truncateAndAdd(startLen, slug)
       trackExerciseConfigPath.addArticlesConfigPath()
       if fileExists(trackExerciseConfigPath):
-        yield (exerciseKind, dkArticlesConfig, trackExerciseConfigPath)
+        yield (dkArticlesConfig, trackExerciseConfigPath)
 
 proc fmtImpl(trackExerciseSlugs: TrackExerciseSlugs,
-             trackDir: string): seq[PathAndFormattedDocument] =
-  ## Reads the config files for every slug in `trackExerciseSlugs`
-  ## in `trackExerciseDir`.
+             conf: Conf): seq[PathAndFormattedDocument] =
+  ## Reads the track config file and all exercise config files
+  ## for every slug in `trackExerciseSlugs` in `trackExerciseDir`.
   ## This includes `.meta/config.json`, `.approaches/config.json`
-  ## and `.articles/config.json`.
+  ## and `.articles/config.json` for each exercise, and `config.json`
+  ## for the track.
   ##
   ## Returns a seq of (document kind, path, formatted document) objects
-  ## containing every exercise's configs that are not already formatted.
-  let trackExercisesDir = trackDir / "exercises"
+  ## containing every document that is not already formatted.
   var seenUnformatted = false
-  for (exerciseKind, documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
-                                                                 trackExercisesDir):
+  let trackDir = conf.trackDir
+  for (documentKind, configPath) in getConfigPaths(trackExerciseSlugs,
+                                                   conf):
     let formatted =
       case documentKind
-      of dkExerciseConfig: formatExerciseConfigFile(exerciseKind, configPath)
+      of dkTrackConfig: formatTrackConfigFile(configPath)
+      of dkConceptExerciseConfig: formatExerciseConfigFile(ekConcept, configPath)
+      of dkPracticeExerciseConfig: formatExerciseConfigFile(ekPractice, configPath)
       of dkApproachesConfig: formatApproachesConfigFile(configPath)
       of dkArticlesConfig: formatArticlesConfigFile(configPath)
 
@@ -116,7 +133,7 @@ proc fmt*(conf: Conf) =
   logNormal("Looking for exercises that lack a formatted '.meta/config.json', " &
             "'.approaches/config.json'\nor '.articles/config.json' file...")
 
-  let pairs = fmtImpl(trackExerciseSlugs, conf.trackDir)
+  let pairs = fmtImpl(trackExerciseSlugs, conf)
 
   let userExercise = conf.action.exerciseFmt
   if pairs.len > 0:
