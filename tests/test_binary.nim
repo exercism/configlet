@@ -1223,7 +1223,6 @@ proc testsForFmt(binaryPath: static string) =
 
   suite "fmt, with --update, for an exercise that is not formatted (diff, and exits with 0)":
     test "-e bob":
-      echo &"{fmtUpdateUnformatted} --yes -e bob"
       let exitCode = execCmdEx(&"{fmtUpdateUnformatted} --yes -e bob")[1]
       check exitCode == 0
       const expectedDiff = """
@@ -1239,7 +1238,6 @@ proc testsForFmt(binaryPath: static string) =
   suite "fmt, with --update --yes, for an exercise that is formatted (no diff, and exits with 0)":
     test "-e bob":
       let (outp, exitCode) = execCmdEx(&"{fmtUpdateFormatted} --yes -e bob")
-      echo outp
       check exitCode == 0
       checkNoDiff(formattedTrackDir)
 
