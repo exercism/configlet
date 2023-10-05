@@ -30,6 +30,30 @@ proc hasValidIntroduction(data: JsonNode, path: Path): bool =
               "corresponding introduction file at the below location"
     result.setFalseIfFileMissingOrEmpty(introductionPath, msg)
 
+proc hasValidTags(data: JsonNode; path: Path): bool =
+  const k = "tags"
+  if data.hasKey(k):
+    if hasObject(data, k, path):
+      let checks = [
+        hasArrayOfStrings(data[k], "all", path, isRequired = false, uniqueValues = true),
+        hasArrayOfStrings(data[k], "any", path, isRequired = false, uniqueValues = true),
+        hasArrayOfStrings(data[k], "not", path, isRequired = false, uniqueValues = true),
+      ]
+      result = allTrue(checks)
+      if result:
+        var anyAllLen = 0
+
+        if data[k].hasKey("all"):
+          anyAllLen += data[k]["all"].len
+
+        if data[k].hasKey("any"):
+          anyAllLen += data[k]["any"].len
+
+        if anyAllLen == 0:
+          result.setFalseAndPrint("There must be at least one element in the `all` or `any` fields in the `tags` object", path)
+  else:
+    result = true
+
 proc isValidApproachOrArticle(data: JsonNode, context: string,
                               path: Path): bool =
   if isObject(data, context, path):
@@ -41,6 +65,7 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
       hasArrayOfStrings(data, "authors", path, context, uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, context,
                         isRequired = false),
+      hasValidTags(data, path),
     ]
     result = allTrue(checks)
     if result:
