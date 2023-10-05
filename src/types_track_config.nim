@@ -1,5 +1,4 @@
 import std/[hashes, options, sets]
-import pkg/jsony
 import "."/[cli, helpers]
 
 type
