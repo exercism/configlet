@@ -1,6 +1,7 @@
 import std/[algorithm, os, parseutils, strformat, strscans, strutils, terminal]
 import pkg/jsony
 import "."/cli
+export jsony
 
 template withDir*(dir: string; body: untyped): untyped =
   ## Changes the current directory to `dir` temporarily.
