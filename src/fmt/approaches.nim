@@ -1,4 +1,4 @@
-import std/[json, strformat]
+import std/[json, options, strformat]
 import ".."/[helpers, sync/sync_common, types_approaches_config]
 
 func approachesConfigKeyOrderForFmt(e: ApproachesConfig): seq[ApproachesConfigKey] =
@@ -23,6 +23,20 @@ func addApproachesIntroduction(result: var string;
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
 
+func addApproachTags(result: var string; val: ApproachConfigTags; indentLevel = 2) =
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("tags", result)
+  result.add ": {"
+  if val.all.len > 0:
+    result.addArray("all", val.all, indentLevel + 1)
+  if val.`any`.len > 0:
+    result.addArray("any", val.`any`, indentLevel + 1)
+  if val.`not`.len > 0:
+    result.addArray("not", val.`not`, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
 func addApproach(result: var string; val: ApproachConfig; indentLevel = 1) =
   ## Appends the pretty-printed JSON for an `approach` object with value `val` to
   ## `result`.
@@ -35,6 +49,10 @@ func addApproach(result: var string; val: ApproachConfig; indentLevel = 1) =
   result.addArray("authors", val.authors, indentLevel + 1)
   if val.contributors.len > 0:
     result.addArray("contributors", val.contributors, indentLevel + 1)
+  if val.tags.isSome():
+    let tags = val.tags.get()
+    if tags.all.len + tags.`any`.len + tags.`not`.len > 0:
+      result.addApproachTags(tags, indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"
