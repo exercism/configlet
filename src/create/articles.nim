@@ -1,6 +1,5 @@
 import std/[os, strformat, strutils]
-import ".."/[fmt/articles, helpers, sync/sync_common, types_track_config,
-             types_articles_config, uuid/uuid]
+import ".."/[fmt/articles, helpers, types_track_config, types_articles_config, uuid/uuid]
 
 func kebabToTitleCase(slug: Slug): string =
   result = newStringOfCap(slug.len)
