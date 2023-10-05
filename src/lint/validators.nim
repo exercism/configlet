@@ -382,11 +382,13 @@ proc isArrayOfStrings*(data: JsonNode;
         result.setFalseAndPrint(msgStart & msgEnd, path, annotation = errorAnnotation)
     elif isRequired:
       if 0 notin allowedArrayLen:
-        result.setFalseAndPrint(&"The {q context} array is empty", path, annotation = errorAnnotation)
+        result.setFalseAndPrint(&"The {q context} array is empty", path,
+            annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {q context} is " &
-                              &"{qNull}, but it must be an array", path, annotation = errorAnnotation)
+                              &"{qNull}, but it must be an array", path,
+                              annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {q context} is " &
                              "not an array", path, annotation = errorAnnotation)
@@ -566,6 +568,30 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
     result = isInteger(data[key], key, path, context, isRequired, allowed,
                        errorAnnotation = errorAnnotation)
   elif not isRequired:
+    result = true
+
+proc hasValidTags*(data: JsonNode; path: Path): bool =
+  const k = "tags"
+  if data.hasKey(k):
+    if hasObject(data, k, path):
+      let checks = [
+        hasArrayOfStrings(data[k], "all", path, isRequired = false, uniqueValues = true),
+        hasArrayOfStrings(data[k], "any", path, isRequired = false, uniqueValues = true),
+        hasArrayOfStrings(data[k], "not", path, isRequired = false, uniqueValues = true),
+      ]
+      result = allTrue(checks)
+      if result:
+        var anyAllLen = 0
+
+        if data[k].hasKey("all"):
+          anyAllLen += data[k]["all"].len
+
+        if data[k].hasKey("any"):
+          anyAllLen += data[k]["any"].len
+
+        if anyAllLen == 0:
+          result.setFalseAndPrint("There must be at least one element in the `all` or `any` fields in the `tags` object", path)
+  else:
     result = true
 
 proc parseJson(s: Stream; filename: Path; rawIntegers = false;
