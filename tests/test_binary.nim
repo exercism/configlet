@@ -1236,7 +1236,7 @@ proc testsForFmt(binaryPath: static string) =
       let trackDir = unformattedTrackDir
       testDiffThenRestore(trackDir, expectedDiff, configPath)
 
-  suite "fmt, with --update, without --yes, for an exercise that is formatted (no diff, and exits with 0)":
+  suite "fmt, with --update --yes, for an exercise that is formatted (no diff, and exits with 0)":
     test "-e bob":
       let (outp, exitCode) = execCmdEx(&"{fmtUpdateFormatted} --yes -e bob")
       echo outp
