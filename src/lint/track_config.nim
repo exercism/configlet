@@ -121,7 +121,7 @@ proc hasValidExercises(data: JsonNode; path: Path): bool =
     let exercises = data[k]
     let checks = [
       hasArrayOf(exercises, "concept", path, isValidConceptExercise, k,
-                 allowedLength = 0..int.high),
+                 isRequired = false, allowedLength = 0..int.high),
       hasArrayOf(exercises, "practice", path, isValidPracticeExercise, k,
                  allowedLength = 0..int.high),
       hasArrayOfStrings(exercises, "foregone", path, k, isRequired = false,
@@ -141,7 +141,7 @@ proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
 
 proc hasValidConcepts(data: JsonNode; path: Path): bool =
   result = hasArrayOf(data, "concepts", path, isValidConcept,
-                      allowedLength = 0..int.high)
+                      isRequired = false, allowedLength = 0..int.high)
 
 const keyFeatureIcons = [
   "community",
