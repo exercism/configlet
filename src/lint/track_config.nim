@@ -135,7 +135,7 @@ proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
       hasString(data, "uuid", path, context, checkIsUuid = true),
       hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
       hasString(data, "name", path, context, maxLen = 255),
-      hasValidTags(data, path),
+      hasValidAnalyzerTags(data, path),
     ]
     result = allTrue(checks)
 

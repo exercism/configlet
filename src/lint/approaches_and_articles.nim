@@ -41,7 +41,7 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
       hasArrayOfStrings(data, "authors", path, context, uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, context,
                         isRequired = false),
-      if checkTags: hasValidTags(data, path) else: true,
+      if checkTags: hasValidAnalyzerTags(data, path) else: true,
     ]
     result = allTrue(checks)
     if result:

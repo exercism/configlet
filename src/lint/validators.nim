@@ -568,7 +568,7 @@ proc hasInteger*(data: JsonNode; key: string; path: Path; context = "";
   elif not isRequired:
     result = true
 
-proc hasValidTags*(data: JsonNode; path: Path): bool =
+proc hasValidAnalyzerTags*(data: JsonNode; path: Path): bool =
   const k = "tags"
   if data.hasKey(k):
     if hasObject(data, k, path):
