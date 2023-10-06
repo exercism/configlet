@@ -135,6 +135,7 @@ proc isValidConcept(data: JsonNode; context: string; path: Path): bool =
       hasString(data, "uuid", path, context, checkIsUuid = true),
       hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
       hasString(data, "name", path, context, maxLen = 255),
+      hasValidAnalyzerTags(data, path),
     ]
     result = allTrue(checks)
 
@@ -625,7 +626,7 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
                  "but there is an implemented exercise with that slug"
       b.setFalseAndPrint(msg, path)
 
-proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string,
+proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string;
                               b: var bool; path: Path) =
   const overlappingSolutionTestTrackSlugs = ["d", "plsql"]
   const uniqueFilePatternCombinations = [

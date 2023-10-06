@@ -1,3 +1,4 @@
+import std/options
 import "."/helpers
 
 type
@@ -12,6 +13,7 @@ type
     akBlurb = "blurb"
     akAuthors = "authors"
     akContributors = "contributors"
+    akTags = "tags"
 
   ApproachIntroductionKey* = enum
     aiAuthors = "authors"
@@ -21,6 +23,11 @@ type
     authors*: seq[string]
     contributors*: seq[string]
 
+  ApproachConfigTags* = object
+    all*: seq[string]
+    `any`*: seq[string]
+    `not`*: seq[string]
+
   ApproachConfig* = object
     uuid*: string
     slug*: string
@@ -28,6 +35,7 @@ type
     blurb*: string
     authors*: seq[string]
     contributors*: seq[string]
+    tags*: Option[ApproachConfigTags]
 
   ApproachesConfig* = object
     introduction*: ApproachesIntroductionConfig

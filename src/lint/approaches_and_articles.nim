@@ -31,7 +31,7 @@ proc hasValidIntroduction(data: JsonNode, path: Path): bool =
     result.setFalseIfFileMissingOrEmpty(introductionPath, msg)
 
 proc isValidApproachOrArticle(data: JsonNode, context: string,
-                              path: Path): bool =
+                              path: Path, checkTags: bool): bool =
   if isObject(data, context, path):
     let checks = [
       hasString(data, "uuid", path, context, checkIsUuid = true),
@@ -41,6 +41,7 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
       hasArrayOfStrings(data, "authors", path, context, uniqueValues = true),
       hasArrayOfStrings(data, "contributors", path, context,
                         isRequired = false),
+      if checkTags: hasValidAnalyzerTags(data, path) else: true,
     ]
     result = allTrue(checks)
     if result:
@@ -63,6 +64,12 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
                   "there is no corresponding snippet file at the below location"
         result.setFalseIfFileMissingOrEmpty(snippetPath, msg)
 
+proc isValidApproach(data: JsonNode, context: string, path: Path): bool =
+  isValidApproachOrArticle(data, context, path, checkTags = true)
+
+proc isValidArticle(data: JsonNode, context: string, path: Path): bool =
+  isValidApproachOrArticle(data, context, path, checkTags = false)
+
 proc getSlugs(data: JsonNode, k: string): seq[string] =
   result = @[]
   if data.kind == JObject and data.hasKey(k):
@@ -77,7 +84,8 @@ proc isValidConfig(data: JsonNode, path: Path, dk: DocumentKind): bool =
     let k = dk.`$`[1..^1] # Remove dot.
     let checks = [
       if dk == dkApproaches: hasValidIntroduction(data, path) else: true,
-      hasArrayOf(data, k, path, isValidApproachOrArticle, isRequired = false),
+      hasArrayOf(data, k, path, if dk == dkApproaches: isValidApproach else: isValidArticle,
+          isRequired = false),
     ]
     result = allTrue(checks)
     if result:
