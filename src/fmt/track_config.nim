@@ -121,6 +121,20 @@ func addKeyFeatures(result: var string; val: KeyFeatures; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "],"
 
+func addConceptTags(result: var string; val: ConceptTags; indentLevel = 2) =
+  result.addNewlineAndIndent(indentLevel)
+  escapeJson("tags", result)
+  result.add ": {"
+  if val.all.len > 0:
+    result.addArray("all", val.all, indentLevel + 1)
+  if val.`any`.len > 0:
+    result.addArray("any", val.`any`, indentLevel + 1)
+  if val.`not`.len > 0:
+    result.addArray("not", val.`not`, indentLevel + 1)
+  result.removeComma()
+  result.addNewlineAndIndent(indentLevel)
+  result.add "},"
+
 func addConcept(result: var string; val: Concept; indentLevel = 1) =
   ## Appends the pretty-printed JSON for a `concept` object with value `val` to
   ## `result`.
@@ -129,6 +143,10 @@ func addConcept(result: var string; val: Concept; indentLevel = 1) =
   result.addString("uuid", val.uuid, indentLevel + 1)
   result.addString("slug", val.slug, indentLevel + 1)
   result.addString("name", val.name, indentLevel + 1)
+  if val.tags.isSome():
+    let tags = val.tags.get()
+    if tags.all.len + tags.`any`.len + tags.`not`.len > 0:
+      result.addConceptTags(tags, indentLevel + 1)
   result.removeComma()
   result.addNewlineAndIndent(indentLevel)
   result.add "},"

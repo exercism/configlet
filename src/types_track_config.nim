@@ -78,10 +78,16 @@ type
     indentSize*: int
     highlightjsLanguage*: string
 
+  ConceptTags* = object
+    all*: seq[string]
+    `any`*: seq[string]
+    `not`*: seq[string]
+
   Concept* = object
     name*: string
     slug*: string
     uuid*: string
+    tags*: Option[ConceptTags]
 
   Concepts* = seq[Concept]
 
