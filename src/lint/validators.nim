@@ -588,7 +588,9 @@ proc hasValidTags*(data: JsonNode; path: Path): bool =
           anyAllLen += data[k]["any"].len
 
         if anyAllLen == 0:
-          result.setFalseAndPrint("There must be at least one element in the `all` or `any` fields in the `tags` object", path)
+          const msg = "There must be at least one element in the `all` " &
+                      "or `any` fields in the `tags` object"
+          result.setFalseAndPrint(msg, path)
   else:
     result = true
 
