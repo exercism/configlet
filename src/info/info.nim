@@ -1,5 +1,4 @@
 import std/[algorithm, os, sequtils, sets, strformat, strutils, sugar, terminal]
-import pkg/jsony
 import ".."/[cli, sync/probspecs, types_track_config]
 
 proc header(s: string): string =
