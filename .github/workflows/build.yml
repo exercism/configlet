@@ -34,6 +34,10 @@ jobs:
             arch: x86-64
 
           - os: macos
+            runs-on: macos-13-xlarge
+            arch: arm64
+
+          - os: macos
             runs-on: macos-12
             arch: x86-64
 
@@ -83,9 +87,6 @@ jobs:
 
           - runs-on: ubuntu-22.04
             zig_target: riscv64-linux-musl
-
-          - runs-on: macos-12
-            zig_target: aarch64-macos-none
 
           - runs-on: ubuntu-22.04
             zig_target: aarch64-windows-gnu
