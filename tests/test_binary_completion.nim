@@ -1,8 +1,7 @@
-import std/[os, osproc, strformat, strscans, strutils, unittest]
-import exec, helpers, lint/validators, sync/probspecs
+import std/[os, osproc, strformat, strutils, unittest]
 import "."/[binary_helpers]
 
-proc testsForCompletion(binaryPath: string) =
+proc main =
   suite "completion":
     const completionsDir = repoRootDir / "completions"
     for shell in ["bash", "fish", "zsh"]:
@@ -27,9 +26,6 @@ proc testsForCompletion(binaryPath: string) =
       check:
         outp.contains(&"Please choose a shell. For example: `configlet completion -s bash`")
         exitCode == 1
-
-proc main =
-  testsForCompletion(binaryPath)
 
 main()
 {.used.}

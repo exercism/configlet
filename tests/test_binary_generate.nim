@@ -1,5 +1,5 @@
-import std/[os, osproc, strformat, strscans, strutils, unittest]
-import exec, helpers, lint/validators, sync/probspecs
+import std/[os, osproc, strformat, strutils, unittest]
+import exec
 import "."/[binary_helpers]
 
 proc prepareIntroductionFiles(trackDir, placeholder: string; removeIntro: bool) =
@@ -19,7 +19,7 @@ proc prepareIntroductionFiles(trackDir, placeholder: string; removeIntro: bool) 
   if removeIntro:
     removeFile(introPath)
 
-proc testsForGenerate(binaryPath: string) =
+proc main =
   suite "generate":
     const trackDir = testsDir / ".test_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
@@ -63,9 +63,6 @@ proc testsForGenerate(binaryPath: string) =
 
     test "and writes the `introduction.md` file as expected":
       checkNoDiff(trackDir)
-
-proc main =
-  testsForGenerate(binaryPath)
 
 main()
 {.used.}

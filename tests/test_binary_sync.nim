@@ -1,8 +1,8 @@
-import std/[os, osproc, strformat, strscans, strutils, unittest]
-import exec, helpers, lint/validators, sync/probspecs
+import std/[os, osproc, strformat, strutils, unittest]
+import exec, helpers, sync/probspecs
 import "."/[binary_helpers]
 
-proc testsForSync(binaryPath: static string) =
+proc main =
   const psDir = getCacheDir() / "exercism" / "configlet" / "problem-specifications"
   const trackDir = testsDir / ".test_nim_track_repo"
 
@@ -883,9 +883,6 @@ proc testsForSync(binaryPath: static string) =
         discard gitCheck(0, ["merge", "--ff-only", &"{remoteName}/{mainBranchName}"],
                          &"failed to merge '{mainBranchName}' in " &
                          &"problem-specifications directory: '{probSpecsDir}'")
-
-proc main =
-  testsForSync(binaryPath)
 
 main()
 {.used.}

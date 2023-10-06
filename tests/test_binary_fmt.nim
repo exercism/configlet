@@ -1,8 +1,8 @@
-import std/[os, osproc, strformat, strscans, strutils, unittest]
-import exec, helpers, lint/validators, sync/probspecs
+import std/[os, osproc, strformat, strutils, unittest]
+import exec
 import "."/[binary_helpers]
 
-proc testsForFmt(binaryPath: static string) =
+proc main =
   const formattedTrackDir = testsDir / ".test_nim_track_repo"
   const unformattedTrackDir = testsDir / ".test_elixir_track_repo"
 
@@ -280,9 +280,6 @@ proc testsForFmt(binaryPath: static string) =
       let configPath = "config.json"
       let trackDir = formattedTrackDir
       testDiffThenRestore(trackDir, expectedDiff, configPath)
-
-proc main =
-  testsForFmt(binaryPath)
 
 main()
 {.used.}

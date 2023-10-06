@@ -1,5 +1,5 @@
-import std/[os, osproc, strformat, strscans, strutils, unittest]
-import exec, helpers, lint/validators, sync/probspecs
+import std/[osproc, strformat, strutils, unittest]
+import lint/validators
 import "."/[binary_helpers]
 
 proc main =
