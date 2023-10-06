@@ -382,13 +382,11 @@ proc isArrayOfStrings*(data: JsonNode;
         result.setFalseAndPrint(msgStart & msgEnd, path, annotation = errorAnnotation)
     elif isRequired:
       if 0 notin allowedArrayLen:
-        result.setFalseAndPrint(&"The {q context} array is empty", path,
-            annotation = errorAnnotation)
+        result.setFalseAndPrint(&"The {q context} array is empty", path, annotation = errorAnnotation)
   of JNull:
     if isRequired:
       result.setFalseAndPrint(&"The value of {q context} is " &
-                              &"{qNull}, but it must be an array", path,
-                              annotation = errorAnnotation)
+                              &"{qNull}, but it must be an array", path, annotation = errorAnnotation)
   else:
     result.setFalseAndPrint(&"The value of {q context} is " &
                              "not an array", path, annotation = errorAnnotation)
