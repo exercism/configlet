@@ -1,5 +1,4 @@
 import std/[json, options, os, sets, strformat, strutils]
-import pkg/jsony
 import ".."/[helpers, sync/sync_common, types_exercise_config, types_track_config]
 
 func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;

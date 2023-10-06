@@ -1,5 +1,4 @@
 import std/[os, strformat, strutils]
-import pkg/jsony
 import ".."/[fmt/articles, helpers, sync/sync_common, types_track_config,
              types_articles_config, uuid/uuid]
 
