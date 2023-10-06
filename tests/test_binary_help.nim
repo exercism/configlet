@@ -1,6 +1,8 @@
 import std/[osproc, strformat, strutils, unittest]
 import "."/[binary_helpers]
 
+const usageStart* = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
+
 proc main =
   suite "help as an argument":
     test "help":

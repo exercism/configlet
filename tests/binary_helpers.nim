@@ -9,7 +9,6 @@ const
     else: ""
   binaryName* = &"configlet{binaryExt}"
   binaryPath* = repoRootDir / binaryName
-  usageStart* = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
 template execAndCheckExitCode*(expectedExitCode: int; cmd: string;
                                inputStr = "") =
