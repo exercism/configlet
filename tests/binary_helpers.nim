@@ -1,9 +1,15 @@
-import std/[os, osproc, unittest]
+import std/[os, osproc, strformat, unittest]
 import exec, helpers
 
 const
   testsDir* = currentSourcePath().parentDir()
   repoRootDir* = testsDir.parentDir()
+  binaryExt* =
+    when defined(windows): ".exe"
+    else: ""
+  binaryName* = &"configlet{binaryExt}"
+  binaryPath* = repoRootDir / binaryName
+  usageStart* = &"Usage:\n  {binaryName} [global-options] <command> [command-options]"
 
 template execAndCheckExitCode*(expectedExitCode: int; cmd: string;
                                inputStr = "") =
