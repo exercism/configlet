@@ -68,7 +68,7 @@ proc isValidApproach(data: JsonNode, context: string, path: Path): bool =
   isValidApproachOrArticle(data, context, path, checkTags = true)
 
 proc isValidArticle(data: JsonNode, context: string, path: Path): bool =
-  result = isValidApproachOrArticle(data, context, path, checkTags = false)
+  isValidApproachOrArticle(data, context, path, checkTags = false)
 
 proc getSlugs(data: JsonNode, k: string): seq[string] =
   result = @[]
