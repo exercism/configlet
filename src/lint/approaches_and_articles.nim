@@ -65,7 +65,7 @@ proc isValidApproachOrArticle(data: JsonNode, context: string,
         result.setFalseIfFileMissingOrEmpty(snippetPath, msg)
 
 proc isValidApproach(data: JsonNode, context: string, path: Path): bool =
-  result = isValidApproachOrArticle(data, context, path, checkTags = true)
+  isValidApproachOrArticle(data, context, path, checkTags = true)
 
 proc isValidArticle(data: JsonNode, context: string, path: Path): bool =
   result = isValidApproachOrArticle(data, context, path, checkTags = false)
