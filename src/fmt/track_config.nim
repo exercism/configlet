@@ -1,4 +1,4 @@
-import std/[algorithm, sequtils, json, options, sets, strformat]
+import std/[algorithm, sequtils, json, options, sets]
 import ".."/[helpers, sync/sync_common, types_track_config]
 
 func trackConfigKeyOrderForFmt(e: TrackConfig): seq[TrackConfigKey] =
