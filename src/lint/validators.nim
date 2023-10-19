@@ -75,6 +75,33 @@ proc hasValidRuneLength(s, key: string; path: Path; context: string;
                 &"exceed {maxLen} characters"
       result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
 
+const analyzerTagCategories = [
+  "paradigm",
+  "technique",
+  "construct",
+  "uses"
+].toHashSet()
+
+proc hasValidAnalyzerTag(s, key: string; path: Path; context: string;
+                         errorAnnotation = ""): bool =
+  ## Returns true if `s` is a valid analyzer tag
+  result = true
+  let colonIdx = s.find(':')
+  if colonIdx == -1:
+    let msg = &"The {format(context, s)} tag does not match the expected format: \"<category>:<value>\""
+    result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+  else:
+    let category = s.substr(0, colonIdx - 1)
+    if category notin analyzerTagCategories:
+      let msg = &"The {format(context, s)} tag's category must be one of: " &
+                 "`paradigm`, `technique`, `construct` or `uses`"
+      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+
+    let value = s.substr(colonIdx + 1)
+    if value.isEmptyOrWhitespace:
+      let msg = &"The {format(context, s)} tag's value is a whitespace-only string"
+      result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+
 proc isUrlLike(s: string): bool =
   ## Returns true if `s` starts with `https://`, `http://` or `www`.
   # We probably only need simplistic URL checking, and we want to avoid using
@@ -234,7 +261,8 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
                isRequired = true; allowed = emptySetOfStrings;
                checkIsUrlLike = false; maxLen = int.high; checkIsKebab = false;
                checkIsUuid = false; isInArray = false;
-               checkIsFilesPattern = false; errorAnnotation = ""): bool =
+               checkIsFilesPattern = false; checkIsAnalyzerTag = false;
+               errorAnnotation = ""): bool =
   result = true
   case data.kind
   of JString:
@@ -294,6 +322,9 @@ proc isString*(data: JsonNode; key: string; path: Path; context: string;
               &"A {format(context, key)} value is {q s}, which is not a " &
               &"valid file pattern. Allowed placeholders are: {placeholders}"
             result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+        elif checkIsAnalyzerTag:
+          if not hasValidAnalyzerTag(s, key, path, context, errorAnnotation = errorAnnotation):
+            result = false
         if not hasValidRuneLength(s, key, path, context, maxLen, errorAnnotation = errorAnnotation):
           result = false
       else:
@@ -344,6 +375,7 @@ proc isArrayOfStrings*(data: JsonNode;
                        allowedArrayLen: Slice;
                        checkIsKebab: bool;
                        checkIsFilesPattern: bool;
+                       checkIsAnalyzerTag: bool;
                        errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `data` is a `JArray` with length in `allowedArrayLen` that contains only
@@ -362,6 +394,7 @@ proc isArrayOfStrings*(data: JsonNode;
           if not isString(item, context, path, "", isRequired, allowed,
                           checkIsKebab = checkIsKebab,
                           checkIsFilesPattern = checkIsFilesPattern,
+                          checkIsAnalyzerTag = checkIsAnalyzerTag,
                           isInArray = true,
                           errorAnnotation = errorAnnotation):
             result = false
@@ -401,6 +434,7 @@ proc hasArrayOfStrings*(data: JsonNode;
                         allowedArrayLen = 1..int.high;
                         checkIsKebab = false;
                         checkIsFilesPattern = false;
+                        checkIsAnalyzerTag = false;
                         errorAnnotation = ""): bool =
   ## Returns true in any of these cases:
   ## - `isArrayOfStrings` returns true for `data[key]`.
@@ -411,6 +445,7 @@ proc hasArrayOfStrings*(data: JsonNode;
                               uniqueValues, allowed, allowedArrayLen,
                               checkIsKebab = checkIsKebab,
                               checkIsFilesPattern = checkIsFilesPattern,
+                              checkIsAnalyzerTag = checkIsAnalyzerTag,
                               errorAnnotation = errorAnnotation)
   elif not isRequired:
     result = true
@@ -573,9 +608,9 @@ proc hasValidAnalyzerTags*(data: JsonNode; path: Path): bool =
   if data.hasKey(k):
     if hasObject(data, k, path):
       let checks = [
-        hasArrayOfStrings(data[k], "all", path, isRequired = false, uniqueValues = true),
-        hasArrayOfStrings(data[k], "any", path, isRequired = false, uniqueValues = true),
-        hasArrayOfStrings(data[k], "not", path, isRequired = false, uniqueValues = true),
+        hasArrayOfStrings(data[k], "all", path, isRequired = false, uniqueValues = true, checkIsAnalyzerTag = true),
+        hasArrayOfStrings(data[k], "any", path, isRequired = false, uniqueValues = true, checkIsAnalyzerTag = true),
+        hasArrayOfStrings(data[k], "not", path, isRequired = false, uniqueValues = true, checkIsAnalyzerTag = true),
       ]
       result = allTrue(checks)
       if result:
