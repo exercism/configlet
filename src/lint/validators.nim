@@ -86,7 +86,7 @@ proc hasValidAnalyzerTag(s, key: string; path: Path; context: string;
                          errorAnnotation = ""): bool =
   ## Returns true if `s` is a valid analyzer tag
   result = true
-  let (isMatch, category, value) = s.scanTuple("$+:$*")
+  let (isMatch, category, value) = s.scanTuple("$+:$+")
   if isMatch:
     if category notin analyzerTagCategories:
       let msg = &"The {format(context, s)} tag's category must be one of: " &
