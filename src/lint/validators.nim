@@ -86,21 +86,18 @@ proc hasValidAnalyzerTag(s, key: string; path: Path; context: string;
                          errorAnnotation = ""): bool =
   ## Returns true if `s` is a valid analyzer tag
   result = true
-  let colonIdx = s.find(':')
-  if colonIdx == -1:
-    let msg = &"The {format(context, s)} tag does not match the expected format: \"<category>:<value>\""
-    result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-  else:
-    let category = s.substr(0, colonIdx - 1)
+  let (isMatch, category, value) = s.scanTuple("$+:$+")
+  if isMatch:
     if category notin analyzerTagCategories:
       let msg = &"The {format(context, s)} tag's category must be one of: " &
                  "`paradigm`, `technique`, `construct` or `uses`"
       result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
-
-    let value = s.substr(colonIdx + 1)
     if value.isEmptyOrWhitespace:
       let msg = &"The {format(context, s)} tag's value is a whitespace-only string"
       result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
+  else:
+    let msg = &"The {format(context, s)} tag does not match the expected format: \"<category>:<value>\""
+    result.setFalseAndPrint(msg, path, annotation = errorAnnotation)
 
 proc isUrlLike(s: string): bool =
   ## Returns true if `s` starts with `https://`, `http://` or `www`.
