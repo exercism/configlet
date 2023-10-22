@@ -148,7 +148,7 @@ Note that in `configlet` releases `4.0.0-alpha.34` and earlier, the `sync` comma
 
 A Practice Exercise that originates from the `problem-specifications` repository must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
 
-To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
+To check every Practice Exercise on the track for available documentation updates (exiting with a nonzero exit code if at least one update is available):
 
 ```shell
 configlet sync --docs
@@ -178,7 +178,7 @@ configlet sync --docs -uy -e prime-factors
 Every exercise on a track must have a `.meta/config.json` file.
 For a Practice Exercise that originates from the `problem-specifications` repository, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
 
-To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
+To check every Practice Exercise for available metadata updates (exiting with a nonzero exit code if at least one update is available):
 
 ```shell
 configlet sync --metadata
@@ -238,7 +238,7 @@ comment = "excluded because we don't want to add error handling to the exercise"
 In this case, the track has chosen to implement two of the three available tests.
 If a track uses a _test generator_ to generate an exercise's test suite, it _must_ use the contents of the `tests.toml` file to determine which tests to include in the generated test suite.
 
-To check every Practice Exercise `tests.toml` file for available tests updates (exiting with a non-zero exit code if there is at least one test case that appears in the exercise's canonical data, but not in the `tests.toml`):
+To check every Practice Exercise `tests.toml` file for available tests updates (exiting with a nonzero exit code if there is at least one test case that appears in the exercise's canonical data, but not in the `tests.toml`):
 
 ```shell
 configlet sync --tests
@@ -324,7 +324,7 @@ A plain `configlet fmt` makes no changes to the track,
 and checks the formatting of the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
 
 To print a list of paths for which there isn't already a formatted exercise `.meta/config.json` file
-(exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
+(exiting with a nonzero exit code if at least one exercise lacks a formatted config file):
 
 ```shell
 configlet fmt
