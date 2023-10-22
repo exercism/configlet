@@ -126,7 +126,7 @@ We describe the checking and updating of these data kinds in individual sections
 
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file.
   Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, please add the exercise to the track-level `config.json` file first.
-  If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
+  If the exercise isn't yet ready to be user-facing, please set its `status` value to `wip`.
 - A plain `configlet sync` makes no changes to the track, and checks every data kind for every exercise.
 - To operate on a subset of data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
 - To interactively update data on the track, use the `--update` option.
@@ -135,9 +135,9 @@ We describe the checking and updating of these data kinds in individual sections
 - To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
 - Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating.
   To write these files in a canonical form without syncing, please use the `configlet fmt` command.
-  However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they are missing.
+  However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they're missing.
   This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
-- `configlet sync` removes keys that are not in the spec.
+- `configlet sync` removes keys that aren't in the spec.
   Custom key/value pairs are still supported, but you must write them inside a JSON object named `custom`.
 - Configlet exits with an exit code of 0 when all the seen data are up to date, and 1 otherwise.
 
@@ -299,7 +299,7 @@ If you are adding a Practice Exercise named `foo` that exists in `problem-specif
 1. Edit the exercise `.meta/config.json` file as desired.
    For example, add yourself to the `authors` array.
 1. Run `configlet sync --tests include -u -e foo` to create a `.meta/tests.toml` file with every test included.
-1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise will not implement.
+1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise won't implement.
 1. Implement the tests for the exercise to match those included in `.meta/tests.toml`.
 1. Add the other required files.
 
@@ -317,12 +317,12 @@ These files are more readable if they have a consistent formatting Exercism-wide
 and so configlet has a `fmt` command for rewriting a track's JSON files in a canonical form.
 
 The `fmt` command currently only operates on the exercise `.meta/config.json` files,
-but it is likely to operate on all the track JSON files in the future.
+but it's likely to operate on all the track JSON files in the future.
 
 A plain `configlet fmt` makes no changes to the track,
 and checks the formatting of the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
 
-To print a list of paths for which there is not already a formatted exercise `.meta/config.json` file
+To print a list of paths for which there isn't already a formatted exercise `.meta/config.json` file
 (exiting with a non-zero exit code if at least one exercise lacks a formatted config file):
 
 ```shell
@@ -393,7 +393,7 @@ where the square brackets indicate that the enclosed key is optional.
 Note that `configlet fmt` only operates on exercises that exist in the track-level `config.json` file.
 Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file,
 please add the exercise to the track-level `config.json` file first.
-If the exercise is not yet ready to be user-facing, please set its `status` value to `wip`.
+If the exercise isn't yet ready to be user-facing, please set its `status` value to `wip`.
 
 The exit code is 0 when every seen exercise has a formatted `.meta/config.json` file when configlet exits, and 1 otherwise.
 
@@ -422,7 +422,7 @@ e42b94bb-9c90-47f2-aebb-03cdbc27bf3b
 
 Each concept exercise and concept have an `introduction.md` file.
 If you want the exercise's introduction to include the concept's introduction verbatim, you can create a `introduction.md.tpl` file to achieve this.
-This file may use a placeholder to refer to the concept's introduction, so that the information is not duplicated.
+This file may use a placeholder to refer to the concept's introduction, so that the information isn't duplicated.
 
 Concept placeholders must use the following format:
 
@@ -438,7 +438,7 @@ For example, if the track has a concept named `floating-point-numbers` then an `
 
 You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file.
 The generated `introduction.md` is identical to the `introduction.md.tpl`, except that configlet replaces concept placeholders with the contents of the concept's `introduction.md` file (minus its top-level heading).
-In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
+In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this isn't yet implemented.
 
 ## Contributing
 
