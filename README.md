@@ -15,7 +15,7 @@ You can then use configlet by running `bin/configlet` or `bin/configlet.exe` res
 We sign each configlet release archive with [`minisign`](https://jedisct1.github.io/minisign/).
 
 For now, if you want to verify the signature of a configlet release, you need to do it manually.
-The `fetch-configlet` script may support checking the release signature in the future, but it won't be required: we don't want to require every `fetch-configlet` user to install `minisign`.
+The `fetch-configlet` script may support checking the release signature in the future, but it won't require checking it: we don't want to require every `fetch-configlet` user to install `minisign`.
 
 To verify a release archive, first download (from the assets section of a [release](https://github.com/exercism/configlet/releases)) the archive and its corresponding `.minisig` file.
 Write them to the same directory.
@@ -47,7 +47,7 @@ You may delete the archive and the `.minisig` file.
 
 ## Usage
 
-The application is a single binary and can be used as follows:
+The application is a single binary, and you can use it as follows:
 
 ```text
 Usage:
@@ -110,7 +110,7 @@ The primary function of configlet is to do _linting_: checking if a track's conf
 Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development.
-The list of currently implemented checks can be found [here](https://github.com/exercism/configlet/issues/249).
+The list of currently implemented checks is [here](https://github.com/exercism/configlet/issues/249).
 
 ## `configlet sync`
 
@@ -119,8 +119,8 @@ A Practice Exercise on an Exercism track is often implemented from a specificati
 Exercism deliberately requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
 Therefore configlet has a `sync` command, which can check that such Practice Exercises on a track are in sync with that upstream source, and can update them when updates are available.
 
-There are three kinds of data that can be updated from `problem-specifications`: documentation, metadata, and tests.
-There is also one kind of data that can be populated from the track-level `config.json` file: filepaths in exercise config files.
+There are three kinds of data that configlet can update from `problem-specifications`: documentation, metadata, and tests.
+There is also one kind of data that configlet can populate from the track-level `config.json` file: filepaths in exercise config files.
 
 We describe the checking and updating of these data kinds in individual sections below, but as a quick summary:
 
@@ -138,14 +138,14 @@ We describe the checking and updating of these data kinds in individual sections
   However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they are missing.
   This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
 - `configlet sync` removes keys that are not in the spec.
-  Custom key/value pairs are still supported: they must be written inside a JSON object named `custom`.
-- The exit code is 0 when all the seen data are synced when configlet exits, and 1 otherwise.
+  Custom key/value pairs are still supported, but you must write them inside a JSON object named `custom`.
+- Configlet exits with an exit code of 0 when all the seen data are up to date, and 1 otherwise.
 
 Note that in `configlet` releases `4.0.0-alpha.34` and earlier, the `sync` command operated only on tests.
 
 ### Docs
 
-A Practice Exercise that is derived from the `problem-specifications` repo must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
+A Practice Exercise that originates from the `problem-specifications` repo must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
 
 To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
 
@@ -175,7 +175,7 @@ configlet sync --docs -uy -e prime-factors
 ### Metadata
 
 Every exercise on a track must have a `.meta/config.json` file.
-For a Practice Exercise that is derived from the `problem-specifications` repo, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
+For a Practice Exercise that originates from the `problem-specifications` repo, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
 
 To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
 
@@ -205,8 +205,8 @@ configlet sync --metadata -uy -e prime-factors
 ### Tests
 
 If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file.
-The goal of the `tests.toml` file is to keep track of which tests are implemented by the exercise.
-Tests in this file are identified by their UUID and each test has a boolean value that indicates if it is implemented by that exercise.
+The goal of the `tests.toml` file is to track which tests the exercise implements.
+Each test in this file has a UUID to identify it, and may have an `include` key to specify whether the test is implemented.
 
 A `tests.toml` file has this format:
 
@@ -268,7 +268,7 @@ Finally, the `sync` command also handles "syncing" from a source that isn't `pro
 Every Concept Exercise and Practice Exercise must have a `.meta/config.json` file with a `files` object that specifies the (relative) locations of the files that the exercise uses.
 Such filepaths usually follow a simple pattern, and so configlet can populate the exercise-level values from patterns in the `files` key of the track-level `config.json` file.
 
-To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that cannot be populated from the track-level `files` key):
+To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that we can populate from the track-level `files` key):
 
 ```shell
 configlet sync --filepaths
@@ -329,7 +329,7 @@ To print a list of paths for which there is not already a formatted exercise `.m
 configlet fmt
 ```
 
-To be prompted to write formatted config files, add the `--update` option (or `-u` for short):
+For configlet to prompt to write formatted config files, add the `--update` option (or `-u` for short):
 
 ```shell
 configlet fmt --update
@@ -357,7 +357,7 @@ When writing JSON files, `configlet fmt` will:
 - Use a separate line for each item in a JSON array, and each key in a JSON object.
 
 - Remove key/value pairs for keys that are optional and have empty values.
-  For example, `"source": ""` is removed.
+  For example, it will remove `"source": ""`.
 
 - Remove `"test_runner": true` from Practice Exercise config files.
   This is an optional key - the spec says that an omitted `test_runner` key implies the value `true`.
@@ -437,7 +437,7 @@ For example, if the track has a concept named `floating-point-numbers` then an `
 ```
 
 You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file.
-The generated `introduction.md` is identical to the `introduction.md.tpl`, except that concept placeholders are replaced with the contents of the concept's `introduction.md` file (minus its top-level heading).
+The generated `introduction.md` is identical to the `introduction.md.tpl`, except that configlet replaces concept placeholders with the contents of the concept's `introduction.md` file (minus its top-level heading).
 In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this is not yet implemented.
 
 ## Contributing
