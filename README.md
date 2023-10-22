@@ -123,7 +123,7 @@ Therefore configlet has a `sync` command, which can check that such Practice Exe
 There are three kinds of data that configlet can update from `problem-specifications`: documentation, metadata, and tests.
 There is also one kind of data that configlet can populate from the track-level `config.json` file: filepaths in exercise config files.
 
-We describe the checking and updating of these data kinds in individual sections below, but as a quick summary:
+We describe the checking and updating of these data kinds in individual sections later, but as a quick summary:
 
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file.
   Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, please add the exercise to the track-level `config.json` file first.
@@ -401,7 +401,7 @@ The exit code is 0 when every seen exercise has a formatted `.meta/config.json` 
 ## `configlet uuid`
 
 Each exercise and concept has a [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), which must only appear once across all of Exercism.
-It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must match the below regular expression:
+It must be a valid version 4 UUID (compliant with RFC 4122) in the canonical textual representation, which means that it must match this regular expression:
 
 ```text
 ^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
