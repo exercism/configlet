@@ -75,7 +75,7 @@ We should:
 1. State in the new release notes that the reader shouldn't use the previous **tag**.
 
 This process means that we don't tag a different commit with a previously pushed tag.
-Please read the [git documentation on re-tagging][git-re-tag].
+See the [git documentation on re-tagging][git-re-tag].
 
 ### Investigate problems in a release
 
