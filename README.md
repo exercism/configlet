@@ -131,7 +131,7 @@ We describe the checking and updating of these data kinds in individual sections
 - To operate on a subset of data kinds, use some combination of the `--docs`, `--filepaths`, `--metadata`, and `--tests` options.
 - To interactively update data on the track, use the `--update` option.
 - To non-interactively update docs, filepaths, and metadata on the track, use `--update --yes`.
-- To non-interactively include every unseen test for a given exercise, use e.g. `--update --tests include --exercise prime-factors`.
+- To non-interactively include every unseen test for a given exercise, use (for example) `--update --tests include --exercise prime-factors`.
 - To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
 - Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating.
   To write these files in a canonical form without syncing, please use the `configlet fmt` command.
@@ -438,7 +438,7 @@ For example, if the track has a concept named `floating-point-numbers` then an `
 
 You can run `configlet generate` to generate the exercise's `introduction.md` for any exercise that has an `introduction.md.tpl` file.
 The generated `introduction.md` is identical to the `introduction.md.tpl`, except that configlet replaces concept placeholders with the contents of the concept's `introduction.md` file (minus its top-level heading).
-In the future, `configlet generate` will also increment the level of other headings by 1 (e.g. from `## My Heading` to `### My Heading`), but this isn't yet implemented.
+In the future, `configlet generate` will also increment the level of other headings by 1 (for example from `## My Heading` to `### My Heading`), but this isn't yet implemented.
 
 ## Contributing
 
