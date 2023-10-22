@@ -32,9 +32,9 @@ Then run a `minisign` command in that directory:
 minisign -Vm configlet_4.0.0-beta.13_linux_x86-64.tar.gz -P RWQGj6DTXgYLhKvWJMGtbDUrZerawUcyWnti9MGuWMx7VDW9DqZn2tMZ
 ```
 
-where the above argument to `-P` is the [configlet public key](https://github.com/exercism/configlet/blob/009dc9df9d947e71ff039ac2af0f82315dbf9073/configlet-minisign.pub).
+where the argument to `-P` is the [configlet public key](https://github.com/exercism/configlet/blob/009dc9df9d947e71ff039ac2af0f82315dbf9073/configlet-minisign.pub).
 
-The above command has verified the release archive if (and only if) the command's output begins with `Signature and comment signature verified`.
+The preceding command has verified the release archive if (and only if) the command's output begins with `Signature and comment signature verified`.
 For example:
 
 ```text
