@@ -12,10 +12,10 @@ You can then use configlet by running `bin/configlet` or `bin/configlet.exe` res
 
 ### Verifying
 
-We sign each configlet release archive with [`minisign`](https://jedisct1.github.io/minisign/).
+Exercism signs each configlet release archive with [`minisign`](https://jedisct1.github.io/minisign/).
 
 For now, if you want to verify the signature of a configlet release, you need to do it manually.
-The `fetch-configlet` script may support checking the release signature in the future, but it won't require checking it: we don't want to require every `fetch-configlet` user to install `minisign`.
+The `fetch-configlet` script may support checking the release signature in the future, but it won't require checking it: Exercism doesn't want to require every `fetch-configlet` user to install `minisign`.
 
 To verify a release archive, first download (from the assets section of a [release](https://github.com/exercism/configlet/releases)) the archive and its corresponding `.minisig` file.
 Write them to the same directory.
@@ -268,7 +268,7 @@ Finally, the `sync` command also handles "syncing" from a source that isn't `pro
 Every Concept Exercise and Practice Exercise must have a `.meta/config.json` file with a `files` object that specifies the (relative) locations of the files that the exercise uses.
 Such filepaths usually follow a simple pattern, and so configlet can populate the exercise-level values from patterns in the `files` key of the track-level `config.json` file.
 
-To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that we can populate from the track-level `files` key):
+To check that every Concept Exercise and Practice Exercise on the track has a fully populated `files` key (or at least one that configlet can populate from the track-level `files` key):
 
 ```shell
 configlet sync --filepaths
