@@ -297,7 +297,7 @@ If you are adding a Practice Exercise named `foo` that exists in `problem-specif
 1. Manually add an entry to the track-level `config.json` file for the exercise `foo`.
    This makes the exercise visible to `configlet sync`.
 1. Run `configlet sync --docs --filepaths --metadata -uy -e foo` to create the exercise's documentation, and a starter `.meta/config.json` file with populated `files`, `blurb`, and perhaps `source` and `source_url` values.
-1. Edit the exercise `.meta/config.json` file as desired.
+1. Edit the exercise `.meta/config.json` file as needed.
    For example, add yourself to the `authors` array.
 1. Run `configlet sync --tests include -u -e foo` to create a `.meta/tests.toml` file with every test included.
 1. View that `.meta/tests.toml` file, and add `include = false` to any test case that the exercise won't implement.
