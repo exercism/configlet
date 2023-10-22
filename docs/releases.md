@@ -82,7 +82,7 @@ See the [Git documentation on re-tagging][git-re-tag].
 If we've already published a release, and want to investigate a problem in it, we should mark the release as a prerelease.
 Similar to a draft release, a release marked as a prerelease won't be downloaded by a configlet CI job, or `fetch-configlet`.
 Note that you can't set a published release as a draft again.
-If it turns out that we want the release to be available again, simply undo the marking of the release as prerelease.
+If it turns out that we want the release to be available again, just undo the marking of the release as prerelease.
 If it turns out that we want to remove the release, follow the steps in the earlier section to create a new release.
 
 [bump_version]: https://github.com/exercism/configlet/blob/main/bin/bump_version.nim
