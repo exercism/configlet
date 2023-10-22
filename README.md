@@ -107,7 +107,8 @@ Global options:
 ## `configlet lint`
 
 The primary function of configlet is to do _linting_: checking if a track's configuration files are correctly structured - both syntactically and semantically.
-Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism.
+Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience.
+Therefore configlet's guards play an important part in maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development.
 The list of currently implemented checks is [here](https://github.com/exercism/configlet/issues/249).
