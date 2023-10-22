@@ -8,7 +8,7 @@ Each track should have a `bin/fetch-configlet` script, and might have a `bin/fet
 The first is a bash script, and the second is a PowerShell script.
 
 Running one of these scripts downloads the latest version of configlet to the `bin` directory.
-You can then use configlet by running `bin/configlet` or `bin/configlet.exe` respectively.
+You can then use configlet by running `bin/configlet`, or `bin/configlet.exe` on Windows.
 
 ### Verifying
 
