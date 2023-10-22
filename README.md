@@ -261,7 +261,7 @@ For example, to do so for an exercise named `prime-factors`:
 configlet sync --tests include -u -e prime-factors
 ```
 
-Remember to actually implement these tests on the track!
+Remember to actually implement these tests on the track.
 
 ### Filepaths
 
