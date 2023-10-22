@@ -51,7 +51,7 @@ If any build job fails due to intermittent failures, we should restart only the 
 If we restart a build job that was successful, it will fail when it can't upload an asset that already exists.
 In that case, we should manually delete the corresponding asset from the release and then restart the job.
 
-### Abort or remove a release
+### Cancel or remove a release
 
 If any of these are true:
 
