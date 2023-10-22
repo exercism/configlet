@@ -275,9 +275,9 @@ To check that every Concept Exercise and Practice Exercise on the track has a fu
 configlet sync --filepaths
 ```
 
-(Note that `configlet lint` also produces an error when an exercise has a missing/empty `files` key.)
+(Note that `configlet lint` also produces an error when an exercise has a missing or empty `files` key.)
 
-To populate empty/missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
+To populate empty or missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
 
 ```shell
 configlet sync --filepaths --update
