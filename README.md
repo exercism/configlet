@@ -314,17 +314,13 @@ An Exercism track repository has many JSON files, including:
 
 - For each Concept Exercise or Practice Exercise, a `.meta/config.json` file.
 
-These files are more readable if they have a consistent formatting Exercism-wide,
-and so configlet has a `fmt` command for rewriting a track's JSON files in a canonical form.
+These files are more readable if they have a consistent formatting Exercism-wide, and so configlet has a `fmt` command for rewriting a track's JSON files in a canonical form.
 
-The `fmt` command currently only operates on the exercise `.meta/config.json` files,
-but it's likely to operate on all the track JSON files in the future.
+The `fmt` command currently only operates on the exercise `.meta/config.json` files, but it's likely to operate on all the track JSON files in the future.
 
-A plain `configlet fmt` makes no changes to the track,
-and checks the formatting of the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
+A plain `configlet fmt` makes no changes to the track, and checks the formatting of the `.meta/config.json` file for every Concept Exercise and Practice Exercise.
 
-To print a list of paths for which there isn't already a formatted exercise `.meta/config.json` file
-(exiting with a nonzero exit code if at least one exercise lacks a formatted config file):
+To print a list of paths for which there isn't already a formatted exercise `.meta/config.json` file (exiting with a nonzero exit code if at least one exercise lacks a formatted config file):
 
 ```shell
 configlet fmt
@@ -392,8 +388,7 @@ The canonical key order for an exercise `.meta/config.json` file is:
 where the square brackets indicate that the enclosed key is optional.
 
 Note that `configlet fmt` only operates on exercises that exist in the track-level `config.json` file.
-Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file,
-add the exercise to the track-level `config.json` file first.
+Therefore if you are implementing a new exercise on a track and want to format its `.meta/config.json` file, add the exercise to the track-level `config.json` file first.
 If the exercise isn't yet ready to be user-facing, set its `status` value to `wip`.
 
 The exit code is 0 when every seen exercise has a formatted `.meta/config.json` file when configlet exits, and 1 otherwise.
