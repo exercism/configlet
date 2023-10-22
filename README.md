@@ -252,7 +252,7 @@ configlet sync --tests --update
 
 For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
 Configlet writes an exercise's `tests.toml` file when the user has finished making choices for that exercise.
-This means that you can terminate configlet at a prompt (for example, by pressing Ctrl-C in the terminal) and only lose the syncing decisions for at most one exercise.
+This means that you can exit configlet at a prompt (for example, by pressing Ctrl-C in the terminal) and only lose the syncing decisions for at most one exercise.
 
 To non-interactively include every unseen test case, use `--tests include`.
 For example, to do so for an exercise named `prime-factors`:
