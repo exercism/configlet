@@ -275,7 +275,7 @@ To check that every Concept Exercise and Practice Exercise on the track has a fu
 configlet sync --filepaths
 ```
 
-(Note that `configlet lint` will also produce an error when an exercise has a missing/empty `files` key.)
+(Note that `configlet lint` also produces an error when an exercise has a missing/empty `files` key.)
 
 To populate empty/missing values of the exercise-level `files` key for every Concept Exercise and Practice Exercise from the patterns in the track-level `files` key:
 
@@ -358,7 +358,7 @@ When writing JSON files, `configlet fmt` will:
 - Use a separate line for each item in a JSON array, and each key in a JSON object.
 
 - Remove key/value pairs for keys that are optional and have empty values.
-  For example, it will remove `"source": ""`.
+  For example, it removes `"source": ""`.
 
 - Remove `"test_runner": true` from Practice Exercise config files.
   This is an optional key - the spec says that an omitted `test_runner` key implies the value `true`.
