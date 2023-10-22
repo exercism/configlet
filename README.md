@@ -250,7 +250,7 @@ To interactively update the `tests.toml` file for every Practice Exercise, add t
 configlet sync --tests --update
 ```
 
-For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file accordingly.
+For each missing test, this prompts the user to choose whether to include/exclude/skip it, and updates the corresponding `tests.toml` file as appropriate.
 Configlet writes an exercise's `tests.toml` file when the user has finished making choices for that exercise.
 This means that you can exit configlet at a prompt (for example, by pressing Ctrl-C in the terminal) and only lose the syncing decisions for at most one exercise.
 
