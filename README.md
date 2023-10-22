@@ -137,7 +137,7 @@ We describe the checking and updating of these data kinds in individual sections
 - Note that `configlet sync` tries to preserve the key order in exercise `.meta/config.json` files when updating.
   To write these files in a canonical form without syncing, please use the `configlet fmt` command.
   However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they're missing.
-  This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
+  This is less like syncing, but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
 - `configlet sync` removes keys that aren't in the spec.
   Custom key/value pairs are still supported, but you must write them inside a JSON object named `custom`.
 - Configlet exits with an exit code of 0 when all the seen data are up to date, and 1 otherwise.
