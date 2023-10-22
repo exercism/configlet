@@ -11,7 +11,7 @@
 1. Double-check that the repository is in a state such that a release makes sense.
    Remember that we don't support force-pushing to `main`, so any release commit (and tag) will remain permanently.
 
-1. If any commit has been merged since the release PR was created, rebase the release PR on `main`.
+1. If we merged a commit since creating the release PR, rebase the release PR on `main`.
    This ensures that CI tests the merge immediately before the release.
 
 1. Merge the release PR (using "Squash and merge" with the pre-filled commit title and a blank commit body).
@@ -72,7 +72,7 @@ We should:
 
 1. When appropriate, begin the release process again.
 
-1. State in the new release notes that the previous **tag** shouldn't be used.
+1. State in the new release notes that the reader shouldn't use the previous **tag**.
 
 This process means that we don't tag a different commit with a previously pushed tag.
 Please read the [git documentation on re-tagging][git-re-tag].
@@ -81,7 +81,7 @@ Please read the [git documentation on re-tagging][git-re-tag].
 
 If we've already published a release, and want to investigate a problem in it, we should mark the release as a prerelease.
 Similar to a draft release, a release marked as a prerelease won't be downloaded by a configlet CI job, or `fetch-configlet`.
-Note that a published release can't be set as draft again.
+Note that you can't set a published release as a draft again.
 If it turns out that we want the release to be available again, simply undo the marking of the release as prerelease.
 If it turns out that we want to remove the release, follow the steps in the section above to create a new release.
 
