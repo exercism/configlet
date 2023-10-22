@@ -106,7 +106,7 @@ Global options:
 
 ## `configlet lint`
 
-The primary function of configlet is to do _linting_: checking if a track's configuration files are properly structured - both syntactically and semantically.
+The primary function of configlet is to do _linting_: checking if a track's configuration files are correctly structured - both syntactically and semantically.
 Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience, so configlet's guards play an important part in maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development.
@@ -116,7 +116,7 @@ The list of currently implemented checks is [here](https://github.com/exercism/c
 
 A Practice Exercise on an Exercism track is often implemented from a specification in the [`exercism/problem-specifications`](https://github.com/exercism/problem-specifications) repository.
 
-Exercism deliberately requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
+Exercism intentionally requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
 Therefore configlet has a `sync` command, which can check that such Practice Exercises on a track are in sync with that upstream source, and can update them when updates are available.
 
 There are three kinds of data that configlet can update from `problem-specifications`: documentation, metadata, and tests.
@@ -133,7 +133,7 @@ We describe the checking and updating of these data kinds in individual sections
 - To non-interactively update docs, filepaths, and metadata on the track, use `--update --yes`.
 - To non-interactively include every unseen test for a given exercise, use (for example) `--update --tests include --exercise prime-factors`.
 - To skip downloading the `problem-specifications` repository, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
-- Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating.
+- Note that `configlet sync` tries to preserve the key order in exercise `.meta/config.json` files when updating.
   To write these files in a canonical form without syncing, please use the `configlet fmt` command.
   However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they're missing.
   This is less "sync-like", but more ergonomic: when implementing a new exercise, you can use `sync` to create a starter `.meta/config.json` file.
