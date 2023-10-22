@@ -114,7 +114,7 @@ The list of currently implemented checks is [here](https://github.com/exercism/c
 
 ## `configlet sync`
 
-A Practice Exercise on an Exercism track is often implemented from a specification in the [`exercism/problem-specifications`](https://github.com/exercism/problem-specifications) repo.
+A Practice Exercise on an Exercism track is often implemented from a specification in the [`exercism/problem-specifications`](https://github.com/exercism/problem-specifications) repository.
 
 Exercism deliberately requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
 Therefore configlet has a `sync` command, which can check that such Practice Exercises on a track are in sync with that upstream source, and can update them when updates are available.
@@ -132,7 +132,7 @@ We describe the checking and updating of these data kinds in individual sections
 - To interactively update data on the track, use the `--update` option.
 - To non-interactively update docs, filepaths, and metadata on the track, use `--update --yes`.
 - To non-interactively include every unseen test for a given exercise, use (for example) `--update --tests include --exercise prime-factors`.
-- To skip downloading the `problem-specifications` repo, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
+- To skip downloading the `problem-specifications` repository, add `--offline --prob-specs-dir /path/to/local/problem-specifications`
 - Note that `configlet sync` tries to maintain the key order in exercise `.meta/config.json` files when updating.
   To write these files in a canonical form without syncing, please use the `configlet fmt` command.
   However, `configlet sync` _does_ add (possibly empty) required keys (`authors`, `files`, `blurb`) when they're missing.
@@ -145,7 +145,7 @@ Note that in `configlet` releases `4.0.0-alpha.34` and earlier, the `sync` comma
 
 ### Docs
 
-A Practice Exercise that originates from the `problem-specifications` repo must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
+A Practice Exercise that originates from the `problem-specifications` repository must have a `.docs/instructions.md` file (and possibly a `.docs/introduction.md` file too) containing the exercise documentation from `problem-specifications`.
 
 To check every Practice Exercise on the track for available documentation updates (exiting with a non-zero exit code if at least one update is available):
 
@@ -175,7 +175,7 @@ configlet sync --docs -uy -e prime-factors
 ### Metadata
 
 Every exercise on a track must have a `.meta/config.json` file.
-For a Practice Exercise that originates from the `problem-specifications` repo, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
+For a Practice Exercise that originates from the `problem-specifications` repository, this file should contain the `blurb`, `source` and `source_url` key/value pairs that exist in the corresponding upstream `metadata.toml` file.
 
 To check every Practice Exercise for available metadata updates (exiting with a non-zero exit code if at least one update is available):
 
@@ -204,7 +204,7 @@ configlet sync --metadata -uy -e prime-factors
 
 ### Tests
 
-If a track implements an exercise for which test data exists in the [problem-specifications repo](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file.
+If a track implements an exercise for which test data exists in the [problem-specifications repository](https://github.com/exercism/problem-specifications), the exercise _must_ contain a `.meta/tests.toml` file.
 The goal of the `tests.toml` file is to track which tests the exercise implements.
 Each test in this file has a UUID to identify it, and may have an `include` key to specify whether the test is implemented.
 
@@ -305,7 +305,7 @@ If you are adding a Practice Exercise named `foo` that exists in `problem-specif
 
 ## `configlet fmt`
 
-An Exercism track repo has many JSON files, including:
+An Exercism track repository has many JSON files, including:
 
 - The track `config.json` file.
 
