@@ -123,7 +123,7 @@ Therefore configlet has a `sync` command, which can check that such Practice Exe
 There are three kinds of data that configlet can update from `problem-specifications`: documentation, metadata, and tests.
 There is also one kind of data that configlet can populate from the track-level `config.json` file: filepaths in exercise config files.
 
-We describe the checking and updating of these data kinds in individual sections later, but as a quick summary:
+Later sections describe the checking and updating of these data kinds, but as a quick summary:
 
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file.
   Therefore if you are implementing a new exercise on a track and want to add the initial files with `configlet sync`, add the exercise to the track-level `config.json` file first.
