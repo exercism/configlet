@@ -2,13 +2,13 @@
 
 ## How to create a configlet release
 
-1. Check that the repo state is such that creating a release PR makes sense.
+1. Check that the repository state is such that creating a release PR makes sense.
 
 1. Run [`bin/bump_version.nim`][bump_version], which also prompts to create a release PR if you have [`gh`][gh] installed on your machine.
 
 1. Ideally, check that `configlet lint` and `configlet sync` do not produce unexpected output on any track - diffing the output from the previous release.
 
-1. Double-check that the repo is in a state such that a release makes sense.
+1. Double-check that the repository is in a state such that a release makes sense.
    Remember that we do not support force-pushing to `main`, so any release commit (and tag) will remain permanently.
 
 1. If any commit has been merged since the release PR was created, rebase the release PR on `main`.
