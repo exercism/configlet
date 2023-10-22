@@ -117,7 +117,7 @@ The list of currently implemented checks is [here](https://github.com/exercism/c
 
 A Practice Exercise on an Exercism track is often implemented from a specification in the [`exercism/problem-specifications`](https://github.com/exercism/problem-specifications) repository.
 
-Exercism intentionally requires that every exercise has its own copy of certain files (like `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
+Exercism intentionally requires that every exercise has its own copy of certain files (such as `.docs/instructions.md`), even when that exercise exists in `problem-specifications`.
 Therefore configlet has a `sync` command, which can check that such Practice Exercises on a track are in sync with that upstream source, and can update them when updates are available.
 
 There are three kinds of data that configlet can update from `problem-specifications`: documentation, metadata, and tests.
