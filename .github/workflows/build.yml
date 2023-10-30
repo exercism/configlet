@@ -82,6 +82,9 @@ jobs:
             zig_target: aarch64-linux-musl
 
           - runs-on: ubuntu-22.04
+            zig_target: powerpc64-linux-musl
+
+          - runs-on: ubuntu-22.04
             zig_target: riscv64-linux-musl
 
           - runs-on: macos-12
