@@ -108,7 +108,7 @@ Global options:
 
 The primary function of configlet is to do _linting_: checking if a track's configuration files are correctly structured - both syntactically and semantically.
 Misconfigured tracks may not sync correctly, may look wrong on the website, or may present a suboptimal user experience.
-Therefore configlet's guards play an important part in maintaining the integrity of Exercism.
+Configlet's checks are therefore important for maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development.
 The list of currently implemented checks is [here](https://github.com/exercism/configlet/issues/249).
@@ -326,7 +326,7 @@ To print a list of paths for which there isn't already a formatted exercise `.me
 configlet fmt
 ```
 
-For configlet to prompt to write formatted config files, add the `--update` option (or `-u` for short):
+To make configlet prompt to write formatted config files, add the `--update` option (or `-u` for short):
 
 ```shell
 configlet fmt --update
