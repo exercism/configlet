@@ -2,16 +2,16 @@
 
 ## How to create a configlet release
 
-1. Check that the repo state is such that creating a release PR makes sense.
+1. Check that the repository state is such that creating a release PR makes sense.
 
 1. Run [`bin/bump_version.nim`][bump_version], which also prompts to create a release PR if you have [`gh`][gh] installed on your machine.
 
-1. Ideally, check that `configlet lint` and `configlet sync` do not produce unexpected output on any track - diffing the output from the previous release.
+1. Ideally, check that `configlet lint` and `configlet sync` don't produce unexpected output on any track - diffing the output from the previous release.
 
-1. Double-check that the repo is in a state such that a release makes sense.
-   Remember that we do not support force-pushing to `main`, so any release commit (and tag) will remain permanently.
+1. Double-check that the repository is in a state such that a release makes sense.
+   Remember that we don't support force-pushing to `main`, so any release commit (and tag) remains permanently.
 
-1. If any commit has been merged since the release PR was created, rebase the release PR on `main`.
+1. If we merged a commit since creating the release PR, rebase the release PR on `main`.
    This ensures that CI tests the merge immediately before the release.
 
 1. Merge the release PR (using "Squash and merge" with the pre-filled commit title and a blank commit body).
@@ -28,7 +28,7 @@
 > 3. Check that CI is green.
 > 4. Un-draft the release.
 
-where un-drafting the release means that, from that moment on, it is used in any newly triggered track CI configlet job (and downloaded by a user who runs `fetch-configlet`).
+where un-drafting the release means that, from that moment on, it's used in any newly triggered track CI configlet job (and downloaded by a user who runs `fetch-configlet`).
 
 If you edit the draft release notes in the GitHub web interface, be careful to not prematurely press the green "Publish release" button when you mean to press the "Save draft" button.
 You can also edit the release notes using the [GitHub CLI][gh] - for example, for a version `1.2.3`:
@@ -48,10 +48,10 @@ gh -R exercism/configlet release edit 1.2.3 --draft=false
 ### Intermittent failures
 
 If any build job fails due to intermittent failures, we should restart only the failing job.
-If we restart a build job that was successful, it will fail when it cannot upload an asset that already exists.
+If we restart a build job that was successful, it will fail when it can't upload an asset that already exists.
 In that case, we should manually delete the corresponding asset from the release and then restart the job.
 
-### Abort or remove a release
+### Cancel or remove a release
 
 If any of these are true:
 
@@ -59,12 +59,12 @@ If any of these are true:
 
 - We no longer want to create a release at this time.
 
-- We have already published a release, but we want to make track CI use the previous configlet version.
+- We've already published a release, but we want to make track CI use the previous configlet version.
 
 We should:
 
 1. Delete the problematic release, preferably without un-drafting it.
-   Do not delete the problematic tag.
+   Don't delete the problematic tag.
 
 1. Create PRs to fix the problem.
 
@@ -72,18 +72,18 @@ We should:
 
 1. When appropriate, begin the release process again.
 
-1. State in the new release notes that the previous **tag** should not be used.
+1. State in the new release notes that the reader shouldn't use the previous **tag**.
 
-This process means that we do not tag a different commit with a previously pushed tag.
-Please read the [git documentation on re-tagging][git-re-tag].
+This process means that we don't tag a different commit with a previously pushed tag.
+See the [Git documentation on re-tagging][git-re-tag].
 
 ### Investigate problems in a release
 
-If we have already published a release, and want to investigate a problem in it, we should mark the release as a prerelease.
-Similar to a draft release, a release marked as a prerelease will not be downloaded by a configlet CI job, or `fetch-configlet`.
-Note that a published release cannot be set as draft again.
-If it turns out that we want the release to be available again, simply undo the marking of the release as prerelease.
-If it turns out that we want to remove the release, follow the steps in the section above to create a new release.
+If we've already published a release, and want to investigate a problem in it, we should mark the release as a prerelease.
+Similar to a draft release, a release marked as a prerelease won't be downloaded by a configlet CI job, or `fetch-configlet`.
+Note that you can't set a published release as a draft again.
+If it turns out that we want the release to be available again, just undo the marking of the release as prerelease.
+If it turns out that we want to remove the release, follow the steps in the earlier section to create a new release.
 
 [bump_version]: https://github.com/exercism/configlet/blob/main/bin/bump_version.nim
 [gh]: https://github.com/cli/cli
