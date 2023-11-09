@@ -1,4 +1,4 @@
-import std/[os, strformat]
+import std/[os, strformat, syncio]
 import pkg/supersnappy
 import ../cli
 
