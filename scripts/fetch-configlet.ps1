@@ -31,12 +31,12 @@ if (!(Test-Path -Path $outputDirectory)) {
 
 Write-Output "Fetching configlet..."
 $downloadUrl = Get-DownloadUrl
-$outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
-Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile @requestOpts
+$outputFileName = "configlet.zip"
+$outputPath = Join-Path -Path $outputDirectory -ChildPath $outputFileName
+Invoke-WebRequest -Uri $downloadUrl -OutFile $outputPath @requestOpts
 
 $configletPath = Join-Path -Path $outputDirectory -ChildPath "configlet.exe"
 if (Test-Path -Path $configletPath) { Remove-Item -Path $configletPath }
 [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, $outputDirectory)
-Remove-Item -Path $outputPath
 
-Remove-Item -Path $outputFile
+Remove-Item -Path $outputPath
