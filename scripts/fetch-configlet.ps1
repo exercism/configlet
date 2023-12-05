@@ -29,6 +29,7 @@ if (!(Test-Path -Path $outputDirectory)) {
     exit 1
 }
 
+Write-Output "Fetching configlet..."
 $downloadUrl = Get-DownloadUrl
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile @requestOpts
