@@ -33,5 +33,10 @@ Write-Output "Fetching configlet..."
 $downloadUrl = Get-DownloadUrl
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile @requestOpts
-Expand-Archive $outputFile -DestinationPath $outputDirectory -Force
+
+$configletPath = Join-Path -Path $outputDirectory -ChildPath "configlet.exe"
+if (Test-Path -Path $configletPath) { Remove-Item -Path $configletPath }
+[System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, $outputDirectory)
+Remove-Item -Path $outputPath
+
 Remove-Item -Path $outputFile
