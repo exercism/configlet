@@ -12,10 +12,10 @@ $requestOpts = @{
     RetryIntervalSec  = 1
 }
 
-$arch = If ([Environment]::Is64BitOperatingSystem) { "x86-64" } Else { "i386" }
 $fileName = "configlet_.+_windows_$arch.zip"
 
 Function Get-DownloadUrl {
+    $arch = If ([Environment]::Is64BitOperatingSystem) { "x86-64" } Else { "i386" }
     $latestUrl = "https://api.github.com/repos/exercism/configlet/releases/latest"
     Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts `
     | Select-Object -ExpandProperty assets `
