@@ -12,8 +12,6 @@ $requestOpts = @{
     RetryIntervalSec  = 1
 }
 
-$fileName = "configlet_.+_windows_$arch.zip"
-
 Function Get-DownloadUrl {
     $arch = If ([Environment]::Is64BitOperatingSystem) { "x86-64" } Else { "i386" }
     $latestUrl = "https://api.github.com/repos/exercism/configlet/releases/latest"
@@ -38,5 +36,7 @@ Invoke-WebRequest -Uri $downloadUrl -OutFile $outputPath @requestOpts
 $configletPath = Join-Path -Path $outputDirectory -ChildPath "configlet.exe"
 if (Test-Path -Path $configletPath) { Remove-Item -Path $configletPath }
 [System.IO.Compression.ZipFile]::ExtractToDirectory($outputPath, $outputDirectory)
-
 Remove-Item -Path $outputPath
+
+$configletVersion = (Select-String -Pattern "/releases/download/(.+?)/" -InputObject $downloadUrl -AllMatches).Matches.Groups[1].Value
+Write-Output "Downloaded configlet ${configletVersion} to ${configletPath}"
