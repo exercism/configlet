@@ -19,7 +19,7 @@ Function Get-DownloadUrl {
     $latestUrl = "https://api.github.com/repos/exercism/configlet/releases/latest"
     Invoke-RestMethod -Uri $latestUrl -PreserveAuthorizationOnRedirect @requestOpts `
     | Select-Object -ExpandProperty assets `
-    | Where-Object { $_.browser_download_url -match $FileName } `
+    | Where-Object { $_.name -match "^configlet_.+_windows_${arch}.zip$" } `
     | Select-Object -ExpandProperty browser_download_url -First 1
 }
 
