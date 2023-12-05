@@ -23,8 +23,13 @@ Function Get-DownloadUrl {
     | Select-Object -ExpandProperty browser_download_url -First 1
 }
 
-$downloadUrl = Get-DownloadUrl
 $outputDirectory = "bin"
+if (!(Test-Path -Path $outputDirectory)) {
+    Write-Output "Error: no ./bin directory found. This script should be ran from a repo root."
+    exit 1
+}
+
+$downloadUrl = Get-DownloadUrl
 $outputFile = Join-Path -Path $outputDirectory -ChildPath $fileName
 Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile @requestOpts
 Expand-Archive $outputFile -DestinationPath $outputDirectory -Force
