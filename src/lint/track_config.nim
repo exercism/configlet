@@ -236,6 +236,7 @@ const tags = [
   "typing/dynamic",
   "typing/strong",
   "typing/weak",
+  "typing/gradual",
   "execution_mode/compiled",
   "execution_mode/interpreted",
   "platform/windows",
