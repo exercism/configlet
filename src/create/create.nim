@@ -1,6 +1,6 @@
 import std/[os, strformat]
 import ".."/[cli, helpers, sync/sync, types_track_config]
-import "."/[approaches, articles]
+import "."/[approaches, articles, exercises]
 
 proc create*(conf: Conf) =
   if conf.action.kind == actCreate:
@@ -50,8 +50,12 @@ proc create*(conf: Conf) =
           quit QuitFailure
 
       createArticle(Slug(conf.action.articleSlug), userExercise, exerciseDir)
+    elif conf.action.`concept`:
+      createConceptExercise(conf)
+    elif conf.action.practice:
+      createPracticeExercise(conf)
     else:
-      let msg = "Please specify `--article <slug>` or `--approach <slug>`"
+      let msg = "Please specify `--article <slug>`, `--approach <slug>`, `--concept` or `--practice`"
       stderr.writeLine msg
       quit QuitFailure
   else:
