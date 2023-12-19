@@ -56,12 +56,7 @@ proc createPracticeExercise*(conf: Conf) =
   let prettied = prettyTrackConfig(trackConfig)
   writeFile(trackConfigPath, prettied)
 
-  var scope: set[SyncKind]
-  scope.incl(SyncKind.skDocs)
-  scope.incl(SyncKind.skFilepaths)
-  scope.incl(SyncKind.skMetadata)
-  scope.incl(SyncKind.skTests)
-  
+  let scope = {skDocs, skFilepaths, skMetadata, skTests}
 
   let syncConf = Conf(
     trackDir: conf.trackDir,
