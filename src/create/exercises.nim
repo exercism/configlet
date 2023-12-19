@@ -1,5 +1,5 @@
 import std/[sets, os, strformat]
-import ".."/[cli, helpers, fmt/track_config, sync/sync, types_track_config, uuid/uuid]
+import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_metadata, types_track_config, uuid/uuid]
 
 proc createConceptExercise*(conf: Conf) =
   echo "create ce"
@@ -21,10 +21,12 @@ proc createPracticeExercise*(conf: Conf) =
     stderr.writeLine msg
     quit 1
 
-  let exerciseDir = conf.trackDir / "exercises" / "practice" / $userExercise
+  let probSpecsDir = ProbSpecsDir.init(conf)
+  let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
+
   let exercise = PracticeExercise(
     slug: userExercise,
-    name: $userExercise,
+    name: metadata.title,
     uuid: $genUuid(),
     practices: OrderedSet[string](),
     prerequisites: OrderedSet[string](),
@@ -39,3 +41,24 @@ proc createPracticeExercise*(conf: Conf) =
 
   let prettied = prettyTrackConfig(trackConfig)
   writeFile(trackConfigPath, prettied)
+
+  var scope: set[SyncKind]
+  scope.incl(SyncKind.skDocs)
+  scope.incl(SyncKind.skFilepaths)
+  scope.incl(SyncKind.skMetadata)
+  scope.incl(SyncKind.skTests)
+  
+
+  let syncConf = Conf(
+    trackDir: conf.trackDir,
+    
+    action: Action(
+      exercise: conf.action.exerciseCreate,
+      kind: actSync,
+      scope: scope,
+      update: true,
+      yes: true,
+      tests: tmInclude
+    )
+  )
+  discard syncImpl(syncConf, log = false)
