@@ -1,7 +1,7 @@
 import std/[sets, os, strformat]
-import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_metadata, types_track_config, uuid/uuid]
+import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
-proc verifyExerciseDoesNotExist(conf: Conf): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] = 
+proc verifyExerciseDoesNotExist(conf: Conf): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
@@ -20,6 +20,36 @@ proc verifyExerciseDoesNotExist(conf: Conf): tuple[trackConfig: TrackConfig, tra
 
   (trackConfig, trackConfigPath, userExercise)
 
+proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, exerciseKind: ExerciseKind) =
+  let exerciseDir = trackDir / "exercises" / $exerciseKind / $exerciseSlug
+
+  let filePatternGroups = [
+    trackConfig.files.solution,
+    trackConfig.files.test,
+    trackConfig.files.editor,
+    trackConfig.files.invalidator,
+    if exerciseKind == ekConcept: trackConfig.files.exemplar else: trackConfig.files.example
+  ]
+
+  for filePatterns in filePatternGroups:
+    for filePattern in toFilepaths(filePatterns, exerciseSlug):
+      writeFile(exerciseDir / filePattern, "")
+
+proc syncExercise(conf: Conf, scope: set[SyncKind]) =
+  let syncConf = Conf(
+    trackDir: conf.trackDir,
+    
+    action: Action(
+      exercise: conf.action.exerciseCreate,
+      kind: actSync,
+      scope: scope,
+      update: true,
+      yes: true,
+      tests: tmInclude
+    )
+  )
+  discard syncImpl(syncConf, log = false)
+
 proc createConceptExercise*(conf: Conf) =
   let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
 
@@ -30,7 +60,30 @@ proc createConceptExercise*(conf: Conf) =
     stderr.writeLine msg
     quit 1
 
-  # TODO: improve this
+  let exercise = ConceptExercise(
+    slug: userExercise,
+    name: $userExercise, # TODO: Humanize slug
+    uuid: $genUuid(),
+    concepts: OrderedSet[string](),
+    prerequisites: OrderedSet[string](),
+    status: sMissing
+  )
+
+  var a = trackConfig.exercises.`concept`
+  a.add(exercise)
+  trackConfig.exercises.`concept` = a;
+
+  writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
+  syncExercise(conf, {skMetadata, skFilepaths})
+
+  let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
+  if not dirExists(docsDir):
+    createDir(docsDir)
+
+  writeFile(docsDir / "introduction.md", "")
+  writeFile(docsDir / "instructions.md", "")
+
+  syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
 
 proc createPracticeExercise*(conf: Conf) =
   let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
@@ -50,24 +103,9 @@ proc createPracticeExercise*(conf: Conf) =
 
   var a = trackConfig.exercises.practice
   a.add(exercise)
-
   trackConfig.exercises.practice = a;
 
-  let prettied = prettyTrackConfig(trackConfig)
-  writeFile(trackConfigPath, prettied)
+  writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
+  syncExercise(conf, {skDocs, skFilepaths, skMetadata, skTests})
 
-  let scope = {skDocs, skFilepaths, skMetadata, skTests}
-
-  let syncConf = Conf(
-    trackDir: conf.trackDir,
-    
-    action: Action(
-      exercise: conf.action.exerciseCreate,
-      kind: actSync,
-      scope: scope,
-      update: true,
-      yes: true,
-      tests: tmInclude
-    )
-  )
-  discard syncImpl(syncConf, log = false)
+  syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)

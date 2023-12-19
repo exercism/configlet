@@ -23,7 +23,7 @@ func kebabToCamel(slug: Slug): string =
 func kebabToPascal(slug: Slug): string =
   kebabToCamelOrPascal(slug, capitalizeFirstLetter = true)
 
-func toFilepaths(patterns: seq[string], slug: Slug): seq[string] =
+func toFilepaths*(patterns: seq[string], slug: Slug): seq[string] =
   result = newSeq[string](patterns.len)
   for i, pattern in patterns:
     result[i] = pattern.multiReplace(
