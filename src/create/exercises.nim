@@ -1,25 +1,39 @@
 import std/[sets, os, strformat]
 import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_metadata, types_track_config, uuid/uuid]
 
-proc createConceptExercise*(conf: Conf) =
-  echo "create ce"
-
-proc createPracticeExercise*(conf: Conf) =
+proc verifyExerciseDoesNotExist(conf: Conf): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] = 
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
   let userExercise = Slug(conf.action.exerciseCreate)
 
   if userExercise in trackExerciseSlugs.`concept`:
-    let msg = &"There already is a concept exercise with `{userExercise}` " &
+    let msg = &"There already is a concept exercise with `{userExercise}` as the slug " &
               &"in the track config:\n{trackConfigPath}"
     stderr.writeLine msg
     quit 1
   elif userExercise in trackExerciseSlugs.practice:
-    let msg = &"There already is a practice exercise with `{userExercise}` " &
+    let msg = &"There already is a practice exercise with `{userExercise}` as the slug " &
               &"in the track config:\n{trackConfigPath}"
     stderr.writeLine msg
     quit 1
+
+  (trackConfig, trackConfigPath, userExercise)
+
+proc createConceptExercise*(conf: Conf) =
+  let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
+
+  let probSpecsDir = ProbSpecsDir.init(conf)
+  if dirExists(probSpecsDir / "exercises" / $userExercise):
+    let msg = &"There already is an exercise with `{userExercise}` as the slug " &
+              "in the problem specifications repo"
+    stderr.writeLine msg
+    quit 1
+
+  # TODO: improve this
+
+proc createPracticeExercise*(conf: Conf) =
+  let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
 
   let probSpecsDir = ProbSpecsDir.init(conf)
   let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
