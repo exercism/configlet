@@ -38,7 +38,6 @@ proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, e
 proc syncExercise(conf: Conf, scope: set[SyncKind]) =
   let syncConf = Conf(
     trackDir: conf.trackDir,
-    
     action: Action(
       exercise: conf.action.exerciseCreate,
       kind: actSync,
