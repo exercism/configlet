@@ -51,7 +51,7 @@ proc syncExercise(conf: Conf, scope: set[SyncKind]) =
   discard syncImpl(syncConf, log = false)
 
 proc createConceptExercise*(conf: Conf) =
-  let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
+  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
 
   let probSpecsDir = ProbSpecsDir.init(conf)
   if dirExists(probSpecsDir / "exercises" / $userExercise):
@@ -69,11 +69,9 @@ proc createConceptExercise*(conf: Conf) =
     status: sMissing
   )
 
-  var a = trackConfig.exercises.`concept`
-  a.add(exercise)
-  trackConfig.exercises.`concept` = a;
-
+  trackConfig.exercises.`concept`.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
+
   syncExercise(conf, {skMetadata, skFilepaths})
 
   let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
@@ -86,7 +84,7 @@ proc createConceptExercise*(conf: Conf) =
   syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
 
 proc createPracticeExercise*(conf: Conf) =
-  let (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
+  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
 
   let probSpecsDir = ProbSpecsDir.init(conf)
   let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
@@ -101,11 +99,8 @@ proc createPracticeExercise*(conf: Conf) =
     status: sMissing
   )
 
-  var a = trackConfig.exercises.practice
-  a.add(exercise)
-  trackConfig.exercises.practice = a;
-
+  trackConfig.exercises.practice.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
-  syncExercise(conf, {skDocs, skFilepaths, skMetadata, skTests})
 
+  syncExercise(conf, {skDocs, skFilepaths, skMetadata, skTests})
   syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
