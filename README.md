@@ -55,7 +55,7 @@ Usage:
 
 Commands:
   completion  Output a completion script for a given shell
-  create      Add a new approach or article
+  create      Add a new exercise, approach or article
   fmt         Format the exercise 'config.json' files
   generate    Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
   info        Print some information about the track
@@ -72,6 +72,8 @@ Options for create:
       --approach <slug>        The slug of the approach
       --article <slug>         The slug of the article
   -e, --exercise <slug>        Only operate on this exercise
+  -p, --practice               Create a concept exercise
+  -c, --concept                Create a practice exercise
 
 Options for fmt:
   -e, --exercise <slug>        Only operate on this exercise

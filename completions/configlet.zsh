@@ -11,7 +11,7 @@ _configlet_commands() {
     "lint:Check the track configuration for correctness" \
     # subcommands with options
     "completion:Output a completion script for a given shell" \
-    "create:Add a new approach or article" \
+    "create:Add a new exercise, approach or article" \
     "fmt:Format the exercise '.meta/config.json' files" \
     "info:Print track information" \
     "sync:Check or update Practice Exercise docs, metadata, and tests" \

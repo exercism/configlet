@@ -11,7 +11,7 @@ complete -c configlet -n "__fish_use_subcommand" -a lint       -d "Check the tra
 
 # subcommands with options
 complete -c configlet -n "__fish_use_subcommand" -a completion -d "Output a completion script for a given shell"
-complete -c configlet -n "__fish_use_subcommand" -a create     -d "Add a new approach or article"
+complete -c configlet -n "__fish_use_subcommand" -a create     -d "Add a new exercise, approach or article"
 complete -c configlet -n "__fish_use_subcommand" -a fmt        -d "Format the exercise '.meta/config.json' files"
 complete -c configlet -n "__fish_use_subcommand" -a info       -d "Track info"
 complete -c configlet -n "__fish_use_subcommand" -a sync       -d "Check or update Practice Exercise docs, metadata, and tests"
