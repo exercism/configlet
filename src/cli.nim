@@ -85,8 +85,8 @@ type
     # Options for `create`
     optCreateApproach = "approach"
     optCreateArticle = "article"
-    optCreateConceptExercise = "concept-exercise"
-    optCreatePracticeExercise = "practice-exercise"
+    optCreateConceptExercise = "conceptexercise"
+    optCreatePracticeExercise = "practiceexercise"
 
     # Options for `completion`
     optCompletionShell = "shell"
