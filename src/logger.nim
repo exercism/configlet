@@ -1,16 +1,21 @@
 import std/logging
 import "."/cli
 
+let consoleLogger = newConsoleLogger(levelThreshold = lvlNotice,
+                                     fmtStr = "")
+
 func toLevel(verbosity: Verbosity): Level =
   case verbosity
   of verQuiet: lvlNone
   of verNormal: lvlNotice
   of verDetailed: lvlInfo
 
+proc setLevel(verbosity: Verbosity) =
+  consoleLogger.levelThreshold = toLevel(verbosity)
+
 proc setupLogging*(verbosity: Verbosity) =
-  let consoleLogger = newConsoleLogger(levelThreshold = toLevel(verbosity),
-                                       fmtStr = "")
   addHandler(consoleLogger)
+  setLevel(verbosity)
 
 template logNormal*(msgs: varargs[string]) =
   notice(msgs)
