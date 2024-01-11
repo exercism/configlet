@@ -23,8 +23,14 @@ template withLevel*(verbosity: Verbosity, body: untyped): untyped =
   body
   consoleLogger.levelThreshold = currentLevel
 
+template logError*(msgs: varargs[string]) =
+  consoleLogger.useStderr = true
+  error(msgs)
+
 template logNormal*(msgs: varargs[string]) =
+  consoleLogger.useStderr = false
   notice(msgs)
 
 template logDetailed*(msgs: varargs[string]) =
+  consoleLogger.useStderr = false
   info(msgs)
