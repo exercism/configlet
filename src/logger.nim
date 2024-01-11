@@ -17,6 +17,12 @@ proc setupLogging*(verbosity: Verbosity) =
   addHandler(consoleLogger)
   setLevel(verbosity)
 
+template withLevel*(verbosity: Verbosity, body: untyped): untyped =
+  let currentLevel = consoleLogger.levelThreshold
+  consoleLogger.levelThreshold = toLevel(verbosity)
+  body
+  consoleLogger.levelThreshold = currentLevel
+
 template logNormal*(msgs: varargs[string]) =
   notice(msgs)
 
