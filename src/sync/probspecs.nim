@@ -21,9 +21,6 @@ proc `[]`(testCase: ProbSpecsTestCase, name: string): JsonNode {.borrow.}
 proc hasKey(testCase: ProbSpecsTestCase, key: string): bool {.borrow.}
 proc pretty*(testCase: ProbSpecsTestCase, indent = 2): string {.borrow.}
 
-# Keeps track if we already ran `git fetch` before
-var fetched = false;
-
 func canonicalDataFile(probSpecsExerciseDir: ProbSpecsExerciseDir): string =
   probSpecsExerciseDir / "canonical-data.json"
 
@@ -159,14 +156,13 @@ proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
       const upstreamLocation = "exercism/problem-specifications"
       let remoteName = getNameOfRemote(probSpecsDir, upstreamHost, upstreamLocation)
 
-      if not fetched:
+      once:
         # `fetch` and `merge` separately, for better error messages.
         logNormal(&"Updating cached 'problem-specifications' data...")
         try:
           discard gitCheck(0, ["fetch", "--quiet", remoteName, mainBranchName],
                           &"failed to fetch '{mainBranchName}' in " &
                           &"problem-specifications directory: '{probSpecsDir}'")
-          fetched = true
         except OSError:
           const msg = """
             Unable to update the problem-specifications cache.
