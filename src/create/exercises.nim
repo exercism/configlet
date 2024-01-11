@@ -1,5 +1,5 @@
 import std/[sets, os, strformat]
-import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
+import ".."/[cli, helpers, logger, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
 proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
   let trackConfigPath = conf.trackDir / "config.json"
@@ -52,12 +52,13 @@ proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
 proc createConceptExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
 
-  let probSpecsDir = ProbSpecsDir.init(conf)
-  if dirExists(probSpecsDir / "exercises" / $userExercise):
-    let msg = &"There already is an exercise with `{userExercise}` as the slug " &
-              "in the problem specifications repo"
-    stderr.writeLine msg
-    quit QuitFailure
+  withLevel(verQuiet):
+    let probSpecsDir = ProbSpecsDir.init(conf)
+    if dirExists(probSpecsDir / "exercises" / $userExercise):
+      let msg = &"There already is an exercise with `{userExercise}` as the slug " &
+                "in the problem specifications repo"
+      stderr.writeLine msg
+      quit QuitFailure
 
   let exercise = ConceptExercise(
     slug: userExercise,
@@ -71,7 +72,8 @@ proc createConceptExercise*(conf: Conf) =
   trackConfig.exercises.`concept`.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  syncExercise(conf, userExercise, {skMetadata, skFilepaths})
+  withLevel(verQuiet):
+    syncExercise(conf, userExercise, {skMetadata, skFilepaths})
 
   let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
   if not dirExists(docsDir):
@@ -80,14 +82,15 @@ proc createConceptExercise*(conf: Conf) =
   writeFile(docsDir / "introduction.md", "")
   writeFile(docsDir / "instructions.md", "")
 
-  syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
+  withLevel(verQuiet):
+    syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
 
 proc createPracticeExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.practiceExerciseSlug)
 
-  # TODO: use silent logging
-  let probSpecsDir = ProbSpecsDir.init(conf)
-  let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
+  withLevel(verQuiet):
+    let probSpecsDir = ProbSpecsDir.init(conf)
+    let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
 
   let exercise = PracticeExercise(
     slug: userExercise,
@@ -102,5 +105,6 @@ proc createPracticeExercise*(conf: Conf) =
   trackConfig.exercises.practice.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
-  syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
+  withLevel(verQuiet):
+    syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
+    syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
