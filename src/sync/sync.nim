@@ -80,7 +80,7 @@ proc getSlugs*(exercises: Exercises, conf: Conf,
       stderr.writeLine msg
       quit QuitFailure
 
-proc syncImpl*(conf: Conf, log = true): set[SyncKind] =
+proc syncImpl*(conf: Conf): set[SyncKind] =
   ## Checks the data specified in `conf.action.scope`, and updates them if
   ## `--update` was passed and the user confirms.
   ##
@@ -88,10 +88,9 @@ proc syncImpl*(conf: Conf, log = true): set[SyncKind] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
-  if log:
-    logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
-                &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
-                trackConfigPath)
+  logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
+              &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
+               trackConfigPath)
 
   # Don't clone problem-specifications if only `--filepaths` is given
   let probSpecsDir =
@@ -104,8 +103,7 @@ proc syncImpl*(conf: Conf, log = true): set[SyncKind] =
   let trackExercisesDir = conf.trackDir / "exercises"
   let trackPracticeExercisesDir = trackExercisesDir / "practice"
 
-  if log:
-    logNormal("Checking exercises...")
+  logNormal("Checking exercises...")
 
   for syncKind in conf.action.scope:
     case syncKind

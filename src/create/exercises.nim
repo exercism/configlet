@@ -47,7 +47,7 @@ proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
       tests: tmInclude
     )
   )
-  discard syncImpl(syncConf, log = false)
+  discard syncImpl(syncConf)
 
 proc createConceptExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
@@ -85,6 +85,7 @@ proc createConceptExercise*(conf: Conf) =
 proc createPracticeExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.practiceExerciseSlug)
 
+  # TODO: use silent logging
   let probSpecsDir = ProbSpecsDir.init(conf)
   let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
 
