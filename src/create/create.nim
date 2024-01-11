@@ -59,7 +59,8 @@ proc create*(conf: Conf) =
     elif conf.action.practiceExerciseSlug.len > 0:
       createPracticeExercise(conf)
     else:
-      let msg = "Please specify `--article <slug>`, `--approach <slug>`, `--concept-exercise <slug>` or `--practice-exercise <slug>`"
+      let msg = "Please specify `--practice-exercise <slug>`, `--concept-exercise <slug>`, " &
+                "`--article <slug>` or `--approach <slug>`"
       stderr.writeLine msg
       quit QuitFailure
   else:

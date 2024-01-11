@@ -35,11 +35,11 @@ proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, e
     for filePattern in toFilepaths(filePatterns, exerciseSlug):
       writeFile(exerciseDir / filePattern, "")
 
-proc syncExercise(conf: Conf, scope: set[SyncKind]) =
+proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
   let syncConf = Conf(
     trackDir: conf.trackDir,
     action: Action(
-      exercise: conf.action.exerciseCreate,
+      exercise: $slug,
       kind: actSync,
       scope: scope,
       update: true,
@@ -71,7 +71,7 @@ proc createConceptExercise*(conf: Conf) =
   trackConfig.exercises.`concept`.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  syncExercise(conf, {skMetadata, skFilepaths})
+  syncExercise(conf, userExercise, {skMetadata, skFilepaths})
 
   let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
   if not dirExists(docsDir):
@@ -101,5 +101,5 @@ proc createPracticeExercise*(conf: Conf) =
   trackConfig.exercises.practice.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  syncExercise(conf, {skDocs, skFilepaths, skMetadata, skTests})
+  syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
   syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)

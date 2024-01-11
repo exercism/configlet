@@ -124,8 +124,7 @@ const
   configletVersion = staticRead("../configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
-               optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optCreatePracticeExercise, optCreateConceptExercise}
+               optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
