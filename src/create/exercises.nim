@@ -85,6 +85,8 @@ proc createConceptExercise*(conf: Conf) =
   withLevel(verQuiet):
     syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
 
+  logNormal(&"Created concept exercise '{userExercise}'.")
+
 proc createPracticeExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.practiceExerciseSlug)
 
@@ -108,3 +110,5 @@ proc createPracticeExercise*(conf: Conf) =
   withLevel(verQuiet):
     syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
     syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
+
+  logNormal(&"Created practice exercise '{userExercise}'.")
