@@ -118,7 +118,6 @@ proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
     .replace(
         &""""average_run_time": {oldValue}""",
         &""""average_run_time": {newValue}""")
-
   writeFile(file, configJson)
 
   let args = ["-C", parentDir(file), "commit", "--allow-empty", "-a", "-m", "config: convert `average_run_time` to int"]
