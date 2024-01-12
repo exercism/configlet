@@ -40,5 +40,13 @@ template testDiffThenRestore*(dir, expectedDiff, restoreArg: string) =
     check diff == expectedDiff
   gitRestore(dir, restoreArg)
 
+proc testStatusThenReset*(dir, expectedStatus: string) =
+  discard git(["-C", dir, "add", "."])
+
+  let status = gitCheck(0, ["--no-pager", "-C", dir, "status", "--short"])
+  check status == expectedStatus
+
+  discard git(["-C", dir, "reset", "--hard"])
+
 template checkNoDiff*(trackDir: string) =
   check gitDiffExitCode(trackDir) == 0

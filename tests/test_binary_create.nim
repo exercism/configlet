@@ -58,13 +58,7 @@ A  exercises/concept/foo/.meta/exemplar.ex
 A  exercises/concept/foo/lib/foo.ex
 A  exercises/concept/foo/test/foo_test.exs
       """.unindent()
-
-      discard git(["-C", trackDir, "add", "."])
-
-      let status = gitCheck(0, ["--no-pager", "-C", trackDir, "status", "--short"])
-      check status == expectedStatus
-
-      discard git(["-C", trackDir, "reset", "--hard"])
+      testStatusThenReset(trackDir, expectedStatus)
 
     test "practice exercise slug matches existing concept exercise (prints the expected output, and exits with 1)":
       const expectedOutput = fmt"""
@@ -93,13 +87,7 @@ A  exercises/practice/foo/.meta/example.ex
 A  exercises/practice/foo/lib/foo.ex
 A  exercises/practice/foo/test/foo_test.exs
       """.unindent()
-
-      discard git(["-C", trackDir, "add", "."])
-
-      let status = gitCheck(0, ["--no-pager", "-C", trackDir, "status", "--short"])
-      check status == expectedStatus
-
-      discard git(["-C", trackDir, "reset", "--hard"])
+      testStatusThenReset(trackDir, expectedStatus)
 
 main()
 {.used.}

@@ -20,6 +20,13 @@ proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: Tr
 
   (trackConfig, trackConfigPath, userExercise)
 
+proc createEmptyFile(file: string) =
+  let fileDir = parentDir(file)
+  if not dirExists(fileDir):
+    createDir(fileDir)
+
+  writeFile(file, "")
+
 proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, exerciseKind: ExerciseKind) =
   let exerciseDir = trackDir / "exercises" / $exerciseKind / $exerciseSlug
 
@@ -33,11 +40,7 @@ proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, e
 
   for filePatterns in filePatternGroups:
     for filePattern in toFilepaths(filePatterns, exerciseSlug):
-      let fileDir = exerciseDir / parentDir(filePattern)
-      if not dirExists(fileDir):
-        createDir(fileDir)
-
-      writeFile(exerciseDir / filePattern, "")
+      createEmptyFile(exerciseDir / filePattern)
 
 proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
   let syncConf = Conf(
@@ -80,11 +83,8 @@ proc createConceptExercise*(conf: Conf) =
     syncExercise(conf, userExercise, {skMetadata, skFilepaths})
 
   let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
-  if not dirExists(docsDir):
-    createDir(docsDir)
-
-  writeFile(docsDir / "introduction.md", "")
-  writeFile(docsDir / "instructions.md", "")
+  createEmptyFile(docsDir / "introduction.md")
+  createEmptyFile(docsDir / "instructions.md")
 
   withLevel(verQuiet):
     syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
@@ -97,7 +97,7 @@ proc createPracticeExercise*(conf: Conf) =
   withLevel(verQuiet):
     let probSpecsDir = ProbSpecsDir.init(conf)
     let metadataFile = probSpecsDir / "exercises" / $userExercise / "metadata.toml"
-    let metadata = 
+    let metadata =
       if fileExists(metadataFile):
         parseMetadataToml(metadataFile)
       else:
@@ -121,9 +121,6 @@ proc createPracticeExercise*(conf: Conf) =
     syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
 
   let docsDir = conf.trackDir / "exercises" / "practice" / $userExercise / ".docs"
-  if not dirExists(docsDir):
-    createDir(docsDir)
-
-  writeFile(docsDir / "instructions.md", "")
+  createEmptyFile(docsDir / "instructions.md")
 
   logNormal(&"Created practice exercise '{userExercise}'.")
