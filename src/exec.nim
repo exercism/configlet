@@ -115,12 +115,17 @@ proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
   ## In order to not break existing tests, we manually change the value
   ## from a float to an int.
   let configJson = readFile(file)
+  let newConfigJson = configJson
     .replace(
         &""""average_run_time": {oldValue}""",
         &""""average_run_time": {newValue}""")
-  writeFile(file, configJson)
-  let args = ["-C", parentDir(file), "commit", "-a", "-m", "config: convert `average_run_time` to int"]
-  discard gitCheck(0, args)
+
+  # Only commit the change when the config file has changed
+  if configJson != newConfigJson:
+    writeFile(file, configJson)
+
+    let args = ["-C", parentDir(file), "commit", "-a", "-m", "config: convert `average_run_time` to int"]
+    discard gitCheck(0, args)
 
 proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =
   ## If there is no directory at `dest`, clones the Exercism repo named

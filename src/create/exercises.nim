@@ -33,6 +33,10 @@ proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, e
 
   for filePatterns in filePatternGroups:
     for filePattern in toFilepaths(filePatterns, exerciseSlug):
+      let fileDir = exerciseDir / parentDir(filePattern)
+      if not dirExists(fileDir):
+        createDir(fileDir)
+
       writeFile(exerciseDir / filePattern, "")
 
 proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
