@@ -42,19 +42,18 @@ proc syncFiles(trackConfig: TrackConfig, trackDir: string, exerciseSlug: Slug, e
     for filePattern in toFilepaths(filePatterns, exerciseSlug):
       createEmptyFile(exerciseDir / filePattern)
 
-proc syncExercise(conf: Conf, slug: Slug, scope: set[SyncKind]) =
+proc syncExercise(conf: Conf, slug: Slug,) =
   let syncConf = Conf(
     trackDir: conf.trackDir,
-    action: Action(
-      exercise: $slug,
-      kind: actSync,
-      scope: scope,
-      update: true,
-      yes: true,
-      tests: tmInclude
-    )
+    action: Action(exercise: $slug, kind: actSync, update: true, yes: true,
+                   scope: {skDocs, skFilepaths, skMetadata, skTests}, tests: tmInclude)
   )
   discard syncImpl(syncConf)
+
+proc createFiles(conf: Conf, slug: Slug, trackConfig: TrackConfig, trackDir: string, exerciseKind: ExerciseKind) =
+  withLevel(verQuiet):
+    syncExercise(conf, slug)
+    syncFiles(trackConfig, conf.trackDir, slug, exerciseKind)
 
 proc createConceptExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
@@ -79,15 +78,11 @@ proc createConceptExercise*(conf: Conf) =
   trackConfig.exercises.`concept`.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  withLevel(verQuiet):
-    syncExercise(conf, userExercise, {skMetadata, skFilepaths})
-
   let docsDir = conf.trackDir / "exercises" / "concept" / $userExercise / ".docs"
   createEmptyFile(docsDir / "introduction.md")
   createEmptyFile(docsDir / "instructions.md")
 
-  withLevel(verQuiet):
-    syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
+  createFiles(conf, userExercise, trackConfig, conf.trackDir, ekConcept)
 
   logNormal(&"Created concept exercise '{userExercise}'.")
 
@@ -116,11 +111,9 @@ proc createPracticeExercise*(conf: Conf) =
   trackConfig.exercises.practice.add(exercise)
   writeFile(trackConfigPath, prettyTrackConfig(trackConfig))
 
-  withLevel(verQuiet):
-    syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
-    syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
-
   let docsDir = conf.trackDir / "exercises" / "practice" / $userExercise / ".docs"
   createEmptyFile(docsDir / "instructions.md")
+
+  createFiles(conf, userExercise, trackConfig, conf.trackDir, ekPractice)
 
   logNormal(&"Created practice exercise '{userExercise}'.")
