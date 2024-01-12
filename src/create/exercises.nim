@@ -1,4 +1,4 @@
-import std/[sets, os, strformat]
+import std/[sets, options, os, strformat]
 import ".."/[cli, helpers, logger, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
 proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
@@ -96,7 +96,12 @@ proc createPracticeExercise*(conf: Conf) =
 
   withLevel(verQuiet):
     let probSpecsDir = ProbSpecsDir.init(conf)
-    let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
+    let metadataFile = probSpecsDir / "exercises" / $userExercise / "metadata.toml"
+    let metadata = 
+      if fileExists(metadataFile):
+        parseMetadataToml(metadataFile)
+      else:
+        UpstreamMetadata(title: $userExercise, blurb: "", source: none(string), source_url: none(string))
 
   let exercise = PracticeExercise(
     slug: userExercise,
@@ -114,5 +119,11 @@ proc createPracticeExercise*(conf: Conf) =
   withLevel(verQuiet):
     syncExercise(conf, userExercise, {skDocs, skFilepaths, skMetadata, skTests})
     syncFiles(trackConfig, conf.trackDir, userExercise, ekPractice)
+
+  let docsDir = conf.trackDir / "exercises" / "practice" / $userExercise / ".docs"
+  if not dirExists(docsDir):
+    createDir(docsDir)
+
+  writeFile(docsDir / "instructions.md", "")
 
   logNormal(&"Created practice exercise '{userExercise}'.")

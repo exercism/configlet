@@ -44,6 +44,28 @@ proc main =
       """.unindent()
       execAndCheck(1, &"{createBase} --concept-exercise=hangman", expectedOutput)
 
+    test "create concept exercise (creates the exercise files, and exits with 0)":
+      const expectedOutput = fmt"""
+        Created concept exercise 'foo'.
+      """.unindent()
+      execAndCheck(0, &"{createBase} --concept-exercise=foo", expectedOutput)
+
+      const expectedStatus = """M  config.json
+A  exercises/concept/foo/.docs/instructions.md
+A  exercises/concept/foo/.docs/introduction.md
+A  exercises/concept/foo/.meta/config.json
+A  exercises/concept/foo/.meta/exemplar.ex
+A  exercises/concept/foo/lib/foo.ex
+A  exercises/concept/foo/test/foo_test.exs
+      """.unindent()
+
+      discard git(["-C", trackDir, "add", "."])
+
+      let status = gitCheck(0, ["--no-pager", "-C", trackDir, "status", "--short"])
+      check status == expectedStatus
+
+      discard git(["-C", trackDir, "reset", "--hard"])
+
     test "practice exercise slug matches existing concept exercise (prints the expected output, and exits with 1)":
       const expectedOutput = fmt"""
         There already is a concept exercise with `lasagna` as the slug in the track config:
@@ -58,42 +80,26 @@ proc main =
       """.unindent()
       execAndCheck(1, &"{createBase} --practice-exercise=leap", expectedOutput)
 
-    test "create practice exercise with slug matching prob-specs exercise (creates the exercise files, and exits with 0)":
+    test "create practice exercise with slug not matching prob-specs exercise (creates the exercise files, and exits with 0)":
       const expectedOutput = fmt"""
-        Created practice exercise 'hangman'.
+        Created practice exercise 'foo'.
       """.unindent()
-      execAndCheck(0, &"{createBase} --practice-exercise=hangman", expectedOutput)
+      execAndCheck(0, &"{createBase} --practice-exercise=foo", expectedOutput)
 
-      const expectedDiff = """--- config.json
-+++ config.json
-+      },
-+      {
-+        "slug": "hangman",
-+        "name": "Hangman",
-+        "uuid": "d78c1f28-f436-4d65-9c88-03f6ab662bcd",
-+        "practices": [],
-+        "prerequisites": [],
-+        "difficulty": 1
+      const expectedStatus = """M  config.json
+A  exercises/practice/foo/.docs/instructions.md
+A  exercises/practice/foo/.meta/config.json
+A  exercises/practice/foo/.meta/example.ex
+A  exercises/practice/foo/lib/foo.ex
+A  exercises/practice/foo/test/foo_test.exs
       """.unindent()
 
-      testDiffThenRestore(trackDir, expectedDiff, trackDir / "config.json")
+      discard git(["-C", trackDir, "add", "."])
 
-      # let diff = gitDiffConcise(trackDir)
-      # echo diff
+      let status = gitCheck(0, ["--no-pager", "-C", trackDir, "status", "--short"])
+      check status == expectedStatus
 
-      # check diff == expectedDiff
-
-      # let exerciseDir = trackDir / "exercises" / "practice" / "hangman"
-      # let expectedFiles = [
-      #   exerciseDir / ".docs" / "instructions.md",
-      #   exerciseDir / ".meta" / "config.json",
-      #   exerciseDir / ".meta" / "example.ex",
-      #   exerciseDir / "lib" / "hangman.ex",
-      #   exerciseDir / "test" / "hangman_test.exs"
-      # ]
-      
-      # for expectedFile in expectedFiles:
-      #   check fileExists(expectedFile)
+      discard git(["-C", trackDir, "reset", "--hard"])
 
 main()
 {.used.}

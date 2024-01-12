@@ -7,7 +7,7 @@ import "."/sync_common
 {.push hint[Name]: off.}
 
 type
-  UpstreamMetadata = object
+  UpstreamMetadata* = object
     title*: string
     blurb*: string
     source*: Option[string]

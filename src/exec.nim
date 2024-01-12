@@ -152,7 +152,7 @@ func conciseDiff(s: string): string =
 
 proc gitDiffConcise*(dir: string): string =
   let diffArgs = ["--no-pager", "-C", dir, "diff", "--no-ext-diff", "--text",
-                  "--unified=0", "--no-prefix", "--color=never"]
+                  "--unified=0", "--no-prefix", "--color=never", "HEAD"]
   result = gitCheck(0, diffArgs).conciseDiff()
 
 proc gitDiffExitCode*(trackDir: string): int =
