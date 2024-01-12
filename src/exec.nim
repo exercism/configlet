@@ -120,7 +120,9 @@ proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
         &""""average_run_time": {oldValue}""",
         &""""average_run_time": {newValue}""")
 
-  # Only commit the change when the config file has changed
+  # Only commit the change when the config file has changed.
+  # This is needed to support working with commits both before
+  # and after the average_run_time change.
   if configJson != newConfigJson:
     writeFile(file, configJson)
 
