@@ -349,7 +349,7 @@ let
   colorStdout* = shouldUseColor(stdout)
   colorStderr* = shouldUseColor(stderr)
 
-proc showError*(s: string, writeHelp = true) =
+proc showError* (s: string, writeHelp = true) {.noreturn.} =
   const errorPrefix = "Error: "
   if colorStderr:
     stderr.styledWrite(fgRed, errorPrefix)
