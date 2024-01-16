@@ -78,7 +78,7 @@ proc getSlugs*(exercises: Exercises, conf: Conf,
                 &"exercise slug, but `{userExercise}` is not an slug in the " &
                 &"track config:\n{trackConfigPath}"
       stderr.writeLine msg
-      quit 1
+      quit(QuitFailure)
 
 proc syncImpl(conf: Conf): set[SyncKind] =
   ## Checks the data specified in `conf.action.scope`, and updates them if

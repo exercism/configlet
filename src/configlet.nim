@@ -4,7 +4,7 @@ import "."/[cli, completion/completion, create/create, fmt/fmt, info/info,
 
 proc configlet =
   onSignal(SIGTERM):
-    quit(0)
+    quit(QuitSuccess)
 
   let conf = processCmdLine()
 

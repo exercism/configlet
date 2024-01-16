@@ -93,7 +93,7 @@ proc addObject(s: var string; key: string; val: JsonNode; indentLevel = 1) =
   else:
     stderr.writeLine &"The value of a `{key}` key is not a JSON object:"
     stderr.writeLine val.pretty()
-    quit 1
+    quit(QuitFailure)
 
 func exerciseConfigKeyOrderForSync(originalKeyOrder: seq[
     ExerciseConfigKey]): seq[ExerciseConfigKey] =

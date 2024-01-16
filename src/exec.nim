@@ -98,7 +98,7 @@ proc cloneExercismRepo*(repoName, dest: string; shallow = false;
   else:
     stderr.writeLine "failure"
     stderr.writeLine outp
-    quit 1
+    quit(QuitFailure)
 
 proc gitCheckout(dir, hash: string) =
   ## Checkout `hash` in the git repo at `dir`, discarding changes to the working

@@ -61,4 +61,4 @@ proc lint*(conf: Conf) =
       Configlet detected at least one problem.
       For more information on resolving the problems, please see the documentation:
       {url}""".unindent()
-    quit(1)
+    quit(QuitFailure)

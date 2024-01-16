@@ -11,7 +11,7 @@ proc genUuid*: Uuid {.noinit.} =
     result[8] = (result[8] and 0x3f) or 0x80 # Set variant to 1
   else:
     stderr.writeLine "uuid: error: failed to read from the system CSPRNG"
-    quit 1
+    quit(QuitFailure)
 
 func `$`*(u: Uuid): string =
   ## Returns the canonical string representation for the given UUID `u`.
