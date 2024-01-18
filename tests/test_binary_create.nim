@@ -50,13 +50,14 @@ proc main =
       """.unindent()
       execAndCheck(0, &"{createBase} --concept-exercise=foo", expectedOutput)
 
-      const expectedStatus = """M  config.json
-A  exercises/concept/foo/.docs/instructions.md
-A  exercises/concept/foo/.docs/introduction.md
-A  exercises/concept/foo/.meta/config.json
-A  exercises/concept/foo/.meta/exemplar.ex
-A  exercises/concept/foo/lib/foo.ex
-A  exercises/concept/foo/test/foo_test.exs
+      const expectedStatus = """
+        M  config.json
+        A  exercises/concept/foo/.docs/instructions.md
+        A  exercises/concept/foo/.docs/introduction.md
+        A  exercises/concept/foo/.meta/config.json
+        A  exercises/concept/foo/.meta/exemplar.ex
+        A  exercises/concept/foo/lib/foo.ex
+        A  exercises/concept/foo/test/foo_test.exs
       """.unindent()
       testStatusThenReset(trackDir, expectedStatus)
 
@@ -80,12 +81,13 @@ A  exercises/concept/foo/test/foo_test.exs
       """.unindent()
       execAndCheck(0, &"{createBase} --practice-exercise=foo", expectedOutput)
 
-      const expectedStatus = """M  config.json
-A  exercises/practice/foo/.docs/instructions.md
-A  exercises/practice/foo/.meta/config.json
-A  exercises/practice/foo/.meta/example.ex
-A  exercises/practice/foo/lib/foo.ex
-A  exercises/practice/foo/test/foo_test.exs
+      const expectedStatus = """
+        M  config.json
+        A  exercises/practice/foo/.docs/instructions.md
+        A  exercises/practice/foo/.meta/config.json
+        A  exercises/practice/foo/.meta/example.ex
+        A  exercises/practice/foo/lib/foo.ex
+        A  exercises/practice/foo/test/foo_test.exs
       """.unindent()
       testStatusThenReset(trackDir, expectedStatus)
 
