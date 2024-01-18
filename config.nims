@@ -8,10 +8,6 @@ switch("experimental", "strictFuncs")
 switch("define", "nimStrictDelete")
 switch("mm", "refc")
 
-# Replace the stdlib JSON modules with our own stricter versions.
-patchFile("stdlib", "json", "src/patched_stdlib/json")
-patchFile("stdlib", "parsejson", "src/patched_stdlib/parsejson")
-
 if defined(zig) and findExe("zigcc").len > 0:
   switch("cc", "clang")
   # We can't write `zig cc` below, because the value cannot contain a space.
