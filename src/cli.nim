@@ -46,6 +46,7 @@ type
       # in `actSync`, and Nim doesn't yet support duplicate field names
       # in object variants.
       exerciseCreate*: string
+      offlineCreate*: bool
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -98,8 +99,8 @@ type
     optFmtSyncUpdate = "update"
     optFmtSyncYes = "yes"
 
-    # Options for both `info` and `sync`
-    optInfoSyncOffline = "offline"
+    # Options for both `info`, `sync` and `create`
+    optInfoSyncCreateOffline = "offline"
 
     # Scope to sync
     optSyncDocs = "docs"
@@ -124,7 +125,7 @@ const
   configletVersion = staticRead("../configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
-               optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
+               optInfoSyncCreateOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -248,7 +249,7 @@ func genHelpText: string =
     optFmtSyncCreateExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
+    optInfoSyncCreateOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -313,7 +314,9 @@ func genHelpText: string =
             of "yesFmt":
               optFmtSyncYes
             of "offlineInfo":
-              optInfoSyncOffline
+              optInfoSyncCreateOffline
+            of "offlineCreate":
+              optInfoSyncCreateOffline
             else:
               parseEnum[Opt](key)
           # Set the description for `fmt` options.
@@ -547,6 +550,8 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(conceptExerciseSlug, val)
       of optCreatePracticeExercise:
         setActionOpt(practiceExerciseSlug, val)
+      of optInfoSyncCreateOffline:
+        setActionOpt(offlineCreate, true)
       else:
         discard
     of actFmt:
@@ -561,7 +566,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actInfo:
       case opt
-      of optInfoSyncOffline:
+      of optInfoSyncCreateOffline:
         setActionOpt(offlineInfo, true)
       else:
         discard
@@ -576,7 +581,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
-      of optInfoSyncOffline:
+      of optInfoSyncCreateOffline:
         setActionOpt(offline, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:
         conf.action.scope.incl parseEnum[SyncKind]($opt)

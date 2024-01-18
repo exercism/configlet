@@ -106,7 +106,8 @@ proc getNameOfRemote*(probSpecsDir: ProbSpecsDir;
 
 func isOffline(conf: Conf): bool =
   (conf.action.kind == actSync and conf.action.offline) or
-      (conf.action.kind == actInfo and conf.action.offlineInfo)
+    (conf.action.kind == actInfo and conf.action.offlineInfo) or
+      (conf.action.kind == actCreate and conf.action.offlineCreate)
 
 proc validate(probSpecsDir: ProbSpecsDir, conf: Conf) =
   ## Raises an error if the given `probSpecsDir` is not a valid

@@ -48,6 +48,7 @@ proc syncExercise(conf: Conf, slug: Slug,) =
   let syncConf = Conf(
     trackDir: conf.trackDir,
     action: Action(exercise: $slug, kind: actSync, update: true, yes: true,
+                   offline: conf.action.offlineCreate,
                    scope: {skDocs, skFilepaths, skMetadata, skTests}, tests: tmInclude)
   )
   discard syncImpl(syncConf)
