@@ -40,15 +40,34 @@ proc main =
 
     test "concept exercise slug matches prob-specs exercise (prints the expected output, and exits with 1)":
       const expectedOutput = fmt"""
+        Updating cached 'problem-specifications' data...
         There already is an exercise with `hangman` as the slug in the problem specifications repo
       """.unindent()
       execAndCheck(1, &"{createBase} --concept-exercise=hangman", expectedOutput)
 
     test "create concept exercise (creates the exercise files, and exits with 0)":
       const expectedOutput = fmt"""
+        Updating cached 'problem-specifications' data...
         Created concept exercise 'foo'.
       """.unindent()
       execAndCheck(0, &"{createBase} --concept-exercise=foo", expectedOutput)
+
+      const expectedStatus = """
+        M  config.json
+        A  exercises/concept/foo/.docs/instructions.md
+        A  exercises/concept/foo/.docs/introduction.md
+        A  exercises/concept/foo/.meta/config.json
+        A  exercises/concept/foo/.meta/exemplar.ex
+        A  exercises/concept/foo/lib/foo.ex
+        A  exercises/concept/foo/test/foo_test.exs
+      """.unindent()
+      testStatusThenReset(trackDir, expectedStatus)
+
+    test "create concept exercise - offline (creates the exercise files, and exits with 0)":
+      const expectedOutput = fmt"""
+        Created concept exercise 'foo'.
+      """.unindent()
+      execAndCheck(0, &"{createBase} --concept-exercise=foo --offline", expectedOutput)
 
       const expectedStatus = """
         M  config.json
@@ -77,9 +96,26 @@ proc main =
 
     test "create practice exercise with slug not matching prob-specs exercise (creates the exercise files, and exits with 0)":
       const expectedOutput = fmt"""
+        Updating cached 'problem-specifications' data...
         Created practice exercise 'foo'.
       """.unindent()
       execAndCheck(0, &"{createBase} --practice-exercise=foo", expectedOutput)
+
+      const expectedStatus = """
+        M  config.json
+        A  exercises/practice/foo/.docs/instructions.md
+        A  exercises/practice/foo/.meta/config.json
+        A  exercises/practice/foo/.meta/example.ex
+        A  exercises/practice/foo/lib/foo.ex
+        A  exercises/practice/foo/test/foo_test.exs
+      """.unindent()
+      testStatusThenReset(trackDir, expectedStatus)
+
+    test "create practice exercise with slug not matching prob-specs exercise - offline (creates the exercise files, and exits with 0)":
+      const expectedOutput = fmt"""
+        Created practice exercise 'foo'.
+      """.unindent()
+      execAndCheck(0, &"{createBase} --practice-exercise=foo --offline", expectedOutput)
 
       const expectedStatus = """
         M  config.json
