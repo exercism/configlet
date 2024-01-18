@@ -50,10 +50,10 @@ proc getPracticeExerciseSlugs(trackDir: TrackDir,
     else:
       stderr.writeLine "Error: file does not have an `exercises` key:\n" &
                        configFile
-      quit(1)
+      quit QuitFailure
   else:
     stderr.writeLine "Error: file does not exist:\n" & configFile
-    quit(1)
+    quit QuitFailure
 
   sort result
 
@@ -79,10 +79,10 @@ proc init(T: typedesc[PracticeExerciseTests], testsPath: string): T =
 
           The expected 'tests.toml' format is documented in
           https://exercism.org/docs/building/configlet/sync#h-tests""".unindent()
-        quit 1
+        quit QuitFailure
       except CatchableError:
         stderr.writeLine "Error: " & getCurrentExceptionMsg()
-        quit 1
+        quit QuitFailure
 
     for uuid, val in tests.getTable():
       if val.hasKey("include"):

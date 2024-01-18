@@ -77,11 +77,11 @@ proc conceptIntroduction(trackDir: Path, slug: Slug, templatePath: Path,
       result = path.readFile().alterHeadings(linkDefs, h2)
     else:
       writeError(&"File {path} not found for concept '{slug}'", templatePath)
-      quit(1)
+      quit QuitFailure
   else:
     writeError(&"Directory {conceptDir} not found for concept '{slug}'",
                templatePath)
-    quit(1)
+    quit QuitFailure
 
 proc generateIntroduction(trackDir: Path, templatePath: Path,
                           slugLookup: Table[Slug, string]): string =
@@ -119,7 +119,7 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
       else:
         writeError(&"Concept '{conceptSlug}' does not exist in track config.json",
                    templatePath)
-        quit(1)
+        quit QuitFailure
     else:
       if content.continuesWith("\n#", i):
         headingLevel = content.skipWhile({'#'}, i+1)

@@ -338,7 +338,7 @@ proc showHelp(exitCode: range[0..255] = 0, prependDashedLine = false) =
 
 proc showVersion =
   echo &"{configletVersion}"
-  quit(0)
+  quit QuitSuccess
 
 proc shouldUseColor(f: File): bool =
   ## Returns true if we should write to `f` with color.
@@ -359,7 +359,7 @@ proc showError*(s: string, writeHelp = true) =
   if writeHelp:
     showHelp(exitCode = 1, prependDashedLine = true)
   else:
-    quit 1
+    quit QuitFailure
 
 func formatOpt(kind: CmdLineKind, key: string, val = ""): string =
   ## Returns a string that describes an option, given its `kind`, `key` and

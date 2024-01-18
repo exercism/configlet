@@ -68,7 +68,7 @@ proc main =
   except BumpError:
     let msg = getCurrentExceptionMsg()
     stderr.writeLine &"Error: {msg}"
-    quit 1
+    quit QuitFailure
 
 when isMainModule:
   main()

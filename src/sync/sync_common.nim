@@ -22,7 +22,7 @@ proc postHook*(e: ConceptExercise | PracticeExercise) =
     let msg = "Error: the track `config.json` file contains " &
               &"an exercise slug of \"{s}\", which is not a kebab-case string"
     stderr.writeLine msg
-    quit 1
+    quit QuitFailure
 
 func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise],
                withDeprecated = true): seq[Slug] =

@@ -146,7 +146,7 @@ proc parseFile*(path: string; T: typedesc): T =
     except IOError:
       let msg = getCurrentExceptionMsg()
       stderr.writeLine &"Error: {msg}"
-      quit 1
+      quit QuitFailure
   if contents.len > 0:
     try:
       contents.fromJson(T)
@@ -155,6 +155,6 @@ proc parseFile*(path: string; T: typedesc): T =
       let details = tidyJsonyMessage(jsonyMsg, contents)
       let msg = &"JSON parsing error:\n{path}{details}"
       stderr.writeLine msg
-      quit 1
+      quit QuitFailure
   else:
     T()

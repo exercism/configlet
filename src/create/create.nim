@@ -7,12 +7,12 @@ proc create*(conf: Conf) =
     if conf.action.exerciseCreate.len == 0:
       let msg = "Please specify an exercise, using --exercise <slug>"
       stderr.writeLine msg
-      quit 1
+      quit QuitFailure
     if conf.action.approachSlug.len > 0:
       if conf.action.articleSlug.len > 0:
         let msg = &"Both --approach and --article were provided. Please specify only one."
         stderr.writeLine msg
-        quit 1
+        quit QuitFailure
       let trackConfigPath = conf.trackDir / "config.json"
       let trackConfig = parseFile(trackConfigPath, TrackConfig)
       let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
@@ -28,7 +28,7 @@ proc create*(conf: Conf) =
                     &"exercise slug, but `{userExercise}` is not an slug in the " &
                     &"track config:\n{trackConfigPath}"
           stderr.writeLine msg
-          quit 1
+          quit QuitFailure
 
       createApproach(Slug(conf.action.approachSlug), userExercise, exerciseDir)
     elif conf.action.articleSlug.len > 0:
@@ -47,12 +47,12 @@ proc create*(conf: Conf) =
                     &"exercise slug, but `{userExercise}` is not an slug in the " &
                     &"track config:\n{trackConfigPath}"
           stderr.writeLine msg
-          quit 1
+          quit QuitFailure
 
       createArticle(Slug(conf.action.articleSlug), userExercise, exerciseDir)
     else:
       let msg = "Please specify `--article <slug>` or `--approach <slug>`"
       stderr.writeLine msg
-      quit 1
+      quit QuitFailure
   else:
-    quit 1
+    quit QuitFailure
