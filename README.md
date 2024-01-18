@@ -74,6 +74,7 @@ Options for create:
       --practice-exercise <slug>  The slug of the concept exercise
       --concept-exercise <slug>   The slug of the practice exercise
   -e, --exercise <slug>           Only operate on this exercise
+  -o, --offline                   Do not update the cached 'problem-specifications' data
 
 Options for fmt:
   -e, --exercise <slug>           Only operate on this exercise
