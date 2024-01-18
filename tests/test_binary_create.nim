@@ -23,14 +23,14 @@ proc main =
         There already is a concept exercise with `lasagna` as the slug in the track config:
         {trackDir / "config.json"}
       """.unindent()
-      execAndCheck(1, &"{createBase} -e lasagna --concept", expectedOutput)
+      execAndCheck(1, &"{createBase} --concept-exercise lasagna ", expectedOutput)
 
     test "practice exercise that already has been implemented (prints the expected output, and exits with 1)":
       const expectedOutput = fmt"""
         There already is a practice exercise with `leap` as the slug in the track config:
         {trackDir / "config.json"}
       """.unindent()
-      execAndCheck(1, &"{createBase} -e leap --practice", expectedOutput)
+      execAndCheck(1, &"{createBase} --practice-exercise leap", expectedOutput)
 
 main()
 {.used.}

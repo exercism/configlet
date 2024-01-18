@@ -40,12 +40,12 @@ type
     of actCreate:
       approachSlug*: string
       articleSlug*: string
+      practiceExerciseSlug*: string
+      conceptExerciseSlug*: string
       # We can't name this field `exercise` because we use that names
       # in `actSync`, and Nim doesn't yet support duplicate field names
       # in object variants.
       exerciseCreate*: string
-      practice*: bool
-      `concept`*: bool
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -85,8 +85,8 @@ type
     # Options for `create`
     optCreateApproach = "approach"
     optCreateArticle = "article"
-    optCreateConcept = "concept"
-    optCreatePractice = "practice"
+    optCreateConceptExercise = "concept-exercise"
+    optCreatePracticeExercise = "practice-exercise"
 
     # Options for `completion`
     optCompletionShell = "shell"
@@ -114,7 +114,8 @@ func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
     if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optSyncTests, optCreateApproach, optCreateArticle}:
+               optSyncTests, optCreateApproach, optCreateArticle,
+               optCreateConceptExercise, optCreatePracticeExercise}:
       result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
@@ -124,7 +125,7 @@ const
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
                optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optCreatePractice, optCreateConcept}
+               optCreatePracticeExercise, optCreateConceptExercise}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -184,6 +185,8 @@ func genHelpText: string =
         of optFmtSyncCreateExercise: "slug"
         of optCreateApproach: "slug"
         of optCreateArticle: "slug"
+        of optCreateConceptExercise: "slug"
+        of optCreatePracticeExercise: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
@@ -239,8 +242,8 @@ func genHelpText: string =
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optCreateApproach: "The slug of the approach",
     optCreateArticle: "The slug of the article",
-    optCreateConcept: "Create a practice exercise",
-    optCreatePractice: "Create a concept exercise",
+    optCreateConceptExercise: "The slug of the practice exercise",
+    optCreatePracticeExercise: "The slug of the concept exercise",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",
@@ -298,6 +301,10 @@ func genHelpText: string =
               optCreateApproach
             of "articleSlug":
               optCreateArticle
+            of "conceptExerciseSlug":
+              optCreateConceptExercise
+            of "practiceExerciseSlug":
+              optCreatePracticeExercise
             of "exerciseCreate":
               optFmtSyncCreateExercise
             of "exerciseFmt":
@@ -537,10 +544,10 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(articleSlug, val)
       of optFmtSyncCreateExercise:
         setActionOpt(exerciseCreate, val)
-      of optCreateConcept:
-        setActionOpt(`concept`, true)
-      of optCreatePractice:
-        setActionOpt(practice, true)
+      of optCreateConceptExercise:
+        setActionOpt(conceptExerciseSlug, val)
+      of optCreatePracticeExercise:
+        setActionOpt(practiceExerciseSlug, val)
       else:
         discard
     of actFmt:

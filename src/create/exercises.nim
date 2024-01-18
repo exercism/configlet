@@ -1,22 +1,22 @@
 import std/[sets, os, strformat]
 import ".."/[cli, helpers, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
-proc verifyExerciseDoesNotExist(conf: Conf): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
+proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
-  let userExercise = Slug(conf.action.exerciseCreate)
+  let userExercise = Slug(slug)
 
   if userExercise in trackExerciseSlugs.`concept`:
     let msg = &"There already is a concept exercise with `{userExercise}` as the slug " &
               &"in the track config:\n{trackConfigPath}"
     stderr.writeLine msg
-    quit 1
+    quit QuitFailure
   elif userExercise in trackExerciseSlugs.practice:
     let msg = &"There already is a practice exercise with `{userExercise}` as the slug " &
               &"in the track config:\n{trackConfigPath}"
     stderr.writeLine msg
-    quit 1
+    quit QuitFailure
 
   (trackConfig, trackConfigPath, userExercise)
 
@@ -50,14 +50,14 @@ proc syncExercise(conf: Conf, scope: set[SyncKind]) =
   discard syncImpl(syncConf, log = false)
 
 proc createConceptExercise*(conf: Conf) =
-  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
+  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
 
   let probSpecsDir = ProbSpecsDir.init(conf)
   if dirExists(probSpecsDir / "exercises" / $userExercise):
     let msg = &"There already is an exercise with `{userExercise}` as the slug " &
               "in the problem specifications repo"
     stderr.writeLine msg
-    quit 1
+    quit QuitFailure
 
   let exercise = ConceptExercise(
     slug: userExercise,
@@ -83,7 +83,7 @@ proc createConceptExercise*(conf: Conf) =
   syncFiles(trackConfig, conf.trackDir, userExercise, ekConcept)
 
 proc createPracticeExercise*(conf: Conf) =
-  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf)
+  var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.practiceExerciseSlug)
 
   let probSpecsDir = ProbSpecsDir.init(conf)
   let metadata = parseMetadataToml(probSpecsDir / "exercises" / $userExercise / "metadata.toml")
