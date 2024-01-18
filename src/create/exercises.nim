@@ -1,5 +1,7 @@
 import std/[sets, options, os, strformat]
-import ".."/[cli, helpers, logger, fmt/track_config, sync/probspecs, sync/sync, sync/sync_filepaths, sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
+import ".."/[cli, helpers, logger, fmt/track_config, sync/probspecs, sync/sync,
+             sync/sync_filepaths, sync/sync_metadata, types_exercise_config,
+             types_track_config, uuid/uuid]
 
 proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
   let trackConfigPath = conf.trackDir / "config.json"
