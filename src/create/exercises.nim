@@ -61,13 +61,12 @@ proc createFiles(conf: Conf, slug: Slug, trackConfig: TrackConfig, trackDir: str
 proc createConceptExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
 
-  withLevel(verQuiet):
-    let probSpecsDir = ProbSpecsDir.init(conf)
-    if dirExists(probSpecsDir / "exercises" / $userExercise):
-      let msg = &"There already is an exercise with `{userExercise}` as the slug " &
-                "in the problem specifications repo"
-      stderr.writeLine msg
-      quit QuitFailure
+  let probSpecsDir = ProbSpecsDir.init(conf)
+  if dirExists(probSpecsDir / "exercises" / $userExercise):
+    let msg = &"There already is an exercise with `{userExercise}` as the slug " &
+              "in the problem specifications repo"
+    stderr.writeLine msg
+    quit QuitFailure
 
   let exercise = ConceptExercise(
     slug: userExercise,
@@ -92,14 +91,13 @@ proc createConceptExercise*(conf: Conf) =
 proc createPracticeExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.practiceExerciseSlug)
 
-  withLevel(verQuiet):
-    let probSpecsDir = ProbSpecsDir.init(conf)
-    let metadataFile = probSpecsDir / "exercises" / $userExercise / "metadata.toml"
-    let metadata =
-      if fileExists(metadataFile):
-        parseMetadataToml(metadataFile)
-      else:
-        UpstreamMetadata(title: $userExercise, blurb: "", source: none(string), source_url: none(string))
+  let probSpecsDir = ProbSpecsDir.init(conf)
+  let metadataFile = probSpecsDir / "exercises" / $userExercise / "metadata.toml"
+  let metadata =
+    if fileExists(metadataFile):
+      parseMetadataToml(metadataFile)
+    else:
+      UpstreamMetadata(title: $userExercise, blurb: "", source: none(string), source_url: none(string))
 
   let exercise = PracticeExercise(
     slug: userExercise,
