@@ -123,7 +123,7 @@ proc write(pairsToWrite: seq[PathAndContents]) =
       writeFile(path, pathAndContents.contents)
     else:
       stderr.writeLine &"Unexpected path before writing: {path}"
-      quit(QuitFailure)
+      quit QuitFailure
   let s = if pairsToWrite.len > 1: "s" else: ""
   logNormal(&"Updated the docs for {pairsToWrite.len} Practice Exercise{s}")
 

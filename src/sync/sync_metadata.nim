@@ -101,7 +101,7 @@ proc write(configPairs: seq[PathAndUpdatedConfig]) =
       writeFile(path, updatedJson)
     else:
       stderr.writeLine &"Unexpected path before writing: {path}"
-      quit(QuitFailure)
+      quit QuitFailure
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the metadata for {configPairs.len} Practice Exercise{s}")
 

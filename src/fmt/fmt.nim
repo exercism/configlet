@@ -141,9 +141,9 @@ proc fmt*(conf: Conf) =
       if conf.action.yesFmt or userSaysYes(userExercise):
         writeFormatted(pairs)
       else:
-        quit(QuitFailure)
+        quit QuitFailure
     else:
-      quit(QuitFailure)
+      quit QuitFailure
   else:
     let wording =
       if userExercise.len > 0:

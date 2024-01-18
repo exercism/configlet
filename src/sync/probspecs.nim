@@ -197,11 +197,11 @@ proc init*(T: typedesc[ProbSpecsDir], conf: Conf): T =
       'problem-specifications' elsewhere, you can copy it to the above location and then
       use it with --offline.""".unindent()
     stderr.writeLine msg
-    quit(QuitFailure)
+    quit QuitFailure
   else:
     try:
       createDir result.parentDir()
     except IOError, OSError:
       stderr.writeLine &"Error: {getCurrentExceptionMsg()}"
-      quit(QuitFailure)
+      quit QuitFailure
     cloneExercismRepo("problem-specifications", result.string, shallow = false)

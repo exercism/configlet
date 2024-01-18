@@ -129,7 +129,7 @@ proc write(configPairs: seq[PathAndUpdatedExerciseConfig]) =
       writeFile(path, contents)
     else:
       stderr.writeLine &"Unexpected path before writing: {path}"
-      quit(QuitFailure)
+      quit QuitFailure
   let s = if configPairs.len > 1: "s" else: ""
   logNormal(&"Updated the filepaths for {configPairs.len} exercise{s}")
 

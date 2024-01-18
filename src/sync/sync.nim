@@ -78,7 +78,7 @@ proc getSlugs*(exercises: Exercises, conf: Conf,
                 &"exercise slug, but `{userExercise}` is not an slug in the " &
                 &"track config:\n{trackConfigPath}"
       stderr.writeLine msg
-      quit(QuitFailure)
+      quit QuitFailure
 
 proc syncImpl(conf: Conf): set[SyncKind] =
   ## Checks the data specified in `conf.action.scope`, and updates them if
@@ -149,7 +149,7 @@ proc sync*(conf: Conf) =
   if seenUnsynced.len > 0:
     for syncKind in seenUnsynced:
       logNormal(&"[warn] some exercises {explain(syncKind)}")
-    quit(QuitFailure)
+    quit QuitFailure
   else:
     let userExercise = conf.action.exercise
     let wording =
@@ -162,4 +162,4 @@ proc sync*(conf: Conf) =
     else:
       for syncKind in conf.action.scope:
         logNormal(&"{wording} has up-to-date {syncKind}!")
-    quit(QuitSuccess)
+    quit QuitSuccess
