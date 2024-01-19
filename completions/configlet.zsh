@@ -84,6 +84,8 @@ _configlet() {
           '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_any_exercise_slug' \
           '--approach=[The slug of the approach]' \
           '--article=[The slug of the article]' \
+          '--concept-exercise=[The slug of the concept exercise]' \
+          '--practice-exercise=[The slug of the practice exercise]' \
       ;;
     (fmt)
       _arguments "${_arguments_options[@]}" \

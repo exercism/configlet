@@ -26,6 +26,8 @@ complete -c configlet -n "__fish_seen_subcommand_from create"     -s e -l exerci
   -xa '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
 complete -c configlet -n "__fish_seen_subcommand_from create"          -l approach  -d "The slug of the approach"
 complete -c configlet -n "__fish_seen_subcommand_from create"          -l article   -d "The slug of the article"
+complete -c configlet -n "__fish_seen_subcommand_from create"          -l practice-exercise   -d "The slug of the practice exercise"
+complete -c configlet -n "__fish_seen_subcommand_from create"          -l concept-exercise   -d "The slug of the concept exercise"
 
 # fmt subcommand
 complete -c configlet -n "__fish_seen_subcommand_from fmt"        -s e -l exercise  -d "exercise slug" \
