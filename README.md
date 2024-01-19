@@ -55,7 +55,7 @@ Usage:
 
 Commands:
   completion  Output a completion script for a given shell
-  create      Add a new approach or article
+  create      Add a new exercise, approach or article
   fmt         Format the exercise 'config.json' files
   generate    Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files
   info        Print some information about the track
@@ -65,43 +65,46 @@ Commands:
   uuid        Output new (version 4) UUIDs, suitable for the value of a 'uuid' key
 
 Options for completion:
-  -s, --shell <shell>          Choose the shell type (required)
-                               Allowed values: b[ash], f[ish], z[sh]
+  -s, --shell <shell>             Choose the shell type (required)
+                                  Allowed values: b[ash], f[ish], z[sh]
 
 Options for create:
-      --approach <slug>        The slug of the approach
-      --article <slug>         The slug of the article
-  -e, --exercise <slug>        Only operate on this exercise
+      --approach <slug>           The slug of the approach
+      --article <slug>            The slug of the article
+      --practice-exercise <slug>  The slug of the concept exercise
+      --concept-exercise <slug>   The slug of the practice exercise
+  -e, --exercise <slug>           Only operate on this exercise
+  -o, --offline                   Do not update the cached 'problem-specifications' data
 
 Options for fmt:
-  -e, --exercise <slug>        Only operate on this exercise
-  -u, --update                 Prompt to write formatted files
-  -y, --yes                    Auto-confirm the prompt from --update
+  -e, --exercise <slug>           Only operate on this exercise
+  -u, --update                    Prompt to write formatted files
+  -y, --yes                       Auto-confirm the prompt from --update
 
 Options for info:
-  -o, --offline                Do not update the cached 'problem-specifications' data
+  -o, --offline                   Do not update the cached 'problem-specifications' data
 
 Options for sync:
-  -e, --exercise <slug>        Only operate on this exercise
-  -o, --offline                Do not update the cached 'problem-specifications' data
-  -u, --update                 Prompt to update the unsynced track data
-  -y, --yes                    Auto-confirm prompts from --update for updating docs, filepaths, and metadata
-      --docs                   Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files
-      --filepaths              Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files
-      --metadata               Sync Practice Exercise '.meta/config.json' metadata values
-      --tests [mode]           Sync Practice Exercise '.meta/tests.toml' files.
-                               The mode value specifies how missing tests are handled when using --update.
-                               Allowed values: c[hoose], i[nclude], e[xclude] (default: choose)
+  -e, --exercise <slug>           Only operate on this exercise
+  -o, --offline                   Do not update the cached 'problem-specifications' data
+  -u, --update                    Prompt to update the unsynced track data
+  -y, --yes                       Auto-confirm prompts from --update for updating docs, filepaths, and metadata
+      --docs                      Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files
+      --filepaths                 Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files
+      --metadata                  Sync Practice Exercise '.meta/config.json' metadata values
+      --tests [mode]              Sync Practice Exercise '.meta/tests.toml' files.
+                                  The mode value specifies how missing tests are handled when using --update.
+                                  Allowed values: c[hoose], i[nclude], e[xclude] (default: choose)
 
 Options for uuid:
-  -n, --num <int>              Number of UUIDs to output
+  -n, --num <int>                 Number of UUIDs to output
 
 Global options:
-  -h, --help                   Show this help message and exit
-      --version                Show this tool's version information and exit
-  -t, --track-dir <dir>        Specify a track directory to use instead of the current directory
-  -v, --verbosity <verbosity>  The verbosity of output.
-                               Allowed values: q[uiet], n[ormal], d[etailed] (default: normal)
+  -h, --help                      Show this help message and exit
+      --version                   Show this tool's version information and exit
+  -t, --track-dir <dir>           Specify a track directory to use instead of the current directory
+  -v, --verbosity <verbosity>     The verbosity of output.
+                                  Allowed values: q[uiet], n[ormal], d[etailed] (default: normal)
 ```
 
 ## `configlet lint`

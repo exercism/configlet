@@ -7,10 +7,11 @@ import "."/sync_common
 {.push hint[Name]: off.}
 
 type
-  UpstreamMetadata = object
-    blurb: string
-    source: Option[string]
-    source_url: Option[string]
+  UpstreamMetadata* = object
+    title*: string
+    blurb*: string
+    source*: Option[string]
+    source_url*: Option[string]
 
   PathAndUpdatedConfig = object
     path: string
@@ -18,11 +19,13 @@ type
 
 {.pop.}
 
-proc parseMetadataToml(path: string): UpstreamMetadata =
+proc parseMetadataToml*(path: string): UpstreamMetadata =
   ## Parses the problem-specifications `metadata.toml` file at `path`, and
   ## returns an object containing the `blurb`, `source`, and `source_url` values.
   let t = parsetoml.parseFile(path)
   result = UpstreamMetadata(
+    title:
+      if t.hasKey("title"): t["title"].getStr() else: "",
     blurb:
       if t.hasKey("blurb"): t["blurb"].getStr() else: "",
     source:

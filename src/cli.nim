@@ -40,10 +40,13 @@ type
     of actCreate:
       approachSlug*: string
       articleSlug*: string
+      practiceExerciseSlug*: string
+      conceptExerciseSlug*: string
       # We can't name this field `exercise` because we use that names
       # in `actSync`, and Nim doesn't yet support duplicate field names
       # in object variants.
       exerciseCreate*: string
+      offlineCreate*: bool
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -83,6 +86,8 @@ type
     # Options for `create`
     optCreateApproach = "approach"
     optCreateArticle = "article"
+    optCreateConceptExercise = "conceptExercise"
+    optCreatePracticeExercise = "practiceExercise"
 
     # Options for `completion`
     optCompletionShell = "shell"
@@ -94,8 +99,8 @@ type
     optFmtSyncUpdate = "update"
     optFmtSyncYes = "yes"
 
-    # Options for both `info` and `sync`
-    optInfoSyncOffline = "offline"
+    # Options for both `info`, `sync` and `create`
+    optInfoSyncCreateOffline = "offline"
 
     # Scope to sync
     optSyncDocs = "docs"
@@ -110,7 +115,8 @@ func genShortKeys: array[Opt, char] =
   ## Returns a lookup that gives the valid short option key for an `Opt`.
   for opt in Opt:
     if opt in {optVersion, optSyncDocs, optSyncFilepaths, optSyncMetadata,
-               optSyncTests, optCreateApproach, optCreateArticle}:
+               optSyncTests, optCreateApproach, optCreateArticle,
+               optCreateConceptExercise, optCreatePracticeExercise}:
       result[opt] = '_' # No short option for these options.
     else:
       result[opt] = ($opt)[0]
@@ -119,7 +125,7 @@ const
   configletVersion = staticRead("../configlet.version").strip()
   short = genShortKeys()
   optsNoVal = {optHelp, optVersion, optFmtSyncUpdate, optFmtSyncYes,
-               optInfoSyncOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
+               optInfoSyncCreateOffline, optSyncDocs, optSyncFilepaths, optSyncMetadata}
 
 func generateNoVals: tuple[shortNoVal: set[char], longNoVal: seq[string]] =
   ## Returns the short and long keys for the options in `optsNoVal`.
@@ -179,6 +185,8 @@ func genHelpText: string =
         of optFmtSyncCreateExercise: "slug"
         of optCreateApproach: "slug"
         of optCreateArticle: "slug"
+        of optCreateConceptExercise: "slug"
+        of optCreatePracticeExercise: "slug"
         of optSyncTests: "mode"
         of optUuidNum: "int"
         else: ""
@@ -206,7 +214,7 @@ func genHelpText: string =
   const actionDescriptions: array[ActionKind, string] = [
     actNil: "",
     actCompletion: "Output a completion script for a given shell",
-    actCreate: "Add a new approach or article",
+    actCreate: "Add a new exercise, approach or article",
     actFmt: "Format the exercise 'config.json' files",
     actGenerate: "Generate Concept Exercise 'introduction.md' files from 'introduction.md.tpl' files",
     actInfo: "Print some information about the track",
@@ -234,12 +242,14 @@ func genHelpText: string =
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optCreateApproach: "The slug of the approach",
     optCreateArticle: "The slug of the article",
+    optCreateConceptExercise: "The slug of the practice exercise",
+    optCreatePracticeExercise: "The slug of the concept exercise",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",
     optFmtSyncUpdate: "Prompt to update the unsynced track data",
     optFmtSyncYes: &"Auto-confirm prompts from --{$optFmtSyncUpdate} for updating docs, filepaths, and metadata",
-    optInfoSyncOffline: "Do not update the cached 'problem-specifications' data",
+    optInfoSyncCreateOffline: "Do not update the cached 'problem-specifications' data",
     optSyncDocs: "Sync Practice Exercise '.docs/introduction.md' and '.docs/instructions.md' files",
     optSyncFilepaths: "Populate empty 'files' values in Concept/Practice exercise '.meta/config.json' files",
     optSyncMetadata: "Sync Practice Exercise '.meta/config.json' metadata values",
@@ -291,6 +301,10 @@ func genHelpText: string =
               optCreateApproach
             of "articleSlug":
               optCreateArticle
+            of "conceptExerciseSlug":
+              optCreateConceptExercise
+            of "practiceExerciseSlug":
+              optCreatePracticeExercise
             of "exerciseCreate":
               optFmtSyncCreateExercise
             of "exerciseFmt":
@@ -300,7 +314,9 @@ func genHelpText: string =
             of "yesFmt":
               optFmtSyncYes
             of "offlineInfo":
-              optInfoSyncOffline
+              optInfoSyncCreateOffline
+            of "offlineCreate":
+              optInfoSyncCreateOffline
             else:
               parseEnum[Opt](key)
           # Set the description for `fmt` options.
@@ -530,6 +546,12 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(articleSlug, val)
       of optFmtSyncCreateExercise:
         setActionOpt(exerciseCreate, val)
+      of optCreateConceptExercise:
+        setActionOpt(conceptExerciseSlug, val)
+      of optCreatePracticeExercise:
+        setActionOpt(practiceExerciseSlug, val)
+      of optInfoSyncCreateOffline:
+        setActionOpt(offlineCreate, true)
       else:
         discard
     of actFmt:
@@ -544,7 +566,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         discard
     of actInfo:
       case opt
-      of optInfoSyncOffline:
+      of optInfoSyncCreateOffline:
         setActionOpt(offlineInfo, true)
       else:
         discard
@@ -559,7 +581,7 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
       of optSyncTests:
         setActionOpt(tests, parseVal[TestsMode](kind, key, val))
         conf.action.scope.incl skTests
-      of optInfoSyncOffline:
+      of optInfoSyncCreateOffline:
         setActionOpt(offline, true)
       of optSyncDocs, optSyncMetadata, optSyncFilepaths:
         conf.action.scope.incl parseEnum[SyncKind]($opt)

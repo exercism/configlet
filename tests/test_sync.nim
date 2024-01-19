@@ -491,6 +491,7 @@ proc testSyncMetadata =
     test "with only `blurb` and `source_url` (and quote escaping)":
       let metadataPath = joinPath(psExercisesDir, "two-fer", "metadata.toml")
       const expected = UpstreamMetadata(
+        title: "Two-fer",
         blurb: """Create a sentence of the form "One for X, one for me.".""",
         source: none(string),
         source_url: some("https://github.com/exercism/problem-specifications/issues/757")
@@ -501,6 +502,7 @@ proc testSyncMetadata =
     test "with `blurb`, `source`, and `source_url`":
       let metadataPath = joinPath(psExercisesDir, "collatz-conjecture", "metadata.toml")
       const expected = UpstreamMetadata(
+        title: "",
         blurb: "Calculate the number of steps to reach 1 using the Collatz conjecture.",
         source: some("An unsolved problem in mathematics named after mathematician Lothar Collatz"),
         source_url: some("https://en.wikipedia.org/wiki/3x_%2B_1_problem")
@@ -511,6 +513,7 @@ proc testSyncMetadata =
     test "with `blurb`, `source`, and `source_url`, and extra `title`":
       let metadataPath = joinPath(psExercisesDir, "etl", "metadata.toml")
       const expected = UpstreamMetadata(
+        title: "ETL",
         blurb: "We are going to do the `Transform` step of an Extract-Transform-Load.",
         source: some("The Jumpstart Lab team"),
         source_url: some("http://jumpstartlab.com")

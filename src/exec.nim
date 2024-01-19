@@ -119,7 +119,7 @@ proc fixAverageRunTimeInConfigJson(file, oldValue, newValue: string) =
         &""""average_run_time": {oldValue}""",
         &""""average_run_time": {newValue}""")
   writeFile(file, configJson)
-  let args = ["-C", parentDir(file), "commit", "-a", "-m", "config: convert `average_run_time` to int"]
+  let args = ["-C", parentDir(file), "commit", "--allow-empty", "-a", "-m", "config: convert `average_run_time` to int"]
   discard gitCheck(0, args)
 
 proc setupExercismRepo*(repoName, dest, hash: string; shallow = false) =

@@ -1,14 +1,14 @@
 import std/[os, strformat]
 import ".."/[cli, helpers, sync/sync, types_track_config]
-import "."/[approaches, articles]
+import "."/[approaches, articles, exercises]
 
 proc create*(conf: Conf) =
   if conf.action.kind == actCreate:
-    if conf.action.exerciseCreate.len == 0:
-      let msg = "Please specify an exercise, using --exercise <slug>"
-      stderr.writeLine msg
-      quit QuitFailure
     if conf.action.approachSlug.len > 0:
+      if conf.action.exerciseCreate.len == 0:
+        let msg = "Please specify an exercise to create an approach for, using --exercise <slug>"
+        stderr.writeLine msg
+        quit QuitFailure
       if conf.action.articleSlug.len > 0:
         let msg = &"Both --approach and --article were provided. Please specify only one."
         stderr.writeLine msg
@@ -32,6 +32,10 @@ proc create*(conf: Conf) =
 
       createApproach(Slug(conf.action.approachSlug), userExercise, exerciseDir)
     elif conf.action.articleSlug.len > 0:
+      if conf.action.exerciseCreate.len == 0:
+        let msg = "Please specify an exercise to create an article for, using --exercise <slug>"
+        stderr.writeLine msg
+        quit QuitFailure
       let trackConfigPath = conf.trackDir / "config.json"
       let trackConfig = parseFile(trackConfigPath, TrackConfig)
       let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
@@ -50,8 +54,13 @@ proc create*(conf: Conf) =
           quit QuitFailure
 
       createArticle(Slug(conf.action.articleSlug), userExercise, exerciseDir)
+    elif conf.action.conceptExerciseSlug.len > 0:
+      createConceptExercise(conf)
+    elif conf.action.practiceExerciseSlug.len > 0:
+      createPracticeExercise(conf)
     else:
-      let msg = "Please specify `--article <slug>` or `--approach <slug>`"
+      let msg = "Please specify `--practice-exercise <slug>`, `--concept-exercise <slug>`, " &
+                "`--article <slug>` or `--approach <slug>`"
       stderr.writeLine msg
       quit QuitFailure
   else:

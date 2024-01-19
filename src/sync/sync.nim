@@ -80,7 +80,7 @@ proc getSlugs*(exercises: Exercises, conf: Conf,
       stderr.writeLine msg
       quit QuitFailure
 
-proc syncImpl(conf: Conf): set[SyncKind] =
+proc syncImpl*(conf: Conf): set[SyncKind] =
   ## Checks the data specified in `conf.action.scope`, and updates them if
   ## `--update` was passed and the user confirms.
   ##

@@ -242,7 +242,7 @@ func addConcepts(result: var string; val: Concepts; indentLevel = 1) =
   result.addNewlineAndIndent(indentLevel)
   result.add "],"
 
-func prettyTrackConfig(e: TrackConfig): string =
+func prettyTrackConfig*(e: TrackConfig): string =
   ## Serializes `e` as pretty-printed JSON, using the canonical key order.
   let keys = trackConfigKeyOrderForFmt(e)
 
