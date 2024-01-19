@@ -85,7 +85,7 @@ _configlet_complete_create_() {
       _configlet_complete_slugs_ "practice" "concept"
       ;;
     *)
-      _configlet_complete_options_ "--approach --article --concept-exercise -e --exercise --practice-exercise $global_opts"
+      _configlet_complete_options_ "--approach --article --concept-exercise -e --exercise --practice-exercise -o --offline $global_opts"
       ;;
   esac
 }

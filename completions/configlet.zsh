@@ -82,6 +82,7 @@ _configlet() {
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
           '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_any_exercise_slug' \
+          {-o,--offline}'[Do not update prob-specs cache]' \
           '--approach=[The slug of the approach]' \
           '--article=[The slug of the article]' \
           '--concept-exercise=[The slug of the concept exercise]' \
