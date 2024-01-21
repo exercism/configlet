@@ -242,8 +242,8 @@ func genHelpText: string =
                   &"{paddingOpt}{allowedValues(Verbosity)} (default: normal)",
     optCreateApproach: "The slug of the approach",
     optCreateArticle: "The slug of the article",
-    optCreateConceptExercise: "The slug of the practice exercise",
-    optCreatePracticeExercise: "The slug of the concept exercise",
+    optCreateConceptExercise: "The slug of the concept exercise",
+    optCreatePracticeExercise: "The slug of the practice exercise",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",

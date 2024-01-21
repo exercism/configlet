@@ -71,8 +71,8 @@ Options for completion:
 Options for create:
       --approach <slug>           The slug of the approach
       --article <slug>            The slug of the article
-      --practice-exercise <slug>  The slug of the concept exercise
-      --concept-exercise <slug>   The slug of the practice exercise
+      --practice-exercise <slug>  The slug of the practice exercise
+      --concept-exercise <slug>   The slug of the concept exercise
   -e, --exercise <slug>           Only operate on this exercise
   -o, --offline                   Do not update the cached 'problem-specifications' data
 
