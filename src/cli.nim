@@ -1,4 +1,4 @@
-import std/[os, parseutils, strformat, strutils, terminal]
+import std/[options, os, parseutils, strformat, strutils, terminal]
 import pkg/supersnappy
 import patched_libs/parseopt3
 
@@ -47,6 +47,8 @@ type
       # in object variants.
       exerciseCreate*: string
       offlineCreate*: bool
+      author*: string
+      difficulty*: Option[int]
     of actFmt:
       # We can't name these fields `exercise`, `update`, and `yes` because we
       # use those names in `actSync`, and Nim doesn't yet support duplicate
@@ -88,6 +90,8 @@ type
     optCreateArticle = "article"
     optCreateConceptExercise = "conceptExercise"
     optCreatePracticeExercise = "practiceExercise"
+    optCreateAuthor = "author"
+    optCreateDifficulty = "difficulty"
 
     # Options for `completion`
     optCompletionShell = "shell"
@@ -244,6 +248,8 @@ func genHelpText: string =
     optCreateArticle: "The slug of the article",
     optCreateConceptExercise: "The slug of the concept exercise",
     optCreatePracticeExercise: "The slug of the practice exercise",
+    optCreateAuthor: "The author of the exercise, approach or article",
+    optCreateDifficulty: "The difficulty of the exercise (default: 1)",
     optCompletionShell: &"Choose the shell type (required)\n" &
                         &"{paddingOpt}{allowedValues(Shell)}",
     optFmtSyncCreateExercise: "Only operate on this exercise",
@@ -552,6 +558,15 @@ proc handleOption(conf: var Conf; kind: CmdLineKind; key, val: string) =
         setActionOpt(practiceExerciseSlug, val)
       of optInfoSyncCreateOffline:
         setActionOpt(offlineCreate, true)
+      of optCreateAuthor:
+        setActionOpt(author, val)
+      of optCreateDifficulty:
+        var num = -1
+        discard parseSaturatedNatural(val, num)
+        if num notin 1..10:
+          showError(&"value for {formatOpt(kind, key)} is not between " &
+                    &" 1 to 10: {val}")
+        setActionOpt(difficulty, some(num))
       else:
         discard
     of actFmt:
