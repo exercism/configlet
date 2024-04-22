@@ -41,7 +41,7 @@ proc create*(conf: Conf) =
         stderr.writeLine msg
         quit QuitFailure
       if conf.action.difficulty.isSome:
-        let msg = "The difficulty argument is not supported for approaches"
+        let msg = "The difficulty argument is not supported for articles"
         stderr.writeLine msg
         quit QuitFailure
       let trackConfigPath = conf.trackDir / "config.json"
