@@ -1,5 +1,5 @@
 import std/[sets, options, os, strformat]
-import ".."/[cli, helpers, logger, fmt/exercises, fmt/track_config, 
+import ".."/[cli, helpers, logger, fmt/exercises, fmt/track_config,
              sync/probspecs, sync/sync, sync/sync_common, sync/sync_filepaths,
              sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
@@ -56,7 +56,7 @@ proc syncExercise(conf: Conf, slug: Slug,) =
 proc setAuthor(conf: Conf, slug: Slug, trackDir: string, exerciseKind: ExerciseKind) =
   let configPath = trackDir / "exercises" / $exerciseKind / $slug / ".meta" / "config.json"
   var exerciseConfig = ExerciseConfig.init(exerciseKind, configPath)
-  let formattedConfig = 
+  let formattedConfig =
     case exerciseKind
     of ekConcept:
       exerciseConfig.c.authors.add conf.action.author
