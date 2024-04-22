@@ -45,6 +45,12 @@ proc main =
       """.unindent()
       execAndCheck(1, &"{createBase} --concept-exercise=hangman", expectedOutput)
 
+    test "concept exercise with difficulty (prints the expected output, and exits with 1)":
+      const expectedOutput = fmt"""
+        The difficulty argument is not supported for concept exercises
+      """.unindent()
+      execAndCheck(1, &"{createBase} --concept-exercise=bar --difficulty 4", expectedOutput)
+
     test "create concept exercise (creates the exercise files, and exits with 0)":
       const expectedOutput = fmt"""
         Updating cached 'problem-specifications' data...
