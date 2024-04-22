@@ -76,7 +76,7 @@ Options for create:
   -e, --exercise <slug>           Only operate on this exercise
   -o, --offline                   Do not update the cached 'problem-specifications' data
   -a, --author                    The author of the exercise, approach or article
-  -d, --difficult                 The difficulty of the exercise (default: 1)
+  -d, --difficulty                The difficulty of the exercise (default: 1)
 
 Options for fmt:
   -e, --exercise <slug>           Only operate on this exercise
