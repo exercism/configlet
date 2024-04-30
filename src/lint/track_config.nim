@@ -226,6 +226,7 @@ proc hasValidKeyFeatures(data: JsonNode; path: Path): bool =
                       errorAnnotation = errorAnnotation)
 
 const tags = [
+  "paradigm/array",
   "paradigm/declarative",
   "paradigm/functional",
   "paradigm/imperative",
