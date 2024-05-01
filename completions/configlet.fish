@@ -22,8 +22,9 @@ complete -c configlet -n "__fish_seen_subcommand_from completion" -s s -l shell 
   -xa "bash fish zsh"
 
 # create subcommand
-complete -c configlet -n "__fish_seen_subcommand_from create"     -s e -l exercise  -d "exercise slug" \
-  -xa '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
+complete -c configlet -n "__fish_seen_subcommand_from create"     -s e -l exercise  -d "exercise slug"
+complete -c configlet -n "__fish_seen_subcommand_from create"     -s a -l author    -d "The implementation author"
+complete -c configlet -n "__fish_seen_subcommand_from create"     -s d -l difficulty -d "The exerise difficulty (default 1)"
 complete -c configlet -n "__fish_seen_subcommand_from create"     -s o -l offline   -d "Do not update prob-specs cache"
 complete -c configlet -n "__fish_seen_subcommand_from create"          -l approach  -d "The slug of the approach"
 complete -c configlet -n "__fish_seen_subcommand_from create"          -l article   -d "The slug of the article"
