@@ -1,7 +1,7 @@
 import std/[sets, options, os, strformat]
-import ".."/[cli, helpers, logger, fmt/track_config, sync/probspecs, sync/sync,
-             sync/sync_filepaths, sync/sync_metadata, types_exercise_config,
-             types_track_config, uuid/uuid]
+import ".."/[cli, helpers, logger, fmt/exercises, fmt/track_config,
+             sync/probspecs, sync/sync, sync/sync_common, sync/sync_filepaths,
+             sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
 
 proc verifyExerciseDoesNotExist(conf: Conf, slug: string): tuple[trackConfig: TrackConfig, trackConfigPath: string, exercise: Slug] =
   let trackConfigPath = conf.trackDir / "config.json"
@@ -53,10 +53,25 @@ proc syncExercise(conf: Conf, slug: Slug,) =
   )
   discard syncImpl(syncConf)
 
+proc setAuthor(conf: Conf, slug: Slug, trackDir: string, exerciseKind: ExerciseKind) =
+  let configPath = trackDir / "exercises" / $exerciseKind / $slug / ".meta" / "config.json"
+  var exerciseConfig = ExerciseConfig.init(exerciseKind, configPath)
+  let formattedConfig =
+    case exerciseKind
+    of ekConcept:
+      exerciseConfig.c.authors.add conf.action.author
+      prettyExerciseConfig(exerciseConfig.c, pmFmt)
+    of ekPractice:
+      exerciseConfig.p.authors.add conf.action.author
+      prettyExerciseConfig(exerciseConfig.p, pmFmt)
+  writeFile(configPath, formattedConfig)
+
 proc createFiles(conf: Conf, slug: Slug, trackConfig: TrackConfig, trackDir: string, exerciseKind: ExerciseKind) =
   withLevel(verQuiet):
     syncExercise(conf, slug)
     syncFiles(trackConfig, conf.trackDir, slug, exerciseKind)
+    if conf.action.author.len > 0:
+      setAuthor(conf, slug, trackDir, exerciseKind)
 
 proc createConceptExercise*(conf: Conf) =
   var (trackConfig, trackConfigPath, userExercise) = verifyExerciseDoesNotExist(conf, conf.action.conceptExerciseSlug)
@@ -105,7 +120,7 @@ proc createPracticeExercise*(conf: Conf) =
     uuid: $genUuid(),
     practices: OrderedSet[string](),
     prerequisites: OrderedSet[string](),
-    difficulty: 1,
+    difficulty: conf.action.difficulty.get(1),
     status: sMissing
   )
 

@@ -75,6 +75,8 @@ Options for create:
       --concept-exercise <slug>   The slug of the concept exercise
   -e, --exercise <slug>           Only operate on this exercise
   -o, --offline                   Do not update the cached 'problem-specifications' data
+  -a, --author                    The author of the exercise, approach or article
+  -d, --difficulty                The difficulty of the exercise (default: 1)
 
 Options for fmt:
   -e, --exercise <slug>           Only operate on this exercise
