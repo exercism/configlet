@@ -1,4 +1,4 @@
-import std/[os, osproc, strformat, strutils, unittest]
+import std/[os, osproc, re, strformat, strutils, unittest]
 import exec
 import "."/[binary_helpers]
 
@@ -122,6 +122,78 @@ proc main =
         Created practice exercise 'foo'.
       """.unindent()
       execAndCheck(0, &"{createBase} --practice-exercise=foo --offline", expectedOutput)
+
+      const expectedStatus = """
+        M  config.json
+        A  exercises/practice/foo/.docs/instructions.md
+        A  exercises/practice/foo/.meta/config.json
+        A  exercises/practice/foo/.meta/example.ex
+        A  exercises/practice/foo/lib/foo.ex
+        A  exercises/practice/foo/test/foo_test.exs
+      """.unindent()
+      testStatusThenReset(trackDir, expectedStatus)
+
+    test "create practice exercise with difficulty (creates the exercise files, and exits with 0)":
+      const expectedOutput = fmt"""
+        Updating cached 'problem-specifications' data...
+        Created practice exercise 'foo'.
+      """.unindent()
+      execAndCheck(0, &"{createBase} --practice-exercise=foo --difficulty=5", expectedOutput)
+
+      const expectedDiff = """
+        --- config.json
+        +++ config.json
+        +      },
+        +      {
+        +        "slug": "foo",
+        +        "name": "foo",
+        +        "uuid": "<UUID>",
+        +        "practices": [],
+        +        "prerequisites": [],
+        +        "difficulty": 5
+      """.unindent().replace("\p", "\n")
+      let diff = gitDiffConcise(trackDir).replace(re""""uuid": "[^"]+"""", """"uuid": "<UUID>"""")
+      check diff == expectedDiff
+
+      const expectedStatus = """
+        M  config.json
+        A  exercises/practice/foo/.docs/instructions.md
+        A  exercises/practice/foo/.meta/config.json
+        A  exercises/practice/foo/.meta/example.ex
+        A  exercises/practice/foo/lib/foo.ex
+        A  exercises/practice/foo/test/foo_test.exs
+      """.unindent()
+      testStatusThenReset(trackDir, expectedStatus)
+
+    test "create practice exercise with author (creates the exercise files, and exits with 0)":
+      const expectedOutput = fmt"""
+        Updating cached 'problem-specifications' data...
+        Created practice exercise 'foo'.
+      """.unindent()
+      execAndCheck(0, &"{createBase} --practice-exercise=foo --author=bar", expectedOutput)
+
+      const expectedConfig = """
+      {
+        "authors": [
+          "bar"
+        ],
+        "files": {
+          "solution": [
+            "lib/foo.ex"
+          ],
+          "test": [
+            "test/foo_test.exs"
+          ],
+          "example": [
+            ".meta/example.ex"
+          ]
+        },
+        "blurb": ""
+      }
+      """.dedent(6).replace("\p", "\n")
+      let configPath = trackDir / "exercises" / "practice" / "foo" / ".meta" / "config.json"
+      let config = readFile(configPath)
+      check config == expectedConfig
 
       const expectedStatus = """
         M  config.json
