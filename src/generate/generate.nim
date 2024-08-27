@@ -1,6 +1,11 @@
-import std/[parseutils, strbasics, strformat, strscans, strutils, sugar, tables,
-            terminal]
-import ".."/[cli, helpers, types_track_config]
+import std/[os, parseutils, strbasics, strformat, strscans, strutils, sugar,
+            tables, terminal]
+import ".."/[cli, helpers, logger, types_track_config]
+
+type
+  PathAndGeneratedDocument = object
+    path: string
+    generatedDocument: string
 
 proc getConceptSlugLookup(trackDir: Path): Table[Slug, string] =
   ## Returns a `Table` that maps each concept's `slug` to its `name`.
@@ -133,18 +138,77 @@ proc generateIntroduction(trackDir: Path, templatePath: Path,
       result.add linkDef
       result.add '\n'
 
+iterator getIntroductionTemplatePaths(trackDir: Path, conf: Conf): Path =
+  let conceptExercisesDir = trackDir / "exercises" / "concept"
+  if dirExists(conceptExercisesDir):
+    for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
+      if conf.action.exerciseGenerate.len == 0 or conf.action.exerciseGenerate == $conceptExerciseDir.splitFile.name:
+        let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
+        if fileExists(introductionTemplatePath):
+          yield introductionTemplatePath
+
+proc generateImpl(trackDir: Path, conf: Conf): seq[PathAndGeneratedDocument] =
+  result = @[]
+
+  let slugLookup = getConceptSlugLookup(trackDir)
+
+  for introductionTemplatePath in getIntroductionTemplatePaths(trackDir, conf):
+    let generated = generateIntroduction(trackDir, introductionTemplatePath,
+                                         slugLookup)
+    let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
+
+    if fileExists(introductionPath) and readFile(introductionPath) == generated:
+      logDetailed(&"Up-to-date: {relativePath(introductionPath, $trackDir)}")
+    else:
+      logNormal(&"Outdated: {relativePath(introductionPath, $trackDir)}")
+      result.add PathAndGeneratedDocument(
+        path: introductionPath,
+        generatedDocument: generated
+      )
+
+proc writeGenerated(generatedPairs: seq[PathAndGeneratedDocument]) =
+  for generatedPair in generatedPairs:
+    let path = generatedPair.path
+    doAssert lastPathPart(path) == "introduction.md"
+    createDir path.parentDir()
+    logDetailed(&"Generating: {path}")
+    writeFile(path, generatedPair.generatedDocument)
+  let s = if generatedPairs.len > 1: "s" else: ""
+  logNormal(&"Generated {generatedPairs.len} file{s}")
+
+proc userSaysYes(userExercise: string): bool =
+  ## Asks the user if they want to format files, and returns `true` if they
+  ## confirm.
+  let s = if userExercise.len > 0: "" else: "s"
+  while true:
+    stderr.write &"Generate (update) the above file{s} ([y]es/[n]o)? "
+    case stdin.readLine().toLowerAscii()
+    of "y", "yes":
+      return true
+    of "n", "no":
+      return false
+    else:
+      stderr.writeLine "Unrecognized response. Please answer [y]es or [n]o."
+
 proc generate*(conf: Conf) =
   ## For every Concept Exercise in `conf.trackDir` with an `introduction.md.tpl`
   ## file, write the corresponding `introduction.md` file.
   let trackDir = Path(conf.trackDir)
+  let pairs = generateImpl(trackDir, conf)
 
-  let conceptExercisesDir = trackDir / "exercises" / "concept"
-  if dirExists(conceptExercisesDir):
-    let slugLookup = getConceptSlugLookup(trackDir)
-    for conceptExerciseDir in getSortedSubdirs(conceptExercisesDir):
-      let introductionTemplatePath = conceptExerciseDir / ".docs" / "introduction.md.tpl"
-      if fileExists(introductionTemplatePath):
-        let introduction = generateIntroduction(trackDir, introductionTemplatePath,
-                                                slugLookup)
-        let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
-        writeFile(introductionPath, introduction)
+  let userExercise = conf.action.exerciseGenerate
+  if pairs.len > 0:
+    if conf.action.updateGenerate:
+      if conf.action.yesGenerate or userSaysYes(userExercise):
+        writeGenerated(pairs)
+      else:
+        quit QuitFailure
+    else:
+      quit QuitFailure
+  else:
+    let wording =
+      if userExercise.len > 0:
+        &"The `{userExercise}`"
+      else:
+        "Every"
+    logNormal(&"{wording} introduction file is up-to-date!")
