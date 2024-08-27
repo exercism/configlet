@@ -61,7 +61,14 @@ _configlet_complete_lint_() {
 }
 
 _configlet_complete_generate_() {
-  _configlet_complete_options_ "$global_opts"
+  case $prev in
+    '-e' | '--exercise')
+      _configlet_complete_slugs_ "practice" "concept"
+      ;;
+    *)
+      _configlet_complete_options_ "-e --exercise -u --update -y --yes $global_opts"
+      ;;
+  esac
 }
 
 _configlet_complete_info_() {

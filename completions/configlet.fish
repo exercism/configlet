@@ -6,7 +6,6 @@ end
 complete -c configlet -f
 
 # subcommands with no options
-complete -c configlet -n "__fish_use_subcommand" -a generate   -d "Generate concept exercise introductions"
 complete -c configlet -n "__fish_use_subcommand" -a lint       -d "Check the track configuration for correctness"
 
 # subcommands with options
@@ -36,6 +35,12 @@ complete -c configlet -n "__fish_seen_subcommand_from fmt"        -s e -l exerci
   -xa '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
 complete -c configlet -n "__fish_seen_subcommand_from fmt"        -s u -l update    -d "Write changes"
 complete -c configlet -n "__fish_seen_subcommand_from fmt"        -s y -l yes       -d "Auto-confirm update"
+
+# generate subcommand
+complete -c configlet -n "__fish_seen_subcommand_from generate"   -s e -l exercise  -d "exercise slug" \
+  -xa '(__fish_configlet_find_dirs ./exercises/{concept,practice})'
+complete -c configlet -n "__fish_seen_subcommand_from generate"   -s u -l update    -d "Write changes"
+complete -c configlet -n "__fish_seen_subcommand_from generate"   -s y -l yes       -d "Auto-confirm update"
 
 # info subcommand
 complete -c configlet -n "__fish_seen_subcommand_from info"       -s o -l offline   -d "Do not update prob-specs cache"

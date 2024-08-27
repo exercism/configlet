@@ -67,6 +67,9 @@ _configlet() {
     (generate)
       _arguments "${_arguments_options[@]}" \
           "$_configlet_global_opts[@]" \
+          '(-e --exercise)'{-e+,--exercise=}'[exercise slug]:slug:_configlet_complete_any_exercise_slug' \
+          {-u,--update}'[Write changes]' \
+          {-y,--yes}'[Auto-confirm update]' \
       ;;
     (lint)
       _arguments "${_arguments_options[@]}" \
