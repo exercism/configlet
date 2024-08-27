@@ -23,13 +23,18 @@ proc main =
   suite "generate":
     const trackDir = testsDir / ".test_elixir_track_repo"
     let generateCmd = &"{binaryPath} -t {trackDir} generate"
+    let generateCmdUpdate = &"{generateCmd} --update"
+    let generateCmdUpdateYes = &"{generateCmdUpdate} --yes"
 
     # Setup: clone a track repo, and checkout a known state
     setupExercismRepo("elixir", trackDir,
                       "91ccf91940f32aff3726c772695b2de167d8192a") # 2022-06-12
 
     test "`configlet generate` exits with 0 when there are no `.md.tpl` files":
-      execAndCheck(0, generateCmd, "")
+      const expectedOutput = fmt"""
+        Every introduction file is up-to-date!
+      """.unindent().replace("\p", "\n")
+      execAndCheck(0, generateCmdUpdateYes, expectedOutput)
 
     test "and does not make a change":
       checkNoDiff(trackDir)
@@ -39,7 +44,7 @@ proc main =
                              removeIntro = false)
 
     test "`configlet generate` exits with 1 for an invalid placeholder usage":
-      execAndCheckExitCode(1, generateCmd)
+      execAndCheckExitCode(1, generateCmdUpdateYes)
 
     test "and does not make a change":
       checkNoDiff(trackDir)
@@ -49,7 +54,11 @@ proc main =
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for a valid `.md.tpl` file":
-      execAndCheck(0, generateCmd, "")
+      const expectedOutput = fmt"""
+        Outdated: {"exercises"/"concept"/"bird-count"/".docs"/"introduction.md"}
+        Generated 1 file
+      """.unindent().replace("\p", "\n")
+      execAndCheck(0, generateCmdUpdateYes, expectedOutput)
 
     test "and writes the `introduction.md` file as expected":
       checkNoDiff(trackDir)
@@ -59,7 +68,11 @@ proc main =
                              removeIntro = true)
 
     test "`configlet generate` exits with 0 for valid placeholder usage with spaces":
-      execAndCheck(0, generateCmd, "")
+      const expectedOutput = fmt"""
+        Outdated: {"exercises"/"concept"/"bird-count"/".docs"/"introduction.md"}
+        Generated 1 file
+      """.unindent().replace("\p", "\n")
+      execAndCheck(0, generateCmdUpdateYes, expectedOutput)
 
     test "and writes the `introduction.md` file as expected":
       checkNoDiff(trackDir)
