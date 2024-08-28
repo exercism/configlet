@@ -2,7 +2,10 @@
 
 ## How to create a configlet release
 
-1. Check that the repository state is such that creating a release PR makes sense.
+1. Check that the repository state is such that creating a release PR makes sense:
+
+   - Checkout the `main` branch
+   - Pull the latest changes
 
 1. Run [`bin/bump_version.nim`][bump_version], which also prompts to create a release PR if you have [`gh`][gh] installed on your machine.
 
@@ -15,6 +18,11 @@
    This ensures that CI tests the merge immediately before the release.
 
 1. Merge the release PR (using "Squash and merge" with the pre-filled commit title and a blank commit body).
+
+1. Check that the repository state is such that tagging the release makes sense:
+
+   - Checkout the `main` branch
+   - Pull the latest changes
 
 1. Run [`bin/tag_release.nim`][tag_release] to tag the release commit and push the tag (which triggers the build job and creates a draft release).
 
