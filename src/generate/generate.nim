@@ -157,10 +157,17 @@ proc generateImpl(trackDir: Path, conf: Conf): seq[PathAndGeneratedDocument] =
                                          slugLookup)
     let introductionPath = introductionTemplatePath.string[0..^5] # Removes `.tpl`
 
-    if fileExists(introductionPath) and readFile(introductionPath) == generated:
-      logDetailed(&"Up-to-date: {relativePath(introductionPath, $trackDir)}")
+    if fileExists(introductionPath):
+      if readFile(introductionPath) == generated:
+        logDetailed(&"Up-to-date: {relativePath(introductionPath, $trackDir)}")
+      else:
+        logNormal(&"Outdated: {relativePath(introductionPath, $trackDir)}")
+        result.add PathAndGeneratedDocument(
+          path: introductionPath,
+          generatedDocument: generated
+        )
     else:
-      logNormal(&"Outdated: {relativePath(introductionPath, $trackDir)}")
+      logNormal(&"Missing: {relativePath(introductionPath, $trackDir)}")
       result.add PathAndGeneratedDocument(
         path: introductionPath,
         generatedDocument: generated
