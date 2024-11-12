@@ -178,9 +178,8 @@ proc bumpVersionFile(versionFile: string): Version =
   let pkgVersion = readFile(versionFile)
   result = Version.init()
   if pkgVersion.scanf("$i.$i.$i\n$.",
-                      result.major, result.minor, result.patch,
-                      result.pre, result.n):
-    inc result.n
+                      result.major, result.minor, result.patch):
+    inc result.patch
     createBranchAndCheckout(result)
     writeFile(versionFile, $result & "\n")
   else:
