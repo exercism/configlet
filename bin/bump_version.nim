@@ -177,7 +177,7 @@ proc bumpVersionFile(versionFile: string): Version =
   ## version.
   let pkgVersion = readFile(versionFile)
   result = Version.init()
-  if pkgVersion.scanf("$i.$i.$i-$+.$i\n$.",
+  if pkgVersion.scanf("$i.$i.$i\n$.",
                       result.major, result.minor, result.patch,
                       result.pre, result.n):
     inc result.n
