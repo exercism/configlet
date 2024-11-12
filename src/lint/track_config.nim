@@ -233,6 +233,7 @@ const tags = [
   "paradigm/logic",
   "paradigm/object_oriented",
   "paradigm/procedural",
+  "paradigm/stack_oriented",
   "typing/static",
   "typing/dynamic",
   "typing/strong",
