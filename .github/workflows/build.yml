@@ -54,7 +54,7 @@ jobs:
         run: ./.github/bin/linux-install-musl
 
       - name: Install Nim
-        uses: iffy/install-nim@25e9ede26d630a40bb8ecb9ce75479e281e717bf
+        uses: iffy/install-nim@0f3350b4052f0906164f934a2e638257341fdff7
         with:
           version: "binary:2.0.8"
         env:
@@ -99,7 +99,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
       - name: Install Nim
-        uses: iffy/install-nim@25e9ede26d630a40bb8ecb9ce75479e281e717bf
+        uses: iffy/install-nim@0f3350b4052f0906164f934a2e638257341fdff7
         with:
           version: "binary:2.0.8"
         env:
