@@ -1,5 +1,5 @@
 # This file is minimally adapted from this version in the Nim standard library:
-# https://github.com/nim-lang/Nim/blob/a488067a4130/lib/pure/parsejson.nim
+# https://github.com/nim-lang/Nim/blob/f7145dd26efe/lib/pure/parsejson.nim
 # The standard library version is lenient: it silently allows line comments
 # with `//`, and long comments with `/* */`.
 # The below version is stricter: it raises a `JsonParsingError` for such
@@ -29,7 +29,7 @@
 ## and exported by the `json` standard library
 ## module, but can also be used in its own right.
 
-import strutils, lexbase, streams, unicode
+import std/[strutils, lexbase, streams, unicode]
 import std/private/decode_helpers
 
 when defined(nimPreviewSlimSystem):
