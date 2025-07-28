@@ -22,13 +22,18 @@ get_download_url() {
   local os="$1"
   local ext="$2"
   local latest='https://api.github.com/repos/exercism/configlet/releases/latest'
+  local uname_m
+  uname_m="$(uname -m)"
   local arch
-  case "$(uname -m)" in
-    aarch64|arm64) arch='arm64'  ;;
-    x86_64)        arch='x86-64' ;;
-    *686*)         arch='i386'   ;;
-    *386*)         arch='i386'   ;;
-    *)             arch='x86-64' ;;
+  case "${uname_m}" in
+    aarch64|arm64) arch='arm64'       ;;
+    x86_64)        arch='x86-64'      ;;
+    *686*)         arch='i386'        ;;
+    *386*)         arch='i386'        ;;
+    ppc)           arch='powerpc'     ;;
+    ppc64)         arch='powerpc64'   ;;
+    ppc64le)       arch='powerpc64le' ;;
+    *)             arch="${uname_m}"  ;;
   esac
   local suffix="${os}_${arch}.${ext}"
   curl "${curlopts[@]}" --header 'Accept: application/vnd.github.v3+json' "${latest}" |
@@ -48,13 +53,15 @@ main() {
   fi
 
   local os
-  case "$(uname -s)" in
-    Darwin*)   os='macos'   ;;
-    Linux*)    os='linux'   ;;
-    Windows*)  os='windows' ;;
-    MINGW*)    os='windows' ;;
-    MSYS_NT-*) os='windows' ;;
-    *)         os='linux'   ;;
+  local uname_s
+  uname_s="$(uname -s)"
+  case "${uname_s}" in
+    Darwin*)   os='macos'        ;;
+    Linux*)    os='linux'        ;;
+    Windows*)  os='windows'      ;;
+    MINGW*)    os='windows'      ;;
+    MSYS_NT-*) os='windows'      ;;
+    *)         os="${uname_s,,}" ;; # Convert to lower case.
   esac
 
   local ext
