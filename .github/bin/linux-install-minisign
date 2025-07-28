@@ -2,7 +2,7 @@
 
 set -e
 
-tag='0.11'
+tag='0.12'
 name="minisign-${tag}-linux"
 archive_name="${name}.tar.gz"
 url="https://github.com/jedisct1/minisign/releases/download/${tag}/${archive_name}"
@@ -11,13 +11,13 @@ curl -sSfL --retry 3 "${url}" > "${archive_name}"
 
 # The minisign archive signature was verified previously:
 #
-#     $ minisign -Vm minisign-0.11-linux.tar.gz -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
+#     $ minisign -Vm minisign-0.12-linux.tar.gz -P RWQf6LRCGA9i53mlYecO4IzT51TGPpvWucNSCh1CBM0QTaLn73Y7GFO3
 #     Signature and comment signature verified
-#     Trusted comment: timestamp:1673952371	file:minisign-0.11-linux.tar.gz	hashed
+#     Trusted comment: timestamp:1737030580	file:minisign-0.12-linux.tar.gz	hashed
 #
 # Therefore we can trust the downloaded minisign if it has the corresponding hash.
 
-sha256sum_input="f0a0954413df8531befed169e447a66da6868d79052ed7e892e50a4291af7ae0  ${archive_name}"
+sha256sum_input="9a599b48ba6eb7b1e80f12f36b94ceca7c00b7a5173c95c3efc88d9822957e73  ${archive_name}"
 
 if echo "${sha256sum_input}" | sha256sum --check; then
   tar xf "${archive_name}"
