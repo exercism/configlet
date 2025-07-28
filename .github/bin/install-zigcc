@@ -16,4 +16,3 @@ chmod +x "${zigcc_path}"
 # Print the versions of Zig and Clang.
 zig version
 zig cc --version
-echo "Successfully installed Zig."
