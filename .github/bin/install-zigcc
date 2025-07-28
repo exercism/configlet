@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# Add zigcc directory to `GITHUB_PATH`.
+dir="$(pwd)/zigcc"
+mkdir "${dir}"
+echo "${dir}" >> "${GITHUB_PATH}"
+
+# Install `zigcc`, which is just a wrapper for `zig cc`. We need this because
+# the value of e.g. `--clang.exe` cannot contain a space (Nim requires the value
+# to be an executable, not a command).
+zigcc_path="${dir}/zigcc"
+printf '#!/usr/bin/env sh\nzig cc $@\n' > "${zigcc_path}"
+chmod +x "${zigcc_path}"
+
+# Print the versions of Zig and Clang.
+zig version
+zig cc --version
