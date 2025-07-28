@@ -107,6 +107,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Zig
+        uses: mlugg/setup-zig@8d6198c65fb0feaa111df26e6b467fea8345e46f
+        with:
+          version: 0.14.1
+
+      - name: Install zigcc
         shell: bash
         run: ./.github/bin/install-zig
 
