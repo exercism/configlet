@@ -5,7 +5,6 @@ warning("ProveInit", off)
 warning("Uninit", off)
 switch("experimental", "strictDefs")
 switch("experimental", "strictFuncs")
-switch("define", "nimStrictDelete")
 switch("mm", "refc")
 
 # Replace the stdlib JSON modules with our own stricter versions.
