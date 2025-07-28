@@ -127,7 +127,9 @@ jobs:
     runs-on: ubuntu-24.04
     name: Upload signatures and checksums
     permissions:
+      attestations: write
       contents: write
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -140,3 +142,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CONFIGLET_MINISIGN_SECRET_KEY: ${{ secrets.CONFIGLET_MINISIGN_SECRET_KEY }}
+
+      - name: Generate signed build provenance attestations
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
+        with:
+          subject-checksums: 'releases/*/configlet_*_checksums_sha256.txt'
+
+      - name: Verify artifact attestation
+        run: gh attestation verify releases/*/*linux_x86-64.tar.gz -R exercism/configlet
