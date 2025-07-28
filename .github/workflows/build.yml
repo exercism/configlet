@@ -113,7 +113,7 @@ jobs:
 
       - name: Install zigcc
         shell: bash
-        run: ./.github/bin/install-zig
+        run: ./.github/bin/install-zigcc
 
       - name: Cross-compile
         shell: bash
