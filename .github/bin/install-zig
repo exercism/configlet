@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-version='0.13.0' # 2024-06-07
+version='0.14.1' # 2025-05-21
 
 case "$(uname)" in
   Darwin*)   os='macos'   ;;
@@ -37,15 +37,15 @@ curl "${curlopts[@]}" --output "${archive}" "${url}"
 echo "Verifying archive..." >&2
 case "${os}" in
   linux)
-    archive_sha256='d45312e61ebcc48032b77bc4cf7fd6915c11fa16e4aad116b66c9468211230ea'
+    archive_sha256='24aeeec8af16c381934a6cd7d95c807a8cb2cf7df9fa40d359aa884195c4716c'
     echo "${archive_sha256} ${archive}" | sha256sum -c -
     ;;
   macos)
-    archive_sha256='8b06ed1091b2269b700b3b07f8e3be3b833000841bae5aa6a09b1a8b4773effd'
+    archive_sha256='b0f8bdfb9035783db58dd6c19d7dea89892acc3814421853e5752fe4573e5f43'
     shasum -a 256 -c <<< "${archive_sha256} *${archive}"
     ;;
   windows)
-    archive_sha256='d859994725ef9402381e557c60bb57497215682e355204d754ee3df75ee3c158'
+    archive_sha256='554f5378228923ffd558eac35e21af020c73789d87afeabf4bfd16f2e6feed2c'
     # TODO: check windows archive checksum
     ;;
 esac
