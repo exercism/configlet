@@ -1,0 +1,23 @@
+name: Lint PowerShell
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  lint_powershell:
+    name: Lint PowerShell files
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+
+      - name: Run PSScriptAnalyzer
+        uses: microsoft/psscriptanalyzer-action@6b2948b1944407914a58661c49941824d149734f
+        with:
+          path: .\
+          recurse: true
+          output: results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@f94817b9f0deeb3871261446912ae8f854d1b675
+        with:
+          sarif_file: results.sarif
