@@ -121,7 +121,7 @@ Misconfigured tracks may not sync correctly, may look wrong on the website, or m
 Configlet's checks are therefore important for maintaining the integrity of Exercism.
 
 The `configlet lint` command is still under development.
-The list of currently implemented checks is [here](https://github.com/exercism/configlet/issues/249).
+Check [the list of currently implemented checks](https://github.com/exercism/configlet/issues/249) to see which have been implemented.
 
 ## `configlet sync`
 
