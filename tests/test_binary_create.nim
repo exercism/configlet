@@ -1,4 +1,4 @@
-import std/[os, osproc, re, strformat, strutils, unittest]
+import std/[json, os, osproc, re, strformat, strutils, unittest]
 import exec
 import "."/[binary_helpers]
 
@@ -204,6 +204,61 @@ proc main =
         A  exercises/practice/foo/test/foo_test.exs
       """.unindent()
       testStatusThenReset(trackDir, expectedStatus)
+
+    suite "create practice exercise with editor and invalidator files":
+      setup:
+        let trackConfigPath = trackDir / "config.json"
+        var trackConfig = json.parseFile(trackConfigPath)
+        let files = trackConfig["files"]
+        files["editor"] = %* ["lib/%{snake_slug}_editor.ex"]
+        files["invalidator"] = %* ["lib/%{snake_slug}_invalidator.ex"]
+        writeFile(trackConfigPath, trackConfig.pretty() & "\n")
+
+      test "creates metadata file entries, and exits with 0":
+        const expectedOutput = fmt"""
+          Updating cached 'problem-specifications' data...
+          Created practice exercise 'foo'.
+        """.unindent()
+        execAndCheck(0, &"{createBase} --practice-exercise=foo", expectedOutput)
+
+        const expectedConfig = """
+        {
+          "authors": [],
+          "files": {
+            "solution": [
+              "lib/foo.ex"
+            ],
+            "test": [
+              "test/foo_test.exs"
+            ],
+            "example": [
+              ".meta/example.ex"
+            ],
+            "editor": [
+              "lib/foo_editor.ex"
+            ],
+            "invalidator": [
+              "lib/foo_invalidator.ex"
+            ]
+          },
+          "blurb": ""
+        }
+        """.dedent(8).replace("\p", "\n")
+        let configPath = trackDir / "exercises" / "practice" / "foo" / ".meta" / "config.json"
+        let config = readFile(configPath)
+        check config == expectedConfig
+
+        const expectedStatus = """
+          M  config.json
+          A  exercises/practice/foo/.docs/instructions.md
+          A  exercises/practice/foo/.meta/config.json
+          A  exercises/practice/foo/.meta/example.ex
+          A  exercises/practice/foo/lib/foo.ex
+          A  exercises/practice/foo/lib/foo_editor.ex
+          A  exercises/practice/foo/lib/foo_invalidator.ex
+          A  exercises/practice/foo/test/foo_test.exs
+        """.unindent()
+        testStatusThenReset(trackDir, expectedStatus)
 
 main()
 {.used.}
