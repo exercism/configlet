@@ -19,7 +19,7 @@ jobs:
             runs-on: ubuntu-24.04
 
           - os: macos
-            runs-on: macos-13
+            runs-on: macos-15-intel
 
           - os: windows
             runs-on: windows-2022
