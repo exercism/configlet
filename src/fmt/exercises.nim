@@ -6,9 +6,9 @@ func filesKeyOrder(val: ConceptExerciseFiles | PracticeExerciseFiles;
   let fkEx = when val is ConceptExerciseFiles: fkExemplar else: fkExample
   if prettyMode == pmFmt or val.originalKeyOrder.len == 0:
     result = @[fkSolution, fkTest, fkEx]
-    if prettyMode == pmFmt and val.editor.len > 0:
+    if val.editor.len > 0:
       result.add fkEditor
-    if prettyMode == pmFmt and val.invalidator.len > 0:
+    if val.invalidator.len > 0:
       result.add fkInvalidator
   else:
     result = val.originalKeyOrder
