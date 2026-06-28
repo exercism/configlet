@@ -211,8 +211,7 @@ proc main =
 
   suite "fmt, with --update, without --yes, for an exercise that is not formatted (no diff, and exits with 1)":
     test "-e bob":
-      let exitCode = execCmdEx(&"{fmtUpdateUnformatted} -e bob")[1]
-      check exitCode == 1
+      execAndCheckExitCode(1, &"{fmtUpdateUnformatted} -e bob", inputStr = "n")
       checkNoDiff(unformattedTrackDir)
 
   suite "fmt, with --update, for an exercise that is not formatted (diff, and exits with 0)":
