@@ -93,6 +93,8 @@ proc isValidPracticeExercise(data: JsonNode; context: string;
     let checks = [
       hasString(data, "slug", path, context, maxLen = 255, checkIsKebab = true),
       hasString(data, "name", path, context, maxLen = 255),
+      hasString(data, "specification", path, context, isRequired = false,
+                maxLen = 255, checkIsKebab = true),
       hasString(data, "uuid", path, context, checkIsUuid = true),
       hasInteger(data, "difficulty", path, context, allowed = 1..10),
       hasArrayOfStrings(data, "practices", path, context,

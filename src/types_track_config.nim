@@ -49,6 +49,8 @@ type
   PracticeExercise* = object
     slug*: Slug
     name*: string
+    specification*: Option[Slug] ## If set, sync uses this slug to find the
+      ## exercise in `problem-specifications`, instead of `slug`.
     uuid*: string
     practices*: OrderedSet[string]
     prerequisites*: OrderedSet[string]
