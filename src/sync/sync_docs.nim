@@ -1,4 +1,4 @@
-import std/[os, strformat, strutils]
+import std/[os, strformat, strutils, tables]
 import ".."/[cli, logger, types_track_config]
 import "."/sync_common
 
@@ -131,7 +131,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
                         conf: Conf;
                         practiceExerciseSlugs: seq[Slug];
                         trackPracticeExercisesDir: string;
-                        psExercisesDir: string) =
+                        psExercisesDir: string;
+                        specBySlug: Table[string, string]) =
   ## Prints a message for each Practice Exercise on the track with an outdated
   ## `.docs/introduction.md` or `.docs/instructions.md` file, and updates them
   ## if `--update` was passed and the user confirms.
@@ -147,7 +148,8 @@ proc checkOrUpdateDocs*(seenUnsynced: var set[SyncKind];
   let trackDestStartLen = trackDestPath.len
 
   for slug in practiceExerciseSlugs:
-    psSourcePath.truncateAndAdd(psStartLen, slug)
+    let specSlug = Slug(specBySlug.getOrDefault($slug, $slug))
+    psSourcePath.truncateAndAdd(psStartLen, specSlug)
     if dirExists(psSourcePath): # e.g. /foo/problem-specifications/exercises/bob
       trackDestPath.truncateAndAdd(trackDestStartLen, slug)
       trackDestPath.addDocsDir()

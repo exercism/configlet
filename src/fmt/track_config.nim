@@ -189,6 +189,8 @@ func addPracticeExercise(result: var string; val: PracticeExercise;
   result.add "{"
   result.addString("slug", $val.slug, indentLevel + 1)
   result.addString("name", val.name, indentLevel + 1)
+  if val.specification.isSome():
+    result.addString("specification", $val.specification.get, indentLevel + 1)
   result.addString("uuid", val.uuid, indentLevel + 1)
   result.addArray("practices", toSeq(val.practices), indentLevel + 1)
   result.addArray("prerequisites", toSeq(val.prerequisites), indentLevel + 1)
