@@ -13,7 +13,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0 # Allows using `git log` to set initial release notes.
 
@@ -51,7 +51,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: On Linux, install musl
         if: matrix.os == 'linux'
@@ -97,7 +97,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install Nim
         uses: iffy/install-nim@cceb6b4d10dcb1968575ac083d4981c0302fd00d
@@ -130,7 +130,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install minisign
         run: ./.github/bin/linux-install-minisign
