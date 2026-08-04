@@ -1,8 +1,52 @@
 import std/[importutils, json, os, options, random, strutils, unittest]
 import exec, fmt/exercises, helpers, sync/sync_common, types_exercise_config
+import fmt/track_config, types_track_config
 
 const
   testsDir = currentSourcePath().parentDir()
+
+proc testFmtTrackConfig =
+  suite "fmt: track config `specification` key":
+    const contents = """
+      {
+        "exercises": {
+          "practice": [
+            {
+              "slug": "binary-chop",
+              "name": "Binary Search",
+              "specification": "binary-search",
+              "uuid": "11111111-1111-4111-8111-111111111111",
+              "practices": [],
+              "prerequisites": [],
+              "difficulty": 3
+            },
+            {
+              "slug": "leap",
+              "name": "Leap",
+              "uuid": "22222222-2222-4222-8222-222222222222",
+              "practices": [],
+              "prerequisites": [],
+              "difficulty": 1
+            }
+          ]
+        }
+      }
+    """.dedent(6)
+
+    let trackConfig = TrackConfig.init(contents)
+    let formatted = prettyTrackConfig(trackConfig)
+
+    test "round-trips the `specification` key, after `name` and before `uuid`":
+      check:
+        "\"specification\": \"binary-search\"" in formatted
+        formatted.find("\"name\": \"Binary Search\"") <
+          formatted.find("\"specification\": \"binary-search\"")
+        formatted.find("\"specification\": \"binary-search\"") <
+          formatted.find("\"uuid\": \"11111111-1111-4111-8111-111111111111\"")
+
+    test "omits the `specification` key for an exercise that lacks it":
+      # Only the `binary-chop` exercise has a `specification`.
+      check formatted.count("\"specification\"") == 1
 
 proc testFmt =
   const trackDir = testsDir / ".test_elixir_track_repo"
@@ -374,6 +418,7 @@ proc testFmt =
 
 proc main =
   testFmt()
+  testFmtTrackConfig()
 
 main()
 {.used.}

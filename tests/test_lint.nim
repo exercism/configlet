@@ -1,6 +1,8 @@
-import std/[strutils, unittest]
+import std/[json, strutils, unittest]
+import helpers
 import lint/validators
 import lint/approaches_and_articles {.all.}
+from lint/track_config {.all.} import isValidPracticeExercise
 
 proc testIsKebabCase =
   suite "isKebabCase":
@@ -345,12 +347,50 @@ proc testCountLinesWithoutCodeFence =
         countLinesWithoutCodeFence(s, dkArticles) == 7
         countLinesWithoutCodeFence(s, dkApproaches) == 9
 
+proc testSpecificationKey =
+  suite "the optional `specification` key in a Practice Exercise":
+    const path = Path("config.json")
+    # `hasString(checkIsUuid = true)` records UUIDs to detect duplicates across
+    # the track, so each exercise here needs its own UUID.
+    proc practiceExercise(uuid, specification: string): JsonNode =
+      result = %*{
+        "slug": "binary-chop",
+        "name": "Binary Search",
+        "uuid": uuid,
+        "practices": [],
+        "prerequisites": [],
+        "difficulty": 3
+      }
+      if specification.len > 0:
+        result["specification"] = newJString(specification)
+
+    test "is accepted when it is a valid kebab-case slug":
+      check isValidPracticeExercise(
+        practiceExercise("11111111-1111-4111-8111-111111111111", "binary-search"),
+        "practice", path)
+
+    test "is accepted when omitted (it is optional)":
+      check isValidPracticeExercise(
+        practiceExercise("22222222-2222-4222-8222-222222222222", ""),
+        "practice", path)
+
+    test "is rejected when it is not kebab-case":
+      check not isValidPracticeExercise(
+        practiceExercise("33333333-3333-4333-8333-333333333333", "Binary_Search"),
+        "practice", path)
+
+    test "is rejected when it is the wrong type":
+      let data = practiceExercise("44444444-4444-4444-8444-444444444444", "")
+      data["specification"] = newJInt(42)
+      check not isValidPracticeExercise(data, "practice", path)
+
 proc main =
   testIsKebabCase()
   testIsUuidV4()
   testExtractPlaceholders()
   testIsFilesPattern()
   testCountLinesWithoutCodeFence()
+  testSpecificationKey()
 
 main()
 {.used.}
