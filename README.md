@@ -137,6 +137,14 @@ By default, configlet looks up the upstream exercise in `problem-specifications`
 If a track needs to use a different `slug` from the upstream exercise name (for example, to avoid a name collision in the track's language), it can set the optional `specification` key on that Practice Exercise in the track-level `config.json` file.
 The `specification` value, like a `slug`, must be a kebab-case string.
 
+```json
+      {
+        "slug": "binary-chop",
+        "specification": "binary-search",
+        "name": "Binary Search"
+      }
+```
+
 Later sections describe the checking and updating of these data kinds, but as a quick summary:
 
 - `configlet sync` only operates on exercises that exist in the track-level `config.json` file.
