@@ -1,6 +1,11 @@
 name: Lint PowerShell
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+  pull_request:
+  workflow_dispatch:
 
 jobs:
   lint_powershell:
