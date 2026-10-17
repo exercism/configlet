@@ -54,18 +54,32 @@ proc main =
     test "create concept exercise (creates the exercise files, and exits with 0)":
       const expectedOutput = fmt"""
         Updating cached 'problem-specifications' data...
-        Created concept exercise 'foo'.
+        Created concept exercise 'foo-bar'.
       """.unindent()
-      execAndCheck(0, &"{createBase} --concept-exercise=foo", expectedOutput)
+      execAndCheck(0, &"{createBase} --concept-exercise=foo-bar", expectedOutput)
+
+      const expectedDiff = """
+        --- config.json
+        +++ config.json
+        +      },
+        +      {
+        +        "slug": "foo-bar",
+        +        "name": "Foo Bar",
+        +        "uuid": "<UUID>",
+        +        "concepts": [],
+        +        "prerequisites": []
+      """.unindent().replace("\p", "\n")
+      let diff = gitDiffConcise(trackDir).replace(re""""uuid": "[^"]+"""", """"uuid": "<UUID>"""")
+      check diff == expectedDiff
 
       const expectedStatus = """
         M  config.json
-        A  exercises/concept/foo/.docs/instructions.md
-        A  exercises/concept/foo/.docs/introduction.md
-        A  exercises/concept/foo/.meta/config.json
-        A  exercises/concept/foo/.meta/exemplar.ex
-        A  exercises/concept/foo/lib/foo.ex
-        A  exercises/concept/foo/test/foo_test.exs
+        A  exercises/concept/foo-bar/.docs/instructions.md
+        A  exercises/concept/foo-bar/.docs/introduction.md
+        A  exercises/concept/foo-bar/.meta/config.json
+        A  exercises/concept/foo-bar/.meta/exemplar.ex
+        A  exercises/concept/foo-bar/lib/foo_bar.ex
+        A  exercises/concept/foo-bar/test/foo_bar_test.exs
       """.unindent()
       testStatusThenReset(trackDir, expectedStatus)
 
