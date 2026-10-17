@@ -1,4 +1,4 @@
-import std/[sets, options, os, strformat]
+import std/[sets, options, os, strformat, strutils, unicode]
 import ".."/[cli, helpers, logger, fmt/exercises, fmt/track_config,
              sync/probspecs, sync/sync, sync/sync_common, sync/sync_filepaths,
              sync/sync_metadata, types_exercise_config, types_track_config, uuid/uuid]
@@ -85,7 +85,7 @@ proc createConceptExercise*(conf: Conf) =
 
   let exercise = ConceptExercise(
     slug: userExercise,
-    name: $userExercise, # TODO: Humanize slug
+    name: userExercise.string.replace('-', ' ').title,
     uuid: $genUuid(),
     concepts: OrderedSet[string](),
     prerequisites: OrderedSet[string](),
