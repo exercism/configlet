@@ -88,6 +88,9 @@ proc syncImpl*(conf: Conf): set[SyncKind] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
+  # Maps a track slug to its `specification` override (for Practice Exercises
+  # whose problem-specifications name differs from their track slug).
+  let specBySlug = specBySlug(trackConfig.exercises.practice)
   logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
               &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &
                trackConfigPath)
@@ -110,12 +113,12 @@ proc syncImpl*(conf: Conf): set[SyncKind] =
     # Check/update docs
     of skDocs:
       checkOrUpdateDocs(result, conf, trackExerciseSlugs.practice,
-                        trackPracticeExercisesDir, psExercisesDir)
+                        trackPracticeExercisesDir, psExercisesDir, specBySlug)
 
     # Check/update metadata
     of skMetadata:
       checkOrUpdateMetadata(result, conf, trackExerciseSlugs.practice,
-                            trackPracticeExercisesDir, psExercisesDir)
+                            trackPracticeExercisesDir, psExercisesDir, specBySlug)
 
     # Check/update filepaths
     of skFilepaths:
@@ -126,7 +129,7 @@ proc syncImpl*(conf: Conf): set[SyncKind] =
 
     # Check/update tests
     of skTests:
-      let exercises = toSeq findExercises(conf, probSpecsDir)
+      let exercises = toSeq findExercises(conf, probSpecsDir, specBySlug)
       if conf.action.update:
         updateTests(result, conf, exercises)
       else:

@@ -1,4 +1,4 @@
-import std/[options, os, strformat, strutils]
+import std/[options, os, strformat, strutils, tables]
 import pkg/parsetoml
 import ".."/[cli, fmt/exercises, helpers, logger, types_exercise_config, types_track_config]
 import "."/sync_common
@@ -112,7 +112,8 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
                             conf: Conf;
                             practiceExerciseSlugs: seq[Slug];
                             trackPracticeExercisesDir: string;
-                            psExercisesDir: string) =
+                            psExercisesDir: string;
+                            specBySlug: Table[string, string]) =
   ## Prints a message for each Practice Exercise on the track with an outdated
   ## `.meta/config.json` file, and updates them if `--update` was passed and the
   ## user confirms.
@@ -131,7 +132,8 @@ proc checkOrUpdateMetadata*(seenUnsynced: var set[SyncKind];
   let startLenTrackPath = trackExerciseConfigPath.len
 
   for slug in practiceExerciseSlugs:
-    psMetadataTomlPath.truncateAndAdd(startLenPsPath, slug)
+    let specSlug = Slug(specBySlug.getOrDefault($slug, $slug))
+    psMetadataTomlPath.truncateAndAdd(startLenPsPath, specSlug)
     if dirExists(psMetadataTomlPath):
       psMetadataTomlPath.addMetadataTomlPath()
       trackExerciseConfigPath.truncateAndAdd(startLenTrackPath, slug)
