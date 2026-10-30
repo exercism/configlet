@@ -134,13 +134,13 @@ There are three kinds of data that configlet can update from `problem-specificat
 There is also one kind of data that configlet can populate from the track-level `config.json` file: filepaths in exercise config files.
 
 By default, configlet looks up the upstream exercise in `problem-specifications` using the Practice Exercise's `slug`.
-If a track needs to use a different `slug` from the upstream exercise name (for example, to avoid a name collision in the track's language), it can set the optional `specification` key on that Practice Exercise in the track-level `config.json` file.
-The `specification` value, like a `slug`, must be a kebab-case string.
+If a track needs to use a different `slug` from the upstream exercise name (for example, to avoid a name collision in the track's language), it can set the optional `problem_specifications_slug` key on that Practice Exercise in the track-level `config.json` file.
+The `problem_specifications_slug` value, like a `slug`, must be a kebab-case string.
 
 ```json
       {
         "slug": "binary-chop",
-        "specification": "binary-search",
+        "problem_specifications_slug": "binary-search",
         "name": "Binary Search"
       }
 ```

@@ -348,11 +348,11 @@ proc testCountLinesWithoutCodeFence =
         countLinesWithoutCodeFence(s, dkApproaches) == 9
 
 proc testSpecificationKey =
-  suite "the optional `specification` key in a Practice Exercise":
+  suite "the optional `problem_specifications_slug` key in a Practice Exercise":
     const path = Path("config.json")
     # `hasString(checkIsUuid = true)` records UUIDs to detect duplicates across
     # the track, so each exercise here needs its own UUID.
-    proc practiceExercise(uuid, specification: string): JsonNode =
+    proc practiceExercise(uuid, problemSpecificationsSlug: string): JsonNode =
       result = %*{
         "slug": "binary-chop",
         "name": "Binary Search",
@@ -361,8 +361,9 @@ proc testSpecificationKey =
         "prerequisites": [],
         "difficulty": 3
       }
-      if specification.len > 0:
-        result["specification"] = newJString(specification)
+      if problemSpecificationsSlug.len > 0:
+        result["problem_specifications_slug"] =
+          newJString(problemSpecificationsSlug)
 
     test "is accepted when it is a valid kebab-case slug":
       check isValidPracticeExercise(
@@ -381,7 +382,7 @@ proc testSpecificationKey =
 
     test "is rejected when it is the wrong type":
       let data = practiceExercise("44444444-4444-4444-8444-444444444444", "")
-      data["specification"] = newJInt(42)
+      data["problem_specifications_slug"] = newJInt(42)
       check not isValidPracticeExercise(data, "practice", path)
 
 proc main =

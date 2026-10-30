@@ -616,18 +616,19 @@ proc testSpecBySlug =
   suite "specBySlug":
     let practiceExercises = @[
       PracticeExercise(slug: Slug("binary-chop"),
-                       specification: some(Slug("binary-search"))),
+                       problemSpecificationsSlug: some(Slug("binary-search"))),
       PracticeExercise(slug: Slug("leap")),
     ]
     let m = specBySlug(practiceExercises)
 
-    test "contains only the exercises that set a `specification`":
+    test "contains only the exercises that set a `problem_specifications_slug`":
       check m.len == 1
 
     test "maps a renamed slug to its problem-specifications slug":
       check m.getOrDefault("binary-chop", "binary-chop") == "binary-search"
 
-    test "falls back to the slug for an exercise without `specification`":
+    test "falls back to the slug for an exercise without " &
+         "`problem_specifications_slug`":
       check m.getOrDefault("leap", "leap") == "leap"
 
 proc main =
