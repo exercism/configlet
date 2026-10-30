@@ -88,8 +88,9 @@ proc syncImpl*(conf: Conf): set[SyncKind] =
   let trackConfigPath = conf.trackDir / "config.json"
   let trackConfig = parseFile(trackConfigPath, TrackConfig)
   let trackExerciseSlugs = getSlugs(trackConfig.exercises, conf, trackConfigPath)
-  # Maps a track slug to its `specification` override (for Practice Exercises
-  # whose problem-specifications name differs from their track slug).
+  # Maps a track slug to its `problem_specifications_slug` override (for
+  # Practice Exercises whose problem-specifications name differs from their
+  # track slug).
   let specBySlug = specBySlug(trackConfig.exercises.practice)
   logDetailed(&"Found {trackExerciseSlugs.`concept`.len} Concept Exercises " &
               &"and {trackExerciseSlugs.practice.len} Practice Exercises in " &

@@ -6,7 +6,7 @@ const
   testsDir = currentSourcePath().parentDir()
 
 proc testFmtTrackConfig =
-  suite "fmt: track config `specification` key":
+  suite "fmt: track config `problem_specifications_slug` key":
     const contents = """
       {
         "exercises": {
@@ -14,7 +14,7 @@ proc testFmtTrackConfig =
             {
               "slug": "binary-chop",
               "name": "Binary Search",
-              "specification": "binary-search",
+              "problem_specifications_slug": "binary-search",
               "uuid": "11111111-1111-4111-8111-111111111111",
               "practices": [],
               "prerequisites": [],
@@ -36,17 +36,19 @@ proc testFmtTrackConfig =
     let trackConfig = TrackConfig.init(contents)
     let formatted = prettyTrackConfig(trackConfig)
 
-    test "round-trips the `specification` key, after `name` and before `uuid`":
+    test "round-trips the `problem_specifications_slug` key, after `name` " &
+         "and before `uuid`":
       check:
-        "\"specification\": \"binary-search\"" in formatted
+        "\"problem_specifications_slug\": \"binary-search\"" in formatted
         formatted.find("\"name\": \"Binary Search\"") <
-          formatted.find("\"specification\": \"binary-search\"")
-        formatted.find("\"specification\": \"binary-search\"") <
+          formatted.find("\"problem_specifications_slug\": \"binary-search\"")
+        formatted.find("\"problem_specifications_slug\": \"binary-search\"") <
           formatted.find("\"uuid\": \"11111111-1111-4111-8111-111111111111\"")
 
-    test "omits the `specification` key for an exercise that lacks it":
-      # Only the `binary-chop` exercise has a `specification`.
-      check formatted.count("\"specification\"") == 1
+    test "omits the `problem_specifications_slug` key for an exercise that " &
+         "lacks it":
+      # Only the `binary-chop` exercise has a `problem_specifications_slug`.
+      check formatted.count("\"problem_specifications_slug\"") == 1
 
 proc testFmt =
   const trackDir = testsDir / ".test_elixir_track_repo"

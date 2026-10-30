@@ -35,14 +35,15 @@ func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise],
   sort result
 
 func specBySlug*(practiceExercises: seq[PracticeExercise]): Table[string, string] =
-  ## Maps a track exercise `slug` to its `specification` value, for the (rare)
-  ## Practice Exercises whose problem-specifications exercise name differs from
-  ## their track slug. Exercises without a `specification` are omitted; callers
-  ## should fall back to the slug via `getOrDefault`.
+  ## Maps a track exercise `slug` to its `problem_specifications_slug` value,
+  ## for the (rare) Practice Exercises whose problem-specifications exercise
+  ## name differs from their track slug. Exercises without a
+  ## `problem_specifications_slug` are omitted; callers should fall back to the
+  ## slug via `getOrDefault`.
   result = initTable[string, string]()
   for e in practiceExercises:
-    if e.specification.isSome():
-      result[$e.slug] = $e.specification.get
+    if e.problemSpecificationsSlug.isSome():
+      result[$e.slug] = $e.problemSpecificationsSlug.get
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   ## Truncates `s` to `truncateLen`, then appends `slug`.
