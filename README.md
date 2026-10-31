@@ -140,8 +140,8 @@ The `problem_specifications_slug` value, like a `slug`, must be a kebab-case str
 ```json
       {
         "slug": "binary-chop",
-        "problem_specifications_slug": "binary-search",
-        "name": "Binary Search"
+        "name": "Binary Search",
+        "problem_specifications_slug": "binary-search"
       }
 ```
 
