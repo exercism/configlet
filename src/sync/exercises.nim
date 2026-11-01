@@ -5,7 +5,7 @@ import "."/[probspecs, tracks]
 export tracks.`$`, probspecs.pretty
 
 type
-  ExerciseTestCase* {.requiresInit.} = ref object
+  ExerciseTestCase* = ref object
     uuid*: string
     description*: string
     json*: ProbSpecsTestCase
@@ -51,7 +51,7 @@ proc new(T: typedesc[ExerciseTestCase], testCase: ProbSpecsTestCase): T =
     uuid: uuid(testCase),
     description: description(testCase),
     json: testCase,
-    reimplements: Option[ExerciseTestCase](), # `none` produces a ProveInit warning
+    reimplements: none(ExerciseTestCase),
   )
 
 proc getReimplementations(testCases: ProbSpecsTestCases): Table[string, string] =
