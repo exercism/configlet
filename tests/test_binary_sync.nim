@@ -203,32 +203,28 @@ proc main =
       trackConfigPath = trackDir / "config.json"
       originalDir = trackDir / "exercises" / "practice" / "hamming"
       renamedDir = trackDir / "exercises" / "practice" / "hamming-distance"
-      originalEntry = """
-        "slug": "hamming",
-        "name": "Hamming","""
-      renamedEntry = """
-        "slug": "hamming-distance",
-        "name": "Hamming","""
-      renamedEntryWithKey = """
-        "slug": "hamming-distance",
-        "name": "Hamming",
-        "problem_specifications_slug": "hamming","""
+      # We only replace within a single line, so that matching doesn't depend on
+      # the line endings of the checked-out track repo (CRLF on Windows).
+      originalSlugLine = """"slug": "hamming","""
+      renamedSlugLine = """"slug": "hamming-distance","""
+      renamedSlugLineWithKey =
+        """"slug": "hamming-distance", "problem_specifications_slug": "hamming","""
       syncRenamed = &"{syncOffline} -e hamming-distance --docs --metadata --tests"
 
     let originalTrackConfig = readFile(trackConfigPath)
-    doAssert originalEntry in originalTrackConfig
+    doAssert originalSlugLine in originalTrackConfig
 
-    proc writeTrackConfigEntry(entry: string) =
-      ## Writes the original track `config.json`, with the `hamming` entry
-      ## replaced by `entry`.
-      writeFile(trackConfigPath, originalTrackConfig.replace(originalEntry, entry))
+    proc writeTrackConfigSlugLine(slugLine: string) =
+      ## Writes the original track `config.json`, with the `hamming` slug line
+      ## replaced by `slugLine`.
+      writeFile(trackConfigPath, originalTrackConfig.replace(originalSlugLine, slugLine))
 
     # Remove any leftover from a previous, interrupted run.
     removeDir(renamedDir)
     moveDir(originalDir, renamedDir)
     try:
       test "without `problem_specifications_slug`: treats it as a track-specific exercise, and exits with 0":
-        writeTrackConfigEntry(renamedEntry)
+        writeTrackConfigSlugLine(renamedSlugLine)
         const expectedOutput = fmt"""
           {header}
           The `hamming-distance` exercise has up-to-date docs!
@@ -238,7 +234,7 @@ proc main =
         execAndCheck(0, syncRenamed, expectedOutput)
 
       test "with `problem_specifications_slug`: syncs against the upstream exercise, and exits with 1":
-        writeTrackConfigEntry(renamedEntryWithKey)
+        writeTrackConfigSlugLine(renamedSlugLineWithKey)
         const expectedOutput = fmt"""
           {header}
           [warn] docs: instructions unsynced: hamming-distance
