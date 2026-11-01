@@ -195,6 +195,68 @@ proc main =
       """.unindent()
       execAndCheck(0, &"{syncOffline} --filepaths", expectedOutput)
 
+  suite "sync, without --update, for an exercise renamed using `problem_specifications_slug`":
+    # Rename the `hamming` exercise to `hamming-distance`. Only the docs,
+    # metadata and tests scopes use problem-specifications, so we don't check
+    # filepaths (the exercise's files are still named after `hamming`).
+    const
+      trackConfigPath = trackDir / "config.json"
+      originalDir = trackDir / "exercises" / "practice" / "hamming"
+      renamedDir = trackDir / "exercises" / "practice" / "hamming-distance"
+      originalEntry = """
+        "slug": "hamming",
+        "name": "Hamming","""
+      renamedEntry = """
+        "slug": "hamming-distance",
+        "name": "Hamming","""
+      renamedEntryWithKey = """
+        "slug": "hamming-distance",
+        "name": "Hamming",
+        "problem_specifications_slug": "hamming","""
+      syncRenamed = &"{syncOffline} -e hamming-distance --docs --metadata --tests"
+
+    let originalTrackConfig = readFile(trackConfigPath)
+    doAssert originalEntry in originalTrackConfig
+
+    proc writeTrackConfigEntry(entry: string) =
+      ## Writes the original track `config.json`, with the `hamming` entry
+      ## replaced by `entry`.
+      writeFile(trackConfigPath, originalTrackConfig.replace(originalEntry, entry))
+
+    # Remove any leftover from a previous, interrupted run.
+    removeDir(renamedDir)
+    moveDir(originalDir, renamedDir)
+    try:
+      test "without `problem_specifications_slug`: treats it as a track-specific exercise, and exits with 0":
+        writeTrackConfigEntry(renamedEntry)
+        const expectedOutput = fmt"""
+          {header}
+          The `hamming-distance` exercise has up-to-date docs!
+          The `hamming-distance` exercise has up-to-date metadata!
+          The `hamming-distance` exercise has up-to-date tests!
+        """.unindent()
+        execAndCheck(0, syncRenamed, expectedOutput)
+
+      test "with `problem_specifications_slug`: syncs against the upstream exercise, and exits with 1":
+        writeTrackConfigEntry(renamedEntryWithKey)
+        const expectedOutput = fmt"""
+          {header}
+          [warn] docs: instructions unsynced: hamming-distance
+          [warn] hamming-distance: missing 6 test cases
+                 - disallow first strand longer (b9228bb1-465f-4141-b40f-1f99812de5a8)
+                 - disallow second strand longer (dab38838-26bb-4fff-acbe-3b0a9bfeba2d)
+                 - disallow left empty strand (db92e77e-7c72-499d-8fe6-9354d2bfd504)
+                 - disallow empty first strand (b764d47c-83ff-4de2-ab10-6cfe4b15c0f3)
+                 - disallow right empty strand (920cd6e3-18f4-4143-b6b8-74270bb8f8a3)
+                 - disallow empty second strand (9ab9262f-3521-4191-81f5-0ed184a5aa89)
+          {footerUnsyncedDocs}
+          {footerUnsyncedTests}
+        """.dedent()
+        execAndCheck(1, syncRenamed, expectedOutput)
+    finally:
+      moveDir(renamedDir, originalDir)
+      gitRestore(trackDir, trackConfigPath)
+
   suite "sync, without --update, for an unsynced scope for one exercise (prints the expected output, and exits with 1)":
     test "-e yacht --docs":
       const expectedOutput = fmt"""
