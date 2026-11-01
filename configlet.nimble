@@ -16,7 +16,7 @@ srcDir        = "src"
 bin           = @["configlet"]
 
 # Dependencies
-requires "nim >= 2.2.4"
+requires "nim >= 2.4.0"
 requires "jsony"
 requires "parsetoml"
 requires "supersnappy"

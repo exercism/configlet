@@ -60,7 +60,7 @@ jobs:
       - name: Install Nim
         uses: iffy/install-nim@cceb6b4d10dcb1968575ac083d4981c0302fd00d
         with:
-          version: "binary:2.2.4"
+          version: "nightly:https://github.com/nim-lang/nightlies/releases/tag/2026-10-28-version-2-4-14991af742d0833503741fd9a0918133d1bcf8a4" # Nim 2.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -102,7 +102,7 @@ jobs:
       - name: Install Nim
         uses: iffy/install-nim@cceb6b4d10dcb1968575ac083d4981c0302fd00d
         with:
-          version: "binary:2.2.4"
+          version: "nightly:https://github.com/nim-lang/nightlies/releases/tag/2026-10-28-version-2-4-14991af742d0833503741fd9a0918133d1bcf8a4" # Nim 2.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
