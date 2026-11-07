@@ -1,6 +1,7 @@
-import std/[strutils, unittest]
-import lint/validators
+import std/[os, strutils, unittest]
+import helpers, lint/validators
 import lint/approaches_and_articles {.all.}
+import lint/docs
 
 proc testIsKebabCase =
   suite "isKebabCase":
@@ -345,12 +346,67 @@ proc testCountLinesWithoutCodeFence =
         countLinesWithoutCodeFence(s, dkArticles) == 7
         countLinesWithoutCodeFence(s, dkApproaches) == 9
 
+proc testTrackDocsExist =
+  suite "trackDocsExist":
+    const docsThatEveryTrackNeeds = [
+      "ABOUT.md",
+      "INSTALLATION.md",
+      "LEARNING.md",
+      "RESOURCES.md",
+      "SNIPPET.txt",
+      "TESTS.md",
+    ]
+    let trackDir = getTempDir() / "configlet_test_lint_track_docs"
+
+    proc setupTrack(config: string; docs: openArray[string]) =
+      removeDir trackDir
+      createDir trackDir / "docs"
+      writeFile(trackDir / "config.json", config)
+      for doc in docs:
+        writeFile(trackDir / "docs" / doc, "")
+
+    const activeConfig = """{"slug": "foo", "active": true}"""
+    const inactiveConfig = """{"slug": "foo", "active": false}"""
+
+    test "active track with every required doc":
+      setupTrack(activeConfig, @docsThatEveryTrackNeeds & "SIGN_UP_SNIPPET.txt")
+      check trackDocsExist(Path(trackDir))
+
+    test "active track without docs/SIGN_UP_SNIPPET.txt":
+      setupTrack(activeConfig, docsThatEveryTrackNeeds)
+      check not trackDocsExist(Path(trackDir))
+
+    test "inactive track without docs/SIGN_UP_SNIPPET.txt":
+      setupTrack(inactiveConfig, docsThatEveryTrackNeeds)
+      check trackDocsExist(Path(trackDir))
+
+    test "track without an active key, and without docs/SIGN_UP_SNIPPET.txt":
+      setupTrack("""{"slug": "foo"}""", docsThatEveryTrackNeeds)
+      check trackDocsExist(Path(trackDir))
+
+    test "track with invalid config.json, and without docs/SIGN_UP_SNIPPET.txt":
+      setupTrack("{", docsThatEveryTrackNeeds)
+      check trackDocsExist(Path(trackDir))
+
+    test "active track without docs/SNIPPET.txt":
+      setupTrack(activeConfig, ["ABOUT.md", "INSTALLATION.md", "LEARNING.md",
+                                "RESOURCES.md", "TESTS.md", "SIGN_UP_SNIPPET.txt"])
+      check not trackDocsExist(Path(trackDir))
+
+    test "active track without a docs directory":
+      setupTrack(activeConfig, [])
+      removeDir trackDir / "docs"
+      check not trackDocsExist(Path(trackDir))
+
+    removeDir trackDir
+
 proc main =
   testIsKebabCase()
   testIsUuidV4()
   testExtractPlaceholders()
   testIsFilesPattern()
   testCountLinesWithoutCodeFence()
+  testTrackDocsExist()
 
 main()
 {.used.}
