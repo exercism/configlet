@@ -1,8 +1,57 @@
 import std/[importutils, json, os, options, random, strutils, unittest]
-import exec, fmt/exercises, helpers, sync/sync_common, types_exercise_config
+import exec, fmt/[exercises, track_config], helpers, sync/sync_common,
+       types_exercise_config, types_track_config
 
 const
   testsDir = currentSourcePath().parentDir()
+
+proc testFmtTrackConfig =
+  suite "fmt: track config `problem_specifications_slug` key":
+    const contents = """
+      {
+        "language": "Scott",
+        "slug": "scott",
+        "active": true,
+        "status": {
+          "concept_exercises": false,
+          "test_runner": true,
+          "representer": false,
+          "analyzer": false
+        },
+        "blurb": "Scott is an unreal programming language.",
+        "version": 3,
+        "online_editor": {
+          "indent_style": "space",
+          "indent_size": 2
+        },
+        "exercises": {
+          "practice": [
+            {
+              "slug": "binary-chop",
+              "name": "Binary Search",
+              "problem_specifications_slug": "binary-search",
+              "uuid": "11111111-1111-4111-8111-111111111111",
+              "practices": [],
+              "prerequisites": [],
+              "difficulty": 3
+            },
+            {
+              "slug": "leap",
+              "name": "Leap",
+              "uuid": "22222222-2222-4222-8222-222222222222",
+              "practices": [],
+              "prerequisites": [],
+              "difficulty": 1
+            }
+          ]
+        }
+      }
+    """.dedent(6)
+
+    test "round-trips the `problem_specifications_slug` key, after `name` " &
+         "and before `uuid`, and omits it for an exercise that lacks it":
+      let trackConfig = TrackConfig.init(contents)
+      check prettyTrackConfig(trackConfig) == contents
 
 proc testFmt =
   const trackDir = testsDir / ".test_elixir_track_repo"
@@ -374,6 +423,7 @@ proc testFmt =
 
 proc main =
   testFmt()
+  testFmtTrackConfig()
 
 main()
 {.used.}

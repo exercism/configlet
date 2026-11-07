@@ -82,11 +82,14 @@ proc init(T: typedesc[ExerciseTestCases], testCases: ProbSpecsTestCases): T =
         let uuidOfReimplementation = reimplementations[uuid]
         testCase.reimplements = some(testCasesByUuids[uuidOfReimplementation])
 
-iterator findExercises*(conf: Conf, probSpecsDir: ProbSpecsDir): Exercise {.inline.} =
+iterator findExercises*(conf: Conf, probSpecsDir: ProbSpecsDir;
+                        specBySlug: Table[string, string]): Exercise {.inline.} =
   for practiceExercise in findPracticeExercises(conf):
     # Parse `canonical-data.json` only when necessary
     if skTests in conf.action.scope:
-      let testCases = getCanonicalTests(probSpecsDir, practiceExercise.slug.string)
+      let slug = practiceExercise.slug.string
+      let specSlug = specBySlug.getOrDefault(slug, slug)
+      let testCases = getCanonicalTests(probSpecsDir, specSlug)
       yield Exercise(
         slug: practiceExercise.slug,
         tests: ExerciseTests.init(practiceExercise.tests, testCases),

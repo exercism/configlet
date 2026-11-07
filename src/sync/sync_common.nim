@@ -1,4 +1,5 @@
-import std/[algorithm, enumutils, json, os, sets, strformat, strutils]
+import std/[algorithm, enumutils, json, options, os, sets, strformat, strutils,
+            tables]
 import ".."/[cli, lint/validators, types_exercise_config, types_track_config]
 
 proc userSaysYes*(syncKind: SyncKind): bool =
@@ -32,6 +33,17 @@ func getSlugs*(e: seq[ConceptExercise] | seq[PracticeExercise],
     if withDeprecated or item.status != sDeprecated:
       result.add item.slug
   sort result
+
+func specBySlug*(practiceExercises: seq[PracticeExercise]): Table[string, string] =
+  ## Maps a track exercise `slug` to its `problem_specifications_slug` value,
+  ## for the (rare) Practice Exercises whose problem-specifications exercise
+  ## name differs from their track slug. Exercises without a
+  ## `problem_specifications_slug` are omitted; callers should fall back to the
+  ## slug via `getOrDefault`.
+  result = initTable[string, string]()
+  for e in practiceExercises:
+    if e.problemSpecificationsSlug.isSome():
+      result[$e.slug] = $e.problemSpecificationsSlug.get
 
 func truncateAndAdd*(s: var string, truncateLen: int, slug: Slug) =
   ## Truncates `s` to `truncateLen`, then appends `slug`.

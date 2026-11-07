@@ -49,6 +49,7 @@ type
   PracticeExercise* = object
     slug*: Slug
     name*: string
+    problemSpecificationsSlug*: Option[Slug]
     uuid*: string
     practices*: OrderedSet[string]
     prerequisites*: OrderedSet[string]
