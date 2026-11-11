@@ -26,3 +26,4 @@ tests/.test_nim_track_repo/
 # Ignore user-specific Nimble files
 nimble.develop
 nimble.paths
+nimbledeps/

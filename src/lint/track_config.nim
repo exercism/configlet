@@ -1,6 +1,11 @@
-import std/[json, os, sets, strformat, strutils, tables]
+import std/[algorithm, json, os, sequtils, sets, strformat, strutils, tables]
 import ".."/[helpers, types_track_config]
 import "."/validators
+
+func sortedItems(s: HashSet[string]): seq[string] =
+  ## Returns the elements of `s` in alphabetical order, so that the output does
+  ## not depend on the iteration order of the `HashSet`.
+  sorted(toSeq(s))
 
 proc hasValidStatus(data: JsonNode; path: Path): bool =
   const k = "status"
@@ -343,7 +348,8 @@ proc checkPractices(practiceExercises: seq[PracticeExercise];
     let slugs = joinWithNewlines(practicesNotInTopLevelConcepts)
     warn(msg, slugs)
 
-  for conceptPracticed, count in countConceptsPracticed.pairs:
+  for conceptPracticed in sorted(toSeq(countConceptsPracticed.keys)):
+    let count = countConceptsPracticed[conceptPracticed]
     if count > 10:
       let msg = &"The Concept {q conceptPracticed} appears {count} times in " &
                  "the `practices` arrays of user-facing Practice Exercises, " &
@@ -615,7 +621,7 @@ proc checkExerciseSlugsAndForegone(exercises: Exercises; b: var bool;
       let msg = &"There is more than one Practice Exercise with the slug {q $slug}"
       b.setFalseAndPrint(msg, path)
 
-  for slug in conceptExerciseSlugs:
+  for slug in sortedItems(conceptExerciseSlugs):
     if slug in practiceExerciseSlugs:
       let msg = &"The slug {q slug} is used for both a Concept Exercise and " &
                  "a Practice Exercise, but must only appear once on the track"
@@ -660,7 +666,7 @@ proc checkFilePatternsOverlap(filePatterns: FilePatterns; trackSlug: string;
       continue
 
     let duplicatePatterns = seenFilePatterns[key1] * seenFilePatterns[key2]
-    for duplicatePattern in duplicatePatterns:
+    for duplicatePattern in sortedItems(duplicatePatterns):
       let msg =
         &"The values in the `files.{key1}` and `files.{key2}` keys must not overlap, " &
         &"but the {q duplicatePattern} value appears in both"
@@ -729,7 +735,7 @@ proc checkExerciseDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
       for exerciseDir in getSortedSubdirs(exercisesDir):
         exerciseDirSlugs.incl lastPathPart(exerciseDir.string)
 
-    for exerciseSlug in exerciseDirSlugs - exerciseSlugs:
+    for exerciseSlug in sortedItems(exerciseDirSlugs - exerciseSlugs):
       let msg = &"{q $exercisesDir} contains a directory named {q exerciseSlug}, " &
                 &"which is not a `slug` in the array of {exerciseKind} " &
                   "exercises. Please add the exercise to that array. " &
@@ -737,7 +743,7 @@ proc checkExerciseDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
                   "website, please set its `status` value to \"wip\""
       b.setFalseAndPrint(msg, path)
 
-    for exerciseSlug in exerciseSlugs - exerciseDirSlugs:
+    for exerciseSlug in sortedItems(exerciseSlugs - exerciseDirSlugs):
       let exerciseDir = exercisesDir / exerciseSlug
       let msg = &"The {q exerciseSlug} {exerciseKind} exercise is missing its " &
                 &"required files. Please create the {q $exerciseDir} directory with " &
@@ -774,13 +780,13 @@ proc checkConceptDirsAndTrackConfigAreInSync(trackDir: Path; data: JsonNode;
     for conceptDir in getSortedSubdirs(conceptsDir):
       conceptDirSlugs.incl lastPathPart(conceptDir.string)
 
-  for conceptSlug in conceptDirSlugs - conceptSlugs:
+  for conceptSlug in sortedItems(conceptDirSlugs - conceptSlugs):
     let msg = &"{q $conceptsDir} contains a directory named {q conceptSlug}, " &
               &"which is not a `slug` in the concepts array. " &
                "Please add the concept to that array"
     b.setFalseAndPrint(msg, path)
 
-  for conceptSlug in conceptSlugs - conceptDirSlugs:
+  for conceptSlug in sortedItems(conceptSlugs - conceptDirSlugs):
     let conceptDir = conceptsDir / conceptSlug
     let msg = &"The {q conceptSlug} concept is missing its required files. " &
               &"Please create the {q $conceptDir} directory with its required files"
